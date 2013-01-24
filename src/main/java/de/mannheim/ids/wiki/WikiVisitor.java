@@ -66,8 +66,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	private boolean renderTemplates = false;
 	private boolean renderTagExtensions = false;
 	private List<ExternalLink> numberedLinks = new ArrayList<ExternalLink>();
-	private boolean xcesFormat =false;
-	
+		
 	protected WikiVisitor(Writer writer) {
 		super(writer);
 		// TODO Auto-generated constructor stub
@@ -88,32 +87,17 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	}
 	public void visit(Text text) throws IOException	{
 		if(!text.getContent().equals("\n"))
-			//print(escHtml(text.getContent()));
-			print(text.getContent());
+			print(escHtml(text.getContent()));	
 	}
 	public void visit(Italics n) throws IOException	{
-		if(xcesFormat){
-			print("<hi rend=\"it\">");
-			iterate(n.getContent());
-			print("</hi>");
-		}
-		else{
-			print("<i>");
-			iterate(n.getContent());
-			print("</i>");
-		}
+		print("<i>");
+		iterate(n.getContent());
+		print("</i>");
 	}
-	public void visit(Bold n) throws IOException	{
-		if(xcesFormat){			
-			print("<hi rend=\"bo\">");
-			iterate(n.getContent());
-			print("</hi>");
-		}
-		else{
-			print("<b>");
-			iterate(n.getContent());
-			print("</b>");
-		}
+	public void visit(Bold n) throws IOException	{	
+		print("<b>");
+		iterate(n.getContent());
+		print("</b>");	
 	}
 	public void visit(Whitespace n) throws IOException	{
 		//iterate(n.getContent());
@@ -129,20 +113,16 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		}
 		printNewline(false);
 	}
-	public void visit(SemiPre sp) throws IOException
-	{
+	public void visit(SemiPre sp) throws IOException	{
 		printNewline(false);
 		print("<pre>");
 		iterate(sp.getContent());
 		print("</pre>");
 		printNewline(false);
-
 	}
-	public void visit(SemiPreLine line) throws IOException
-	{
+	public void visit(SemiPreLine line) throws IOException	{
 		iterate(line.getContent());
 		print("\n");
-
 	}
 	public void visit(Section s) throws IOException	{				
 		incIndent("\t");
@@ -155,8 +135,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print(">");		
 		decIndent();
 		printNewline(false);
-		iterate(s.getBody());		
-			
+		iterate(s.getBody());					
 	}
 	public void visit(XmlComment e) throws IOException	{
 		// trim must be false first
@@ -165,8 +144,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print(e.getContent());
 		print("-->");
 	}
-	public void visit(XmlElement e) throws IOException
-	{
+	public void visit(XmlElement e) throws IOException	{
 		//printNewline(false);
 		print("<");
 		print(e.getName());
@@ -181,38 +159,29 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 			print(">");
 			//printNewline(false);
 		}
-
 	}
-	public void visit(XmlAttribute a) throws IOException
-	{
+	public void visit(XmlAttribute a) throws IOException	{
 		print(" ");
 		print(a.getName());
 		print("=\"");
 		iterate(a.getValue());
 		print("\"");
-
 	}
 	public void visit(XmlAttributeGarbage g) throws IOException
 	{
 
 	}
-	public void visit(XmlCharRef ref) throws IOException
-	{
+	public void visit(XmlCharRef ref) throws IOException	{
 		print("&#");
 		print(ref.getCodePoint());
 		print(";");
-
 	}
-	public void visit(XmlEntityRef ref) throws IOException
-	{
+	public void visit(XmlEntityRef ref) throws IOException	{
 		print("&");
 		print(ref.getName());
 		print(";");
-
 	}
 	public void visit(DefinitionList n) throws IOException	{
-		
-		// DOES NOT WORK
 		printNewline(false);
 		incIndent("\t");
 		print("<dl>");
@@ -222,10 +191,9 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</dl>");
 		decIndent();
 		printNewline(false);
-
 	}
-	public void visit(DefinitionTerm n) throws IOException
-	{
+	public void visit(DefinitionTerm n) throws IOException	{
+		// It is not parsed when it occurs alone and is not nested by <dl> or <dd>
 		printNewline(false);
 		incIndent("    ");
 		print("<dt>");
@@ -233,10 +201,8 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</dt>");
 		decIndent();
 		printNewline(false);
-
 	}
-	public void visit(DefinitionDefinition n) throws IOException
-	{
+	public void visit(DefinitionDefinition n) throws IOException	{
 		printNewline(false);
 		incIndent("    ");
 		print("<dd>");
@@ -244,7 +210,6 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</dd>");
 		decIndent();
 		printNewline(false);
-
 	}
 	public void visit(Enumeration n) throws IOException	{	
 		printNewline(false);
@@ -415,36 +380,25 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</span>");
 
 	}
-	public void visit(Redirect n) throws IOException
-	{
+	public void visit(Redirect n) throws IOException	{
 		print("<span class=\"");
-		// WHAT IS THIS CODE?
-		print("redirect\">&#x21B3; ");
+		print("redirect\">&#x21B3; ");		//↳
 		print(n.getTarget());
 		print("</span>");
-
 	}
-	public void visit(IllegalCodePoint n) throws IOException
-	{
-		print("<span class=\"");
-		
+	public void visit(IllegalCodePoint n) throws IOException	{
+		print("<span class=\"");		
 		print("illegal\">");
 		print(asXmlCharRefs(n.getCodePoint()));
 		print("</span>");
-
 	}
-	public void visit(MagicWord n) throws IOException
-	{
-		print("<span class=\"");
-		
+	public void visit(MagicWord n) throws IOException	{
+		print("<span class=\"");		
 		print("unknown-magic-word\">__");
 		print(n.getWord());
 		print("__</span>");
-
 	}
 	public void visit(TagExtension n) throws IOException	{
-		// TO DO : gap or nested render?
-		// unknown-node-tag-extension
 		print("<span name=");		
 		print("\""+n.getName()+"\" ");		
 		print ("class=\"unknown-tag-extension\"/>");
@@ -465,23 +419,12 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</span>");
 
 	}
-	public void visit(XmlElementOpen e) throws IOException	{		
-		/*print("<");
-		print(e.getName());
-		print("/>");*/
-		
+	public void visit(XmlElementOpen e) throws IOException	{
 		print("<span name=");		
 		print("\""+e.getName()+"\" ");		
 		print ("class=\"unknown-element\"");
 		iterate(e.getXmlAttributes());
-		print("/>");
-		
-		/*if (e.getName().equals("references") ){
-			print("/>");
-		}
-		else{
-			print(">");
-		}*/
+		print("/>");	
 		
 		/*print("<span class=\"");		
 		print("unknown-node-xml-element-open\">");
@@ -492,8 +435,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</span>");*/
 
 	}
-	public void visit(XmlElementClose e) throws IOException	{
-		
+	public void visit(XmlElementClose e) throws IOException	{		
 		if (e.getName().equals("math") || e.getName().equals("references") 
 				|| e.getName().equals("div")
 				){}
@@ -511,8 +453,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 			//System.out.println("closing unknown span"+e.getName());
 		}
 	}
-	public void visit(Template tmpl) throws IOException
-	{
+	public void visit(Template tmpl) throws IOException	{
 		print("<span name=");		
 		print("\"template\" ");		
 		print ("class=\"unknown-template\"/>");
@@ -554,8 +495,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("</span>");
 
 	}
-	public void visit(TemplateArgument arg) throws IOException
-	{
+	public void visit(TemplateArgument arg) throws IOException	{
 		print("|");
 		if (arg.getHasName()) {
 			iterate(arg.getValue());

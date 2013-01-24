@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -24,10 +23,12 @@ public class XMLWikiProcessor {
 	
 	public void process(String inputFile, String articleOutput, String discussionOutput) throws IOException{	
 		
-		boolean readFlag = false, discussionFlag=false;	
-		String strLine, page="";		
-		StringWriter article= new StringWriter(), discussion = new StringWriter();
 		int counter=1;
+		boolean readFlag = false, discussionFlag=false;	
+		String strLine, page="";
+
+		FileWriter articleWriter = createWriter(articleOutput);
+		FileWriter discussionWriter = createWriter(discussionOutput);
 		
 		FileInputStream fs = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
@@ -51,22 +52,21 @@ public class XMLWikiProcessor {
 						strLine.contains("Discussione") ||
 						strLine.contains("Diskusjon") ||
 						strLine.contains("Dyskusja") 
-						){
+						){	
 						
-						discussion.write(page + strLine + "\n");						
+						discussionWriter.append(page + strLine + "\n");
 						discussionFlag = true;
 					}
 					else {
-						
-						article.write(page + strLine + "\n");
+						articleWriter.append(page + strLine + "\n");
 					}
 				}				
 				else if (discussionFlag){
-					discussion = handlePageContent(strLine.trim(), discussion);
+					discussionWriter = handlePageContent(strLine, discussionWriter);
 				}
 				else{
 					//startTime = System.nanoTime();
-					article = handlePageContent(strLine, article);
+					articleWriter = handlePageContent(strLine, articleWriter);
 					//endTime = System.nanoTime();
 					//duration = endTime - startTime;
 					//System.out.println("Article execution time "+duration);					
@@ -76,26 +76,28 @@ public class XMLWikiProcessor {
 		br.close();
 		fs.close();
 		
-		writeXML(article,articleOutput);	
-		writeXML(discussion,discussionOutput);
+		articleWriter.append("</articles>");
+		discussionWriter.append("</articles>");
 		
-	}	
-
-	//public String handlePageContent(String strLine, String xml){
-	public StringWriter handlePageContent(String strLine, StringWriter xml){
+		articleWriter.close();
+		discussionWriter.close();		
+	}
+	
+	public FileWriter handlePageContent(String strLine, FileWriter xml) throws IOException{
 		
 		if (strLine.trim().endsWith("</text>")){ // finish collecting text
 			
 			// text starts and ends at the same line
 			if (strLine.trim().startsWith("<text")){ 						
 				strLine = cleanTextStart(indent, strLine);
-				xml.write( indent + "<text>\n" );
+				xml.append( indent + "<text>\n" );
 			}							
 			wikitext += strLine.trim().replaceFirst("</text>", "") + "\n";
 			wikitext = wikitext.replaceAll(":\\{\\|", "{|");			
 			wikitext = wikitext.replaceAll("/>", " />");			
-			wikitext = wikitext.replaceAll("<([^/\\w])", "< $1");
-									
+			wikitext = wikitext.replaceAll("<([^!!/a-zA-Z\\s])", "< $1");
+			
+			
 			try{
 				//startTime = System.nanoTime();								
 				wikitext = tagSoupParser.generateCleanHTML(wikitext);				
@@ -103,17 +105,16 @@ public class XMLWikiProcessor {
 				//duration = endTime - startTime;
 				//System.out.println("Tagsoup execution time "+duration);				
 				
-				if(wikitext.contains("Datei:Americium"))
-					System.out.println(wikitext);
+				/*if(wikitext.contains("Datei:Americium"))
+					System.out.println(wikitext);*/
 				
 				//startTime = System.nanoTime();
-				xml.append(swebleParser.parseText(wikitext));
-				xml.write("\n");
+				xml.append(swebleParser.parseText(wikitext));				
 				//endTime = System.nanoTime();
 				//duration = endTime - startTime;
 				//System.out.println("Sweble execution time "+duration);
 				
-				xml.write(indent +"</text>\n");
+				xml.append(indent +"</text>\n");
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -126,11 +127,11 @@ public class XMLWikiProcessor {
 		}
 		else if (strLine.trim().startsWith("<text")){ // start collecting text
 			wikitext += cleanTextStart(indent, strLine);
-			xml.write(this.indent + "<text>\n");
+			xml.append(this.indent + "<text>\n");
 			this.textFlag=true;
 		}
 		else{ // bypass page metadata		
-			xml.write(strLine + "\n");
+			xml.append(strLine + "\n");
 		}		
 		return xml;
 	}
@@ -147,23 +148,8 @@ public class XMLWikiProcessor {
 		if (!file.exists()) file.createNewFile();		
 
 		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		fw.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		fw.append("<articles>\n");
 		return fw;
 	}
-	
-	public void writeXML(StringWriter content, String outputFile) throws IOException {		
-		 
-		File file = new File(filepath+outputFile);		
-		if (!file.exists()) file.createNewFile();		
-
-		FileWriter fw = new FileWriter(file.getAbsoluteFile());		
-		PrintWriter pw = new PrintWriter(fw);
-		pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		pw.println("<articles>");
-		pw.print(content);
-		pw.print("</articles>");
-		pw.close();		
-		
-		//new OutputStreamWriter(new BufferedOutpputStream(new FileOutputStream(new File("bla.out"))), "UTF-8");
-	}	
-
 }
