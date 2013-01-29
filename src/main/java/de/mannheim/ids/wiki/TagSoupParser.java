@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
 import org.ccil.cowan.tagsoup.XMLWriter;
@@ -35,15 +36,16 @@ public class TagSoupParser {
 		r.setContentHandler(h);
 		
 		// Do process per paragraph because the correction of improper tags  
-		// will be accumulated and written at the end of the given text.
+		// will be accumulated and repeated until the end of the given text.
 		for (String p : wikitext.split("\n\n")){
 			//System.out.println(p);
 			r.parse(new InputSource( new ByteArrayInputStream(p.getBytes())));
 		}
 		
 		String cleanWikitext = w.toString();
-		cleanWikitext = cleanWikitext.replaceAll("<html><body>", "");
-		cleanWikitext = cleanWikitext.replaceAll("</body></html>", "\n");
+		cleanWikitext = StringUtils.replaceEach(cleanWikitext, 
+				new String[] {"<html><body>", "</body></html>"}, 
+				new String[] {"", "\n"});		
 		cleanWikitext = StringEscapeUtils.unescapeHtml(cleanWikitext);
 		//System.out.println(cleanWikitext);
 		return cleanWikitext;

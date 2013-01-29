@@ -5,6 +5,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.sweble.wikitext.engine.Page;
 import org.sweble.wikitext.lazy.encval.IllegalCodePoint;
 import org.sweble.wikitext.lazy.parser.Bold;
@@ -87,8 +89,12 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	}
 	public void visit(Text text) throws IOException	{
 		if(!text.getContent().equals("\n"))
-			print(escHtml(text.getContent()));	
-	}
+			print(StringEscapeUtils.escapeHtml(text.getContent()));
+//			print(escHtml(text.getContent()));
+			/*print (	StringUtils.replaceEach(text.getContent(), 
+					new String[]{"&", "\"", "<", ">"}, 
+					new String[]{"&amp;", "&quot;", "&lt;", "&gt;"}));*/
+	}	
 	public void visit(Italics n) throws IOException	{
 		print("<i>");
 		iterate(n.getContent());
@@ -171,15 +177,16 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	{
 
 	}
-	public void visit(XmlCharRef ref) throws IOException	{
+	public void visit(XmlCharRef ref) throws IOException	{		
 		print("&#");
 		print(ref.getCodePoint());
 		print(";");
+		System.out.println("XmlCharRef " + ref.getCodePoint());
 	}
 	public void visit(XmlEntityRef ref) throws IOException	{
 		print("&");
 		print(ref.getName());
-		print(";");
+		print(";");		
 	}
 	public void visit(DefinitionList n) throws IOException	{
 		printNewline(false);

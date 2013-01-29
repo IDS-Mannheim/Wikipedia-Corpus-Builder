@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 public class App
 {
-	public static void main(String[] args) throws FileNotFoundException, IOException, LinkTargetException, CompilerException, JAXBException
+	public static void main(String[] args) throws FileNotFoundException, IOException, CompilerException, JAXBException
 	{
 		/*if (args.length < 1)
 		{
@@ -63,7 +63,7 @@ public class App
 //		        html);
 	}
 	
-	static String run(File file, String fileTitle) throws FileNotFoundException, IOException, LinkTargetException, CompilerException, JAXBException
+	static String run(File file, String fileTitle) throws FileNotFoundException, IOException, CompilerException, JAXBException, LinkTargetException
 	{
 		// Set-up a simple wiki configuration
 		SimpleWikiConfiguration config = new SimpleWikiConfiguration(
