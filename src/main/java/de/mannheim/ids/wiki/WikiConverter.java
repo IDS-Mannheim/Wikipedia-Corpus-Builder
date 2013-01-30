@@ -14,11 +14,13 @@ public class WikiConverter {
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();		
 		
-//		XMLWikiProcessor processor = new XMLWikiProcessor(args[0]);
-//		processor.process(args[1], args[2],args[3]);
+		XMLWikiProcessor processor = new XMLWikiProcessor(args[0]);
+		processor.process(args[1], args[2],args[3]);
 		
-		XMLWikiProcessor processor = new XMLWikiProcessor("de");
-		processor.process("test2.xml","dewiki-20130122-articles-d-no.xml","dewiki-20130122-discussions-d-no.xml");
+		//XMLWikiProcessor processor = new XMLWikiProcessor("de");
+		//processor.process("../../Documents/wiki/test5.xml","dewiki-20130122-articles-d-no.xml","dewiki-20130122-discussions-d-no.xml");
+		//processor.process("../../Documents/wiki/test5.xml","test5-articles.xml","test5-discussions.xml");
+		//processor.process("TITLE.wikitext","TITLE-articles.xml","TITLE-discussions.xml");
 
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;

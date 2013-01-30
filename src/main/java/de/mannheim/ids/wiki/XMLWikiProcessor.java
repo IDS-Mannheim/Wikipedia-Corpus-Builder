@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -25,7 +24,7 @@ public class XMLWikiProcessor {
 	private TagSoupParser tagSoupParser = new TagSoupParser();
 	private SwebleParser swebleParser = new SwebleParser();	
 	private Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
-	private Pattern textPattern = Pattern.compile("<text.*\">");
+	private Pattern textPattern = Pattern.compile("<text.*\">");	
 	private Matcher matcher;
 	private long startTime, endTime, duration, total;
 	private int  count=0;	
@@ -47,9 +46,6 @@ public class XMLWikiProcessor {
 		boolean readFlag = false, discussionFlag=false, isArticle=true;	
 		String strLine, trimmedStrLine, page="";
 
-//		FileWriter articleWriter = createWriter(articleOutput);
-//		FileWriter discussionWriter = createWriter(discussionOutput);
-		
 		OutputStreamWriter articleWriter = createWriter(articleOutput);
 		OutputStreamWriter discussionWriter = createWriter(discussionOutput);
 		
@@ -75,9 +71,9 @@ public class XMLWikiProcessor {
 			}			
 			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){
 				
-				strLine = StringEscapeUtils.unescapeHtml(strLine); // unescape HTML tags			
-				strLine = StringEscapeUtils.unescapeHtml(strLine); // unescape %nbsp;				
-				
+				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags			
+				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape &nbsp;	
+											
 				if (trimmedStrLine.startsWith("<title") ){					
 					
 					if (strLine.contains(":")){					
@@ -93,22 +89,24 @@ public class XMLWikiProcessor {
 						
 						if (isArticle){
 							System.out.println(counter++ + strLine);
+							trimmedStrLine = cleanElement("<title>" , trimmedStrLine, "</title>");
 							if(strLine.contains(talk)){								
-								discussionWriter.append(page + strLine + "\n");
+								discussionWriter.append(page + trimmedStrLine + "\n");
 								discussionFlag = true;							
 							}
 							else {								
-								articleWriter.append(page + strLine + "\n");
+								//articleWriter.append(page + strLine + "\n");								
+								articleWriter.append(page + trimmedStrLine);
 							}							
 						}
 						else{
 							isArticle=true;
-						}
-					
+						}					
 					}
 					else{
-						System.out.println(counter++ + strLine);						
-						articleWriter.append(page + strLine + "\n");
+						System.out.println(counter++ + strLine);	
+						trimmedStrLine = cleanElement("<title>" , trimmedStrLine, "</title>");
+						articleWriter.append(page + trimmedStrLine);
 					}
 				}				
 				else if (discussionFlag){
@@ -130,8 +128,7 @@ public class XMLWikiProcessor {
 		//System.out.println(total/count);
 	}
 	
-	
-	//public void handlePageContent(String strLine, String trimmedStrLine, FileWriter xml) throws IOException{		 
+		 
 	public void handlePageContent(String strLine, String trimmedStrLine, OutputStreamWriter xml) throws IOException{
 				
 		if (trimmedStrLine.endsWith("</text>")){ // finish collecting text
@@ -139,30 +136,26 @@ public class XMLWikiProcessor {
 			// text starts and ends at the same line
 			if (trimmedStrLine.startsWith("<text")){ 		
 				setIndent(strLine);
-				strLine = cleanTextStart(trimmedStrLine, xml);				
+				trimmedStrLine = cleanTextStart(trimmedStrLine, xml);				
 			}			
 			
 			wikitext += StringUtils.replaceOnce(trimmedStrLine, "</text>", "") + "\n";		
 			wikitext = StringUtils.replaceEach(wikitext, 
-					new String[] { ":{|" , "/>" }, 
-					new String[] { "{|" , " />" }); //start table notation
+					new String[] { ":{|" , "/>", "&amp;nbsp;" }, 
+					new String[] { "{|" , " />", " "}); //start table notation
 			
 			matcher = pattern.matcher(wikitext);
-			wikitext = matcher.replaceAll("< $1");		
-				
-			/*if(wikitext.contains("1,3-Butylenglycol")){
-				System.out.println(wikitext);
-			}*/
+			wikitext = matcher.replaceAll("< $1");					
 			
-			try{
+			try{			
 				//startTime = System.nanoTime();								
 				wikitext = tagSoupParser.generateCleanHTML(wikitext);				
 				//endTime = System.nanoTime();
 				//duration = endTime - startTime;
 				//System.out.println("Tagsoup execution time "+duration);				
-				
-				/*if(wikitext.contains("Datei:Americium"))
-					System.out.println(wikitext);*/
+								
+				//if(wikitext.contains("Auteur-Theorie"))
+				//	System.out.println(wikitext);
 				
 				//startTime = System.nanoTime();
 				xml.append(swebleParser.parseText(wikitext));
@@ -186,30 +179,32 @@ public class XMLWikiProcessor {
 			wikitext += cleanTextStart(trimmedStrLine, xml);
 			this.textFlag=true;
 		}
+		else if (trimmedStrLine.startsWith("<comment>")){		
+			trimmedStrLine = cleanElement("<comment>" , trimmedStrLine, "</comment>");				
+			xml.append(trimmedStrLine);			
+		}
+		else if (trimmedStrLine.startsWith("<redirect title=")){
+			trimmedStrLine = cleanElement("<redirect title=\">" , trimmedStrLine, "\"/>");
+			xml.append(trimmedStrLine);	
+		}
 		else{ // bypass page metadata		
 			xml.append(strLine + "\n");
 		}	
 		
 	}
 	
-	
-	//private String cleanTextStart(String trimmedStrLine, FileWriter xml) throws IOException{		
-	private String cleanTextStart(String trimmedStrLine, OutputStreamWriter xml) throws IOException{
-		xml.append(this.indent + "<text>\n" );
 		
+	private String cleanTextStart(String trimmedStrLine, OutputStreamWriter xml) throws IOException{
+		xml.append(this.indent + "<text>\n" );		
 		matcher = textPattern.matcher(trimmedStrLine);		
 		return matcher.replaceFirst("") + "\n";		
-	}
-	
+	}	
 	private void setIndent(String strLine){
 		if (this.indent.equals("")){
 			this.indent = StringUtils.repeat(" ", strLine.indexOf("<"));
 		}		
 	}
 	
-	
-	
-	//private FileWriter createWriter (String outputFile) throws IOException {	
 	private OutputStreamWriter createWriter (String outputFile) throws IOException {
 		File file = new File(filepath+outputFile);		
 		if (!file.exists()) file.createNewFile();		
@@ -219,12 +214,7 @@ public class XMLWikiProcessor {
 		
 		os.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		os.append("<articles>\n");
-		return os;
-		/*FileWriter fw = new FileWriter(file.getAbsoluteFile());
-		fw.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		fw.append("<articles>\n");
-		return fw;
-		*/
+		return os;	
 	}
 	
 	
@@ -251,28 +241,41 @@ public class XMLWikiProcessor {
 			
 			talk="Diskussion";
 		}
-		else if (language.equals("fr")){
+		else if (language.equals("fr")){    	    		
+			metapages.add("Média:");
+			metapages.add("Spécial:");
+			metapages.add("Utilisateur:");
+			metapages.add("Discussion utilisateur:");
+			metapages.add("Wikipédia:");
+			metapages.add("Discussion Wikipédia:");
+			metapages.add("Fichier:");
+			metapages.add("Discussion fichier:");
+			metapages.add("MediaWiki:");
+			metapages.add("Discussion MediaWiki:");
+			metapages.add("Modèle:");
+			metapages.add("Discussion modèle:");
+			metapages.add("Aide:");
+			metapages.add("Discussion aide:");
+			metapages.add("Catégorie:");
+			metapages.add("Discussion catégorie:");
+			metapages.add("Portail:");
+			metapages.add("Discussion Portail:");
+			metapages.add("Projet:");
+			metapages.add("Discussion Projet:");
+			metapages.add("Référence:");
+			metapages.add("Discussion Référence:");
+			
 			talk="Discussion";
 		}
 	}
 	
 	
 	// Slower than pattern
-	private String replaceLT(String wikitext){
-		
-		int i=0;
-		Character next;
-		StringBuilder sb = new StringBuilder(wikitext);
-		
-		while ((i=sb.indexOf("<",i)) != -1){
-			next= sb.charAt(i+1);
-			if (!Character.isLetter(next) && !Character.isWhitespace(next) ||
-				!next.equals("/")){
-				sb.insert(i + 1, ' ');
-				i+=2;
-			}
-		}
-			
-		return sb.toString();
+	private String cleanElement(String open, String content, String close){
+		content = StringUtils.replaceEach(content, 
+		new String[] { open , close}, 
+		new String[] { "" , "" });	
+		content = de.fau.cs.osr.utils.StringUtils.escHtml(content); 
+		return "    "+open + content + close +"\n";		
 	}
 }

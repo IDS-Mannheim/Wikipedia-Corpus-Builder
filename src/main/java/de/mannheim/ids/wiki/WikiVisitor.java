@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.select.Evaluator.ContainsOwnText;
 import org.sweble.wikitext.engine.Page;
 import org.sweble.wikitext.lazy.encval.IllegalCodePoint;
 import org.sweble.wikitext.lazy.parser.Bold;
@@ -87,13 +88,20 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	public void visit(Page page) throws IOException{
 		iterate(page.getContent());
 	}
-	public void visit(Text text) throws IOException	{
-		if(!text.getContent().equals("\n"))
-			print(StringEscapeUtils.escapeHtml(text.getContent()));
-//			print(escHtml(text.getContent()));
-			/*print (	StringUtils.replaceEach(text.getContent(), 
+	public void visit(Text text) throws IOException	{	
+			
+		if(!text.getContent().equals("\n")){
+			//print(StringEscapeUtils.escapeXml(text.getContent()));
+/*			temp = StringEscapeUtils.escapeXml(text.getContent());
+			print (	StringUtils.replaceEach(temp, 
+				new String[]{"&amp;nbsp;"}, 
+				new String[]{"&#160;"}));
+*/			
+		/*	print (	StringUtils.replaceEach(text.getContent(), 
 					new String[]{"&", "\"", "<", ">"}, 
 					new String[]{"&amp;", "&quot;", "&lt;", "&gt;"}));*/
+			print(escHtml(text.getContent()));
+		}			
 	}	
 	public void visit(Italics n) throws IOException	{
 		print("<i>");
@@ -127,6 +135,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		printNewline(false);
 	}
 	public void visit(SemiPreLine line) throws IOException	{
+		//System.out.println(line.getContent());
 		iterate(line.getContent());
 		print("\n");
 	}
@@ -184,7 +193,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		System.out.println("XmlCharRef " + ref.getCodePoint());
 	}
 	public void visit(XmlEntityRef ref) throws IOException	{
-		print("&");
+		print("&amp;");
 		print(ref.getName());
 		print(";");		
 	}
@@ -258,12 +267,12 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		decIndent();
 		printNewline(false);
 	}
-	public void visit(ExternalLink link) throws IOException
-	{
+	public void visit(ExternalLink link) throws IOException	{
+		
 		print("<a href=\"");
 		print(link.getTarget().getProtocol());
 		print(":");
-		print(link.getTarget().getPath());
+		print(escHtml(link.getTarget().getPath()));		
 		print("\">");
 		if (!link.getTitle().isEmpty()) {
 			iterate(link.getTitle());
@@ -278,16 +287,15 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("<a href=\"");
 		print(url.getProtocol());
 		print(":");
-		print(url.getPath());
+		print(escHtml(url.getPath()));
 		print("\">");
 		print(url.getProtocol());
 		print(":");
-		print(url.getPath());
+		print(escHtml(url.getPath()));
 		print("</a>");
 
 	}
-	public void visit(InternalLink n) throws IOException
-	{
+	public void visit(InternalLink n) throws IOException	{
 		print("<a href=\"");
 		print(makeLinkTarget(n));
 		print("\">");
@@ -305,7 +313,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		printNewline(false);
 		incIndent("\t");
 		print("<table");
-		iterate(table.getXmlAttributes());
+		//iterate(table.getXmlAttributes());
 		print(">");
 		printNewline(false);
 		incIndent("   ");		
@@ -349,7 +357,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	{
 		printNewline(false);
 		print("<th");
-		iterate(header.getXmlAttributes());
+		//iterate(header.getXmlAttributes());		
 		print(">");
 		printNewline(false);		
 		iterate(header.getBody());		
@@ -362,7 +370,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	{
 		printNewline(false);
 		print("<td");
-		iterate(cell.getXmlAttributes());
+		//iterate(cell.getXmlAttributes());
 		print(">");
 		printNewline(false);		
 		iterate(cell.getBody());		
@@ -371,26 +379,21 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		printNewline(false);
 
 	}
-	public void visit(HorizontalRule rule) throws IOException
-	{
+	public void visit(HorizontalRule rule) throws IOException	{
 		printNewline(false);
 		print("<hr />");
 		printNewline(false);
-
 	}
-	public void visit(Signature sig) throws IOException
-	{
-		print("<span class=\"");
-		
+	public void visit(Signature sig) throws IOException	{
+		print("<span class=\"");		
 		print("signature\">");
 		print(makeSignature(sig));
 		print("</span>");
-
 	}
 	public void visit(Redirect n) throws IOException	{
 		print("<span class=\"");
 		print("redirect\">&#x21B3; ");		//↳
-		print(n.getTarget());
+		print(escHtml(n.getTarget()));
 		print("</span>");
 	}
 	public void visit(IllegalCodePoint n) throws IOException	{
@@ -406,16 +409,12 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("__</span>");
 	}
 	public void visit(TagExtension n) throws IOException	{
+		// ref, nowiki
 		print("<span name=");		
 		print("\""+n.getName()+"\" ");		
-		print ("class=\"unknown-tag-extension\"/>");
-		
-		/*print("<gap desc=");		
-		print("\""+n.getName()+"\" ");		
-		print ("reason=\"omitted\"/>");*/
+		print ("class=\"unknown-tag-extension\"/>");		
 	}
-	public void visit(XmlElementEmpty e) throws IOException
-	{
+	public void visit(XmlElementEmpty e) throws IOException	{
 		print("<span class=\"");
 		
 		print("unknown-node-xml-element-empty\">");
@@ -430,7 +429,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		print("<span name=");		
 		print("\""+e.getName()+"\" ");		
 		print ("class=\"unknown-element\"");
-		iterate(e.getXmlAttributes());
+		//iterate(e.getXmlAttributes());
 		print("/>");	
 		
 		/*print("<span class=\"");		
@@ -453,11 +452,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 			print("<span name=");		
 			print("\""+e.getName()+"\" ");		
 			print ("class=\"unknown-element\"");
-			print("/>");
-			
-			//print ("</span>");
-			//print("</gap name="+e.getName()+">");
-			//System.out.println("closing unknown span"+e.getName());
+			print("/>");			
 		}
 	}
 	public void visit(Template tmpl) throws IOException	{
@@ -551,20 +546,20 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		return true;
 	}
 	
-	private void printExternalLinkNumber(ExternalLink link)
-	{
+	private void printExternalLinkNumber(ExternalLink link)	{
 		numberedLinks.add(link);
 		print(numberedLinks.size());
 	}
 
-	private String makeLinkTitle(InternalLink n)
-	{
-		return n.getTarget();
+	private String makeLinkTitle(InternalLink n)	{
+		// StringEscapeUtils.escapeXml generate invalid encoding such as &#57361; 
+		return escHtml(n.getTarget());
+		//return n.getTarget();
 	}
 
-	private String makeLinkTarget(InternalLink n)
-	{
-		return n.getTarget();
+	private String makeLinkTarget(InternalLink n)	{		
+		return escHtml(n.getTarget());
+		//return n.getTarget();
 	}
 
 	private String makeSignature(Signature sig)
