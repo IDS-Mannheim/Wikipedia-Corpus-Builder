@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class XMLWikiProcessor {
 	
-	private String indent="",wikitext="";
+	private String wikitext="", language;
 	private static String filepath = "./";
 	private boolean textFlag;
 	private TagSoupParser tagSoupParser = new TagSoupParser();
@@ -37,6 +37,7 @@ public class XMLWikiProcessor {
 		// TODO Auto-generated constructor stub
 	}
 	public XMLWikiProcessor(String language) {
+		this.language=language;
 		setLanguageProperties(language);
 	}
 	
@@ -71,9 +72,8 @@ public class XMLWikiProcessor {
 			}			
 			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){
 				
-				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags			
-				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape &nbsp;	
-											
+				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags		
+																
 				if (trimmedStrLine.startsWith("<title") ){					
 					
 					if (strLine.contains(":")){					
@@ -94,8 +94,7 @@ public class XMLWikiProcessor {
 								discussionWriter.append(page + trimmedStrLine + "\n");
 								discussionFlag = true;							
 							}
-							else {								
-								//articleWriter.append(page + strLine + "\n");								
+							else {
 								articleWriter.append(page + trimmedStrLine);
 							}							
 						}
@@ -135,14 +134,18 @@ public class XMLWikiProcessor {
 			
 			// text starts and ends at the same line
 			if (trimmedStrLine.startsWith("<text")){ 		
-				setIndent(strLine);
+				xml.append(setIndent(strLine) + "<text lang=\""+this.language+"\">\n" );
 				trimmedStrLine = cleanTextStart(trimmedStrLine, xml);				
 			}			
 			
 			wikitext += StringUtils.replaceOnce(trimmedStrLine, "</text>", "") + "\n";		
-			wikitext = StringUtils.replaceEach(wikitext, 
+			/*wikitext = StringUtils.replaceEach(wikitext, 
 					new String[] { ":{|" , "/>", "&amp;nbsp;" }, 
 					new String[] { "{|" , " />", " "}); //start table notation
+*/			
+			wikitext = StringUtils.replaceEach(wikitext, 
+					new String[] { ":{|" , "/>"}, 
+					new String[] { "{|" , " />"}); //start table notation
 			
 			matcher = pattern.matcher(wikitext);
 			wikitext = matcher.replaceAll("< $1");					
@@ -155,15 +158,15 @@ public class XMLWikiProcessor {
 				//System.out.println("Tagsoup execution time "+duration);				
 								
 				//if(wikitext.contains("Auteur-Theorie"))
-				//	System.out.println(wikitext);
-				
+				//	System.out.println(wikitext);				
+												
 				//startTime = System.nanoTime();
 				xml.append(swebleParser.parseText(wikitext));
 				//endTime = System.nanoTime();
 //				duration = endTime - startTime;
 //				System.out.println("Sweble execution time "+duration);
 				
-				xml.append(indent +"</text>\n");
+				xml.append(setIndent(strLine) +"</text>\n");
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -175,35 +178,47 @@ public class XMLWikiProcessor {
 			wikitext += strLine + "\n";
 		}
 		else if (trimmedStrLine.startsWith("<text")){ // start collecting text
-			setIndent(strLine);
+			xml.append(setIndent(strLine) + "<text lang=\""+this.language+"\">\n" );
 			wikitext += cleanTextStart(trimmedStrLine, xml);
 			this.textFlag=true;
 		}
 		else if (trimmedStrLine.startsWith("<comment>")){		
 			trimmedStrLine = cleanElement("<comment>" , trimmedStrLine, "</comment>");				
-			xml.append(trimmedStrLine);			
+			xml.append(setIndent(strLine) + trimmedStrLine);			
+		}
+		else if (trimmedStrLine.startsWith("<username>")){		
+			trimmedStrLine = cleanElement("<username>" , trimmedStrLine, "</username>");				
+			xml.append(setIndent(strLine) + trimmedStrLine);			
 		}
 		else if (trimmedStrLine.startsWith("<redirect title=")){
 			trimmedStrLine = cleanElement("<redirect title=\">" , trimmedStrLine, "\"/>");
-			xml.append(trimmedStrLine);	
+			xml.append(setIndent(strLine) + trimmedStrLine);	
 		}
-		else{ // bypass page metadata		
+		else{ // bypass page metadata
 			xml.append(strLine + "\n");
 		}	
 		
-	}
-	
+	}	
 		
 	private String cleanTextStart(String trimmedStrLine, OutputStreamWriter xml) throws IOException{
-		xml.append(this.indent + "<text>\n" );		
 		matcher = textPattern.matcher(trimmedStrLine);		
 		return matcher.replaceFirst("") + "\n";		
 	}	
-	private void setIndent(String strLine){
-		if (this.indent.equals("")){
-			this.indent = StringUtils.repeat(" ", strLine.indexOf("<"));
-		}		
+	
+	private String cleanElement(String open, String content, String close){
+		content = StringUtils.replaceEach(content, 
+		new String[] { open , close}, 
+		new String[] { "" , "" });	
+		content = de.fau.cs.osr.utils.StringUtils.escHtml(content); 
+		return "    "+open + content + close +"\n";		
 	}
+	
+	
+	private String setIndent(String strLine){		
+		return StringUtils.repeat(" ", strLine.indexOf("<"));				
+	}
+	
+	
 	
 	private OutputStreamWriter createWriter (String outputFile) throws IOException {
 		File file = new File(filepath+outputFile);		
@@ -269,13 +284,5 @@ public class XMLWikiProcessor {
 		}
 	}
 	
-	
-	// Slower than pattern
-	private String cleanElement(String open, String content, String close){
-		content = StringUtils.replaceEach(content, 
-		new String[] { open , close}, 
-		new String[] { "" , "" });	
-		content = de.fau.cs.osr.utils.StringUtils.escHtml(content); 
-		return "    "+open + content + close +"\n";		
-	}
+
 }
