@@ -79,27 +79,14 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	public void visit(AstNode astNode) throws IOException{
 		print("<span name=\""+astNode.getClass().getSimpleName()+"\" ");
 		print("class=\"unknown-node\"");
-		print("/>");
-		
-		/*print("<gap desc=\""+astNode.getClass().getSimpleName()+"\" ");
-		print("reason=\"unknown-node\"");
-		print("/>");*/
+		print("/>");		
 	}
 	public void visit(Page page) throws IOException{
 		iterate(page.getContent());
 	}
-	public void visit(Text text) throws IOException	{	
-			
+	public void visit(Text text) throws IOException	{			
 		if(!text.getContent().equals("\n")){
 			//print(StringEscapeUtils.escapeXml(text.getContent()));
-/*			temp = StringEscapeUtils.escapeXml(text.getContent());
-			print (	StringUtils.replaceEach(temp, 
-				new String[]{"&amp;nbsp;"}, 
-				new String[]{"&#160;"}));
-*/			
-		/*	print (	StringUtils.replaceEach(text.getContent(), 
-					new String[]{"&", "\"", "<", ">"}, 
-					new String[]{"&amp;", "&quot;", "&lt;", "&gt;"}));*/
 			print(escHtml(text.getContent()));
 		}			
 	}	
@@ -182,12 +169,11 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 		iterate(a.getValue());
 		print("\"");
 	}
-	public void visit(XmlAttributeGarbage g) throws IOException
-	{
+	public void visit(XmlAttributeGarbage g) throws IOException	{
 
 	}
 	public void visit(XmlCharRef ref) throws IOException	{		
-		print("&#");
+		print("&amp;#");
 		print(ref.getCodePoint());
 		print(";");
 		System.out.println("XmlCharRef " + ref.getCodePoint());
@@ -328,7 +314,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	{
 		printNewline(false);
 		print("<caption");
-		iterate(caption.getXmlAttributes());
+		//iterate(caption.getXmlAttributes());
 		print(">");
 		printNewline(false);
 		incIndent("\t");
@@ -343,7 +329,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	{
 		printNewline(false);
 		print("<tr");
-		iterate(row.getXmlAttributes());
+		//iterate(row.getXmlAttributes());
 		print(">");
 		printNewline(false);		
 		incIndent("   ");
@@ -458,13 +444,7 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 	public void visit(Template tmpl) throws IOException	{
 		print("<span name=");		
 		print("\"template\" ");		
-		print ("class=\"unknown-template\"/>");
-		
-		/*
-		print("<gap desc=");		
-		print("\"template\" ");		
-		print ("reason=\"omitted\"/>");
-		*/
+		print ("class=\"unknown-template\"/>");		
 	}
 	public void visit(TemplateParameter param) throws IOException
 	{
@@ -506,18 +486,17 @@ public class WikiVisitor  extends de.fau.cs.osr.ptk.common.PrinterBase{
 			print("=");
 			iterate(arg.getValue());
 		}
-
 	}
 
 	private String asXmlCharRefs(String codePoint)
 	{
 		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < codePoint.length(); ++i)
-		{
-			b.append("&#");
+		for (int i = 0; i < codePoint.length(); ++i){
+			b.append("&amp;#");
 			b.append((int) codePoint.charAt(i));
-			b.append(";");
+			b.append(";");			
 		}
+		System.out.println("asXmlCharRefs "+codePoint);
 		return b.toString();
 	}
 
