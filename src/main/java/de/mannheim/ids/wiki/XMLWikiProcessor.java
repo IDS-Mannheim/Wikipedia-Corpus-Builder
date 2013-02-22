@@ -2,6 +2,7 @@ package de.mannheim.ids.wiki;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,234 +14,284 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
+import org.sweble.wikitext.engine.CompilerException;
+import org.sweble.wikitext.parser.parser.LinkTargetException;
 
 public class XMLWikiProcessor {
 	
-	private String wikitext="", language;
 	private static String filepath = "./";
-	private boolean textFlag;
+	
+	
+	private String wikitext="", page, pagetitle;
+	private boolean textFlag, discussionFlag=false, isEmptyText=false, isArticle=true;
+
+//	private long startTime, endTime, duration, total;
+	private int count=0,swebleErr=0, parsingErr=0, totalMetapages=0, 
+			totalDiscussions=0, totalArticles=0, counter=1;		
+
 	private TagSoupParser tagSoupParser = new TagSoupParser();
-	private SwebleParser swebleParser = new SwebleParser();	
-	private Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
-	private Pattern textPattern = Pattern.compile("<text.*\">");	
+	private NekoHTMLParser nekoParser = new NekoHTMLParser();
+	private Sweble2Parser swebleParser = new Sweble2Parser();
+	private DOMParser dp = new DOMParser();
+	private LanguageSetter languageSetter;
+	
 	private Matcher matcher;
-	private long startTime, endTime, duration, total;
-	private int  count=0;	
-	
-	private static List<String> metapages = new ArrayList<String>();	
-	private String talk;
-	
-	
+	private Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
+	private Pattern textPattern = Pattern.compile("<text.*\">");
+	private Pattern titlePattern = Pattern.compile("<title>(.+)</title>");
+	private Pattern hackpattern = Pattern.compile("<([^>]+)/>");
+		
 	public XMLWikiProcessor() {
 		// TODO Auto-generated constructor stub
 	}
-	public XMLWikiProcessor(String language) {
-		this.language=language;
-		setLanguageProperties(language);
+	public XMLWikiProcessor(String language) {		
+		languageSetter = new LanguageSetter(language);
 	}
 	
-	public void process(String inputFile, String articleOutput, String discussionOutput) throws IOException{	
-		
-		int counter=1;
-		boolean readFlag = false, discussionFlag=false, isArticle=true;	
-		String strLine, trimmedStrLine, page="", text="";
+	public void process(String inputFile, String articleOutput, String discussionOutput, 
+			String errorOutput) throws IOException{
 
 		OutputStreamWriter articleWriter = createWriter(articleOutput);
 		OutputStreamWriter discussionWriter = createWriter(discussionOutput);
+		OutputStreamWriter errorWriter = createWriter(errorOutput);
 		
+		articleWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		articleWriter.append("<articles>\n");
+		
+		discussionWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		discussionWriter.append("<discussions>\n");
+				
 		FileInputStream fs = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
 		
-		//startTime = System.nanoTime();
+		read(br, articleWriter, discussionWriter, errorWriter);
+	
+		br.close();
+		fs.close();
+		
+		articleWriter.append("</articles>");
+		discussionWriter.append("</discussions>");	
+
+		articleWriter.close();
+		discussionWriter.close();		
+		errorWriter.close();
+		
+		//System.out.println(total/count);
+		System.out.println("Total Articles "+ totalArticles);
+		System.out.println("Total Discussions "+ totalDiscussions);
+		System.out.println("Total Metapages "+ totalMetapages);
+		System.out.println("Total Sweble Exceptions "+ swebleErr);
+		System.out.println("Total XML Parsing Exceptions "+ parsingErr);
+	}
+	
+	private void read(BufferedReader br, OutputStreamWriter articleWriter, 
+			OutputStreamWriter discussionWriter, OutputStreamWriter errorWriter) 
+			throws IOException{		
+		
+		boolean readFlag = false;	
+		String strLine, trimmedStrLine;
+		
 		while ((strLine = br.readLine()) != null)   {					
 			trimmedStrLine = strLine.trim();
 			
-			if (trimmedStrLine.startsWith("<page>")){ // start reading
-				/*endTime = System.nanoTime();
-				duration = endTime - startTime;
-				System.out.println("Page execution time "+duration);	
-				count++;
-				total += duration;*/
-				
-				page=strLine+"\n";	
+			if (trimmedStrLine.startsWith("<page>")){ // start reading				
+				page=strLine+"\n";				
 				readFlag = true;
 				discussionFlag=false;
-
-//				startTime = System.nanoTime();
 			}
 			else if (trimmedStrLine.endsWith("</page>")){
+				page += strLine;
+				//System.out.println(page);	
+				try { 
+					page = tagSoupParser.generate(page);					
+//					page = nekoParser.generate(page);	
+				} 
+				catch (Exception e) { e.printStackTrace();}
+				//System.out.println(page);	
 				
+				if (discussionFlag){ 
+					write(discussionWriter,strLine);
+					if (!wikitext.equals("")) totalDiscussions++;							
+				}
+				else{ 
+					write(articleWriter,strLine);
+					if (!wikitext.equals("")) totalArticles++;
+				}
 				
+				page=""; wikitext="";
+				isEmptyText=false;
+				isArticle=true;
 			}
-			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){
-				
-				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags		
+			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){					
 																
-				if (trimmedStrLine.startsWith("<title") ){					
+				if (trimmedStrLine.startsWith("<title") ){
+					matcher = titlePattern.matcher(trimmedStrLine);
+					if (matcher.find()) {
+						pagetitle = matcher.group(1);						
+					}
 					
-					if (strLine.contains(":")){					
-											
-						for (String s: metapages){							
+					if (strLine.contains(":")){
+						for (String s: this.languageSetter.getMetapages()){							
 							if (strLine.contains(s)){
-								System.out.println("metapage "+ strLine);	
+								//System.out.println("metapage "+ strLine);
+								totalMetapages++;
 								readFlag = false; //skip reading metapages								
 								isArticle = false;
 								break;
 							}
 						}
 						
-						if (isArticle){
-							System.out.println(counter++ + strLine);
-							trimmedStrLine = cleanElement("<title>" , trimmedStrLine, "</title>");
-							if(strLine.contains(talk)){								
-								discussionWriter.append(page + setIndent(strLine)+ trimmedStrLine + "\n");
-								discussionFlag = true;							
+						if (isArticle){							
+							if(strLine.contains(this.languageSetter.getTalk())){
+								discussionFlag = true;
+//								page += setIndent(strLine)+ trimmedStrLine+"\n";
 							}
-							else {
-								articleWriter.append(page + trimmedStrLine);
-							}							
+//							else {readFlag = false;}
+							page += setIndent(strLine)+ trimmedStrLine+"\n";							
 						}
-						else{
-							isArticle=true;
-						}					
 					}
-					else{
-						System.out.println(counter++ + strLine);	
-						trimmedStrLine = cleanElement("<title>" , trimmedStrLine, "</title>");
-						articleWriter.append(page + setIndent(strLine) + trimmedStrLine);
+					else{						
+						page += setIndent(strLine)+ trimmedStrLine+ "\n";
+//						readFlag = false;
 					}
-				}				
-				else if (discussionFlag){
-					handlePageContent(strLine, trimmedStrLine, discussionWriter);
 				}
 				else{					
-					handlePageContent(strLine, trimmedStrLine, articleWriter);
+					handlePageContent(strLine, trimmedStrLine, errorWriter);
 				}				
 			}				
 		}
-		br.close();
-		fs.close();
-		
-		articleWriter.append("</articles>");
-		discussionWriter.append("</articles>");
-		
-		articleWriter.close();
-		discussionWriter.close();		
-		//System.out.println(total/count);
 	}
 	
-		 
-	public void handlePageContent(String strLine, String trimmedStrLine, OutputStreamWriter xml) throws IOException{
-				
-		if (trimmedStrLine.endsWith("</text>")){ // finish collecting text
-			
+	private void handlePageContent(String strLine, String trimmedStrLine, 
+			OutputStreamWriter errorWriter) throws IOException {
+		
+		if (trimmedStrLine.endsWith("</text>")){ // finish collecting text			
+			page += "      <text/>\n";			
 			// text starts and ends at the same line
-			if (trimmedStrLine.startsWith("<text")){ 		
-				xml.append(setIndent(strLine) + "<text lang=\""+this.language+"\">\n" );
-				trimmedStrLine = cleanTextStart(trimmedStrLine, xml);				
+			if (trimmedStrLine.startsWith("<text")){
+				trimmedStrLine = cleanTextStart(trimmedStrLine);				
 			}			
 			
-			wikitext += StringUtils.replaceOnce(trimmedStrLine, "</text>", "") + "\n";
+			trimmedStrLine = StringUtils.replaceOnce(trimmedStrLine, "</text>", ""); // remove </text>		
+			
+//			if (discussionFlag){
+//				wikitext += trimmedStrLine + "\n";
+//			}	
+//			else{ 
+				wikitext += (StringEscapeUtils.unescapeXml(trimmedStrLine) + "\n").trim(); // unescape XML tags
+//			}
+			
+			if (wikitext.equals("")){ return; } // empty text			
+						
 			wikitext = StringUtils.replaceEach(wikitext, 
 					new String[] { ":{|" , "/>"}, 
-					new String[] { "{|" , " />"}); //start table notation
+					new String[] { "{|" , " />"}); //start table notation	
 			
-			matcher = pattern.matcher(wikitext);
+			matcher = hackpattern.matcher(wikitext); // get around for sweble error
+			wikitext = matcher.replaceAll("</$1>");			
+			matcher = pattern.matcher(wikitext); // space for non-tag
 			wikitext = matcher.replaceAll("< $1");					
 			
-			try{			
-				//startTime = System.nanoTime();								
-				wikitext = tagSoupParser.generateCleanHTML(wikitext);
-//				wikitext = NekoHTMLParser.generate(wikitext);
-				
-				//endTime = System.nanoTime();
-				//duration = endTime - startTime;
-				//System.out.println("Tagsoup execution time "+duration);				
-								
-				//if(wikitext.contains("Auteur-Theorie"))
-				//	System.out.println(wikitext);				
-												
-				//startTime = System.nanoTime();
-				xml.append(swebleParser.parseText(wikitext));
-				//endTime = System.nanoTime();
-//				duration = endTime - startTime;
-//				System.out.println("Sweble execution time "+duration);
-				
-				xml.append("      </text>\n");
+			try{
+				// italic and bold are not repaired because they have wiki-mark-ups
+//				wikitext = nekoParser.generate(wikitext);
+				wikitext = tagSoupParser.generate(wikitext); 
+//				System.out.println(wikitext.trim());
+				wikitext = swebleParser.parseText(wikitext.trim(), pagetitle);
 			}catch (Exception e) {
-				e.printStackTrace();
-				xml.append("      </text>\n");
+				wikitext="";
+				swebleErr++;
+				errorWriter.append(pagetitle+"\n");				
+				//e.printStackTrace();
 			}
 			
-			wikitext="";
-			this.textFlag=false;
+			try{
+				//testing
+				String t = "<text>"+wikitext+"</text>";
+				dp.parseXML(new ByteArrayInputStream(t.getBytes("utf-8")));				
+			}
+			catch (Exception e) {
+				wikitext="";
+				e.printStackTrace();		
+				parsingErr++;	
+			}
+						
+			textFlag=false;
 		}
-		else if (textFlag){ // continue collecting text
+		else if (textFlag){ // continue collecting text		
+//			if (!discussionFlag){ 
+				strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags
+//			}
 			wikitext += strLine + "\n";
 		}
-		else if(trimmedStrLine.startsWith("<text")) { 
-			if (trimmedStrLine.endsWith("/>")){ // empty text
-				xml.append(setIndent(strLine) + "<text lang=\""+this.language+"\"/>\n" );
+		else if(trimmedStrLine.startsWith("<text")) {				
+			
+			if (trimmedStrLine.endsWith("/>")){ // empty text				
+				page += "        <text lang=\""+this.languageSetter.getLanguage()+"\"/>\n";
+				wikitext="";
+				this.isEmptyText=true;
 			}
 			else { // start collecting text
-				xml.append(setIndent(strLine) + "<text lang=\""+this.language+"\">\n" );
-				wikitext += cleanTextStart(trimmedStrLine, xml);
+//				if (discussionFlag){
+//					wikitext += cleanTextStart(trimmedStrLine);
+//				}
+//				else {
+					wikitext += StringEscapeUtils.unescapeXml(cleanTextStart(trimmedStrLine)); // unescape XML tags
+//				}
 				this.textFlag=true;
 			}
-		}		
-		else if (trimmedStrLine.startsWith("<comment>")){		
-			trimmedStrLine = cleanElement("<comment>" , trimmedStrLine, "</comment>");				
-			xml.append(setIndent(strLine) + trimmedStrLine);			
 		}
-		else if (trimmedStrLine.startsWith("<username>")){		
-			trimmedStrLine = cleanElement("<username>" , trimmedStrLine, "</username>");				
-			xml.append(setIndent(strLine) + trimmedStrLine);			
-		}
-		else if (trimmedStrLine.startsWith("<redirect title=")){			
-			trimmedStrLine = cleanElement("<redirect title=\"" , trimmedStrLine, "\"/>");			
-			xml.append(setIndent(strLine) + trimmedStrLine);	
-		}
-		else if(strLine.contains("</page>")|| strLine.contains("revision")){
-			xml.append(strLine + "\n");
-		}
-		else{ // bypass page metadata
-			Pattern tag = Pattern.compile(".*<([^/]+)>[^<]+<(.+)>");
-			Matcher m = tag.matcher(strLine);
-			System.out.println(strLine);
-						
-			if (m.find()){
-				System.out.println("hmm "+m.group(1));
-				xml.append(strLine + "\n");
-			}
-			else{
-				System.out.println("tadaaa");
-			}
-			
-		}
-	}	
-		
-	private String cleanTextStart(String trimmedStrLine, OutputStreamWriter xml) throws IOException{
-		matcher = textPattern.matcher(trimmedStrLine);		
-		return matcher.replaceFirst("") + "\n";		
-	}	
-	
-	private String cleanElement(String open, String content, String close){
-		content = StringUtils.replaceEach(content, 
-		new String[] { open , close}, 
-		new String[] { "" , "" });		
-		content = de.fau.cs.osr.utils.StringUtils.escHtml(content); 
-		return open + content + close +"\n";		
+		else{ // bypass page metadata			
+			page += strLine + "\n";
+		}			
 	}
 	
+	private void write(OutputStreamWriter writer, String strLine) throws IOException{
+		if (isArticle && !isEmptyText) {	
+			System.out.println(counter++ +" "+ pagetitle);
+			
+//				String [] arr = page.split("<text/>");				
+			String [] arr = page.split("<text></text>");
+			if (arr.length >1){				
+				writer.append(setIndent(strLine));
+				writer.append(arr[0]);
+				
+				if (wikitext.equals("")){
+					writer.append("<text lang=\""+this.languageSetter.getLanguage()+"\"/>" );
+				}
+				else {
+					writer.append("<text lang=\""+this.languageSetter.getLanguage()+"\">\n" );
+					writer.append(wikitext+"\n");
+					writer.append("      </text>");
+				}
+								
+				writer.append(arr[1]);				
+				//writer.append("\n");				
+			}
+			else{
+				
+				//throw new ArrayIndexOutOfBoundsException();
+				System.out.println("nekoerror");
+			}
+		}
+		else{
+			writer.append(page);
+		}
+	} 
+	
+	private String cleanTextStart(String trimmedStrLine) throws IOException{
+		matcher = textPattern.matcher(trimmedStrLine);		
+		return matcher.replaceFirst("") + "\n";		
+	}
 	
 	private String setIndent(String strLine){		
 		return StringUtils.repeat(" ", strLine.indexOf("<"));				
-	}
-	
-	
+	}		
 	
 	private OutputStreamWriter createWriter (String outputFile) throws IOException {
 		File file = new File(filepath+outputFile);		
@@ -248,63 +299,8 @@ public class XMLWikiProcessor {
 
 		OutputStreamWriter os = new OutputStreamWriter(new BufferedOutputStream(
 				new FileOutputStream(file)), "UTF-8");		
-		
-		os.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		os.append("<articles>\n");
-		return os;	
-	}
-	
-	
-	private void setLanguageProperties(String language){
-		if (language.equals("de")){			
-			metapages.add("Media:");
-			metapages.add("Spezial:");
-			metapages.add("Benutzer:");
-			metapages.add("Benutzer Diskussion:");
-			metapages.add("Wikipedia:");
-			metapages.add("Wikipedia Diskussion:");
-			metapages.add("Datei:");
-			metapages.add("Datei Diskussion:");
-			metapages.add("MediaWiki:");
-			metapages.add("MediaWiki Diskussion:");
-			metapages.add("Vorlage:");
-			metapages.add("Vorlage Diskussion:");
-			metapages.add("Hilfe:");
-			metapages.add("Hilfe Diskussion:");
-			metapages.add("Kategorie:");
-			metapages.add("Kategorie Diskussion:");
-			metapages.add("Portal:");
-			metapages.add("Portal Diskussion:");
-			
-			talk="Diskussion";
-		}
-		else if (language.equals("fr")){    	    		
-			metapages.add("Média:");
-			metapages.add("Spécial:");
-			metapages.add("Utilisateur:");
-			metapages.add("Discussion utilisateur:");
-			metapages.add("Wikipédia:");
-			metapages.add("Discussion Wikipédia:");
-			metapages.add("Fichier:");
-			metapages.add("Discussion fichier:");
-			metapages.add("MediaWiki:");
-			metapages.add("Discussion MediaWiki:");
-			metapages.add("Modèle:");
-			metapages.add("Discussion modèle:");
-			metapages.add("Aide:");
-			metapages.add("Discussion aide:");
-			metapages.add("Catégorie:");
-			metapages.add("Discussion catégorie:");
-			metapages.add("Portail:");
-			metapages.add("Discussion Portail:");
-			metapages.add("Projet:");
-			metapages.add("Discussion Projet:");
-			metapages.add("Référence:");
-			metapages.add("Discussion Référence:");
-			
-			talk="Discussion";
-		}
-	}
-	
 
+		return os;	
+	}		
+	
 }

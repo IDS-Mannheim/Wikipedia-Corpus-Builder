@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>de.ids.mannheim.wiki</groupId>
-  <artifactId>WikiSwebleXML</artifactId>
+  <artifactId>WikiSweble2XML</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -14,7 +14,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.java>1.7</version.java>
   </properties>
-
+  
   <repositories>
     <repository>
       <releases>
@@ -33,24 +33,22 @@
     </repository>
   </repositories>
   
-    <build>
-    <plugins>
-
-      <!-- Create a JAR package with the ParserProfiler as main class -->
-  <!--     <plugin>
-      	<groupId>org.apache.maven.plugins</groupId>
-      	<artifactId>maven-jar-plugin</artifactId>
-      	<version>2.4</version>        
+  <build>
+    <plugins>      
+        <!-- Create a JAR package -->
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.1</version>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>de.mannheim.ids.wiki.WikiConverter</mainClass>              
+              <mainClass>de.mannheim.ids.wiki.WikiConverter</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>
         </configuration>
-      </plugin> -->
-      
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -67,27 +65,21 @@
                   <mainClass>de.mannheim.ids.wiki.WikiConverter</mainClass>
                 </transformer>
               </transformers>
+              <filters>
+	            <filter>
+	              <artifact>*:*</artifact>
+	              <excludes>
+	                <exclude>META-INF/*.SF</exclude>
+	                <exclude>META-INF/*.DSA</exclude>
+	                <exclude>META-INF/*.RSA</exclude>	                
+	              </excludes>
+	            </filter>
+    		  </filters>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
-      <!-- <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/lib</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin> -->      
+     
     </plugins>
     
     <pluginManagement>
@@ -112,15 +104,7 @@
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.sweble.wikitext</groupId>
-	  	<artifactId>swc-engine</artifactId>
-	  	<version>1.1.1</version>
-	  	<!-- <groupId>org.sweble.wikitext</groupId>
-	  	<artifactId>swc-engine</artifactId>
-	  	<version>2.0.0-alpha-2-SNAPSHOT</version> -->
-    </dependency>
+    </dependency>  
     <dependency>
     	<groupId>org.ccil.cowan.tagsoup</groupId>
     	<artifactId>tagsoup</artifactId>
@@ -137,9 +121,16 @@
     	<version>1.9.17</version>
     </dependency>
     <dependency>
-    	<groupId>xerces</groupId>
-    	<artifactId>xercesImpl</artifactId>
-    	<version>2.9.1</version>
+    	<groupId>org.sweble.wikitext</groupId>
+    	<artifactId>swc-engine</artifactId>
+    	<version>2.0.0-alpha-2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+    	<groupId>saxon</groupId>
+    	<artifactId>Saxon-EE</artifactId>
+    	<version>9.4</version>
     </dependency>
   </dependencies>
+  
+
 </project>
