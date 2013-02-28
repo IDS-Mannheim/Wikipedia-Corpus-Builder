@@ -5,7 +5,7 @@ import java.util.List;
 
 public class LanguageSetter {
 
-	private static List<String> metapages = new ArrayList<String>();
+	private List<String> metapages = new ArrayList<String>();
 	private String talk, language;
 	
 	public LanguageSetter() {
@@ -84,11 +84,11 @@ public class LanguageSetter {
 		this.language = language;
 	}
 	
-	public static void setMetapages(List<String> metapages) {
-		LanguageSetter.metapages = metapages;
+	public void setMetapages(List<String> metapages) {
+		this.metapages = metapages;
 	}
 	
-	public static List<String> getMetapages() {
+	public List<String> getMetapages() {
 		return metapages;
 	}
 }

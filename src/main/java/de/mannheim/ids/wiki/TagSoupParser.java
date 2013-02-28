@@ -24,7 +24,7 @@ public class TagSoupParser {
 	
 	private HTMLSchema theSchema = null;	
 		 
-	public String generate(String wikitext) throws IOException, SAXException{		
+	public String generate(String wikitext, boolean segment) throws IOException, SAXException{		
 		theSchema = new HTMLSchema();
 		
 		XMLReader r = new Parser();			
@@ -37,12 +37,15 @@ public class TagSoupParser {
 		
 		// Do process per paragraph because the correction of improper tags  
 		// will be accumulated and repeated until the end of the given text.
-		for (String p : wikitext.split("\n\n")){
-//			System.out.println(p);
-			r.parse(new InputSource( new ByteArrayInputStream(p.getBytes())));
+		if (segment) {
+			for (String p : wikitext.split("\n\n")){
+				r.parse(new InputSource( new ByteArrayInputStream(p.getBytes())));
+			}
 		}
-//		r.parse(new InputSource( new ByteArrayInputStream(wikitext.getBytes())));
-			
+		else{
+			r.parse(new InputSource( new ByteArrayInputStream(wikitext.getBytes())));
+		}
+		
 		String cleanWikitext = w.toString();
 		cleanWikitext = StringUtils.replaceEach(cleanWikitext, 
 				new String[] {"<html><body>", "</body></html>"}, 
