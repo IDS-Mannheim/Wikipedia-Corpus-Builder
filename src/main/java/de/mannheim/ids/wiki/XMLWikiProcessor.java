@@ -1,17 +1,12 @@
 package de.mannheim.ids.wiki;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +15,11 @@ import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
+/** This class converts a Wikidump in Wiki mark-ups format into XML.
+ * 
+ * @author margaretha
+ * @version 1.0 Build Feb 2013
+ */
 public class XMLWikiProcessor {
 	
 	private String xmlOutputDir = "./xml/";
@@ -35,39 +35,52 @@ public class XMLWikiProcessor {
 	private TagSoupParser tagSoupParser = new TagSoupParser();
 	private Sweble2Parser swebleParser = new Sweble2Parser();
 	private DOMParser dp = new DOMParser();
-	private LanguageSetter languageSetter;
-	private WikiStatistics wikiStatistics;
 	
+	private WikiStatistics wikiStatistics = new WikiStatistics();
+	private Helper helper = new Helper();
+	private LanguageSetter languageSetter;
+		
 	private Matcher matcher;
 	private Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
 	private Pattern textPattern = Pattern.compile("<text.*\">");
 	private Pattern titlePattern = Pattern.compile("<title>(.+)</title>");
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
 	private Pattern hackpattern = Pattern.compile("<([^>]+)/>");
-			
-	public XMLWikiProcessor(String language) {		
-		languageSetter = new LanguageSetter(language);
-		wikiStatistics= new WikiStatistics();	
 
-		createDirectory(xmlOutputDir);		
+	/** Constructor
+	 * 
+	 * @param language	is a LanguageSetter instance defining language properties 
+	 * 		of a Wikidump.
+	 * 
+	 */
+	public XMLWikiProcessor(LanguageSetter language) {		
+		this.languageSetter = language;	
+		helper.createDirectory(xmlOutputDir);		
 	}
 	
+	/** This method converts each Wikipage in a Wikidump into an XML Wikipage. Article 
+	 * and discussion pages are stored separately. The XML pages are grouped according 
+	 * to the first character of their titles, namely a letter, a digit or a special 
+	 * character. The files are stored in xml/articles or xml/discussions with respect 
+	 * to their types.
+	 *  
+	 * @param inputFile is the location of the wikidump
+	 * @param errorOutput is the filename for listing the titles of the failed parsed 
+	 * 		wikipages. 
+	 * @throws IOException
+	 */
 	public void processSplit(String inputFile, String errorOutput) throws IOException {
 				
-		String[] index = {"A","B","C","D","E","F","G","H","I","J","K","L",
-			    "M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
-			    "0","1","2","3","4","5","6","7","8","9","Char"};
+		this.indexList = helper.createIndexList();
 		
-		for (String i:index) {
-			createDirectory(this.articleDir+i);
-			createDirectory(this.discussionDir+i);
-		}
-		
-		this.indexList = Arrays.asList(index);		
+		for (String i:indexList) {
+			helper.createDirectory(this.articleDir+i);
+			helper.createDirectory(this.discussionDir+i);
+		}				
 		
 		FileInputStream fs = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
-		OutputStreamWriter errorWriter = createWriter(errorOutput);
+		OutputStreamWriter errorWriter = helper.createWriter(errorOutput);
 				
 		readAndSplit(br, errorWriter);
 	
@@ -75,15 +88,54 @@ public class XMLWikiProcessor {
 		fs.close();
 		errorWriter.close();
 		
-		printStatistics();		
+		wikiStatistics.printStatistics();		
+	}
+	
+	/** This method converts a Wikidump into a single XML and stored it in xml/ directory.
+	 * 
+	 * @param inputFile is the location of the wikidump
+	 * @param errorOutput is the filename for listing the titles of the failed parsed 
+	 * 		wikipages.
+	 * @throws IOException
+	 */
+	public void process(String inputFile, String errorOutput) throws IOException{
+				
+		String basename = StringUtils.removeEnd(inputFile,".xml").replaceFirst(".*/", "");
+				
+		OutputStreamWriter articleWriter = helper.createWriter(this.xmlOutputDir+ basename+"-articles.xml");
+		OutputStreamWriter discussionWriter = helper.createWriter(this.xmlOutputDir + basename+"-discussions.xml");
+		OutputStreamWriter errorWriter = helper.createWriter(errorOutput);
+		
+		articleWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		articleWriter.append("<articles>\n");
+		
+		discussionWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		discussionWriter.append("<discussions>\n");
+				
+		FileInputStream fs = new FileInputStream(inputFile);
+		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
+		
+		read(br, articleWriter, discussionWriter, errorWriter);
+	
+		br.close();
+		fs.close();
+		
+		articleWriter.append("</articles>");
+		discussionWriter.append("</discussions>");	
+
+		articleWriter.close();
+		discussionWriter.close();		
+		errorWriter.close();		
+
+		wikiStatistics.printStatistics();
 	}
 	
 	public void readAndSplit(BufferedReader br, OutputStreamWriter errorWriter) 
 			throws IOException{
 		
 		boolean readFlag = false, idFlag = false, isMetapage = false;	
-		String strLine, trimmedStrLine, id = "", index;
-		int start;
+		String strLine, trimmedStrLine, id = "", normalizedIndex;
+		int start = languageSetter.getTalk().length() +1;;
 		
 		OutputStreamWriter writer = null;
 		
@@ -108,7 +160,7 @@ public class XMLWikiProcessor {
 					else if (isEmptyText){ wikiStatistics.addEmptyDiscussions(); }
 					else { 
 						wikiStatistics.addEmptyParsedDiscussions();						 
-						errorWriter.append("Empty parsed discussion:"+ pagetitle); 
+						//errorWriter.append(pagetitle+"\n"); 
 					}
 				}
 				else{ 					
@@ -116,7 +168,7 @@ public class XMLWikiProcessor {
 					else if (isEmptyText){ wikiStatistics.addEmptyArticles(); }
 					else {
 						wikiStatistics.addEmptyParsedArticles();						 
-						errorWriter.append("Empty parsed articles:"+pagetitle); 
+						//errorWriter.append(pagetitle+"\n"); 
 					}
 				}
 				
@@ -151,19 +203,19 @@ public class XMLWikiProcessor {
 					else{ page += setIndent(strLine)+ trimmedStrLine+ "\n"; }
 				}
 				else if (trimmedStrLine.startsWith("<id") && idFlag){
+					page += strLine + "\n";
 					
 					matcher = idPattern.matcher(trimmedStrLine);
 					if (matcher.find()) { id = matcher.group(1); }
 					
-					if (isDiscussion){
-						start = languageSetter.getTalk().length() +1;
-						index = normalizeIndex(pagetitle.substring(start, start+1));						
-						writer = createWriter(this.discussionDir + index+"/"+id+".xml");
+					if (isDiscussion){						
+						normalizedIndex = helper.normalizeIndex(pagetitle.substring(start, start+1), this.indexList);						
+						writer = helper.createWriter(this.discussionDir + normalizedIndex+"/"+id+".xml");
 					}
-					else { 
-						index = normalizeIndex(pagetitle.substring(0,1));
-						writer = createWriter(this.articleDir + index+"/"+id+".xml");
-					}					
+					else {
+						normalizedIndex = helper.normalizeIndex(pagetitle.substring(0,1), this.indexList);
+						writer = helper.createWriter(this.articleDir + normalizedIndex+"/"+id+".xml");
+					}		
 					
 					writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 					
@@ -173,39 +225,7 @@ public class XMLWikiProcessor {
 			}				
 		}
 	}	
-	
-	public void process(String inputFile, String errorOutput) throws IOException{
-				
-		String basename = StringUtils.removeEnd(inputFile,".xml").replaceFirst(".*/", "");
-				
-		OutputStreamWriter articleWriter = createWriter(this.xmlOutputDir+ basename+"-articles.xml");
-		OutputStreamWriter discussionWriter = createWriter(this.xmlOutputDir + basename+"-discussions.xml");
-		OutputStreamWriter errorWriter = createWriter(errorOutput);
-		
-		articleWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		articleWriter.append("<articles>\n");
-		
-		discussionWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		discussionWriter.append("<discussions>\n");
-				
-		FileInputStream fs = new FileInputStream(inputFile);
-		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
-		
-		read(br, articleWriter, discussionWriter, errorWriter);
-	
-		br.close();
-		fs.close();
-		
-		articleWriter.append("</articles>");
-		discussionWriter.append("</discussions>");	
 
-		articleWriter.close();
-		discussionWriter.close();		
-		errorWriter.close();		
-
-		printStatistics();
-	}
-	
 	private void read(BufferedReader br, OutputStreamWriter articleWriter, 
 			OutputStreamWriter discussionWriter, OutputStreamWriter errorWriter) 
 			throws IOException{		
@@ -381,44 +401,5 @@ public class XMLWikiProcessor {
 		return StringUtils.repeat(" ", strLine.indexOf("<"));				
 	}		
 	
-	private OutputStreamWriter createWriter (String outputFile) throws IOException {			
-		File file = new File(outputFile);		
-		if (!file.exists()) file.createNewFile();
 
-		OutputStreamWriter os = new OutputStreamWriter(new BufferedOutputStream(
-				new FileOutputStream(file)), "UTF-8");		
-
-		return os;	
-	}		
-	
-	private void createDirectory(String directory){
-		File dir = new File(directory);
-		if (!dir.exists()) { dir.mkdirs(); }
-	}
-	
-	public String normalizeIndex(String input) throws IOException{
-		String normalizedStr = Normalizer.normalize(input,Form.NFKD).toUpperCase();
-		normalizedStr = normalizedStr.substring(0,1);	
-		
-//		if (Character.isLetterOrDigit(normalizedStr.charAt(0))){
-//			return normalizedStr.substring(0,1);	
-//		}
-		if (this.indexList.contains(normalizedStr)){
-			return normalizedStr;
-		}
-		else{ return "Char"; }		
-	}
-	
-	private void printStatistics(){
-		System.out.println("Total non-empty articles "+ wikiStatistics.getTotalArticles());
-		System.out.println("Total non-empty discussions "+ wikiStatistics.getTotalDiscussions());
-		System.out.println("Total empty articles "+ wikiStatistics.getEmptyArticles());
-		System.out.println("Total empty discussions "+ wikiStatistics.getEmptyDiscussions());
-		System.out.println("Total empty parsed articles "+ wikiStatistics.getEmptyParsedArticles());
-		System.out.println("Total empty parsed discussions "+ wikiStatistics.getEmptyParsedDiscussions());		
-		System.out.println("Total metapages "+ wikiStatistics.getTotalMetapages());
-		System.out.println("Total Sweble exceptions "+ wikiStatistics.getSwebleErrors());
-		System.out.println("Total XML parsing exceptions "+ wikiStatistics.getParsingErrors());
-		System.out.println("Total page structure exceptions "+ wikiStatistics.getOuterErrors());
-	}
 }

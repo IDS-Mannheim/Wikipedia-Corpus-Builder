@@ -26,7 +26,6 @@ public class NekoHTMLParser {
 	 static StringWriter writer = new StringWriter();
      static Transformer transformer;
 
-
      public String generate(String wiki) throws SAXException, IOException, TransformerException{
     	 //DOMParser parser = new DOMParser();
 		 HTMLConfiguration HtmlConfig = new HTMLConfiguration();
@@ -35,11 +34,10 @@ public class NekoHTMLParser {
 		 DOMParser parser = new DOMParser(HtmlConfig);
 		 InputSource is = new InputSource();
 		 
-		 //for (String p : wiki.split("\n\n")){					 
-			 is.setCharacterStream(new StringReader(wiki));	        
-			 parser.parse(is);			 		         
-			 printDocument(parser.getDocument(),s);				
-		 //}       
+		 is.setCharacterStream(new StringReader(wiki));	        
+		 parser.parse(is);			 		         
+		 printDocument(parser.getDocument(),s);				
+	        
 		 String cleanWikitext = StringUtils.replaceEach(s.toString(), 
 				new String[] {"<html>", "<body>", "<head xmlns=\"http://www.w3.org/1999/xhtml\"/>", "</body>","</html>"}, 
 				new String[] {"", "", "", "", "\n"});	

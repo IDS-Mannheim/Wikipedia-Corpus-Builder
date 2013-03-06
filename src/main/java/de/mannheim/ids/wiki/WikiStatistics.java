@@ -107,4 +107,17 @@ public class WikiStatistics {
 	public void addTotalMetapages() {
 		this.totalMetapages ++;
 	}
+	
+	public void printStatistics(){
+		System.out.println("Total non-empty articles "+ this.getTotalArticles());
+		System.out.println("Total non-empty discussions "+ this.getTotalDiscussions());
+		System.out.println("Total empty articles "+ this.getEmptyArticles());
+		System.out.println("Total empty discussions "+ this.getEmptyDiscussions());
+		System.out.println("Total empty parsed articles "+ this.getEmptyParsedArticles());
+		System.out.println("Total empty parsed discussions "+ this.getEmptyParsedDiscussions());		
+		System.out.println("Total metapages "+ this.getTotalMetapages());
+		System.out.println("Total Sweble exceptions "+ this.getSwebleErrors());
+		System.out.println("Total XML parsing exceptions "+ this.getParsingErrors());
+		System.out.println("Total page structure exceptions "+ this.getOuterErrors());
+	}
 }

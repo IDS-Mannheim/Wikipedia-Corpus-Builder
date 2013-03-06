@@ -28,20 +28,15 @@ public class Sweble2Parser {
 		final int wrapCol = 80;
 		
 		// Instantiate Sweble parser compiler
-		WtEngine engine = new WtEngine(config);		
-		
-		// Dummy pagetitle
+		WtEngine engine = new WtEngine(config);
+
 		PageTitle pageTitle = PageTitle.make(config, pagetitle);		
 		PageId pageId = new PageId(pageTitle, -1);
 		
-		//wikitext = FileUtils.readFileToString(new File("xml/test.wikitext"));
-		// Compile wikitext to AST
 		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);		
-		//System.out.println(cp);
 		
 		// Render AST to XML		
 		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage());
-		//String wikiXML = HtmlRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage());
 		
 		return wikiXML;
 	}	

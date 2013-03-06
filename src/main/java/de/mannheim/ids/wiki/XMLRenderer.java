@@ -99,6 +99,9 @@ import de.fau.cs.osr.utils.FmtNotYetImplementedError;
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
 
+/** Modified Class from HTMLRenderer
+ * 
+ */ 
 public final class XMLRenderer
 		extends
 			HtmlRendererBase

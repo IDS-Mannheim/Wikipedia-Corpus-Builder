@@ -115,21 +115,27 @@
     	<artifactId>commons-lang3</artifactId>
     	<version>3.1</version>
     </dependency>
-    <dependency>
+<!--     <dependency>
     	<groupId>net.sourceforge.nekohtml</groupId>
     	<artifactId>nekohtml</artifactId>
     	<version>1.9.17</version>
-    </dependency>
+    </dependency> -->
     <dependency>
     	<groupId>org.sweble.wikitext</groupId>
     	<artifactId>swc-engine</artifactId>
     	<version>2.0.0-alpha-2-SNAPSHOT</version>
     </dependency>
-    <dependency>
+<!--     <dependency>
     	<groupId>saxon</groupId>
     	<artifactId>Saxon-EE</artifactId>
     	<version>9.4</version>
-    </dependency>
+    </dependency> -->
+	<!-- <dependency>
+	  <groupId>de.tudarmstadt.ukp.wikipedia</groupId>
+	  <artifactId>de.tudarmstadt.ukp.wikipedia.api</artifactId>
+	  <version>0.9.2</version>
+	  <classifier>jar-with-dependencies</classifier>
+	</dependency> -->
   </dependencies>
   
 

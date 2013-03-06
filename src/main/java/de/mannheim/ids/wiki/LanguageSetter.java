@@ -14,10 +14,10 @@ public class LanguageSetter {
 	
 	public LanguageSetter(String language) {		
 		this.setLanguage(language);
-		setLanguageProperties(language);
+		initLanguageProperties(language);
 	}
 	
-	private void setLanguageProperties(String language){
+	private void initLanguageProperties(String language){
 		if (language.equals("de")){			
 			metapages.add("Media:");
 			metapages.add("Spezial:");

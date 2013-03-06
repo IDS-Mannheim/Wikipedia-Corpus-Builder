@@ -2,7 +2,11 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 
-
+/** An example Class to convert a wikidump to a set of XML wikipages
+ * 
+ * @author margaretha
+ * @version 1.0 Build Feb 2013
+ */
 public class WikiConverter {
 	/*
 	 * The main method takes arguments where 
@@ -13,16 +17,20 @@ public class WikiConverter {
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();		
 		
-		XMLWikiProcessor processor = new XMLWikiProcessor(args[0]);
-		processor.processSplit(args[1], args[2]);
-			
+		/* 	If the language of the input wikidump is defined in the LanguageSetter 
+		 * 	class, instantiate the language. Otherwise, create an empty instance 
+		 * 	and set its properties.
+		*/ 
+		LanguageSetter languageSetter = new LanguageSetter(args[0]);
+//		LanguageSetter languageSetter = new LanguageSetter("de");
 		
-//		XMLWikiProcessor processor = new XMLWikiProcessor("de");
-//		processor.processSplit("input/dewiki-latest-pages-meta-current.xml", "error.log");
+		XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
+		processor.processSplit(args[1], args[2]);	// convert the input wikidumps into XML wikipages
+		//processor.process(args[1], args[2]);		// convert the input wikidumps into a single XML
+		
+//		processor.processSplit("input/mariavitismus.xml", "error.log");
 //		processor.process("input/test2.xml","error.log");//
 		
-//		System.out.println(processor.normalizeIndex("Łódź"));
-
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;
 		System.out.println("Wikitext to XML execution time "+duration);

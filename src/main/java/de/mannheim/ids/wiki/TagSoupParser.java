@@ -50,8 +50,7 @@ public class TagSoupParser {
 		cleanWikitext = StringUtils.replaceEach(cleanWikitext, 
 				new String[] {"<html><body>", "</body></html>"}, 
 				new String[] {"", "\n"});		
-		//cleanWikitext = StringEscapeUtils.unescapeHtml(cleanWikitext);
-		//System.out.println(cleanWikitext);
+
 		return cleanWikitext;
 		
 	}
