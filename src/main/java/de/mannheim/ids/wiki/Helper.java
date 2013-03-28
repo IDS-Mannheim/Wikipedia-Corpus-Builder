@@ -10,6 +10,11 @@ import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * 
+ * @author margaretha
+ *
+ */
 public class Helper {
 	public void createDirectory(String directory){
 		File dir = new File(directory);

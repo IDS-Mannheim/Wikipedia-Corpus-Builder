@@ -101,6 +101,7 @@ import de.fau.cs.osr.utils.visitor.VisitingException;
 
 /** Modified Class from HTMLRenderer
  * 
+ * @author margaretha
  */ 
 public final class XMLRenderer
 		extends

@@ -1,5 +1,11 @@
 package de.mannheim.ids.wiki;
 
+/** Collect statistical information about wikipages and 
+ *  the errors in the conversion
+ * 
+ * @author margaretha
+ *
+ */
 public class WikiStatistics {	
 	
 	private int swebleErrors;

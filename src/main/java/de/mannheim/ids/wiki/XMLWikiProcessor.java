@@ -15,7 +15,7 @@ import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
-/** This class converts a Wikidump in Wiki mark-ups format into XML.
+/** Converts a Wikidump in Wiki mark-ups format into XML.
  * 
  * @author margaretha
  * @version 1.0 Build Feb 2013
@@ -31,7 +31,6 @@ public class XMLWikiProcessor {
 	private boolean textFlag, isDiscussion, isEmptyText;
 	private int counter=1;
 
-//	private NekoHTMLParser nekoParser = new NekoHTMLParser();
 	private TagSoupParser tagSoupParser = new TagSoupParser();
 	private Sweble2Parser swebleParser = new Sweble2Parser();
 	private DOMParser dp = new DOMParser();
@@ -158,18 +157,12 @@ public class XMLWikiProcessor {
 				if (isDiscussion){
 					if (!wikitext.equals("")){ wikiStatistics.addTotalDiscussions(); }
 					else if (isEmptyText){ wikiStatistics.addEmptyDiscussions(); }
-					else { 
-						wikiStatistics.addEmptyParsedDiscussions();						 
-						//errorWriter.append(pagetitle+"\n"); 
-					}
+					else { wikiStatistics.addEmptyParsedDiscussions(); }
 				}
 				else{ 					
 					if (!wikitext.equals("")){ wikiStatistics.addTotalArticles(); }
 					else if (isEmptyText){ wikiStatistics.addEmptyArticles(); }
-					else {
-						wikiStatistics.addEmptyParsedArticles();						 
-						//errorWriter.append(pagetitle+"\n"); 
-					}
+					else { wikiStatistics.addEmptyParsedArticles(); }
 				}
 				
 				write(writer,strLine);
@@ -356,7 +349,7 @@ public class XMLWikiProcessor {
 				this.textFlag=true;
 			}
 		}
-		else{ // bypass page metadata			
+		else{ // copy page metadata			
 			page += strLine + "\n";
 		}			
 	}

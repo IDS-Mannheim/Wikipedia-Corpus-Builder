@@ -3,6 +3,11 @@ package de.mannheim.ids.wiki;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Set the language properties of a wikidump
+ * 
+ * @author margaretha
+ * @version 1.0 Build Mar 2013
+ */
 public class LanguageSetter {
 
 	private List<String> metapages = new ArrayList<String>();
@@ -11,12 +16,24 @@ public class LanguageSetter {
 	public LanguageSetter() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
+	/** Set the language of the wikidump
+	 * 
+	 *  If the language of the input wikidump is defined in the LanguageSetter 
+	 * 	class, instantiate the language. Otherwise, create an empty instance 
+	 * 	and set its properties.
+	 * 
+	 * @param language
+	 */	
 	public LanguageSetter(String language) {		
 		this.setLanguage(language);
 		initLanguageProperties(language);
 	}
 	
+	/** Define the title indicators for skipping metapages
+	 * 
+	 * @param language
+	 */
 	private void initLanguageProperties(String language){
 		if (language.equals("de")){			
 			metapages.add("Media:");

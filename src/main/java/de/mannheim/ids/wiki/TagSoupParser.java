@@ -15,15 +15,26 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-/* This class generate a clean HTML from the wikitext containing improper HTML tags 
- * (e.g the tags do not opened or closed properly) using TagSoup library. TagSoup parser
- * removes a close tag without an open tag, and generates a missing close tag for an open 
- * without a close tag. However, the part of the text nested by the tags may not be correct.
+/** Repair broken HTML tags in a wikitext
+ * 
+ * @author margaretha
  */
 public class TagSoupParser {
 	
 	private HTMLSchema theSchema = null;	
-		 
+	
+	/** Generate a clean HTML from a given wikitext containing improper HTML tags 
+	 *  (e.g tags that do not opened or closed properly) using TagSoup library. 
+	 *  TagSoup parser removes a close tag without an open tag, and generates 
+	 *  a missing close tag for an open tag	without a close tag. However, the part 
+	 *  of the text nested by the generated tags may not be correct.
+	 * 
+	 * @param wikitext
+	 * @param segment
+	 * @return wikitext
+	 * @throws IOException
+	 * @throws SAXException
+	 */
 	public String generate(String wikitext, boolean segment) throws IOException, SAXException{		
 		theSchema = new HTMLSchema();
 		

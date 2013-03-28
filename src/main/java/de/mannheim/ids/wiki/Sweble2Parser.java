@@ -15,11 +15,25 @@ import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.utils.DefaultConfigEn;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
 
-/* This class generates an Abstract Syntax Tree representation (AST) representation of the wikitext
- * using the Sweble Parser and eventually generates an XML representation using a visitor class.
+/** Convert wikitext to XML
+ *  
+ *  @author margaretha
+ *  
  * */
 public class Sweble2Parser {
 	
+	/** Generate an Abstract Syntax Tree representation (AST) representation 
+	 *  of a given wikitext using the Sweble Parser 2.0.0-alpha-2-SNAPSHOT version,
+	 *  and eventually generates an XML representation using a visitor class.
+	 * 
+	 * @param wikitext
+	 * @param pagetitle
+	 * @return wikitext in XML
+	 * @throws JAXBException
+	 * @throws CompilerException
+	 * @throws LinkTargetException
+	 * @throws IOException
+	 */
 	public String parseText(String wikitext, String pagetitle) 
 			throws JAXBException, CompilerException, LinkTargetException, IOException {
 				

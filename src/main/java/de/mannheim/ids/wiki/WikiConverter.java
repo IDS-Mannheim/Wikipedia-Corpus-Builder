@@ -2,17 +2,26 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 
-/** An example Class to convert a wikidump to a set of XML wikipages
+/** Main class running the jar
+ *  Convert a wikidump to a set of XML wikipages
  * 
  * @author margaretha
- * @version 1.0 Build Feb 2013
+ * @version 1.0 Build Mar 2013
  */
-public class WikiConverter {
-	/*
-	 * The main method takes arguments where 
-	 * 1. the first argument is the language 
-	 * 2. the second argument is the input file 
-	 * 3. the third argument is the title list of the failed parsed pages
+public class WikiConverter {	
+	
+	private static final int LANGUAGE = 0;
+	private static final int WIKIDUMP = 1;
+	private static final int FAILED_PARSING_LIST = 2;
+	private static final int SPLIT_OPTION = 3;
+	
+	/** Main method 
+	 *  
+	 *  @param arg[0] is the language of a wikidump 
+	 *  @param arg[1] is the input file 
+	 *  @param arg[2] is the the title list of the failed parsed pages
+	 *  @param arg[3] is the option to split the XML output
+	 *  
 	 * */
 	public static void main(String[] args) throws IOException{
 		long startTime = System.nanoTime();		
@@ -21,33 +30,22 @@ public class WikiConverter {
 		 * 	class, instantiate the language. Otherwise, create an empty instance 
 		 * 	and set its properties.
 		*/ 
-		LanguageSetter languageSetter = new LanguageSetter(args[0]);
-//		LanguageSetter languageSetter = new LanguageSetter("de");
+		LanguageSetter languageSetter = new LanguageSetter(args[LANGUAGE]);
 		
 		XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
-		processor.processSplit(args[1], args[2]);	// convert the input wikidumps into XML wikipages
-		//processor.process(args[1], args[2]);		// convert the input wikidumps into a single XML
 		
-//		processor.processSplit("input/mariavitismus.xml", "error.log");
-//		processor.process("input/test2.xml","error.log");//
-		
+		if (args[SPLIT_OPTION].equals("split")){
+			// convert the input wikidumps into XML wikipages
+			processor.processSplit(args[WIKIDUMP], args[FAILED_PARSING_LIST]);	
+		}
+		else{
+			// convert the input wikidumps into a single XML
+			processor.process(args[WIKIDUMP], args[FAILED_PARSING_LIST]);		
+		}				
+				
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;
-		System.out.println("Wikitext to XML execution time "+duration);
-		
-//		startTime = System.nanoTime();		
-		
-//		System.out.println("\nTransforming XML to XCES");
-//		XCESWikiProcessor xcesProcessor = new XCESWikiProcessor();
-//		xcesProcessor.transformToXCES(articlePath, "Wikipedia-Konvertierung/xmlwiki2xces.xsl", "xces/"+args[2]+".xces", "saxon-articles-error.log");
-//		xcesProcessor.transformToXCES(discussionPath, "Wikipedia-Konvertierung/xmlwiki2xces.xsl", "xces/"+args[3]+".xces", "saxon-discussions-error.log");
+		System.out.println("Wikitext to XML execution time "+duration);		
 
-//		xcesProcessor.transformToXCES("xml/test-articles.xml", "Wikipedia-Konvertierung/xmlwiki2xces.xsl", "xces/test-articles.xces", "saxon-error.log");
-//		xcesProcessor.transformToXCES("xml/test-discussions.xml", "Wikipedia-Konvertierung/xmlwiki2xces.xsl", "xces/test-discussions.xces", "saxon-error.log");
-				
-//		endTime = System.nanoTime();
-//		duration = endTime - startTime;
-//		System.out.println("Wiki XML to XCES execution time "+duration);
-					 
 	}
 }
