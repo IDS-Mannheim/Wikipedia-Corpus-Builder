@@ -30,15 +30,15 @@ public class WikiConverter {
 		 * 	class, instantiate the language. Otherwise, create an empty instance 
 		 * 	and set its properties.
 		*/ 
-		LanguageSetter languageSetter = new LanguageSetter(args[LANGUAGE]);
-		
-		XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
+		LanguageSetter languageSetter = new LanguageSetter(args[LANGUAGE]);			
 		
 		if (args[SPLIT_OPTION].equals("split")){
+			XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
 			// convert the input wikidumps into XML wikipages
 			processor.processSplit(args[WIKIDUMP], args[FAILED_PARSING_LIST]);	
 		}
 		else{
+			XMLWikiProcessorSingle processor = new XMLWikiProcessorSingle(languageSetter);
 			// convert the input wikidumps into a single XML
 			processor.process(args[WIKIDUMP], args[FAILED_PARSING_LIST]);		
 		}				

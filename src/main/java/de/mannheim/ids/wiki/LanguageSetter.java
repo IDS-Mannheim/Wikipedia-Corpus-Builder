@@ -11,7 +11,7 @@ import java.util.List;
 public class LanguageSetter {
 
 	private List<String> metapages = new ArrayList<String>();
-	private String talk, language;
+	private String talk, language, user, contribution;
 	
 	public LanguageSetter() {
 		// TODO Auto-generated constructor stub
@@ -56,6 +56,9 @@ public class LanguageSetter {
 			metapages.add("Portal Diskussion:");
 			
 			setTalk("Diskussion");
+			setUser("Benutzer");
+			setContribution("Spezial:Beiträge");
+			
 		}
 		else if (language.equals("fr")){    	    		
 			metapages.add("Média:");
@@ -82,6 +85,7 @@ public class LanguageSetter {
 			metapages.add("Discussion Référence:");
 			
 			setTalk("Discussion");
+			setUser("Utilisateur");
 		}
 	}
 
@@ -107,5 +111,21 @@ public class LanguageSetter {
 	
 	public List<String> getMetapages() {
 		return metapages;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getContribution() {
+		return contribution;
+	}
+
+	public void setContribution(String contribution) {
+		this.contribution = contribution;
 	}
 }

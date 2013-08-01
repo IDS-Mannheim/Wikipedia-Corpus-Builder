@@ -25,27 +25,29 @@ public class XMLWikiProcessor {
 	private String xmlOutputDir = "./xml/";
 	private String articleDir = this.xmlOutputDir+"articles/";
 	private String discussionDir = this.xmlOutputDir+"discussions/";
-	private String wikitext="", page, pagetitle;
+	protected String wikitext="", page, pagetitle;
 	private List<String> indexList;
 	
-	private boolean textFlag, isDiscussion, isEmptyText;
+	protected boolean textFlag, isDiscussion, isEmptyText;
 	private int counter=1;
 
 	private TagSoupParser tagSoupParser = new TagSoupParser();
 	private Sweble2Parser swebleParser = new Sweble2Parser();
 	private DOMParser dp = new DOMParser();
 	
-	private WikiStatistics wikiStatistics = new WikiStatistics();
-	private Helper helper = new Helper();
-	private LanguageSetter languageSetter;
+	protected WikiStatistics wikiStatistics = new WikiStatistics();
+	protected Helper helper = new Helper();
+	protected LanguageSetter languageSetter;
 		
-	private Matcher matcher;
+	protected Matcher matcher;
 	private Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
+	private Pattern stylePattern = Pattern.compile("(\\[\\[.+>\\]\\])");
 	private Pattern textPattern = Pattern.compile("<text.*\">");
-	private Pattern titlePattern = Pattern.compile("<title>(.+)</title>");
+	protected Pattern titlePattern = Pattern.compile("<title>(.+)</title>");
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
-	private Pattern hackpattern = Pattern.compile("<([^>]+)/>");
-
+	
+	private WikiDiscussionHandler wikiDiscussionHandler;
+	
 	/** Constructor
 	 * 
 	 * @param language	is a LanguageSetter instance defining language properties 
@@ -55,6 +57,8 @@ public class XMLWikiProcessor {
 	public XMLWikiProcessor(LanguageSetter language) {		
 		this.languageSetter = language;	
 		helper.createDirectory(xmlOutputDir);		
+		
+		 wikiDiscussionHandler = new WikiDiscussionHandler(this);
 	}
 	
 	/** This method converts each Wikipage in a Wikidump into an XML Wikipage. Article 
@@ -89,46 +93,7 @@ public class XMLWikiProcessor {
 		
 		wikiStatistics.printStatistics();		
 	}
-	
-	/** This method converts a Wikidump into a single XML and stored it in xml/ directory.
-	 * 
-	 * @param inputFile is the location of the wikidump
-	 * @param errorOutput is the filename for listing the titles of the failed parsed 
-	 * 		wikipages.
-	 * @throws IOException
-	 */
-	public void process(String inputFile, String errorOutput) throws IOException{
-				
-		String basename = StringUtils.removeEnd(inputFile,".xml").replaceFirst(".*/", "");
-				
-		OutputStreamWriter articleWriter = helper.createWriter(this.xmlOutputDir+ basename+"-articles.xml");
-		OutputStreamWriter discussionWriter = helper.createWriter(this.xmlOutputDir + basename+"-discussions.xml");
-		OutputStreamWriter errorWriter = helper.createWriter(errorOutput);
 		
-		articleWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		articleWriter.append("<articles>\n");
-		
-		discussionWriter.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		discussionWriter.append("<discussions>\n");
-				
-		FileInputStream fs = new FileInputStream(inputFile);
-		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
-		
-		read(br, articleWriter, discussionWriter, errorWriter);
-	
-		br.close();
-		fs.close();
-		
-		articleWriter.append("</articles>");
-		discussionWriter.append("</discussions>");	
-
-		articleWriter.close();
-		discussionWriter.close();		
-		errorWriter.close();		
-
-		wikiStatistics.printStatistics();
-	}
-	
 	public void readAndSplit(BufferedReader br, OutputStreamWriter errorWriter) 
 			throws IOException{
 		
@@ -214,80 +179,15 @@ public class XMLWikiProcessor {
 					
 					idFlag=false;
 				}
+				else if(isDiscussion){					
+					wikiDiscussionHandler.handleDiscussion(strLine, trimmedStrLine, errorWriter); 
+				}
 				else{ handlePageContent(strLine, trimmedStrLine, errorWriter); }				
 			}				
 		}
 	}	
-
-	private void read(BufferedReader br, OutputStreamWriter articleWriter, 
-			OutputStreamWriter discussionWriter, OutputStreamWriter errorWriter) 
-			throws IOException{		
-		
-		boolean readFlag = false, isMetapage=false;	
-		String strLine, trimmedStrLine;
-		
-		while ((strLine = br.readLine()) != null)   {					
-			trimmedStrLine = strLine.trim();
-			
-			if (trimmedStrLine.startsWith("<page>")){ // start reading				
-				page=strLine+"\n";				
-				readFlag = true;
-				isDiscussion=false;	 isEmptyText=false; isMetapage=false;
-			}
-			else if (trimmedStrLine.endsWith("</page>")  && !isMetapage){
-				page += strLine;
 	
-				try { 
-					page = tagSoupParser.generate(page, false);					
-//					page = nekoParser.generate(page);	
-				} 
-				catch (Exception e) { e.printStackTrace();}
-				
-				if (isDiscussion){ 
-					write(discussionWriter,strLine);
-					if (!wikitext.equals("")){ wikiStatistics.addTotalDiscussions(); }
-					else if (isEmptyText){ wikiStatistics.addEmptyDiscussions(); }
-				}
-				else{ 
-					write(articleWriter,strLine);
-					if (!wikitext.equals("")){ wikiStatistics.addTotalArticles(); }
-					else if (isEmptyText){ wikiStatistics.addEmptyArticles(); }
-				}
-				
-				page=""; wikitext="";
-			}
-			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){					
-																
-				if (trimmedStrLine.startsWith("<title") ){
-					matcher = titlePattern.matcher(trimmedStrLine);
-					if (matcher.find()) { pagetitle = matcher.group(1); }
-					
-					if (strLine.contains(":")){
-						for (String s: this.languageSetter.getMetapages()){							
-							if (strLine.contains(s)){
-								//System.out.println("metapage "+ strLine);
-								wikiStatistics.addTotalMetapages();								
-								readFlag = false; //skip reading metapages								
-								isMetapage = true;
-								break;
-							}
-						}
-						
-						if (!isMetapage){							
-							if(strLine.contains(this.languageSetter.getTalk())){
-								isDiscussion = true;								
-							}
-							page += setIndent(strLine)+ trimmedStrLine+"\n";							
-						}
-					}
-					else{ page += setIndent(strLine)+ trimmedStrLine+ "\n"; }
-				}
-				else{ handlePageContent(strLine, trimmedStrLine, errorWriter); }				
-			}				
-		}
-	}
-	
-	private void handlePageContent(String strLine, String trimmedStrLine, 
+	public void handlePageContent(String strLine, String trimmedStrLine, 
 			OutputStreamWriter errorWriter) throws IOException {
 		
 		if (trimmedStrLine.endsWith("</text>")){ // finish collecting text			
@@ -302,19 +202,31 @@ public class XMLWikiProcessor {
 			
 			if (wikitext.equals("")){ this.isEmptyText=true; return; } // empty text			
 						
-			wikitext = StringUtils.replaceEach(wikitext, 
-					new String[] { ":{|" , "/>"}, 
-					new String[] { "{|" , " />"}); //start table notation	
+			/*wikitext = StringUtils.replaceEach(wikitext, 
+					new String[] { ":{|" , "<br/>", "<br />"}, 
+					new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table notation	
+		
+			matcher = pattern.matcher(wikitext); // space for non-tag			
+			wikitext = matcher.replaceAll("&lt; $1");			
+			matcher.reset();
 			
-			matcher = hackpattern.matcher(wikitext); // remove <x/>
-			wikitext = matcher.replaceAll("</$1>");			
-			matcher = pattern.matcher(wikitext); // space for non-tag
-			wikitext = matcher.replaceAll("< $1");					
+			matcher = stylePattern.matcher(wikitext); // escape for style containing tag
+			StringBuffer sb = new StringBuffer();
+	        while(matcher.find()){
+	        	String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
+	        	replace = matcher.quoteReplacement(replace);
+	        	matcher.appendReplacement(sb,replace);
+	        }
+	        matcher.appendTail(sb);		        
+		    wikitext=sb.toString();    */
+			
+			wikitext = cleanPattern(wikitext);
 			
 			try{
 				// italic and bold are not repaired because they have wiki-mark-ups
-				wikitext = tagSoupParser.generate(wikitext,true);
-				wikitext = swebleParser.parseText(wikitext.trim(), pagetitle);				
+				wikitext = tagSoupParser.generate(wikitext,true);				
+				wikitext = swebleParser.parseText(wikitext.trim(), pagetitle);
+				//System.out.println(wikitext);
 			}catch (Exception e) {
 				errorWriter.append(pagetitle+"\n");
 				wikiStatistics.addSwebleErrors();
@@ -354,12 +266,12 @@ public class XMLWikiProcessor {
 		}			
 	}
 	
-	private void write(OutputStreamWriter writer, String strLine) throws IOException{
+	public void write(OutputStreamWriter writer, String strLine) throws IOException{
 		if (!isEmptyText) {	
-			System.out.println(counter++ +" "+ pagetitle);
-			
+			System.out.println(counter++ +" "+ pagetitle);						
 //				String [] arr = page.split("<text/>");				
 			String [] arr = page.split("<text></text>");
+			//System.out.println(page);
 			if (arr.length >1){				
 				writer.append(setIndent(strLine));
 				writer.append(arr[0]);	
@@ -385,12 +297,33 @@ public class XMLWikiProcessor {
 		}
 	} 
 	
-	private String cleanTextStart(String trimmedStrLine) throws IOException{
+	public String cleanPattern(String wikitext){		 
+		wikitext = StringUtils.replaceEach(wikitext, 
+				new String[] { ":{|" , "<br/>", "<br />"}, 
+				new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table notation	
+	
+		Matcher matcher = pattern.matcher(wikitext); // space for non-tag			
+		wikitext = matcher.replaceAll("&lt; $1");			
+		matcher.reset();
+		
+		matcher = stylePattern.matcher(wikitext); // escape for style containing tag
+		StringBuffer sb = new StringBuffer();
+        while(matcher.find()){
+        	String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
+        	replace = matcher.quoteReplacement(replace);
+        	matcher.appendReplacement(sb,replace);
+        }
+        matcher.appendTail(sb);		        
+	    wikitext=sb.toString();    
+	    return wikitext;
+	}
+	
+	public String cleanTextStart(String trimmedStrLine) throws IOException{
 		matcher = textPattern.matcher(trimmedStrLine);		
 		return matcher.replaceFirst("") + "\n";		
 	}
 	
-	private String setIndent(String strLine){		
+	public String setIndent(String strLine){		
 		return StringUtils.repeat(" ", strLine.indexOf("<"));				
 	}		
 	

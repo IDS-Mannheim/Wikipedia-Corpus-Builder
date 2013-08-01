@@ -15,7 +15,7 @@ public class SplitExample {
 		// Initialized the processor to convert to XML
 		XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
 		// convert the input wikidump into XML wikipages
-		processor.processSplit("input/mariavitismus.xml", "error.log");
+		processor.processSplit("input/ag.xml", "error.log");
 		
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;

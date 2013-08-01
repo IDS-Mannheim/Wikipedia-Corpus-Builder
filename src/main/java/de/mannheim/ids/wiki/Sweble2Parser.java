@@ -48,7 +48,7 @@ public class Sweble2Parser {
 		PageId pageId = new PageId(pageTitle, -1);
 		
 		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);		
-		
+		//System.out.println(cp);
 		// Render AST to XML		
 		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage());
 		

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.mannheim.ids.wiki.LanguageSetter;
 import de.mannheim.ids.wiki.XMLWikiProcessor;
+import de.mannheim.ids.wiki.XMLWikiProcessorSingle;
 
 public class OneXMLExample {
 	
@@ -13,9 +14,9 @@ public class OneXMLExample {
 		// Set the language properties of the wikidump
 		LanguageSetter languageSetter = new LanguageSetter("de");
 		// Initialized the processor to convert to XML
-		XMLWikiProcessor processor = new XMLWikiProcessor(languageSetter);
+		XMLWikiProcessorSingle processor = new XMLWikiProcessorSingle(languageSetter);
 		// convert the input wikidump into one XML page
-		processor.process("input/mariavitismus.xml", "error.log");		
+		processor.process("input/test.xml", "error.log");		
 		
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;

@@ -786,7 +786,7 @@ public final class XMLRenderer
 	}
 	
 	public void visit(WtSemiPre n)
-	{
+	{		
 		p.indent();
 		++inPre;
 		pt("<pre>%!</pre>", n);
@@ -899,7 +899,7 @@ public final class XMLRenderer
 		// ref, nowiki, math
 		p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\"/>");
 		//System.out.println("Tag extension "+n.getName());
-		
+		//System.out.println("Body "+n.getBody().getContent());
 //		p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\">");
 //		p.print(esc(n.getBody().getContent()));
 //		p.print("</span>");		
@@ -1069,7 +1069,7 @@ public final class XMLRenderer
 				pf("&lt;/%s&gt;", n.getName());
 			}
 			else //if (inlineElements.contains(n.getName().toLowerCase())){
-			{
+			{				
 				p.indentAtBol();
 				pt("<%s%!>", n.getName(), cleanAttribs(n.getXmlAttributes()));
 				p.incIndent();
