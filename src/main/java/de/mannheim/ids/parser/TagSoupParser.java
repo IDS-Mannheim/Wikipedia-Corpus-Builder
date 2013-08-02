@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

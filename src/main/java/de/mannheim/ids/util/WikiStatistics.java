@@ -1,4 +1,9 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import de.mannheim.ids.wiki.WikiPage;
 
 /** Collect statistical information about wikipages and 
  *  the errors in the conversion
@@ -10,7 +15,7 @@ public class WikiStatistics {
 	
 	private int swebleErrors;
 	private int parsingErrors;
-	private int outerErrors;
+	private int pageStructureErrors;
 
 	private int emptyArticles;
 	private int emptyDiscussions;
@@ -20,18 +25,21 @@ public class WikiStatistics {
 	private int totalDiscussions;
 	private int totalArticles;
 	private int totalMetapages;
+	
+	public List<String> errorPages;
 
 	public WikiStatistics() {
 		this.swebleErrors=0;
 		this.parsingErrors=0;
-		this.outerErrors=0;		
+		this.pageStructureErrors=0;		
 		this.emptyArticles=0; 
 		this.emptyDiscussions=0;
 		this.emptyParsedDiscussions=0; 
 		this.emptyParsedArticles=0;		
 		this.totalMetapages=0;
 		this.totalDiscussions=0;
-		this.totalArticles=0;		
+		this.totalArticles=0;	
+		this.errorPages = new ArrayList<String>();
 	} 
 	
 	public int getSwebleErrors() {
@@ -50,12 +58,12 @@ public class WikiStatistics {
 		this.parsingErrors ++;
 	}
 
-	public int getOuterErrors() {
-		return outerErrors;
+	public int getPageStructureErrors() {
+		return pageStructureErrors;
 	}
 
-	public void addOuterErrors() {
-		this.outerErrors ++;
+	public void addPageStructureErrors() {
+		this.pageStructureErrors ++;
 	}
 
 	public int getTotalDiscussions() {
@@ -114,6 +122,19 @@ public class WikiStatistics {
 		this.totalMetapages ++;
 	}
 	
+	public void countStatistics(boolean isDiscussion, WikiPage wikiPage) {
+		if (isDiscussion){
+			if (!wikiPage.wikitext.isEmpty()){ addTotalDiscussions(); }
+			else if (wikiPage.isEmpty()){ addEmptyDiscussions(); }
+			else { addEmptyParsedDiscussions(); }
+		}
+		else{
+			if (!wikiPage.wikitext.isEmpty()){ addTotalArticles(); }
+			else if (wikiPage.isEmpty()){  addEmptyArticles(); }
+			else { addEmptyParsedArticles(); }
+		}
+	}
+	
 	public void printStatistics(){
 		System.out.println("Total non-empty articles "+ this.getTotalArticles());
 		System.out.println("Total non-empty discussions "+ this.getTotalDiscussions());
@@ -124,6 +145,14 @@ public class WikiStatistics {
 		System.out.println("Total metapages "+ this.getTotalMetapages());
 		System.out.println("Total Sweble exceptions "+ this.getSwebleErrors());
 		System.out.println("Total XML parsing exceptions "+ this.getParsingErrors());
-		System.out.println("Total page structure exceptions "+ this.getOuterErrors());
+		System.out.println("Total page structure exceptions "+ this.getPageStructureErrors());
+	}
+
+	public List<String> getErrorPages() {
+		return errorPages;
+	}
+
+	public void setErrorPages(List<String> errorPages) {
+		this.errorPages = errorPages;
 	}
 }
