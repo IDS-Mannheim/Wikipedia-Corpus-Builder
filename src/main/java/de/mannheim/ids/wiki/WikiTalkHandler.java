@@ -39,7 +39,7 @@ public class WikiTalkHandler {
 		tagSoupParser = new TagSoupParser();
 		swebleParser = new Sweble2Parser();
 		this.language = language;
-		this.wikiStatistics = wikiStatistics;
+		this.wikiStatistics = wikiStatistics;		
 	} 
 	
 	protected void handleDiscussion(WikiPage wikiPage, String strLine, String trimmedStrLine) 
@@ -177,8 +177,7 @@ public class WikiTalkHandler {
 		try {
 			posting = tagSoupParser.generate(posting,true);
 			posting = swebleParser.parseText(posting, wikiPage.getPageTitle());
-		} catch (JAXBException | CompilerException | LinkTargetException | IOException | SAXException e) {				
-			e.printStackTrace();			
+		} catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(wikiPage.getPageTitle());
 		}		
@@ -186,7 +185,13 @@ public class WikiTalkHandler {
 	}
 	
 	private void writePosting(String speaker, String timestamp, String posting){
-				
+		
+		if (posting.isEmpty()){
+			System.out.println("empty posting");
+			return;
+		}
+		else wikiStatistics.addTotalPostings();
+		
 		int level = identifyLevel(posting.trim());
 		if (level > 0){ 
 			posting = posting.substring(level,posting.length()); 

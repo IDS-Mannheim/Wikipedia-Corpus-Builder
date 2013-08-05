@@ -27,10 +27,11 @@ public class WikiPageReader {
 	
 	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics wikiStatistics) {		
 		this.languageProperties = languageProperties;
+		this.wikiStatistics = wikiStatistics;
+		
 		this.wikiPageHandler = new WikiPageHandler(languageProperties.getLanguage(),wikiStatistics);
 		this.wikiTalkHandler = new WikiTalkHandler(languageProperties.getLanguage(), 
 				languageProperties.getUser(), languageProperties.getContribution(),wikiStatistics);
-		this.wikiStatistics = wikiStatistics;
 	}
 	
 	public void read(String inputFile, WikiXMLWriter wikiXMLWriter) throws IOException {

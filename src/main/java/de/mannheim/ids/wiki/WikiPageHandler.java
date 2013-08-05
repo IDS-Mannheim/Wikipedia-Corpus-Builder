@@ -33,6 +33,7 @@ public class WikiPageHandler {
 		dp = new DOMParser();
 		
 		this.language=language;
+		this.wikiStatistics=wikiStatistics;
 	}
 	
 	public void handlePageContent(WikiPage wikiPage, String strLine, String trimmedStrLine) 
@@ -87,7 +88,7 @@ public class WikiPageHandler {
 			// italic and bold are not repaired because they have wiki-mark-ups
 			wikitext = tagSoupParser.generate(wikitext,true);				
 			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle);
-		}catch (Exception e) {			
+		}catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(pagetitle);
 			wikitext="";

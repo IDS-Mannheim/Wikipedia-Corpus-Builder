@@ -25,6 +25,7 @@ public class WikiStatistics {
 	private int totalDiscussions;
 	private int totalArticles;
 	private int totalMetapages;
+	private int totalPostings;
 	
 	public List<String> errorPages;
 
@@ -39,6 +40,7 @@ public class WikiStatistics {
 		this.totalMetapages=0;
 		this.totalDiscussions=0;
 		this.totalArticles=0;	
+		this.totalPostings=0;
 		this.errorPages = new ArrayList<String>();
 	} 
 	
@@ -73,6 +75,14 @@ public class WikiStatistics {
 	public void addTotalDiscussions() {
 		this.totalDiscussions ++;
 	}	
+	
+	public int getTotalPostings() {
+		return totalPostings;
+	}
+
+	public void addTotalPostings() {
+		this.totalPostings++;
+	}
 
 	public int getTotalArticles() {
 		return totalArticles;
@@ -138,6 +148,7 @@ public class WikiStatistics {
 	public void printStatistics(){
 		System.out.println("Total non-empty articles "+ this.getTotalArticles());
 		System.out.println("Total non-empty discussions "+ this.getTotalDiscussions());
+		System.out.println("Total postings "+ this.getTotalPostings());
 		System.out.println("Total empty articles "+ this.getEmptyArticles());
 		System.out.println("Total empty discussions "+ this.getEmptyDiscussions());
 		System.out.println("Total empty parsed articles "+ this.getEmptyParsedArticles());
@@ -154,5 +165,5 @@ public class WikiStatistics {
 
 	public void setErrorPages(List<String> errorPages) {
 		this.errorPages = errorPages;
-	}
+	}	
 }
