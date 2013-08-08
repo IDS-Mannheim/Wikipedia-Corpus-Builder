@@ -985,7 +985,7 @@ public final class XMLRenderer
 	{
 		p.indentAtBol();
 		
-		String url = makeUrl(n);
+		String url = makeUrl(n);		
 		pf("<a href=\"%s\">%s</a>", url, url);
 	}
 	
@@ -1509,10 +1509,12 @@ public final class XMLRenderer
 			HtmlRendererCallback callback,
 			WikiConfig wikiConfig,
 			PageTitle pageTitle,
-			T node)
+			T node,
+			String uri)
 	{
+		LOCAL_URL = uri;
 		return print(callback, wikiConfig, new StringWriter(), pageTitle, node).toString();
-	}
+	}	
 	
 	public static <T extends WtNode> Writer print(
 			HtmlRendererCallback callback,
@@ -1527,7 +1529,7 @@ public final class XMLRenderer
 	
 	// =========================================================================
 	
-	private static final String LOCAL_URL = "/mediawiki/index.php/";
+	private static String LOCAL_URL;
 	
 	private static final Logger logger = Logger.getLogger(XMLRenderer.class);
 	

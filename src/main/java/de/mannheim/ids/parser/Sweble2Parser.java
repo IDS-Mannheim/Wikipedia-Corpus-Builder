@@ -9,7 +9,6 @@ import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.EngCompiledPage;
-import org.sweble.wikitext.engine.output.HtmlRenderer;
 import org.sweble.wikitext.engine.output.HtmlRendererCallback;
 import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.utils.DefaultConfigEn;
@@ -34,7 +33,7 @@ public class Sweble2Parser {
 	 * @throws LinkTargetException
 	 * @throws IOException
 	 */
-	public String parseText(String wikitext, String pagetitle) 
+	public String parseText(String wikitext, String pagetitle, String language) 
 			throws JAXBException, CompilerException, LinkTargetException, IOException {
 				
 		WikiConfig config = DefaultConfigEn.generate();
@@ -50,7 +49,8 @@ public class Sweble2Parser {
 		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);		
 		//System.out.println(cp);
 		// Render AST to XML		
-		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage());
+		String uri = language+".wikipedia.org/wiki/";
+		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage(),uri);
 		
 		return wikiXML;
 	}	

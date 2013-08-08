@@ -37,8 +37,8 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 		writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
 		if (!wikiPage.isEmpty()) {			
-			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());						
-//				String [] arr = page.split("<text/>");				
+			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());					
+				
 			String [] arr = wikiPage.pageStructure.split("<text></text>");
 			//System.out.println(wikiPage.pageStructure);
 			if (arr.length >1){				

@@ -26,7 +26,7 @@ public class WikiPageHandler {
 	private boolean textFlag;
 	private String language;
 	private WikiStatistics wikiStatistics;
-	
+//	long startTime=0;
 	public WikiPageHandler(String language, WikiStatistics wikiStatistics) {
 		tagSoupParser = new TagSoupParser();
 		swebleParser = new Sweble2Parser();
@@ -57,12 +57,16 @@ public class WikiPageHandler {
 			wikiPage.wikitext= parseToXML(tempText, wikiPage.getPageTitle());
 			wikiPage.pageStructure += "      <text/>\n";
 			textFlag=false;
+//			long endTime = System.nanoTime();
+//			long duration = endTime - startTime;
+//			System.out.println("reading "+duration);
 		}
 		
 		// Continue collecting text
 		else if (textFlag){ 
 			strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags			
-			wikiPage.wikitext += strLine+"\n";			
+			wikiPage.wikitext += strLine+"\n";
+//			startTime = System.nanoTime();
 		}		
 		
 		else if(trimmedStrLine.startsWith("<text")) {				
@@ -86,8 +90,12 @@ public class WikiPageHandler {
 	private String parseToXML(String wikitext, String pagetitle){
 		try{
 			// italic and bold are not repaired because they have wiki-mark-ups
-			wikitext = tagSoupParser.generate(wikitext,true);				
-			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle);
+			wikitext = tagSoupParser.generate(wikitext,true);		
+//			long startTime = System.nanoTime();
+			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle,language);
+//			long endTime = System.nanoTime();
+//			long duration = endTime - startTime;			
+//			System.out.println("parsing "+duration);
 		}catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(pagetitle);

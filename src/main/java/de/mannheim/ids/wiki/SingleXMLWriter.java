@@ -2,6 +2,7 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 import de.mannheim.ids.util.Utilities;
 import de.mannheim.ids.util.WikiStatistics;
@@ -13,17 +14,16 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	private WikiStatistics wikiStatistics;
 	private OutputStreamWriter articleWriter, discussionWriter;
 	
-	public SingleXMLWriter(String xmlOutputDir, String language, WikiStatistics wikiStatistics) {
+	public SingleXMLWriter(String xmlOutputDir, String language, WikiStatistics 
+			wikiStatistics, List<String> namespaces) throws IOException {
 		this.language = language;
 		this.wikiStatistics = wikiStatistics;
 		this.counter=1;
 		
-		try {
+		if (namespaces.contains("0")) 
 			articleWriter = Utilities.createWriter(xmlOutputDir+"/wiki-articles.xml");		
-			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (namespaces.contains("1")) 
+			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml");		
 	}	
 	
 	@Override
@@ -41,8 +41,8 @@ public class SingleXMLWriter implements WikiXMLWriter {
 		writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
 		if (!wikiPage.isEmpty()) {			
-			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());						
-//				String [] arr = page.split("<text/>");				
+			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());					
+				
 			String [] arr = wikiPage.pageStructure.split("<text></text>");
 			//System.out.println(wikiPage.pageStructure);
 			if (arr.length >1){				
@@ -72,7 +72,7 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	
 	@Override
 	public void close() throws IOException{		
-		articleWriter.close();
-		discussionWriter.close();		
+		if (articleWriter!=null)  articleWriter.close();
+		if (discussionWriter!=null) discussionWriter.close();		
 	}
 }

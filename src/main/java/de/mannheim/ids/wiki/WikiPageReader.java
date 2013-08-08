@@ -25,7 +25,7 @@ public class WikiPageReader {
 	private Pattern nsPattern = Pattern.compile("<ns>(.+)</ns>");
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
 	
-	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics wikiStatistics) {		
+	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics wikiStatistics) throws IOException {		
 		this.languageProperties = languageProperties;
 		this.wikiStatistics = wikiStatistics;
 		
@@ -42,22 +42,22 @@ public class WikiPageReader {
 		Matcher matcher;
 		String strLine, trimmedStrLine;
 		boolean readFlag = false, isDiscussion=false, idFlag=true;
-				
+		
 		while ((strLine = br.readLine()) != null)   {					
 			trimmedStrLine = strLine.trim();
-			
+		
 			// Start reading a page
 			if (trimmedStrLine.startsWith("<page>")){
 				wikiPage = new WikiPage();
 				wikiPage.pageStructure = strLine+"\n";
-				
+
 				readFlag = true;
 				idFlag=true;
 				isDiscussion=false;				
 			}
 			// End reading a page
 			else if (readFlag && trimmedStrLine.endsWith("</page>")){
-				wikiPage.pageStructure += strLine + "\n";
+				wikiPage.pageStructure += strLine;
 				wikiPageHandler.validateXML(wikiPage);
 				wikiStatistics.countStatistics(isDiscussion, wikiPage);
 				wikiXMLWriter.write(wikiPage, isDiscussion, setIndent(strLine));				
@@ -96,9 +96,10 @@ public class WikiPageReader {
 						wikiPage.setPageId(matcher.group(1));					
 						wikiPage.setPageIndex(isDiscussion,languageProperties.getTalk());
 						wikiPage.pageStructure += strLine + "\n";
-						idFlag=false;						
-					}				
-				}
+						idFlag=false;
+					}
+				}				
+				
 				// Handle Discussion
 				else if (isDiscussion){
 					wikiTalkHandler.handleDiscussion(wikiPage,strLine, trimmedStrLine);
@@ -108,7 +109,9 @@ public class WikiPageReader {
 					wikiPageHandler.handlePageContent(wikiPage, strLine, trimmedStrLine);
 				}
 			}
-		}	
+		}
+		wikiTalkHandler.user.closeWriter();
+		wikiTalkHandler.time.closeWriter();		
 	}
 	
 	public String setIndent(String strLine){		

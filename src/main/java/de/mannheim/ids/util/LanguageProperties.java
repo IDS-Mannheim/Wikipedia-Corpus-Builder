@@ -26,10 +26,10 @@ public class LanguageProperties {
 	 * 
 	 * @param language
 	 */	
-	public LanguageProperties(String language, String[] namespaces) {		
+	public LanguageProperties(String language, List<String> namespaces) {		
 		this.setLanguage(language.toLowerCase());
 		setLanguageProperties(language);		
-		setNamespaces(Arrays.asList(namespaces));	
+		setNamespaces(namespaces);	
 	}
 	
 	/** Define the title indicators for skipping metapages
