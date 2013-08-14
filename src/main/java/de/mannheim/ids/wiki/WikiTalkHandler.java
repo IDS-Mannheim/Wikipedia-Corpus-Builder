@@ -30,8 +30,6 @@ public class WikiTalkHandler {
 	public WikiTalkUser user;
 	public WikiTalkTime time;
 	private String userLabel, contributionLabel;
-//	long st=0;
-//	long bla=0;
 	
 	public WikiTalkHandler(String language, String user, String contribution , WikiStatistics wikiStatistics) throws IOException {		
 		signaturePattern = Pattern.compile("([^-]*-{0,2})\\s*\\[\\[:?"+user+":([^\\|]+)\\|([^\\]]+)\\]\\](.*)");
@@ -65,34 +63,12 @@ public class WikiTalkHandler {
 				posting="";
 			}
 			wikiPage.pageStructure += "      <text/>\n";
-			textFlag=false;			
-			
-//			try {				
-////				long startTime = System.nanoTime();
-//				wikiPage.wikitext = swebleParser.parseText(wikiPage.wikitext, wikiPage.getPageTitle(),language);
-////				long endTime = System.nanoTime();
-////				long duration = endTime - startTime;			
-////				System.out.println("parsing "+duration);	
-//			} catch (Exception e) {			
-//				wikiStatistics.addSwebleErrors();
-//				wikiStatistics.errorPages.add(wikiPage.getPageTitle());
-//			}
-			
-//			System.out.println("segment  "+bla);			
-//			long endTime = System.nanoTime();
-//			long duration = endTime - st;
-//			System.out.println("reading text "+duration);	
+			textFlag=false;
 		}
 		else if (textFlag){ // continue collecting text
-//			long startTime = System.nanoTime();
 			segmentPosting(strLine);
-//			long endTime = System.nanoTime();
-//			long duration = endTime - startTime;
-//			bla+=duration;
 		}
 		else if(trimmedStrLine.startsWith("<text")) {
-//			bla=0; st = System.nanoTime();
-									
 			if (trimmedStrLine.endsWith("/>")){ // empty text				
 				wikiPage.pageStructure += "        <text lang=\""+language+"\"/>\n";
 				wikiPage.wikitext="";
@@ -101,11 +77,7 @@ public class WikiTalkHandler {
 			else { // start collecting text				
 				Matcher matcher = textPattern.matcher(trimmedStrLine);
 				if (matcher.find()){
-//					long startTime = System.nanoTime();
 					segmentPosting(matcher.group(1));
-//					long endTime = System.nanoTime();
-//					long duration = endTime - startTime;
-//					bla+=duration;
 				}
 				matcher.reset();
 				this.textFlag=true;				
@@ -299,13 +271,12 @@ public class WikiTalkHandler {
 		} 
 		
 		if (!timestamp.isEmpty()){
-			sb.append(" timestamp=\""+time.getTimeId(timestamp)+"\"");
+			sb.append(" synch=\""+time.getTimeId(timestamp)+"\"");
 		}
 		sb.append(">\n");						
 				
 		sb.append(parseToXML(posting)+"\n");
 		
-		//System.out.println("parsing "+duration);
 		if (postscript.toLowerCase().startsWith("ps") || postscript.toLowerCase().startsWith("p.s")){
 			//System.out.println("postscript "+postscript);
 			sb.append("<seg type=\"postscript\">");

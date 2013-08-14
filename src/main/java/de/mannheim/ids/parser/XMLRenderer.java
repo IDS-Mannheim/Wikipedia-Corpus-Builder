@@ -897,7 +897,17 @@ public final class XMLRenderer
 	public void visit(WtTagExtension n)
 	{	
 		// ref, nowiki, math
-		p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\"/>");
+		if (n.getName().equals("ref")){
+			pt("&lt;%s%!&gt;%=&lt;/%s&gt;",
+					n.getName(),
+					n.getXmlAttributes(),
+					n.getBody().getContent(),
+					n.getName());
+		}
+		else{ 
+			p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\"/>");
+		}
+		
 		//System.out.println("Tag extension "+n.getName());
 		//System.out.println("Body "+n.getBody().getContent());
 //		p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\">");
