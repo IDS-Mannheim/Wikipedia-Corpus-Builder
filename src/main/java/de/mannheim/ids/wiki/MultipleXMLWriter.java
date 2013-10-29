@@ -6,6 +6,11 @@ import java.io.OutputStreamWriter;
 import de.mannheim.ids.util.Utilities;
 import de.mannheim.ids.util.WikiStatistics;
 
+/** This class writes an XML file for each XML-ized wiki page.
+ * 
+ * @author margaretha
+ *
+ */
 public class MultipleXMLWriter implements WikiXMLWriter{
 
 	String xmlOutputDir, language;
@@ -16,6 +21,7 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 		this.xmlOutputDir = xmlOutputDir;
 		this.counter=1;
 		this.wikiStatistics = wikiStatistics;
+		this.language=language;
 	}
 	
 	@Override
@@ -23,47 +29,35 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 			throws IOException {	
 		
 		OutputStreamWriter writer;
-		String path;
+		String path;		
 		
-		if (isDiscussion) path = this.xmlOutputDir+"/discussions/";		
-		else path = this.xmlOutputDir+"/articles/";		
-		writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
-		
-		writePage(writer, wikiPage, indent);		
-		writer.close();
-	}
-	
-	public void writePage(OutputStreamWriter writer, WikiPage wikiPage, String indent) throws IOException {
-		writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		
-		if (!wikiPage.isEmpty()) {			
+		if (!wikiPage.isEmpty() && !wikiPage.wikitext.isEmpty()) {		
+			
+			if (isDiscussion) path = this.xmlOutputDir+"/discussions/";		
+			else path = this.xmlOutputDir+"/articles/";		
+			writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
+			System.out.println(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
+			writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			
 			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());					
 				
 			String [] arr = wikiPage.pageStructure.split("<text></text>");
 			//System.out.println(wikiPage.pageStructure);
-			if (arr.length >1){				
-				writer.append(indent);
-				writer.append(arr[0]);	
-				
-				if (wikiPage.wikitext.equals("")){
-					writer.append("<text lang=\""+language+"\"/>" );
-				}
-				else {
-					writer.append("<text lang=\""+language+"\">\n" );
-					writer.append(wikiPage.wikitext+"\n");
-					writer.append("      </text>");
-				}
-				
-				writer.append(arr[1]);				
+							
+			writer.append(indent);
+			writer.append(arr[0]);	
+			
+			if (wikiPage.wikitext.equals("")){
+				writer.append("<text lang=\""+language+"\"/>" );
 			}
-			else{ //throw new ArrayIndexOutOfBoundsException();								
-				System.out.println("Outer Error: "+wikiPage.getPageTitle());
-				wikiStatistics.addPageStructureErrors();
-			} 
-		}
-		else{
-			writer.append(wikiPage.pageStructure);
-		}
+			else {
+				writer.append("<text lang=\""+language+"\">\n" );
+				writer.append(wikiPage.wikitext+"\n");
+				writer.append("      </text>");
+			}			
+			writer.append(arr[1]);
+			writer.close();
+		}		
 	}
 
 	@Override

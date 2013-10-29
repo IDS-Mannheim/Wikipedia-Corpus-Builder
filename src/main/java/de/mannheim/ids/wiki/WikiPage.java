@@ -4,6 +4,11 @@ import java.io.IOException;
 
 import de.mannheim.ids.util.Utilities;
 
+/** Wikipage Class
+ * 
+ * @author margaretha
+ *
+ */
 public class WikiPage {
 
 	public String pageStructure;
@@ -11,7 +16,7 @@ public class WikiPage {
 	private String pageTitle;
 	private String pageIndex;
 	private String pageId;	
-	private boolean isEmpty;
+	private boolean isEmpty, isRedirect;	
 	
 	static String[] indexList = {"A","B","C","D","E","F","G","H","I","J","K","L",
 	    "M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
@@ -57,6 +62,14 @@ public class WikiPage {
 
 	public void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
+	}
+
+	public boolean isRedirect() {
+		return isRedirect;
+	}
+
+	public void setRedirect(boolean isRedirect) {
+		this.isRedirect = isRedirect;
 	}
 	
 }

@@ -13,6 +13,13 @@ import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.util.WikiStatistics;
 
+/** This class implements methods for handling Wikipages including
+ *  reading page content, cleaning wikitext (pre-processing), parsing, 
+ *  and XML validation. 
+ * 
+ * @author margaretha
+ *
+ */
 public class WikiPageHandler {
 
 	private static Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
@@ -26,7 +33,7 @@ public class WikiPageHandler {
 	private boolean textFlag;
 	private String language;
 	private WikiStatistics wikiStatistics;
-//	long startTime=0;
+
 	public WikiPageHandler(String language, WikiStatistics wikiStatistics) {
 		tagSoupParser = new TagSoupParser();
 		swebleParser = new Sweble2Parser();
@@ -46,38 +53,30 @@ public class WikiPageHandler {
 			}						
 			trimmedStrLine = StringUtils.replaceOnce(trimmedStrLine, "</text>", ""); // remove </text>
 			
-			String tempText = wikiPage.wikitext;
-			tempText += (StringEscapeUtils.unescapeXml(trimmedStrLine) + "\n").trim(); // unescape XML tags
-			if (tempText.equals("")){ // empty text
+			wikiPage.wikitext += (trimmedStrLine + "\n").trim(); 
+			if (wikiPage.wikitext.equals("")){ // empty text
 				wikiPage.setEmpty(true); 
 				return; 
 			} 
-			tempText = cleanPattern(tempText);
-			
-			wikiPage.wikitext= parseToXML(tempText, wikiPage.getPageTitle());
+						
+			wikiPage.wikitext= parseToXML(wikiPage.wikitext, wikiPage.getPageTitle());
 			wikiPage.pageStructure += "      <text/>\n";
 			textFlag=false;
-//			long endTime = System.nanoTime();
-//			long duration = endTime - startTime;
-//			System.out.println("reading "+duration);
 		}
 		
 		// Continue collecting text
-		else if (textFlag){ 
-			strLine = StringEscapeUtils.unescapeXml(strLine); // unescape XML tags			
+		else if (textFlag){
 			wikiPage.wikitext += strLine+"\n";
-//			startTime = System.nanoTime();
 		}		
 		
 		else if(trimmedStrLine.startsWith("<text")) {				
-			
-			if (trimmedStrLine.endsWith("/>")){ // empty text				
+			if (trimmedStrLine.endsWith("<text/>")){ // empty text				
 				wikiPage.pageStructure += "        <text lang=\""+language+"\"/>\n";
 				wikiPage.wikitext="";
 				wikiPage.setEmpty(true);
 			}
 			else { // start collecting text
-				wikiPage.wikitext += StringEscapeUtils.unescapeXml(cleanTextStart(trimmedStrLine)); // unescape XML tags
+				wikiPage.wikitext += cleanTextStart(trimmedStrLine);
 				this.textFlag=true;
 			}
 		}
@@ -88,14 +87,14 @@ public class WikiPageHandler {
 	}
 	
 	private String parseToXML(String wikitext, String pagetitle){
+		
+		wikitext = StringEscapeUtils.unescapeXml(wikitext); // unescape XML tags
+		wikitext = cleanPattern(wikitext);
+		
 		try{
 			// italic and bold are not repaired because they have wiki-mark-ups
-			wikitext = tagSoupParser.generate(wikitext,true);		
-//			long startTime = System.nanoTime();
+			wikitext = tagSoupParser.generate(wikitext,true);
 			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle,language);
-//			long endTime = System.nanoTime();
-//			long duration = endTime - startTime;			
-//			System.out.println("parsing "+duration);
 		}catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(pagetitle);
@@ -106,8 +105,10 @@ public class WikiPageHandler {
 	
 	public static String cleanPattern(String wikitext){		 
 		wikitext = StringUtils.replaceEach(wikitext, 
-				new String[] { ":{|" , "<br/>", "<br />"}, 
-				new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table notation	
+//				new String[] { ":{|" , "<br/>", "<br />"}, 
+//				new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table notation	
+		new String[] { ":{|" }, 
+		new String[] { "{|" }); //start table notation
 	
 		Matcher matcher = pattern.matcher(wikitext); // space for non-tag			
 		wikitext = matcher.replaceAll("&lt; $1");			
@@ -131,9 +132,9 @@ public class WikiPageHandler {
 	}
 	
 	public void validateXML(WikiPage wikiPage) {
-		
+		String t="";
 		try{ //test XML validity
-			String t = "<text>"+wikiPage.wikitext+"</text>";
+			 t = "<text>"+wikiPage.wikitext+"</text>";
 			dp.parseXML(new ByteArrayInputStream(t.getBytes("utf-8")));				
 		}
 		catch (Exception e) {			
@@ -146,6 +147,8 @@ public class WikiPageHandler {
 			wikiPage.pageStructure = tagSoupParser.generate(wikiPage.pageStructure, false);
 		} 
 		catch (Exception e) { 
+			System.out.println("Outer Error: "+wikiPage.getPageTitle());
+			wikiStatistics.addPageStructureErrors();
 			e.printStackTrace(); 
 		}		
 	}

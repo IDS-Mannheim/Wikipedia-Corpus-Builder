@@ -7,6 +7,13 @@ import java.util.Map;
 
 import de.mannheim.ids.util.Utilities;
 
+/** Class implementation for handling posting authors.
+ *  Generate a list of authours / users in XML.
+ *  
+ * @author margaretha
+ *
+ */
+
 public class WikiTalkUser {
 
 	private Map<String, String> user; // username, userid

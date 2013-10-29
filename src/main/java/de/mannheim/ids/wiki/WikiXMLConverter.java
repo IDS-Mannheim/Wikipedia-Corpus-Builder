@@ -7,6 +7,12 @@ import java.util.List;
 import de.mannheim.ids.util.LanguageProperties;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 
+/** Main class for Wikitext to XML conversion
+ * 
+ * @author margaretha
+ *
+ */
+
 public class WikiXMLConverter {
 	
 	public static void main(String[] args) throws IOException {
@@ -29,9 +35,13 @@ public class WikiXMLConverter {
 		
 		LanguageProperties lp = new LanguageProperties(language,namespaces);				
 		String xmlOutputDir = "./xml"; 
-		
+		try{
 		WikiXMLProcessor wxp = new WikiXMLProcessor(lp,namespaces);
 		wxp.createWikiXML(wikidump,xmlOutputDir);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		//wxp.createSingleWikiXML(wikidump,xmlOutputDir);		
 		
 		long endTime = System.nanoTime();

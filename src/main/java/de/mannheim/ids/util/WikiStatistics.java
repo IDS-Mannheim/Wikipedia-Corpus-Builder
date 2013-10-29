@@ -6,7 +6,7 @@ import java.util.List;
 import de.mannheim.ids.wiki.WikiPage;
 
 /** Collect statistical information about wikipages and 
- *  the errors in the conversion
+ *  the errors found in the conversion
  * 
  * @author margaretha
  *
@@ -22,6 +22,9 @@ public class WikiStatistics {
 	private int emptyParsedArticles;
 	private int emptyParsedDiscussions;
 	
+	private int redirectArticles;
+	private int redirectDiscussions;
+	
 	private int totalDiscussions;
 	private int totalArticles;
 	private int totalMetapages;
@@ -32,7 +35,9 @@ public class WikiStatistics {
 	public WikiStatistics() {
 		this.swebleErrors=0;
 		this.parsingErrors=0;
-		this.pageStructureErrors=0;		
+		this.pageStructureErrors=0;
+		this.redirectArticles=0;
+		this.redirectDiscussions=0;
 		this.emptyArticles=0; 
 		this.emptyDiscussions=0;
 		this.emptyParsedDiscussions=0; 
@@ -123,6 +128,22 @@ public class WikiStatistics {
 	public void addEmptyParsedDiscussions() {
 		this.emptyParsedDiscussions ++;
 	}
+	
+	public int getRedirectArticles() {
+		return redirectArticles;
+	}
+
+	public void addRedirectArticles() {
+		this.redirectArticles++;
+	}
+
+	public int getRedirectDiscussions() {
+		return redirectDiscussions;
+	}
+
+	public void addRedirectDiscussions() {
+		this.redirectDiscussions++;
+	}
 
 	public int getTotalMetapages() {
 		return totalMetapages;
@@ -135,11 +156,13 @@ public class WikiStatistics {
 	public void countStatistics(boolean isDiscussion, WikiPage wikiPage) {
 		if (isDiscussion){
 			if (!wikiPage.wikitext.isEmpty()){ addTotalDiscussions(); }
+			else if (wikiPage.isRedirect()){ addRedirectDiscussions(); }
 			else if (wikiPage.isEmpty()){ addEmptyDiscussions(); }
 			else { addEmptyParsedDiscussions(); }
 		}
 		else{
 			if (!wikiPage.wikitext.isEmpty()){ addTotalArticles(); }
+			else if (wikiPage.isRedirect()){ addRedirectArticles(); }
 			else if (wikiPage.isEmpty()){  addEmptyArticles(); }
 			else { addEmptyParsedArticles(); }
 		}
@@ -149,6 +172,8 @@ public class WikiStatistics {
 		System.out.println("Total non-empty articles "+ this.getTotalArticles());
 		System.out.println("Total non-empty discussions "+ this.getTotalDiscussions());
 		System.out.println("Total postings "+ this.getTotalPostings());
+		System.out.println("Total redirect articles "+ this.getRedirectArticles());
+		System.out.println("Total redirect discussions "+ this.getRedirectDiscussions());		
 		System.out.println("Total empty articles "+ this.getEmptyArticles());
 		System.out.println("Total empty discussions "+ this.getEmptyDiscussions());
 		System.out.println("Total empty parsed articles "+ this.getEmptyParsedArticles());

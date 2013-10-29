@@ -7,6 +7,12 @@ import java.util.List;
 import de.mannheim.ids.util.Utilities;
 import de.mannheim.ids.util.WikiStatistics;
 
+/** This class writes the XML-ized version of all wikipedia articles in one big XML file. 
+ *  Similarly, all XML-ized wikipedia talk pages are written in another big XML file. 
+ * 
+ * @author margaretha
+ *
+ */
 public class SingleXMLWriter implements WikiXMLWriter {
 
 	int counter;

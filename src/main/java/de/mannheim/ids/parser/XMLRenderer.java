@@ -99,7 +99,7 @@ import de.fau.cs.osr.utils.FmtNotYetImplementedError;
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
 
-/** Modified Class from HTMLRenderer
+/** Modified Class from the HTMLRenderer Class in Sweble library
  * 
  * @author margaretha
  */ 
@@ -765,10 +765,11 @@ public final class XMLRenderer
 	{
 		// TODO: Implement
 		//throw new FmtNotYetImplementedError();
-		p.print("<span class=\"");
+		//System.out.println(esc(n.getTarget().getContent()));
+		/*p.print("<span class=\"");
 		p.print("redirect\">&#x21B3; ");		//↳
 		p.print(esc(n.getTarget().getContent()));
-		p.print("</span>");
+		p.print("</span>");*/
 	}
 	
 	public void visit(WtSection n)
@@ -805,6 +806,7 @@ public final class XMLRenderer
 	{
 		// TODO: Implement
 		//throw new FmtNotYetImplementedError();
+		System.out.println(n.toString());
 		p.print("<span class=\"");		
 		p.print("signature\"/>");
 	}

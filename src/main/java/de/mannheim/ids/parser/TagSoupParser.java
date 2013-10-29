@@ -15,7 +15,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-/** Repair broken HTML tags in a wikitext
+/** Repair improper HTML tags in a wikitext
  * 
  * @author margaretha
  */

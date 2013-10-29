@@ -13,6 +13,15 @@ import org.apache.commons.lang.StringUtils;
 import de.mannheim.ids.util.LanguageProperties;
 import de.mannheim.ids.util.WikiStatistics;
 
+/** This class reads a Wiki page, identify some page metadata, 
+ *  such as title, namespace and id, and pass the page content 
+ *  to a corresponding handler depends on the type of the Wiki 
+ *  page: article or talk page. 
+ * 
+ * @author margaretha
+ *
+ */
+
 public class WikiPageReader {
 
 	private WikiPage wikiPage;	
@@ -56,12 +65,11 @@ public class WikiPageReader {
 				isDiscussion=false;				
 			}
 			// End reading a page
-			else if (readFlag && trimmedStrLine.endsWith("</page>")){
+			else if (readFlag && trimmedStrLine.endsWith("</page>")){				
 				wikiPage.pageStructure += strLine;
 				wikiPageHandler.validateXML(wikiPage);
 				wikiStatistics.countStatistics(isDiscussion, wikiPage);
-				wikiXMLWriter.write(wikiPage, isDiscussion, setIndent(strLine));				
-				wikiPage.wikitext="";
+				wikiXMLWriter.write(wikiPage, isDiscussion, setIndent(strLine));
 				readFlag = false;
 			}
 			else if(readFlag && !trimmedStrLine.equals("</mediawiki>")){
@@ -98,7 +106,13 @@ public class WikiPageReader {
 						wikiPage.pageStructure += strLine + "\n";
 						idFlag=false;
 					}
-				}				
+				}	
+				// Redirect page
+				else if (trimmedStrLine.startsWith("<redirect")){
+					wikiPage.setRedirect(true);		
+					wikiStatistics.countStatistics(isDiscussion, wikiPage);
+					readFlag = false;
+				}
 				
 				// Handle Discussion
 				else if (isDiscussion){

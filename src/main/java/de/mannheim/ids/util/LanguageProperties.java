@@ -14,9 +14,7 @@ public class LanguageProperties {
 	private List<String> namespaces = new ArrayList<String>();
 	private String talk, language, user, contribution;
 	
-	public LanguageProperties() {
-		// TODO Auto-generated constructor stub
-	}
+	public LanguageProperties() {}
 
 	/** Set the language of the wikidump
 	 * 
@@ -32,7 +30,7 @@ public class LanguageProperties {
 		setNamespaces(namespaces);	
 	}
 	
-	/** Define the title indicators for skipping metapages
+	/** Define language dependent terms used in Wikipedia
 	 * 
 	 * @param language
 	 */

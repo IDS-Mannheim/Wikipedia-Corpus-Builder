@@ -5,6 +5,13 @@ import java.io.OutputStreamWriter;
 
 import de.mannheim.ids.util.Utilities;
 
+/** Object model for time information of a posting.
+ *  Generate a list of timestamps in XML.
+ * 
+ * @author margaretha
+ *
+ */
+
 public class WikiTalkTime {
 
 	private OutputStreamWriter timeWriter; 

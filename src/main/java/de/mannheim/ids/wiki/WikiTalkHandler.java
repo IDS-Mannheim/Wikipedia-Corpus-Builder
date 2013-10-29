@@ -11,12 +11,19 @@ import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.util.WikiStatistics;
 
+/** This class implements methods for handling a talk page content,
+ *  including posting segmentation, parsing and posting generation.
+ * 
+ * @author margaretha
+ *
+ */
+
 public class WikiTalkHandler {	
 			
 	private Pattern textPattern = Pattern.compile("<text.*\">(.*)");
 	private Pattern levelPattern = Pattern.compile("^(:+)");	
-	private Pattern headerPattern = Pattern.compile("^\'*(=+[^=]+=+)");
-	private Pattern headerPattern2 = Pattern.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
+	private Pattern headingPattern = Pattern.compile("^\'*(=+[^=]+=+)");
+	private Pattern headingPattern2 = Pattern.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 	private Pattern timePattern = Pattern.compile( "\\s*([0-9]{2}:[^\\)]*\\))(.*)");
 	private Pattern unsignedPattern = Pattern.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}");
 	private Pattern signaturePattern, specialContribution;
@@ -24,7 +31,7 @@ public class WikiTalkHandler {
 	private TagSoupParser tagSoupParser;
 	private Sweble2Parser swebleParser;	
 	private String posting="", language;
-	private boolean textFlag, sigFlag;
+	private boolean textFlag, sigFlag, baselineMode=true;
 	private WikiPage wikiPage;
 	private WikiStatistics wikiStatistics;
 	public WikiTalkUser user;
@@ -32,7 +39,7 @@ public class WikiTalkHandler {
 	private String userLabel, contributionLabel;
 	
 	public WikiTalkHandler(String language, String user, String contribution , WikiStatistics wikiStatistics) throws IOException {		
-		signaturePattern = Pattern.compile("([^-]*-{0,2})\\s*\\[\\[:?"+user+":([^\\|]+)\\|([^\\]]+)\\]\\](.*)");
+		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?"+user+":([^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 		specialContribution = Pattern.compile("(.*)\\[\\["+contribution+"/([^\\|]+)\\|[^\\]]+\\]\\](.*)");
 		
 		tagSoupParser = new TagSoupParser();
@@ -48,13 +55,7 @@ public class WikiTalkHandler {
 	
 	protected void handleDiscussion(WikiPage wikiPage, String strLine, String trimmedStrLine) 
 			throws IOException {
-		this.wikiPage = wikiPage;
-		
-//		String str[]=null;
-//		if (strLine.contains("&lt;br&gt;")){		
-//			str = strLine.split("&lt;br&gt;");			
-//			strLine = str[0];		
-//		}
+		this.wikiPage = wikiPage;		
 		
 		if (trimmedStrLine.endsWith("</text>")){ // finish collecting text
 			segmentPosting(strLine.replace("</text>", "") );			
@@ -85,25 +86,38 @@ public class WikiTalkHandler {
 		}
 		else{ // copy page metadata
 			wikiPage.pageStructure += strLine + "\n";
-		}	
+		}
 		
-//		if (str !=null){
-//			handleDiscussion(wikiPage, str[1], str[1].trim());
-//		}		
-	}	
-	
-	
+	}
+		
 	private void segmentPosting(String text) throws IOException {		
 		
 		String trimmedText = text.trim();		
 		sigFlag=false;
 		
 		// Posting before a level marker 		
-		if (trimmedText.startsWith(":") && !posting.trim().isEmpty()){
+		if (!baselineMode && trimmedText.startsWith(":") && !posting.trim().isEmpty()){
 			writePosting("unknown", "", "", posting.trim(),"");
 			posting="";
 		}
 		
+		// User signature
+		if (trimmedText.contains(this.userLabel)){
+			if (handleSignature(trimmedText)) return;			
+		}
+		
+		if (!baselineMode){
+			
+		// Help signature
+		if (trimmedText.contains(this.contributionLabel)){
+			if (handleHelp(trimmedText)) return;			
+		}
+		
+		// Unsigned
+		if (trimmedText.contains("unsigned")){
+			if (handleUnsigned(trimmedText)) return;			
+		}
+				
 		// Level Marker
 		if (trimmedText.startsWith(":")){			
 			writePosting("unknown", "", "", trimmedText,"");
@@ -119,35 +133,21 @@ public class WikiTalkHandler {
 			return;
 		}
 		
-		// Header
+		// Heading
 		if (trimmedText.contains("=")){
-			Matcher matcher = headerPattern.matcher(trimmedText);
+			Matcher matcher = headingPattern.matcher(trimmedText);
 			if (headerHandler(trimmedText, matcher)) return;
 		}
 		
 		if (trimmedText.contains("&lt;h")){
-			Matcher matcher = headerPattern2.matcher(trimmedText);	
+			Matcher matcher = headingPattern2.matcher(trimmedText);	
 			if (headerHandler(trimmedText, matcher)) return;
 		}
 		
-		// User signature
-		if (trimmedText.contains(this.userLabel)){
-			if (handleSignature(trimmedText)) return;			
-		}
-		
-		// Help signature
-		if (trimmedText.contains(this.contributionLabel)){
-			if (handleHelp(trimmedText)) return;			
-		}
-		
-		// Unsigned
-		if (trimmedText.contains("unsigned")){
-			if (handleUnsigned(trimmedText)) return;			
 		}
 		
 		//else posting+=trimmedText+"\n";			
-		posting+=text+"\n";
-		
+		posting+=text+"\n";		
 		
 	}
 	
@@ -160,7 +160,7 @@ public class WikiTalkHandler {
 				timestamp=matcher2.group(1);
 				rest = matcher2.group(2);
 			}
-			sigFlag=true;
+			sigFlag=true;			
 			posting += matcher.group(1)+"\n";
 			writePosting(matcher.group(3), matcher.group(2), timestamp, posting.trim(),rest.trim());
 						
@@ -219,7 +219,7 @@ public class WikiTalkHandler {
 				posting="";
 			}
 		
-			text = StringEscapeUtils.unescapeXml(WikiPageHandler.cleanTextStart(matcher.group(1))); // unescape XML tags
+			text = WikiPageHandler.cleanTextStart(matcher.group(1));
 					
 			wikiPage.wikitext+=parseToXML(text.trim())+"\n";
 			matcher.reset();
@@ -263,7 +263,7 @@ public class WikiTalkHandler {
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("        <Posting indentLevel=\""+level+"\"");
+		sb.append("        <posting indentLevel=\""+level+"\"");
 		
 		if (!speaker.isEmpty()){			
 			sb.append(" who=\""+user.getTalkUser(speaker,speakerLabel,sigFlag)+"\"");
@@ -278,13 +278,15 @@ public class WikiTalkHandler {
 		sb.append(parseToXML(posting)+"\n");
 		
 		if (postscript.toLowerCase().startsWith("ps") || postscript.toLowerCase().startsWith("p.s")){
-			//System.out.println("postscript "+postscript);
 			sb.append("<seg type=\"postscript\">");
 			sb.append(postscript);
 			sb.append("</seg>\n");
 		}
+		else{
+			sb.append(postscript);
+		}
 		
-		sb.append("        </Posting>\n");	
+		sb.append("        </posting>\n");	
 		wikiPage.wikitext+=sb.toString();
 	}
 	
