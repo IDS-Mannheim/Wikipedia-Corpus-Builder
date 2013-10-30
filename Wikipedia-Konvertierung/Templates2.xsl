@@ -5,7 +5,7 @@
     exclude-result-prefixes="xs xd saxon functx" version="3.0">
 
     <xd:doc scope="stylesheet">
-        <xd:desc>
+        <xd:desc>TES
             <xd:p>Templates for various elements</xd:p>
             <xd:p><xd:b>Date:</xd:b> June 2013</xd:p>
             <xd:p><xd:b>Author:</xd:b> Eliza Margaretha</xd:p>
@@ -13,7 +13,9 @@
     </xd:doc>
 
     <xsl:output name="text" indent="yes" omit-xml-declaration="yes"/>
-
+    
+    <xsl:param name="inflectives" required="yes"/>
+        
     <xsl:param name="phraseNames">
         <name>small</name>
         <name>big</name>
@@ -36,14 +38,6 @@
         <xsl:copy-of select="doc($inflectives)//inflectives//name"/>
     </xsl:param>
     
-    <xsl:param name="authorNames">
-        <xsl:copy-of select="doc($authors)//listPerson//person"/>
-    </xsl:param>
-
-    <xsl:param name="timestamps">
-        <xsl:copy-of select="doc($timeline)//timeline//when"/>
-    </xsl:param>
-    
     <xsl:param name="divClasses">
         <name>BoxenVerschmelzen</name>
         <name>NavFrame</name>
@@ -59,11 +53,7 @@
         <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:choose>
                 <!-- Handle paragraph inside phrase elements -->
-                <xsl:when test="parent::node()[name()=$phraseNames/*]">
-                    <xsl:message>
-                        TEST <xsl:copy-of select="parent::node()/name()"/>
-                        <xsl:copy-of select="."/>
-                    </xsl:message>
+                <xsl:when test="parent::node()[name()=$phraseNames/*]">                   
                     <xsl:choose>
                         <!-- When the phrase element contains header and is escaped -->
                         <xsl:when
@@ -259,7 +249,7 @@
                         <xsl:when test="child::node()/name()!=('p','ul','ol','dl','poem','blockquote')">
                             <p>
                                 <!-- Handling complex structures in a caption - TODO: hack version due to false conversion -->
-                                <!--xsl:for-each select="child::node()">
+                                <xsl:for-each select="child::node()">
                                     <xsl:choose>
                                         <xsl:when test="name()=('p','poem','div','center')">
                                             <xsl:value-of select="."/>
@@ -268,8 +258,7 @@
                                             <xsl:apply-templates select="."/>
                                         </xsl:otherwise>
                                     </xsl:choose>
-                                </xsl:for-each>-->
-                                <xsl:apply-templates/>
+                                </xsl:for-each>                                
                             </p>
                         </xsl:when>
                         <xsl:otherwise>
@@ -374,18 +363,16 @@
 
     <!-- Posting Template -->
     <xsl:template match="posting">  
-<!--        <div n="{@indentLevel}" type="posting">            -->
+        <xsl:if test="text()[normalize-space(.)] | *">
         <xsl:element name="posting">
             <xsl:attribute name="indentLevel" select="@indentLevel"/>
             <xsl:if test="@who">
                 <xsl:variable name="author" select="@who"/>
                 <xsl:attribute name="who" select="$author"/>
-<!--                <xsl:attribute name="who" select="saxon:stream( $authorNames/person[@xml:id=$author][1]/persName)"/>                   -->
             </xsl:if>
             <xsl:if test="@synch">
                 <xsl:variable name="timestamp" select="@synch"/>
                 <xsl:attribute name="synch" select="$timestamp"/>
-<!--                <xsl:attribute name="synch" select="saxon:stream($timestamps/when[@xml:id=$timestamp][1]/@absolute)"/>-->
             </xsl:if>            
             
             <xsl:for-each select="*">
@@ -410,10 +397,15 @@
             </xsl:for-each>         
         </xsl:element>
 <!--        </div>    -->
+        </xsl:if>
     </xsl:template>
 
 
     <!-- Phrase Level Templates -->
+    
+    <xsl:template match="autoSignature">
+        <autoSignature/>
+    </xsl:template>
     
     <xsl:template match="seg">
         <xsl:apply-templates/>
@@ -461,10 +453,11 @@
                     <xsl:with-param name="value" select="$value"/>
                 </xsl:call-template>
             </xsl:when>
-            <xsl:otherwise>
-                <!-- parent node: p, li, dd, dt, blockquote -->
-                <gap desc="{$name}" reason="omitted"/>
-            </xsl:otherwise>
+            <!--  blockquote invalid-->
+            <xsl:when test="parent::node()[name()=('p', 'li', 'dd', 'dt')]">
+                <gap desc="{$name}" reason="omitted"/>                
+            </xsl:when>
+            <xsl:otherwise/>                
         </xsl:choose>
     </xsl:template>
 
@@ -644,20 +637,6 @@
             <xsl:with-param name="name" select="$name"/>
         </xsl:call-template>
 
-        <!-- Hitliste Generator -->
-        <xsl:message>
-            <!--<xsl:variable name="text" select="string-join(descendant-or-self::*/text())"/>-->
-            <xsl:variable name="text">
-                <xsl:value-of select="saxon:serialize(.,'text')"/>
-            </xsl:variable>
-            <xsl:variable name="normalizedText" select="normalize-space($text)"/>
-            <xsl:text>skip###</xsl:text>
-            <xsl:value-of select="$name"/>
-            <!--<xsl:text>###</xsl:text>
-            <xsl:value-of select="string-length($normalizedText)"/>
-            <xsl:text>###</xsl:text>
-            <xsl:value-of select="$normalizedText"/>-->
-        </xsl:message>
     </xsl:template>
 
     <xsl:template name="esc">

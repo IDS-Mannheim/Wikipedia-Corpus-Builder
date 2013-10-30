@@ -8,13 +8,31 @@
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for procesing Wikipedia pages and grouping</xd:p>
+            <xd:p>Version 2.0</xd:p>
             <xd:p><xd:b>Revision:</xd:b> Jun 2013</xd:p>
-            <xd:p><xd:b>Author:</xd:b> Eliza Margaretha</xd:p>
-
-            <xd:p><xd:b>Last modified:</xd:b> Jul 23, 2011</xd:p>
-            <xd:p><xd:b>Author:</xd:b> stefanie</xd:p>
+            <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
+						
+            <xd:p><xd:b>Version 1.0 last modified:</xd:b> Jul 23, 2011</xd:p>
+            <xd:p><xd:b>Author:</xd:b> Stefanie Haupt</xd:p>
         </xd:desc>
     </xd:doc>
+    <xsl:include href="Templates2.xsl"/>
+
+    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN"
+        doctype-system="dtd/i5.dtd" method="xml"
+        encoding="UTF-8" indent="yes"/>
+    
+
+    <xsl:param name="type" required="yes"/>
+    <xsl:param name="korpusSigle" required="yes"/>
+    <xsl:param name="lang" required="yes"/>
+    <xsl:param name="origfilename" required="yes"/>
+    <xsl:param name="pubDay" required="yes"/>
+    <xsl:param name="pubMonth" required="yes"/>
+    <xsl:param name="pubYear" required="yes"/>
+    <xsl:param name="letter" required="yes"/>
+    
+    <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
 
     <xsl:param name="headerNames">
         <name>h1</name>
@@ -28,9 +46,16 @@
         <name>h9</name>
     </xsl:param>
 
+    <xsl:template name="main">
+        <xsl:variable name="doc">
+            <xsl:copy-of saxon:read-once="yes" select="saxon:discard-document(.)"/>
+        </xsl:variable>        
+        <xsl:apply-templates  select="saxon:stream($doc/page)"/>
+        
+    </xsl:template>
+    
     <xsl:template match="page">
-        <!--Current index-->
-        <xsl:param name="letter" required="yes"/>
+        <!--Current index-->       
 
         <xsl:variable name="textSigle">
             <xsl:if test="string-length(id) gt 7">
@@ -157,7 +182,14 @@
                         <creatRefShort/>
                     </creation>
                     <textDesc>
-                        <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
+                        <xsl:choose>
+                            <xsl:when test="type eq 'articles'">
+                                <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
+                            </xsl:when>                            
+                            <xsl:otherwise>
+                                <textTypeArt>Diskussion</textTypeArt>        
+                            </xsl:otherwise>
+                        </xsl:choose>                        
                         <textDomain/>
                     </textDesc>
                 </profileDesc>
@@ -175,19 +207,14 @@
         </idsText>
     </xsl:template>
 
-    <xsl:template match="revision">
+    <xsl:template match="revision">        
         <xsl:try>
             <xsl:apply-templates select="text"/>
             <xsl:catch>
                 <xsl:message>
                     <xsl:copy-of select="../title"/>
                     <xsl:text>error
-                    </xsl:text>
-                    <!-- <xsl:value-of select="$err:code"/>
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="$err:description"/>
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="$err:value"/>-->
+                    </xsl:text>                    
                 </xsl:message>
                 <saxon:assign name="errorCounter" select="$errorCounter+1"/>
             </xsl:catch>
@@ -280,8 +307,8 @@
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template name="group">
-        <xsl:param name="groupingKey"/>        
+    <xsl:template name="group">        
+        <xsl:param name="groupingKey"/>            
         <xsl:choose>
             <!-- Group starting with header element -->
             <xsl:when test="name() eq $groupingKey">
