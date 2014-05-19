@@ -1,10 +1,9 @@
 package de.mannheim.ids.wiki;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -31,7 +30,6 @@ import net.sf.saxon.s9api.XsltTransformer;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -63,7 +61,7 @@ public class WikiXCESProcessor {
 	private XMLReader reader;
 	
 	public WikiXCESProcessor(String xmlFolder, File xsl,String type, String dumpFilename, 
-			String inflectives) throws Exception {
+			String inflectives,String encoding) throws Exception {
 		
 		this.xmlFolder=xmlFolder;		
 		String origfilename = dumpFilename.substring(0,15);	//dewiki-20130728 
@@ -76,6 +74,8 @@ public class WikiXCESProcessor {
 		//Setup XSLT serializer and compiler
 		serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
 		serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+		serializer.setOutputProperty(Serializer.Property.ENCODING, encoding);
+		
 		XsltCompiler compiler = processor.newXsltCompiler();
 		compiler.setXsltLanguageVersion("3.0");
 		XsltExecutable executable = compiler.compile(new StreamSource(xsl));		
@@ -97,26 +97,30 @@ public class WikiXCESProcessor {
 		errorHandler = new XCESErrorHandler(type,origfilename);
 		// Setup documentbuilder for reading xml
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-		xmlBuilder = builderFactory.newDocumentBuilder();	
+		builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+		xmlBuilder = builderFactory.newDocumentBuilder();
+		
 		// Setup saxparser for DTD validation
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();		
 		saxfactory.setValidating(true);
 		saxfactory.setNamespaceAware(true);
-		SAXParser parser = saxfactory.newSAXParser();
+		saxfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+		SAXParser parser = saxfactory.newSAXParser();		
 		reader = parser.getXMLReader();
+		//reader.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
 		reader.setErrorHandler(errorHandler);
 	}	
 	
 	public void run(String path, String type, XCESWriter xcesWriter) throws 
-		SAXException, IOException, XPathExpressionException, XMLStreamException {							
-
-		Document articleList = xmlBuilder.parse(new BufferedInputStream(new FileInputStream(path),1024*1024));				
+		SAXException, IOException, XPathExpressionException, XMLStreamException {
+				
+		Document articleList = xmlBuilder.parse(path);				
 		
 		// Sort by index
 		for (String index :indexList){
 			lastId = xPath.compile(type+"/index[@value='"+index+"']/id[last()]");
 			int n = (int)(double) lastId.evaluate(articleList, XPathConstants.NUMBER);
-			if (n<1) continue;
+			if (n<1) continue; 
 			
 			// Group docs per 100000
 			for (int i=0; i < n/100000+1; i++){
@@ -127,17 +131,17 @@ public class WikiXCESProcessor {
 				group = xPath.compile(type+"/index[@value='"+index+"']/id[xs:integer(xs:integer(.) div 100000) = "+docNr+"]");
 				NodeList pagegroup = (NodeList) group.evaluate(articleList,XPathConstants.NODESET);
 				
-				if (pagegroup.getLength()<1) continue;
+				if (pagegroup.getLength()<1) {continue;}
 				
 				xcesWriter.createIdsDocStartElement(createDocId(index, docSigle));
 				String docTitle = xcesWriter.createIdsDocTitle(type, index, docNr);
-				xcesWriter.createIdsDocHeader(docSigle, docTitle);		
-				
+				xcesWriter.createIdsDocHeader(korpusSigle+"/"+docSigle, docTitle);		
+								
 				// Do transformation and validation for each page in the group
 				for (int j = 0; j < pagegroup.getLength(); j++) {					
 					String xmlPath= index+"/"+pagegroup.item(j).getTextContent()+".xml";
 					System.out.println(xmlPath);	
-					// Do XSLT transformation
+					// Do XSLT transformation					
 					transform(index,new File(xmlFolder+"/"+type+"/"+xmlPath));
 					errorHandler.reset();
 					// Validate the resulting xces file
@@ -149,7 +153,7 @@ public class WikiXCESProcessor {
 					// read and copy the xces content to the corpus file
 					xcesWriter.readIdsText(xces);					
 				}				
-				xcesWriter.createIdsDocEndElement();			
+				xcesWriter.createIdsDocEndElement();						
 			}		
 		}
 		errorHandler.close();
@@ -189,18 +193,20 @@ public class WikiXCESProcessor {
 	private void transform(String index,File xml) {		
 		serializer.setOutputFile(xces);		
 		try {			
-			XdmNode source = processor.newDocumentBuilder().build(new StreamSource(new BufferedInputStream(new FileInputStream(xml),1024*1024)));			
+			
+			XdmNode source = processor.newDocumentBuilder().build(xml);			
 			transformer.setInitialContextNode(source);
 			transformer.setParameter(new QName("letter"), new XdmAtomicValue(index));
 			transformer.transform();			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	} 
 	
 	private void validate(File xces) throws IOException {
-		try {
-			reader.parse(new InputSource(new BufferedInputStream(new FileInputStream(xces.getName()),1024*1024)));
+		try {			
+			reader.parse(xces.getName());			
 		} catch (Exception e) {
 			System.out.println("Invalid");
 			e.printStackTrace();			

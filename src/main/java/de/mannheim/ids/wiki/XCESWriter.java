@@ -17,7 +17,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamConstants;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Characters;
@@ -39,35 +39,46 @@ public class XCESWriter {
 	XMLEventFactory eventFactory;
 	XMLEvent newline,tab;
 	XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-	String dtdfile;
+	String dtdfile, encoding;
 	
-	public XCESWriter(File outputFile,String dtdfile) throws Exception {
+	BufferedOutputStream bos;
+	
+	public XCESWriter(File outputFile,String dtdfile,String encoding) throws Exception {
+		this.encoding = encoding;	
+		
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-		eventWriter = outputFactory.createXMLEventWriter(new BufferedOutputStream(new FileOutputStream(outputFile),1024*1024));		
+		bos = new BufferedOutputStream(new FileOutputStream(outputFile),1024*1024);
+		eventWriter = outputFactory.createXMLEventWriter(bos,encoding);		
 		eventFactory = XMLEventFactory.newInstance();
 		newline = eventFactory.createCharacters("\n");
-		tab = eventFactory.createCharacters("   ");
-		
+		tab = eventFactory.createCharacters("   ");		
+				
 		this.dtdfile=dtdfile;
 	}
 	
 	protected void readIdsText(File inputFile) throws IOException, XMLStreamException {
-		XMLEventReader eventReader = inputFactory.createXMLEventReader(new BufferedInputStream(new FileInputStream(inputFile),1024*1024));		
+		
+		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);		
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(inputFile),1024*1024);
+		XMLEventReader eventReader = inputFactory.createXMLEventReader(bis);
+		
 		eventReader = inputFactory.createFilteredReader(eventReader, createEventFilter()); 
 		eventReader.nextEvent(); // ignore processing instruction
-				
+		eventReader.nextEvent(); // ignore dtd
+		
 		while (eventReader.hasNext()){			
 			eventWriter.add(eventReader.nextEvent());			
 		}
 		eventWriter.add(newline);
-		eventReader.close();
+		bis.close();
+		eventReader.close();		
 	}
 	 
 	private EventFilter createEventFilter() {
 		EventFilter filter = new EventFilter() {			
 			@Override
 			public boolean accept(XMLEvent event) {
-				if (event.isEndDocument() || event.getEventType() == XMLStreamConstants.DTD) return false;
+				if (event.isEndDocument() /*|| event.getEventType() == XMLStreamConstants.DTD*/) return false;
 				else return true;
 			}
 		};
@@ -78,10 +89,11 @@ public class XCESWriter {
 	
 	void write(String xmlFolder,String type,String dumpFilename,WikiXCESProcessor wikiXCESProcessor) throws Exception {			 
 		
-		eventWriter.add(eventFactory.createStartDocument());
+		eventWriter.add(eventFactory.createStartDocument(this.encoding));
 		eventWriter.add(newline);
 		
 		String dtd = "<!DOCTYPE idsCorpus PUBLIC \"-//IDS//DTD IDS-XCES 1.0//EN\" \""+this.dtdfile+"\">";
+		
 		eventWriter.add(eventFactory.createDTD(dtd));
 		eventWriter.add(newline);		
 		
@@ -101,17 +113,16 @@ public class XCESWriter {
 		
 		//create documents and texts
 		try {
-			
 			wikiXCESProcessor.run(idList, type, this);
 			
 		} catch (XPathExpressionException | SAXException e) {
 			e.printStackTrace();
-		}				
-		
+		}
 		
 		eventWriter.add(eventFactory.createEndElement("","idsCorpus",""));
 		eventWriter.add(eventFactory.createEndDocument());
 		eventWriter.close();
+		bos.close();
 	}	
 	
 	private void createLeafNode(int level,String elementName, Iterator<Attribute> attributes,
@@ -362,7 +373,7 @@ public class XCESWriter {
 		eventWriter.add(newline);
 		level++;
 		createLeafNode(level,"publisher", null, "Wikipedia");
-		createLeafNode(level,"pubPlace", null, "URL:http://"+lang+".wikipedia.org");
+		//createLeafNode(level,"pubPlace", null, "URL:http://"+lang+".wikipedia.org");
 		level--; createIndent(level);	
 		eventWriter.add(eventFactory.createEndElement("","","imprint"));
 		eventWriter.add(newline);
