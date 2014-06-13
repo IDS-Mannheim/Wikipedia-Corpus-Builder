@@ -234,23 +234,23 @@
 
     <xsl:template name="section">
         <xsl:param name="input"/>
-        <!-- Group input by header level -->
-        <xsl:choose>
-            <xsl:when test="$input[name() eq 'h1']">
-                <xsl:for-each-group select="$input" group-starting-with="h1">
-                    <xsl:call-template name="group">
+        <!-- Group input by header level -->        
+        <xsl:choose>            
+            <xsl:when test="$input[name() eq 'h1']">                
+                <xsl:for-each-group select="$input" group-starting-with="h1">                    
+                    <xsl:call-template name="group">                        
                         <xsl:with-param name="groupingKey" select="'h1'"/>
                     </xsl:call-template>
                 </xsl:for-each-group>
             </xsl:when>
-            <xsl:when test="$input[name() eq 'h2']">
-                <xsl:for-each-group select="$input" group-starting-with="h2">
+            <xsl:when test="$input[name() eq 'h2']">                             
+                <xsl:for-each-group select="$input" group-starting-with="h2">                    
                     <xsl:call-template name="group">
                         <xsl:with-param name="groupingKey" select="'h2'"/>
                     </xsl:call-template>
                 </xsl:for-each-group>
             </xsl:when>
-            <xsl:when test="$input[name() eq 'h3']">
+            <xsl:when test="$input[name() eq 'h3']">                
                 <xsl:for-each-group select="$input" group-starting-with="h3">
                     <xsl:call-template name="group">
                         <xsl:with-param name="groupingKey" select="'h3'"/>
@@ -299,7 +299,7 @@
                     </xsl:call-template>
                 </xsl:for-each-group>
             </xsl:when>
-            <xsl:otherwise>                                              
+            <xsl:otherwise>                 
                 <xsl:call-template name="paragraphLevel">
                     <xsl:with-param name="input" select="$input"/>
                 </xsl:call-template>
@@ -311,17 +311,17 @@
         <xsl:param name="groupingKey"/>            
         <xsl:choose>
             <!-- Group starting with header element -->
-            <xsl:when test="name() eq $groupingKey">
+            <xsl:when test="name() eq $groupingKey">                   
                 <xsl:apply-templates select="."/>
             </xsl:when>
             <!-- Group containing header element -->
-            <xsl:when test="current-group()[name()=$headerNames]">                
+            <xsl:when test="current-group()[name()=$headerNames/name]">                             
                 <xsl:call-template name="section">
                     <xsl:with-param name="input" select="current-group()"/>
                 </xsl:call-template>
             </xsl:when>
             <!-- Group without header element -->
-            <xsl:otherwise>                
+            <xsl:otherwise>               
                 <xsl:call-template name="paragraphLevel">
                     <xsl:with-param name="input" select="current-group()"/>
                 </xsl:call-template>
@@ -330,12 +330,12 @@
     </xsl:template>
 
     <xsl:template name="paragraphLevel">
-        <xsl:param name="input"/>         
-        <xsl:for-each select="$input">                       
-            <xsl:if test="text()[normalize-space(.)] | *">                
+        <xsl:param name="input"/>        
+        <xsl:for-each select="$input">
+            <xsl:if test="text()[normalize-space(.)] | *">
                 <xsl:choose>                    
                     <!-- Handling header inside invalid elements : Kompliciert discussion D/5372030.xml-->
-                    <xsl:when test=".[not(name()=('dl','ul','ol')) and descendant::*[name()=$headerNames/*]]">
+                    <xsl:when test=".[not(name()=('dl','ul','ol')) and descendant::*[name()=$headerNames/name]]">
                         <xsl:call-template name="section">
                             <xsl:with-param name="input" select="*"/>
                         </xsl:call-template>                        
@@ -348,7 +348,7 @@
                         </p>
                     </xsl:when>
                     <!-- Paragraph elements: paragraph, list, poem, quote, etc. -->
-                    <xsl:otherwise>                        
+                    <xsl:otherwise>
                         <xsl:apply-templates select="."/>
                     </xsl:otherwise>
                 </xsl:choose>
@@ -368,6 +368,15 @@
                 <xsl:if test="parent::node()[1]=.">
                     <xsl:call-template name="heading"/>
                 </xsl:if>                                
+            </xsl:when>
+            <xsl:when test="parent::node()[name()='text']">
+                <div n="{(substring(name(), 2))}" type="{$headingType}">
+                    <xsl:call-template name="heading"/>                    
+                    <!-- Continue processing elements in this header scope -->                                 
+                    <xsl:call-template name="section">
+                        <xsl:with-param name="input" select="current-group() except ."/>
+                    </xsl:call-template>
+                </div>
             </xsl:when>
             <xsl:otherwise>
                 <!-- Define header level and write header -->
