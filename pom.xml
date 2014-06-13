@@ -36,7 +36,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>de.mannheim.ids.main.WikiXMLConverter</mainClass>
+              <mainClass>de.mannheim.ids.wiki.WikiXMLConverter</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
               <addClasspath>true</addClasspath>
             </manifest>
@@ -44,6 +44,41 @@
         </configuration>
       </plugin>
       <plugin>
+	  <artifactId>maven-assembly-plugin</artifactId>
+	  <configuration>
+	    <archive>
+	      <manifest>
+	        <mainClass>de.mannheim.ids.wiki.WikiXMLConverter</mainClass>
+	      </manifest>
+	    </archive>	    
+	    <descriptorRefs>
+	      <descriptorRef>jar-with-dependencies</descriptorRef>
+	    </descriptorRefs>
+	  </configuration>
+	  <executions>
+	    <execution>
+	      <id>make-assembly</id> 
+	      <phase>package</phase> 
+	      <goals>
+	        <goal>single</goal>
+	      </goals>
+	    </execution>
+	  </executions>
+	</plugin>  
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>de.mannheim.ids.wiki.WikiXMLConverter</mainClass>
+              <classpathPrefix>lib/</classpathPrefix>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>    
+   <!--    <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
         <version>1.6</version>
@@ -56,7 +91,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>de.mannheim.ids.wiki.WikiConverter</mainClass>
+                  <mainClass>de.mannheim.ids.wiki.WikiXMLConverter</mainClass>
                 </transformer>
               </transformers>
               <filters>
@@ -72,7 +107,7 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>     
+      </plugin>  -->    
     </plugins>
     
     <pluginManagement>
