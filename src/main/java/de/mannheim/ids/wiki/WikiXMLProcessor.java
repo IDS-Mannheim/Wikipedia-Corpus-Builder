@@ -1,7 +1,6 @@
 package de.mannheim.ids.wiki;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import de.mannheim.ids.util.LanguageProperties;
@@ -11,14 +10,21 @@ import de.mannheim.ids.util.WikiStatistics;
 public class WikiXMLProcessor {
 	
 	private LanguageProperties languageProperties;	
-	private List<String> namespaces;
+	private List<Integer> namespaces;
 	
-	public WikiXMLProcessor(LanguageProperties languageProperties,List<String> namespaces) {
+	public WikiXMLProcessor(LanguageProperties languageProperties,List<Integer> namespaces) {
 		this.languageProperties = languageProperties;
 		this.namespaces = namespaces; 
 	}
 	
 	public void createWikiXML(String inputFile, String xmlOutputDir) throws IOException {
+		if (inputFile==null || inputFile.isEmpty()){
+			throw new IllegalArgumentException("Input file cannot be null or empty.");
+		}
+		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
+			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
+		}
+		
 		createOutputDirectories(xmlOutputDir);		
 		WikiStatistics wikiStatistics = new WikiStatistics();
 		WikiXMLWriter wikiXMLWriter = new MultipleXMLWriter(xmlOutputDir,
@@ -28,6 +34,13 @@ public class WikiXMLProcessor {
 	}
 	
 	public void createSingleWikiXML(String inputFile, String xmlOutputDir) throws IOException {
+		if (inputFile==null || inputFile.isEmpty()){
+			throw new IllegalArgumentException("Input file cannot be null or empty.");
+		}
+		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
+			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
+		}
+		
 		Utilities.createDirectory(xmlOutputDir);		
 		WikiStatistics wikiStatistics = new WikiStatistics();
 		WikiXMLWriter wikiXMLWriter = new SingleXMLWriter(xmlOutputDir,
@@ -39,6 +52,14 @@ public class WikiXMLProcessor {
 	
 	private void process(String inputFile, WikiStatistics wikiStatistics, 
 			WikiXMLWriter wikiXMLWriter) throws IOException{
+		
+		if (wikiStatistics==null){
+			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+		}
+		if (wikiXMLWriter == null){
+			throw new IllegalArgumentException("WikiXMLwriter cannot be null.");
+		}
+		
 		WikiPageReader wikiReader = new WikiPageReader(languageProperties,wikiStatistics);
 		wikiReader.read(inputFile,wikiXMLWriter);		
 		wikiStatistics.printStatistics();
@@ -47,13 +68,13 @@ public class WikiXMLProcessor {
 	private void createOutputDirectories(String xmlOutputDir){		 
 		Utilities.createDirectory(xmlOutputDir);		
 		
-		if (namespaces.contains("0")) { 
+		if (namespaces.contains(0)) { 
 			for (String i:WikiPage.indexList) {
 				Utilities.createDirectory(xmlOutputDir+"/articles/"+i);
 			}
 		}
 		
-		if (namespaces.contains("1")){ 
+		if (namespaces.contains(1)){ 
 			for (String i:WikiPage.indexList) {
 				Utilities.createDirectory(xmlOutputDir+"/discussions/"+i);
 			}

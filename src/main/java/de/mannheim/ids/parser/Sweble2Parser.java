@@ -37,15 +37,13 @@ public class Sweble2Parser {
 			throws JAXBException, CompilerException, LinkTargetException, IOException {
 				
 		WikiConfig config = DefaultConfigEn.generate();
-
 		// Instantiate Sweble parser
 		WtEngine engine = new WtEngine(config);
 
 		PageTitle pageTitle = PageTitle.make(config, pagetitle);		
 		PageId pageId = new PageId(pageTitle, -1);
 		// Parse Wikitext into AST
-		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);		
-		
+		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);	
 		// Render AST to XML		
 		String uri = language+".wikipedia.org/wiki/";
 		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage(),uri);

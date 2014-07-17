@@ -34,6 +34,13 @@ public class WikiPageReader {
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
 	
 	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics wikiStatistics) throws IOException {		
+		if (languageProperties==null){
+			throw new IllegalArgumentException("Language properties cannot be null.");
+		}
+		if (wikiStatistics == null){
+			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+		}
+		
 		this.languageProperties = languageProperties;
 		this.wikiStatistics = wikiStatistics;
 		
@@ -43,6 +50,13 @@ public class WikiPageReader {
 	}
 	
 	public void read(String inputFile, WikiXMLWriter wikiXMLWriter) throws IOException {
+		
+		if (inputFile==null || inputFile.isEmpty()){
+			throw new IllegalArgumentException("Input file cannot be null or empty.");
+		}
+		if (wikiXMLWriter == null){
+			throw new IllegalArgumentException("WikiXMLwriter cannot be null.");
+		}
 		
 		FileInputStream fs = new FileInputStream(inputFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
@@ -87,10 +101,10 @@ public class WikiPageReader {
 				else if (trimmedStrLine.startsWith("<ns>")){
 					matcher = nsPattern.matcher(trimmedStrLine);
 					if (matcher.find()){
-						String ns = matcher.group(1);
+						int ns = Integer.parseInt(matcher.group(1));
 						if (languageProperties.getNamespaces().contains(ns)){
 							// Discussion namespace
-							if (ns.equals("1")) isDiscussion = true;
+							if (ns == 1) isDiscussion = true;
 							wikiPage.pageStructure += setIndent(strLine)+ trimmedStrLine+"\n";
 						}
 						else {

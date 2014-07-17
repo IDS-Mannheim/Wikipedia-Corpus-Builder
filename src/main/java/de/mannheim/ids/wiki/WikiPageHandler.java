@@ -35,6 +35,14 @@ public class WikiPageHandler {
 	private WikiStatistics wikiStatistics;
 
 	public WikiPageHandler(String language, WikiStatistics wikiStatistics) {
+		
+		if (language==null || language.isEmpty()){
+			throw new IllegalArgumentException("Language cannot be null or empty.");
+		}
+		if (wikiStatistics == null){
+			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+		}
+		
 		tagSoupParser = new TagSoupParser();
 		swebleParser = new Sweble2Parser();
 		dp = new DOMParser();
@@ -45,6 +53,10 @@ public class WikiPageHandler {
 	
 	public void handlePageContent(WikiPage wikiPage, String strLine, String trimmedStrLine) 
 			throws IOException {
+		
+		if (wikiPage == null){
+			throw new IllegalArgumentException("WikiPage cannot be null.");
+		}
 		
 		// Finish collecting text
 		if (trimmedStrLine.endsWith("</text>")){ 
@@ -94,7 +106,7 @@ public class WikiPageHandler {
 		try{
 			// italic and bold are not repaired because they have wiki-mark-ups
 			wikitext = tagSoupParser.generate(wikitext,true);
-			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle,language);
+			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle, language);
 		}catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(pagetitle);

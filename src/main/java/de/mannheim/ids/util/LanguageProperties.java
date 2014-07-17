@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class LanguageProperties {
 
-	private List<String> namespaces = new ArrayList<String>();
+	private List<Integer> namespaces = new ArrayList<Integer>();
 	private String talk, language, user, contribution;
 	
 	public LanguageProperties() {}
@@ -23,7 +23,7 @@ public class LanguageProperties {
 	 * 
 	 * @param language
 	 */	
-	public LanguageProperties(String language, List<String> namespaces) {		
+	public LanguageProperties(String language, List<Integer> namespaces) {		
 		this.setLanguage(language.toLowerCase());
 		setLanguageProperties(language);		
 		setNamespaces(namespaces);	
@@ -99,11 +99,11 @@ public class LanguageProperties {
 		this.contribution = contribution;
 	}
 
-	public List<String> getNamespaces() {
+	public List<Integer> getNamespaces() {
 		return namespaces;
 	}
 
-	public void setNamespaces(List<String> namespaces) {
+	public void setNamespaces(List<Integer> namespaces) {
 		this.namespaces = namespaces;
 	}
 }

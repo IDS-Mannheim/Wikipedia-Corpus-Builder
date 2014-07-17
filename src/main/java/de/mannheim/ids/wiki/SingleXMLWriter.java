@@ -21,14 +21,14 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	private OutputStreamWriter articleWriter, discussionWriter;
 	
 	public SingleXMLWriter(String xmlOutputDir, String language, WikiStatistics 
-			wikiStatistics, List<String> namespaces) throws IOException {
+			wikiStatistics, List<Integer> namespaces) throws IOException {
 		this.language = language;
 		this.wikiStatistics = wikiStatistics;
 		this.counter=1;
 		
-		if (namespaces.contains("0")) 
+		if (namespaces.contains(0)) 
 			articleWriter = Utilities.createWriter(xmlOutputDir+"/wiki-articles.xml");		
-		if (namespaces.contains("1")) 
+		if (namespaces.contains(1)) 
 			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml");		
 	}	
 	
@@ -44,6 +44,14 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	
 	public void writePage(OutputStreamWriter writer, WikiPage wikiPage, 
 			String indent) throws IOException {
+		
+		if (wikiPage==null){
+			throw new IllegalArgumentException("WikiPage cannot be null.");
+		}
+		if (writer == null){
+			throw new IllegalArgumentException("Writer cannot be null.");
+		}
+		
 		writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		
 		if (!wikiPage.isEmpty()) {			

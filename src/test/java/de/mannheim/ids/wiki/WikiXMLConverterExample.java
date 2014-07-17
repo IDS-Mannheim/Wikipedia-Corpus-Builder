@@ -10,13 +10,13 @@ public class WikiXMLConverterExample {
 	public static void main(String[] args) {
 		
 		// Set the language of the Wikipedia		
-		String language = "hu";
+		String language = "de";
 		
 		// Set the Wikipedia namespaces to parse
 		// Only articles and discussions are supported.
-		List<String> namespaces = new ArrayList<String>();
-		namespaces.add("0"); // articles
-		namespaces.add("1"); // discussions
+		List<Integer> namespaces = new ArrayList<Integer>();
+		namespaces.add(0); // articles
+		namespaces.add(1); // discussions
 		
 		// Initialize the language property
 		// The language properties have been defined for the following languages:
@@ -26,7 +26,7 @@ public class WikiXMLConverterExample {
 		// Set output directory
 		String xmlOutputDir = "./xml-"+language;		
 		// Set wikidump filepath
-		String wikidump = "hu.test.xml";			
+		String wikidump = "dewiki-20130728-sample.xml";			
 		
 		long startTime = System.nanoTime();
 		

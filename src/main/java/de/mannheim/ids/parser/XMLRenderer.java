@@ -741,11 +741,30 @@ public final class XMLRenderer
 	
 	public void visit(WtParagraph n)
 	{
-		if (!n.isEmpty()){
+		if (!n.isEmpty()){			
 			p.indent("<p>");
 			iterate(n);
-			p.print("</p>");
+			p.print("</p>");			
 		}
+		
+		/*
+		 if (!n.isEmpty()){			
+			
+			if (n.get(0).getNodeType() == WtNode.NT_XML_ELEMENT 
+					&& blockElements.contains(
+						((WtXmlElement) n.get(0)).getName())
+				){
+				iterate(n);
+				
+			}
+			else{
+				p.indent("<p>");
+				iterate(n);
+				p.print("</p>");
+			}
+		}
+		  
+		 * */
 	}
 	
 	@Override

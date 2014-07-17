@@ -28,6 +28,11 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 	public void write(WikiPage wikiPage, boolean isDiscussion, String indent)
 			throws IOException {	
 		
+		if (wikiPage==null){
+			throw new IllegalArgumentException("WikiPage cannot be null.");
+		}
+		
+		
 		OutputStreamWriter writer;
 		String path;		
 		
