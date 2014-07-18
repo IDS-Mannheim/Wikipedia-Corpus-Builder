@@ -24,9 +24,6 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
 
 /** This class defines how to write an IDS-XCES corpus for Wikipedia.
  * 
@@ -45,6 +42,13 @@ public class I5Writer {
 	BufferedOutputStream bos;
 	
 	public I5Writer(File outputFile,String encoding) throws Exception {
+		if (encoding == null || encoding.isEmpty()){
+			throw new IllegalArgumentException("Encoding cannot be null or empty.");
+		}
+		if (outputFile == null){
+			throw new IllegalArgumentException("Output file cannot be null.");
+		}
+		
 		this.encoding = encoding;	
 		
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();

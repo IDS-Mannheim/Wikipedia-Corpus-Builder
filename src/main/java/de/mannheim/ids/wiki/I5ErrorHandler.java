@@ -24,10 +24,14 @@ public class I5ErrorHandler implements ErrorHandler{
 	OutputStreamWriter errorWriter;
 	int numOfInvalidText=0;
 	
-	public I5ErrorHandler(String type,String wikifile) throws IOException {		
+	public I5ErrorHandler(String type,String wikifile) throws IOException {
 		File errorFile = new File("logs/xces-"+wikifile+"-"+type+"-error.txt");
-		errorFile.createNewFile();		
-		errorWriter = new OutputStreamWriter(new FileOutputStream(errorFile));
+		try {
+			errorFile.createNewFile();
+			errorWriter = new OutputStreamWriter(new FileOutputStream(errorFile));
+		} catch (IOException e) {		
+			throw new IOException("Failed creating the error file.");
+		}
 	}
 	
 	@Override

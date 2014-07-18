@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -20,6 +21,7 @@ import javax.xml.xpath.XPathFactory;
 
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmNode;
@@ -31,6 +33,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 /** This class defines the transformation and validation procedures.
@@ -63,11 +67,31 @@ public class WikiI5Processor {
 	public WikiI5Processor(String xmlFolder, File xsl,String type, String dumpFilename, 
 			String inflectives,String encoding) throws Exception {
 		
+		if (xmlFolder == null || xmlFolder.isEmpty()){
+			throw new IllegalArgumentException("xmlfolder cannot be null or empty.");
+		}
+		if (xsl == null){
+			throw new IllegalArgumentException("xsl cannot be null.");
+		}
+		if (type == null || type.isEmpty()){
+			throw new IllegalArgumentException("type cannot be null or empty.");
+		}
+		if (dumpFilename == null || dumpFilename.isEmpty()){
+			throw new IllegalArgumentException("Wikidump filename cannot be " +
+			"null or empty.");
+		}
+		// set default encoding to utf-8
+		if (encoding == null || encoding.isEmpty()){
+			encoding = "utf-8";
+		}
+		
+		
 		this.xmlFolder=xmlFolder;		
 		String origfilename = dumpFilename.substring(0,15);	//dewiki-20130728 
 		String year = dumpFilename.substring(7,11);
 		lang = dumpFilename.substring(0,2);
-		korpusSigle = createKorpusSigle(type, lang.substring(0,1).toUpperCase(), dumpFilename.substring(9,11));
+		korpusSigle = createKorpusSigle(type, lang.substring(0,1).toUpperCase(), 
+				dumpFilename.substring(9,11));
 		corpusTitle = createCorpusTitle(type,lang,year);
 		textType = createTextType(type);
 		
@@ -78,11 +102,33 @@ public class WikiI5Processor {
 		
 		XsltCompiler compiler = processor.newXsltCompiler();
 		compiler.setXsltLanguageVersion("3.0");
-		XsltExecutable executable = compiler.compile(new StreamSource(xsl));		
+		XsltExecutable executable;
+		try {
+			executable = compiler.compile(new StreamSource(xsl));
+		} catch (SaxonApiException e) {
+			throw new SaxonApiException("Failed compiling the XSLT Stylesheet.");
+		}		
 		// Setup transformer
+		setTransformer(executable, type, origfilename, dumpFilename, year, inflectives);
+		// Setup temporary xces file
+		xces = new File(lang+"wiki-"+type+"-temp.xces");
+		// Initialize errorhandler
+		errorHandler = new I5ErrorHandler(type,origfilename);
+		// Setup documentbuilder for reading xml
+		setXmlBuilder();		
+		// Setup saxparser for DTD validation
+		setSAXParser();
+	}	
+	
+	private void setTransformer(XsltExecutable executable, String type, String origfilename,
+			String dumpFilename, String year, String inflectives) throws SaxonApiException{
 		transformer = executable.load();
 		transformer.setDestination(serializer);
-		transformer.setInitialTemplate(new QName("main"));
+		try {
+			transformer.setInitialTemplate(new QName("main"));
+		} catch (SaxonApiException e) {
+			throw new SaxonApiException("Failed setting the initial template for a transformer.");
+		}
 		transformer.setParameter(new QName("type"), new XdmAtomicValue(type));		
 		transformer.setParameter(new QName("origfilename"), new XdmAtomicValue(origfilename));
 		transformer.setParameter(new QName("korpusSigle"), new XdmAtomicValue(korpusSigle));		
@@ -91,31 +137,64 @@ public class WikiI5Processor {
 		transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(dumpFilename.substring(13,15)));
 		transformer.setParameter(new QName("pubYear"), new XdmAtomicValue(year));
 		
-		if (inflectives !=null)
+		if (inflectives !=null && !inflectives.isEmpty())
 			transformer.setParameter(new QName("inflectives"), new XdmAtomicValue("../"+inflectives));
 		
-		// Setup temporary xces file
-		xces = new File(lang+"wiki-"+type+"-temp.xces");
-		errorHandler = new I5ErrorHandler(type,origfilename);
-		// Setup documentbuilder for reading xml
+	}
+	
+	private void setXmlBuilder() throws ParserConfigurationException{
 		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-		builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-		xmlBuilder = builderFactory.newDocumentBuilder();
+		try {
+			builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+			xmlBuilder = builderFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ParserConfigurationException("Failed building a document builder.");
+		}
+	}
+	
+	private void setSAXParser() throws Exception{
 		
-		// Setup saxparser for DTD validation
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();		
 		saxfactory.setValidating(true);
 		saxfactory.setNamespaceAware(true);
-		saxfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-		SAXParser parser = saxfactory.newSAXParser();		
-		reader = parser.getXMLReader();
+		
+		try {
+			saxfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+		} catch (SAXNotRecognizedException | SAXNotSupportedException
+				| ParserConfigurationException e1) {
+			throw new Exception("Failed setting the secure processing " +
+					"feature to a sax factory.");
+		}
+		
+		SAXParser parser = null;		
+		try {			
+			parser = saxfactory.newSAXParser();
+		} catch (ParserConfigurationException | SAXException e) {
+			throw new Exception("Failed creating a SAX parser.");
+		}
+		
+		try{
+			reader = parser.getXMLReader();
+		} catch (SAXException e) {
+			throw new SAXException("Failed getting the XML reader from a SAX parser.");			
+		}		
 		//reader.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
 		reader.setErrorHandler(errorHandler);
-	}	
+	}
 	
-	public void run(String path, String type, I5Writer xcesWriter) throws 
+	public void run(String path, String type, I5Writer i5Writer) throws 
 		SAXException, IOException, XPathExpressionException, XMLStreamException {
-				
+		
+		if (path == null || path.isEmpty()){
+			throw new IllegalArgumentException("Path cannot be null or empty.");
+		}
+		if (type == null || type.isEmpty()){
+			throw new IllegalArgumentException("Type cannot be null or empty.");
+		}
+		if (i5Writer == null){
+			throw new IllegalArgumentException("I5 writer cannot be null.");
+		}
+		
 		Document articleList = xmlBuilder.parse(path);				
 		
 		// Sort by index
@@ -135,9 +214,9 @@ public class WikiI5Processor {
 				
 				if (pagegroup.getLength()<1) {continue;}
 				
-				xcesWriter.createIdsDocStartElement(createDocId(index, docSigle));
-				String docTitle = xcesWriter.createIdsDocTitle(type, index, docNr);
-				xcesWriter.createIdsDocHeader(korpusSigle+"/"+docSigle, docTitle);		
+				i5Writer.createIdsDocStartElement(createDocId(index, docSigle));
+				String docTitle = i5Writer.createIdsDocTitle(type, index, docNr);
+				i5Writer.createIdsDocHeader(korpusSigle+"/"+docSigle, docTitle);		
 								
 				// Do transformation and validation for each page in the group
 				for (int j = 0; j < pagegroup.getLength(); j++) {					
@@ -153,9 +232,9 @@ public class WikiI5Processor {
 						continue;												
 					}
 					// read and copy the xces content to the corpus file
-					xcesWriter.readIdsText(xces);					
+					i5Writer.readIdsText(xces);					
 				}				
-				xcesWriter.createIdsDocEndElement();						
+				i5Writer.createIdsDocEndElement();						
 			}		
 		}
 		errorHandler.close();
