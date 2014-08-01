@@ -5,17 +5,16 @@
     exclude-result-prefixes="xs xd saxon functx" version="3.0">
 
     <xd:doc scope="stylesheet">
-        <xd:desc>TES
-            <xd:p>Templates for various elements</xd:p>
+        <xd:desc>TES <xd:p>Templates for various elements</xd:p>
             <xd:p><xd:b>Date:</xd:b> June 2013</xd:p>
             <xd:p><xd:b>Author:</xd:b> Eliza Margaretha</xd:p>
         </xd:desc>
     </xd:doc>
 
     <xsl:output name="text" indent="yes" omit-xml-declaration="yes"/>
-    
+
     <xsl:param name="inflectives"/>
-        
+
     <xsl:param name="phraseNames">
         <name>small</name>
         <name>big</name>
@@ -37,7 +36,7 @@
     <xsl:param name="inflectiveNames">
         <xsl:copy-of select="doc($inflectives)//inflectives//name"/>
     </xsl:param>
-    
+
     <xsl:param name="divClasses">
         <name>BoxenVerschmelzen</name>
         <name>NavFrame</name>
@@ -45,15 +44,15 @@
         <name>tright</name>
         <name>sideBox</name>
     </xsl:param>
-    
-    
+
+
     <!-- Paragraph Level Templates -->
 
     <xsl:template match="p">
-        <xsl:if test="text()[normalize-space(.)] | *">
+        <xsl:if test="text()[normalize-space(.)] | *">           
             <xsl:choose>
                 <!-- Handle paragraph inside phrase elements -->
-                <xsl:when test="parent::node()[name()=$phraseNames/*]">                   
+                <xsl:when test="parent::node()[name()=$phraseNames/*]">                    
                     <xsl:choose>
                         <!-- When the phrase element contains header and is escaped -->
                         <xsl:when
@@ -67,7 +66,7 @@
                             <xsl:apply-templates/>
                         </xsl:otherwise>
                     </xsl:choose>
-                </xsl:when>                
+                </xsl:when>
                 <xsl:otherwise>
                     <p>
                         <xsl:apply-templates/>
@@ -85,7 +84,7 @@
                 </xsl:when>
                 <xsl:otherwise>
                     <quote>
-                        <xsl:apply-templates/>                       
+                        <xsl:apply-templates/>
                     </quote>
                 </xsl:otherwise>
             </xsl:choose>
@@ -104,15 +103,15 @@
                             <xsl:choose>
                                 <xsl:when test="name()='p'">
                                     <l>
-                                        <xsl:apply-templates/> 
+                                        <xsl:apply-templates/>
                                     </l>
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <l>
                                         <xsl:apply-templates select="."/>
-                                    </l>        
+                                    </l>
                                 </xsl:otherwise>
-                            </xsl:choose>                            
+                            </xsl:choose>
                         </xsl:for-each>
                     </poem>
                 </xsl:otherwise>
@@ -147,28 +146,36 @@
     </xsl:template>
 
     <xsl:template match="li | dd | dt">
-        <xsl:for-each select="child::node()">
-            <xsl:choose>
-                <xsl:when test="name()=$headerNames/*">
-                    <xsl:apply-templates select="."/>
-                </xsl:when>
-                <xsl:when test="name()=('p','poem','blockquote')">
-                    <item>
+        <xsl:choose>
+            <xsl:when test="child::node()/name()=$headerNames/*">
+                <xsl:apply-templates select="."/>
+            </xsl:when>
+            <xsl:when test="child::node()/name()=('p','poem','blockquote')">
+                <item>
+                    <xsl:for-each select="child::node()">
                         <xsl:apply-templates select="child::node()"/>
-                    </item>
-                </xsl:when>
-                <xsl:when test="../../name()=('ul','ol','dl')">
-                    <item>
+                    </xsl:for-each>
+                </item>
+            </xsl:when>
+            <xsl:when test="../../child::node()/name()=('ul','ol','dl')">
+                <item>
+                    <xsl:for-each select="child::node()">
                         <xsl:apply-templates select="."/>
-                    </item>
-                </xsl:when>
-                <xsl:when test="../../name()=('dd','dt')">
+                    </xsl:for-each>
+                </item>
+            </xsl:when>
+            <xsl:when test="../../child::node()/name()=('dd','dt')">
+                <xsl:for-each select="child::node()">
                     <xsl:apply-templates select="."/>
-                </xsl:when>
-                <xsl:otherwise/>
-                <!-- Incorrect placements of the element are skipped. -->
-            </xsl:choose>
-        </xsl:for-each>
+                </xsl:for-each>
+            </xsl:when>
+
+            <xsl:otherwise/>
+            <!-- Incorrect placements of the element are skipped. -->
+        </xsl:choose>
+
+
+
     </xsl:template>
 
     <xsl:template match="div">
@@ -190,13 +197,15 @@
                             </xsl:call-template>
                         </div>
                     </xsl:variable>
-                    <xsl:call-template name="div">                        
+                    <xsl:call-template name="div">
                         <xsl:with-param name="test1" select="$value"/>
-                        <xsl:with-param name="test2" select="$value"/>   
-                    </xsl:call-template>              
+                        <xsl:with-param name="test2" select="$value"/>
+                    </xsl:call-template>
                 </xsl:when>
-                <xsl:when test="parent::node()/name()=('blockquote')">                    
-                    <p><xsl:value-of select="."/></p>
+                <xsl:when test="parent::node()/name()=('blockquote')">
+                    <p>
+                        <xsl:value-of select="."/>
+                    </p>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:call-template name="div">
@@ -225,7 +234,8 @@
             <xsl:when test="parent::node()/name()=('text','blockquote','center','div')">
                 <xsl:copy-of select="$test1"/>
             </xsl:when>
-            <xsl:when test="preceding-sibling::node()/name()=$headerNames/* or
+            <xsl:when
+                test="preceding-sibling::node()/name()=$headerNames/* or
                 following-sibling::node()/name()=$headerNames/*">
                 <xsl:copy-of select="$test2"/>
             </xsl:when>
@@ -233,7 +243,7 @@
                 <xsl:value-of select="."/>
             </xsl:when>
             <xsl:otherwise/>
-        </xsl:choose>    
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template match="caption">
@@ -246,7 +256,8 @@
             <xsl:when test="parent::node()/name()=('text','td','div')">
                 <caption>
                     <xsl:choose>
-                        <xsl:when test="child::node()/name()!=('p','ul','ol','dl','poem','blockquote')">
+                        <xsl:when
+                            test="child::node()/name()!=('p','ul','ol','dl','poem','blockquote')">
                             <p>
                                 <!-- Handling complex structures in a caption - TODO: hack version due to false conversion -->
                                 <xsl:for-each select="child::node()">
@@ -258,7 +269,7 @@
                                             <xsl:apply-templates select="."/>
                                         </xsl:otherwise>
                                     </xsl:choose>
-                                </xsl:for-each>                                
+                                </xsl:for-each>
                             </p>
                         </xsl:when>
                         <xsl:otherwise>
@@ -268,13 +279,16 @@
                 </caption>
             </xsl:when>
             <xsl:when test="parent::node()[name()=$phraseNames/*]">
-                <xsl:variable name="value"><xsl:value-of select="."/></xsl:variable>
+                <xsl:variable name="value">
+                    <xsl:value-of select="."/>
+                </xsl:variable>
                 <xsl:call-template name="phrase">
                     <xsl:with-param name="value" select="$value"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="parent::node()/name()=('p','dd','dt','li')">
-                    <xsl:value-of select="."/> </xsl:when>
+                <xsl:value-of select="."/>
+            </xsl:when>
             <xsl:otherwise/>
         </xsl:choose>
 
@@ -299,7 +313,9 @@
 
     <xsl:template match="pre">
         <xsl:if test="text()[normalize-space(.)] | *">
-            <xsl:variable name="value"> <xsl:value-of select="."/> </xsl:variable>
+            <xsl:variable name="value">
+                <xsl:value-of select="."/>
+            </xsl:variable>
 
             <xsl:choose>
                 <xsl:when test="parent::node()/name()=('text','td','th','div')">
@@ -354,59 +370,64 @@
                         <xsl:with-param name="input" select="*"/>
                     </xsl:call-template>
                 </div>
-            </xsl:when>            
-            <xsl:otherwise>                
-                <xsl:value-of select="."/> </xsl:otherwise>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="."/>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
 
     <!-- Posting Template -->
-    <xsl:template match="posting">  
+    <xsl:template match="posting">
         <xsl:if test="text()[normalize-space(.)] | *">
-        <xsl:element name="posting">
-            <xsl:attribute name="indentLevel" select="@indentLevel"/>
-            <xsl:if test="@who">
-                <xsl:variable name="author" select="@who"/>
-                <xsl:attribute name="who" select="$author"/>
-            </xsl:if>
-            <xsl:if test="@synch">
-                <xsl:variable name="timestamp" select="@synch"/>
-                <xsl:attribute name="synch" select="$timestamp"/>
-            </xsl:if>            
-            
-            <xsl:for-each select="*">
-                <xsl:choose>
-                    <xsl:when test="name()=('p','gap')">
-                        <p>
-                            <xsl:apply-templates/>
-                        </p>
-                    </xsl:when>
-                    <xsl:when test="name()=('div','poem','dl','ul','ol')">
-                        <xsl:apply-templates select="."/>
-                    </xsl:when>
-                    <xsl:when test="name()=('pre','center','blockquote','strike','s')">
-                        <p><xsl:value-of select="."/></p>
-                    </xsl:when>                                        
-                    <xsl:otherwise>
-                        <p><xsl:apply-templates/></p>
-                        <xsl:message>rest <xsl:copy-of select="."/>
-                        </xsl:message>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:for-each>         
-        </xsl:element>
-<!--        </div>    -->
+            <xsl:element name="posting">
+                <xsl:attribute name="indentLevel" select="@indentLevel"/>
+                <xsl:if test="@who">
+                    <xsl:variable name="author" select="@who"/>
+                    <xsl:attribute name="who" select="$author"/>
+                </xsl:if>
+                <xsl:if test="@synch">
+                    <xsl:variable name="timestamp" select="@synch"/>
+                    <xsl:attribute name="synch" select="$timestamp"/>
+                </xsl:if>
+
+                <xsl:for-each select="*">
+                    <xsl:choose>
+                        <xsl:when test="name()=('p')">
+                            <p>
+                                <xsl:apply-templates/>
+                            </p>
+                        </xsl:when>
+                        <xsl:when test="name()=('div','poem','dl','ul','ol','table','gap')">
+                            <xsl:apply-templates select="."/>
+                        </xsl:when>
+                        <xsl:when test="name()=('pre','center','blockquote','strike','s')">
+                            <p>
+                                <xsl:value-of select="."/>
+                            </p>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <p>
+                                <xsl:apply-templates/>
+                            </p>
+                            <xsl:message>rest <xsl:copy-of select="."/>
+                            </xsl:message>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </xsl:element>
+            <!--        </div>    -->
         </xsl:if>
     </xsl:template>
 
 
     <!-- Phrase Level Templates -->
-    
+
     <xsl:template match="autoSignature">
         <autoSignature/>
     </xsl:template>
-    
+
     <xsl:template match="seg">
         <xsl:apply-templates/>
     </xsl:template>
@@ -415,7 +436,9 @@
         <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:choose>
                 <xsl:when test="parent::node()/name()='text'">
-                    <p> <xsl:apply-templates/></p>
+                    <p>
+                        <xsl:apply-templates/>
+                    </p>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:apply-templates/>
@@ -423,7 +446,7 @@
             </xsl:choose>
         </xsl:if>
     </xsl:template>
-    
+
 
     <xsl:template match="table">
         <gap desc="table" reason="omitted"/>
@@ -431,16 +454,16 @@
 
     <xsl:template match="tr|td|th"/>
 
-    <xsl:template match="timeline | references | gallery | Gallery">
+    <xsl:template match="timeline | references | References | gallery | Gallery">
         <xsl:call-template name="gap">
             <xsl:with-param name="name" select="lower-case(name())"/>
         </xsl:call-template>
     </xsl:template>
 
     <xsl:template name="gap">
-        <xsl:param name="name"/>        
+        <xsl:param name="name"/>
         <xsl:choose>
-            <xsl:when test="parent::node()/name()=('text','center','div','posting')">
+            <xsl:when test="parent::node()/name()=('text','center','div')">
                 <p>
                     <gap desc="{$name}" reason="omitted"/>
                 </p>
@@ -454,10 +477,10 @@
                 </xsl:call-template>
             </xsl:when>
             <!--  blockquote invalid-->
-            <xsl:when test="parent::node()[name()=('p', 'li', 'dd', 'dt')]">
-                <gap desc="{$name}" reason="omitted"/>                
+            <xsl:when test="parent::node()[name()=('p', 'li', 'dd', 'dt','posting')]">
+                <gap desc="{$name}" reason="omitted"/>
             </xsl:when>
-            <xsl:otherwise/>                
+            <xsl:otherwise/>
         </xsl:choose>
     </xsl:template>
 
@@ -474,8 +497,10 @@
             </xsl:when>
             <!--<xsl:when test="@class eq 'unknown-node'">                
                 <gap desc="{@name}" reason="omitted"/>
-            </xsl:when>  -->
-            <xsl:otherwise/>
+            </xsl:when>  -->            
+            <xsl:otherwise>
+                <xsl:apply-templates/>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
@@ -587,30 +612,30 @@
     </xsl:template>
 
     <xsl:template match="font">
-        <xsl:if test="text()[normalize-space(.)] | *">
+<!--        <xsl:if test="text()[normalize-space(.)] | *">-->
             <hi rend="font-style">
                 <xsl:apply-templates/>
             </hi>
-        </xsl:if>
+<!--        </xsl:if>-->
     </xsl:template>
 
-    <xsl:template match="syntaxhighlight | Syntaxhighlight">
-        <xsl:if test="text()[normalize-space(.)] | *">
+    <xsl:template match="syntaxhighlight | Syntaxhighlight">      
+<!--        <xsl:if test="text()[normalize-space(.)] | *">-->
             <hi rend="syntaxhighlight">
                 <xsl:apply-templates/>
             </hi>
-        </xsl:if>
+<!--        </xsl:if>-->
     </xsl:template>
 
     <!-- Escaped Element Templates -->
-    
-    <xsl:template match="s | strike | del">        
+
+    <xsl:template match="s | strike | del">
         <xsl:call-template name="esc">
             <xsl:with-param name="name" select="name()"/>
         </xsl:call-template>
     </xsl:template>
 
-    <xsl:template match="node()[name()=$inflectiveNames/*]">        
+    <xsl:template match="node()[name()=$inflectiveNames/*]">
         <xsl:call-template name="esc">
             <xsl:with-param name="name" select="name()"/>
         </xsl:call-template>
@@ -642,9 +667,12 @@
     <xsl:template name="esc">
         <xsl:param name="name"/>
         <xsl:if test="text()[normalize-space(.)] | *">
-            <xsl:variable name="value"> <xsl:value-of select="."/>  </xsl:variable>
-            <xsl:choose>        
-                <xsl:when test="parent::node()[name()='div' and @class = ('tickerList','toccolours')]"/>
+            <xsl:variable name="value">
+                <xsl:value-of select="."/>
+            </xsl:variable>
+            <xsl:choose>
+                <xsl:when
+                    test="parent::node()[name()='div' and @class = ('tickerList','toccolours')]"/>
                 <xsl:when test="parent::node()[name()='div' and @class = 'thumbcaption']">
                     <xsl:copy-of select="$value"/>
                 </xsl:when>
@@ -652,7 +680,7 @@
                     <p>
                         <xsl:copy-of select="$value"/>
                     </p>
-                </xsl:when>                
+                </xsl:when>
                 <xsl:otherwise>
                     <xsl:copy-of select="$value"/>
                 </xsl:otherwise>
