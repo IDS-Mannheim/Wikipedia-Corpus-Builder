@@ -72,6 +72,7 @@ public class WikiPageHandler {
 			} 
 						
 			wikiPage.wikitext= parseToXML(wikiPage.wikitext, wikiPage.getPageTitle());
+			// To do: if wikitext is empty after parsing?
 			wikiPage.pageStructure += "      <text/>\n";
 			textFlag=false;
 		}
@@ -81,7 +82,7 @@ public class WikiPageHandler {
 			wikiPage.wikitext += strLine+"\n";
 		}		
 		
-		else if(trimmedStrLine.startsWith("<text")) {				
+		else if(trimmedStrLine.startsWith("<text")) {
 			if (trimmedStrLine.endsWith("<text/>")){ // empty text				
 				wikiPage.pageStructure += "        <text lang=\""+language+"\"/>\n";
 				wikiPage.wikitext="";
@@ -101,13 +102,14 @@ public class WikiPageHandler {
 	private String parseToXML(String wikitext, String pagetitle){
 		
 		wikitext = StringEscapeUtils.unescapeXml(wikitext); // unescape XML tags
-		wikitext = cleanPattern(wikitext);
+		wikitext = cleanPattern(wikitext);		
 		
 		try{
 			// italic and bold are not repaired because they have wiki-mark-ups
 			wikitext = tagSoupParser.generate(wikitext,true);
 			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle, language);
-		}catch (Exception e) {
+		}
+		catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
 			wikiStatistics.errorPages.add(pagetitle);
 			wikitext="";
@@ -130,7 +132,7 @@ public class WikiPageHandler {
 		StringBuffer sb = new StringBuffer();
         while(matcher.find()){
         	String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
-        	replace = matcher.quoteReplacement(replace);
+        	replace = Matcher.quoteReplacement(replace);
         	matcher.appendReplacement(sb,replace);
         }
         matcher.appendTail(sb);		        
@@ -144,6 +146,11 @@ public class WikiPageHandler {
 	}
 	
 	public void validateXML(WikiPage wikiPage) {
+		
+		if (wikiPage == null){
+			throw new IllegalArgumentException("WikiPage cannot be null.");
+		}
+
 		String t="";
 		try{ //test XML validity
 			 t = "<text>"+wikiPage.wikitext+"</text>";
@@ -159,7 +166,7 @@ public class WikiPageHandler {
 			wikiPage.pageStructure = tagSoupParser.generate(wikiPage.pageStructure, false);
 		} 
 		catch (Exception e) { 
-			System.out.println("Outer Error: "+wikiPage.getPageTitle());
+			System.err.println("Outer Error: "+wikiPage.getPageTitle());
 			wikiStatistics.addPageStructureErrors();
 			e.printStackTrace(); 
 		}		

@@ -22,6 +22,14 @@ public class WikiTalkUser {
 	private String userUri;
 	
 	public WikiTalkUser(String language, String userUri) throws IOException {		
+		
+		if (language==null || language.isEmpty()){
+			throw new IllegalArgumentException("Language cannot be null or empty.");
+		}
+		if (userUri==null || userUri.isEmpty()){
+			throw new IllegalArgumentException("UserUri cannot be null or empty.");
+		}
+		
 		user = new HashMap<String, String>();
 		userWriter = Utilities.createWriter(language+"wiki-talk-user.xml");
 		userWriter.append("<listPerson>\n");		

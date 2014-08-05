@@ -43,11 +43,11 @@ public class WikiTalkHandler {
 		if (language==null || language.isEmpty()){
 			throw new IllegalArgumentException("Language cannot be null or empty.");
 		}
-		if (user==null){
-			throw new IllegalArgumentException("User cannot be null.");
+		if (user==null || user.isEmpty()){
+			throw new IllegalArgumentException("User cannot be null or empty.");
 		}
-		if (contribution==null){
-			throw new IllegalArgumentException("Contribution cannot be null.");
+		if (contribution==null || contribution.isEmpty()){
+			throw new IllegalArgumentException("Contribution cannot be null or empty.");
 		}
 		if (wikiStatistics == null){
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");

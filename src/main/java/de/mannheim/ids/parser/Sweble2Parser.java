@@ -36,6 +36,10 @@ public class Sweble2Parser {
 	public String parseText(String wikitext, String pagetitle, String language) 
 			throws JAXBException, CompilerException, LinkTargetException, IOException {
 				
+		if (language==null || language.isEmpty()){
+			throw new IllegalArgumentException("Language cannot be null or empty.");
+		}
+		
 		WikiConfig config = DefaultConfigEn.generate();
 		// Instantiate Sweble parser
 		WtEngine engine = new WtEngine(config);

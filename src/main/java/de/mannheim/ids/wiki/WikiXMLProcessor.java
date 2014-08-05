@@ -13,18 +13,20 @@ public class WikiXMLProcessor {
 	private List<Integer> namespaces;
 	
 	public WikiXMLProcessor(LanguageProperties languageProperties,List<Integer> namespaces) {
+		
+		if (languageProperties == null){
+			throw new IllegalArgumentException("LanguageProperties cannot be null.");
+		}
+		if (namespaces == null){
+			throw new IllegalArgumentException("Namespaces cannot be null.");
+		}
+		
 		this.languageProperties = languageProperties;
 		this.namespaces = namespaces; 
 	}
 	
 	public void createWikiXML(String inputFile, String xmlOutputDir) throws IOException {
-		if (inputFile==null || inputFile.isEmpty()){
-			throw new IllegalArgumentException("Input file cannot be null or empty.");
-		}
-		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
-			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
-		}
-		
+				
 		createOutputDirectories(xmlOutputDir);		
 		WikiStatistics wikiStatistics = new WikiStatistics();
 		WikiXMLWriter wikiXMLWriter = new MultipleXMLWriter(xmlOutputDir,
@@ -34,13 +36,6 @@ public class WikiXMLProcessor {
 	}
 	
 	public void createSingleWikiXML(String inputFile, String xmlOutputDir) throws IOException {
-		if (inputFile==null || inputFile.isEmpty()){
-			throw new IllegalArgumentException("Input file cannot be null or empty.");
-		}
-		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
-			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
-		}
-		
 		Utilities.createDirectory(xmlOutputDir);		
 		WikiStatistics wikiStatistics = new WikiStatistics();
 		WikiXMLWriter wikiXMLWriter = new SingleXMLWriter(xmlOutputDir,
@@ -53,6 +48,9 @@ public class WikiXMLProcessor {
 	private void process(String inputFile, WikiStatistics wikiStatistics, 
 			WikiXMLWriter wikiXMLWriter) throws IOException{
 		
+		if (inputFile==null || inputFile.isEmpty()){
+			throw new IllegalArgumentException("Input file cannot be null or empty.");
+		}
 		if (wikiStatistics==null){
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
@@ -65,7 +63,7 @@ public class WikiXMLProcessor {
 		wikiStatistics.printStatistics();
 	}
 	
-	private void createOutputDirectories(String xmlOutputDir){		 
+	private void createOutputDirectories(String xmlOutputDir){	
 		Utilities.createDirectory(xmlOutputDir);		
 		
 		if (namespaces.contains(0)) { 

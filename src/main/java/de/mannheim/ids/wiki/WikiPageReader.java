@@ -33,7 +33,9 @@ public class WikiPageReader {
 	private Pattern nsPattern = Pattern.compile("<ns>(.+)</ns>");
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
 	
-	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics wikiStatistics) throws IOException {		
+	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics 
+			wikiStatistics) throws IOException {
+		
 		if (languageProperties==null){
 			throw new IllegalArgumentException("Language properties cannot be null.");
 		}
@@ -44,9 +46,11 @@ public class WikiPageReader {
 		this.languageProperties = languageProperties;
 		this.wikiStatistics = wikiStatistics;
 		
-		this.wikiPageHandler = new WikiPageHandler(languageProperties.getLanguage(),wikiStatistics);
+		this.wikiPageHandler = new WikiPageHandler(languageProperties.getLanguage(),
+				wikiStatistics);
 		this.wikiTalkHandler = new WikiTalkHandler(languageProperties.getLanguage(), 
-				languageProperties.getUser(), languageProperties.getContribution(),wikiStatistics);
+				languageProperties.getUser(), languageProperties.getContribution(),
+				wikiStatistics);
 	}
 	
 	public void read(String inputFile, WikiXMLWriter wikiXMLWriter) throws IOException {

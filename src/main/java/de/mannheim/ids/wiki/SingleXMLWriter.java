@@ -22,6 +22,21 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	
 	public SingleXMLWriter(String xmlOutputDir, String language, WikiStatistics 
 			wikiStatistics, List<Integer> namespaces) throws IOException {
+		
+		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
+			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
+		}		
+		if (language == null || !language.isEmpty()){
+			throw new IllegalArgumentException("Language cannot be null or empty.");
+		}
+		if (wikiStatistics==null){
+			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+		}
+		if (namespaces==null){
+			throw new IllegalArgumentException("Namespaces cannot be null.");
+		}
+		
+		
 		this.language = language;
 		this.wikiStatistics = wikiStatistics;
 		this.counter=1;
