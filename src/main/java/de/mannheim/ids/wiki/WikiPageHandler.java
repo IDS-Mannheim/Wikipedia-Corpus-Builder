@@ -83,7 +83,9 @@ public class WikiPageHandler {
 		}		
 		
 		else if(trimmedStrLine.startsWith("<text")) {
-			if (trimmedStrLine.endsWith("<text/>")){ // empty text				
+			// empty text
+			if (trimmedStrLine.endsWith("<text/>") || 
+					trimmedStrLine.equals("<text xml:space=\"preserve\" />")){ 				
 				wikiPage.pageStructure += "        <text lang=\""+language+"\"/>\n";
 				wikiPage.wikitext="";
 				wikiPage.setEmpty(true);

@@ -26,7 +26,7 @@ public class SingleXMLWriter implements WikiXMLWriter {
 		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
 			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
 		}		
-		if (language == null || !language.isEmpty()){
+		if (language == null || language.isEmpty()){
 			throw new IllegalArgumentException("Language cannot be null or empty.");
 		}
 		if (wikiStatistics==null){
