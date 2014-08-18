@@ -33,8 +33,10 @@
         <name>source</name>
     </xsl:param>
 
-    <xsl:param name="inflectiveNames">
-        <xsl:copy-of select="doc($inflectives)//inflectives//name"/>
+    <xsl:param name="inflectiveNames">      			
+   		<xsl:if test="$inflectives">
+   			<xsl:copy-of select="doc($inflectives)//inflectives//name"/>
+   		</xsl:if>        
     </xsl:param>
 
     <xsl:param name="divClasses">
@@ -44,11 +46,10 @@
         <name>tright</name>
         <name>sideBox</name>
     </xsl:param>
-
-
+	
     <!-- Paragraph Level Templates -->
 
-    <xsl:template match="p">
+    <xsl:template match="p">   		
         <xsl:if test="text()[normalize-space(.)] | *">           
             <xsl:choose>
                 <!-- Handle paragraph inside phrase elements -->
@@ -379,7 +380,7 @@
 
 
     <!-- Posting Template -->
-    <xsl:template match="posting">
+    <xsl:template match="posting">   
         <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:element name="posting">
                 <xsl:attribute name="indentLevel" select="@indentLevel"/>
@@ -411,7 +412,7 @@
                             <p>
                                 <xsl:apply-templates/>
                             </p>
-                            <xsl:message>rest <xsl:copy-of select="."/>
+                            <!--  xsl:message>rest <xsl:copy-of select="."/-->
                             </xsl:message>
                         </xsl:otherwise>
                     </xsl:choose>
@@ -493,7 +494,7 @@
                 <gap desc="template" reason="omitted"/>
             </xsl:when>
             <xsl:when test="@class eq 'signature'">
-                <xsl:message>signature</xsl:message>
+                <!-- xsl:message>signature</xsl:message-->
             </xsl:when>
             <!--<xsl:when test="@class eq 'unknown-node'">                
                 <gap desc="{@name}" reason="omitted"/>

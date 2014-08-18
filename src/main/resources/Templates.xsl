@@ -109,7 +109,7 @@
                     <publicationStmt>
                         <distributor/>
                         <pubAddress/>
-                        <availability region="world" status="restricted"/>
+                        <availability region="world">CC-BY-SA</availability>
                         <pubDate/>
                     </publicationStmt>
                     <sourceDesc Default="n">
@@ -165,11 +165,7 @@
                     <samplingDecl Default="n"/>
                     <editorialDecl Default="n">
                         <pagination type="no"/>
-                    </editorialDecl>
-                    <tagsDecl>
-                        <tagUsage gi="list" occurs="0"/>
-                        <tagUsage gi="p" occurs="0"/>
-                    </tagsDecl>
+                    </editorialDecl>                    
                 </encodingDesc>
                 <profileDesc>
                     <creation>
@@ -183,7 +179,7 @@
                     </creation>
                     <textDesc>
                         <xsl:choose>
-                            <xsl:when test="type eq 'articles'">
+                            <xsl:when test="$type eq 'articles'">
                                 <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
                             </xsl:when>                            
                             <xsl:otherwise>
