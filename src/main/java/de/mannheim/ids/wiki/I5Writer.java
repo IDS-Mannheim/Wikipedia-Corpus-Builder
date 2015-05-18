@@ -228,7 +228,7 @@ public class I5Writer {
 		if (type.equals("articles")){			
 			try {
 				Integer.parseInt(index);
-				return "Wikipedia, Anfangszahl "+index;
+				return "Wikipedia, Anfangszahl "+index+" Teil "+String.format("%02d",docNr);
 			} catch (Exception e) {
 				return "Wikipedia, Anfangsbuchstabe "+index+" Teil "+String.format("%02d",docNr); 
 			}
@@ -254,8 +254,8 @@ public class I5Writer {
 				
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		attributes.add(eventFactory.createAttribute("region", "world"));
-		attributes.add(eventFactory.createAttribute("status", "restricted"));
-		createLeafNode(level,"availability", attributes.iterator(), "");
+		//attributes.add(eventFactory.createAttribute("status", "restricted"));
+		createLeafNode(level,"availability", attributes.iterator(), "CC-BY-SA");
 		attributes.clear();
 				
 		createLeafNode(level,"pubDate", null, "");
@@ -440,6 +440,17 @@ public class I5Writer {
 			level++;
 			createLeafNode(level,"conformance", null, "This document conforms to I5 " +
 					"(see http://jtei.revues.org/508)");
+			createLeafNode(level,"transduction", null, "This document has been " +
+					"generated via a two-stage conversion by Eliza Margaretha. " +
+					"In the first stage, wikitext " +
+					"from a Wikidump is converted into WikiXML by a WikiXMLConverter" +
+					"and in the second stage, WikiXML is converted into I5 by " +
+					"a WikiI5Converter. The converters are available at " +
+					"http://corpora.ids-mannheim.de/pub/tools/. Reference: " +
+					"Margaretha and Lüngen. 2014. Building Linguistic " +
+					"Corpora from Wikipedia Articles and Discussions. Journal " +
+					"for Language Technology and Computational Linguistics. " +
+					"To appear.");
 			level--; createIndent(level);
 			eventWriter.add(eventFactory.createEndElement("","","editorialDecl"));
 			eventWriter.add(newline);

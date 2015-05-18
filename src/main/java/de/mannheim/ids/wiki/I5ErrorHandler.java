@@ -24,8 +24,8 @@ public class I5ErrorHandler implements ErrorHandler{
 	OutputStreamWriter errorWriter;
 	int numOfInvalidText=0;
 	
-	public I5ErrorHandler(String type,String wikifile) throws I5Exception {
-		File errorFile = new File("logs/i5-"+wikifile+"-"+type+"-error.txt");
+	public I5ErrorHandler(String wikifile) throws I5Exception {
+		File errorFile = new File("logs/i5-"+wikifile+"-error.txt");
 		try {
 			errorFile.createNewFile();
 			errorWriter = new OutputStreamWriter(new FileOutputStream(errorFile));

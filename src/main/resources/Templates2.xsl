@@ -413,7 +413,7 @@
                                 <xsl:apply-templates/>
                             </p>
                             <!--  xsl:message>rest <xsl:copy-of select="."/-->
-                            </xsl:message>
+<!--                            </xsl:message>-->
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:for-each>
@@ -637,6 +637,9 @@
     </xsl:template>
 
     <xsl:template match="node()[name()=$inflectiveNames/*]">
+        <xsl:message>
+            <xsl:copy-of select="."/>
+        </xsl:message>
         <xsl:call-template name="esc">
             <xsl:with-param name="name" select="name()"/>
         </xsl:call-template>

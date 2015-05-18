@@ -84,7 +84,7 @@ public class WikiI5Converter {
 			throw new IllegalArgumentException("Please specify the output file.");
 		}
 		if (index == null){
-			throw new IllegalArgumentException("Please specify the index of the Wikipedia"
+			throw new IllegalArgumentException("Please specify the index of the Wikipedia "
 					+type+".");
 		}
 		if (encoding == null){

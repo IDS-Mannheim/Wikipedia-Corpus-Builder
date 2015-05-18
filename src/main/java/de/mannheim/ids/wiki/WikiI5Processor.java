@@ -45,17 +45,17 @@ public class WikiI5Processor {
 	
 	private I5ErrorHandler errorHandler;	
 	
-	private String[] indexList = {"A","B","C","D","E","F","G","H","I","J","K","L",
+	private String[] indexes = {"A","B","C","D","E","F","G","H","I","J","K","L",
 		    "M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
 		    "0","1","2","3","4","5","6","7","8","9"};
 	
-	private Processor processor = new Processor(true);
-	private Serializer serializer = new Serializer();	
+	private Processor processor;
+	private Serializer serializer;	
 	private XsltTransformer transformer;
 	private DocumentBuilder xmlBuilder;
 	
-	private XPathFactory xPathFactory = XPathFactory.newInstance();
-	private XPath xPath = xPathFactory.newXPath();
+	private XPathFactory xPathFactory;
+	private XPath xPath;
 	private XPathExpression lastId,group;	
 	private File tempI5;
 	
@@ -68,11 +68,16 @@ public class WikiI5Processor {
 		}
 		
 		this.corpus = corpus;
+		this.xPathFactory = XPathFactory.newInstance();
+		this.xPath = xPathFactory.newXPath();
+		this.processor = new Processor(true);
+		this.serializer = new Serializer();
 		
-		String type = corpus.getType();
-		errorHandler = new I5ErrorHandler(type,corpus.getOrigfilename());
+		String errorFilename = corpus.getDumpFilename().substring(0,15) + "-"+ 
+				corpus.getType(); 
+		errorHandler = new I5ErrorHandler(errorFilename);
 		// Set temporary i5 file
-		tempI5 = new File(corpus.getLang()+"wiki-"+type+"-temp.i5"); 
+		tempI5 = new File(corpus.getLang()+"wiki-"+corpus.getType()+"-temp.i5");
 				
 		setSerializer(corpus.getEncoding());
 		setTransformer(inflectives);		
@@ -112,7 +117,7 @@ public class WikiI5Processor {
 		transformer.setParameter(new QName("type"), 
 				new XdmAtomicValue(corpus.getType()));		
 		transformer.setParameter(new QName("origfilename"), 
-				new XdmAtomicValue(corpus.getOrigfilename()));
+				new XdmAtomicValue(corpus.getDumpFilename()));
 		transformer.setParameter(new QName("korpusSigle"), 
 				new XdmAtomicValue(corpus.getKorpusSigle()));		
 		transformer.setParameter(new QName("lang"), 
@@ -122,11 +127,9 @@ public class WikiI5Processor {
 		transformer.setParameter(new QName("pubMonth"), 
 				new XdmAtomicValue(corpus.getDumpFilename().substring(13,15)));
 		transformer.setParameter(new QName("pubYear"), 
-				new XdmAtomicValue(corpus.getYear()));
-		
-		if (inflectives !=null && !inflectives.isEmpty())
-			transformer.setParameter(new QName("inflectives"), 
-					new XdmAtomicValue(inflectives));
+				new XdmAtomicValue(corpus.getYear()));				
+		transformer.setParameter(new QName("inflectives"), 
+					new XdmAtomicValue(inflectives));		
 	}
 	
 	private void setXmlBuilder() throws I5Exception {
@@ -185,17 +188,17 @@ public class WikiI5Processor {
 		}
 		
 		String type = corpus.getType();
-		Document articleList;
+		Document wikiPageIndexes;
 		try {
-			articleList = xmlBuilder.parse(index);
+			wikiPageIndexes = xmlBuilder.parse(index);
 		} catch (SAXException | IOException e) {
 			throw new I5Exception(e);
-		}			
+		}
 		
 		// Sort by index
-		for (String idx :indexList){
+		for (String idx :indexes){
 			lastId = xPath.compile(type+"/index[@value='"+idx+"']/id[last()]");
-			int n = (int)(double) lastId.evaluate(articleList, XPathConstants.NUMBER);
+			int n = (int)(double) lastId.evaluate(wikiPageIndexes, XPathConstants.NUMBER);
 			if (n<1) continue; 
 			
 			// Group docs per 100000
@@ -206,7 +209,7 @@ public class WikiI5Processor {
 				
 				group = xPath.compile(type+"/index[@value='"+idx+"']/id[xs:integer" +
 						"(xs:integer(.) div 100000) = "+docNr+"]");
-				NodeList pagegroup = (NodeList) group.evaluate(articleList,
+				NodeList pagegroup = (NodeList) group.evaluate(wikiPageIndexes,
 						XPathConstants.NODESET);
 				
 				if (pagegroup.getLength()<1) {continue;}
@@ -219,15 +222,23 @@ public class WikiI5Processor {
 				for (int j = 0; j < pagegroup.getLength(); j++) {					
 					String xmlPath= idx+"/"+pagegroup.item(j).getTextContent()+".xml";
 					System.out.println(xmlPath);	
-					// Do XSLT transformation					
-					transform(idx,new File(xmlFolder+"/"+xmlPath));
+										
 					errorHandler.reset();
+					
+					// Do XSLT transformation
+					transform(idx,new File(xmlFolder+"/"+xmlPath));
+					if (!errorHandler.isValid()) {	
+						errorHandler.write(xmlPath);
+						continue;
+					}
+					
 					// Validate the resulting i5 file
 					validate(tempI5);
 					if (!errorHandler.isValid()) {											
 						errorHandler.write(xmlPath);
 						continue;												
 					}
+					
 					// read and copy the i5 content to the corpus file
 					try {
 						i5Writer.readIdsText(tempI5);
@@ -258,9 +269,10 @@ public class WikiI5Processor {
 			XdmNode source = processor.newDocumentBuilder().build(xml);			
 			transformer.setInitialContextNode(source);
 			transformer.setParameter(new QName("letter"), new XdmAtomicValue(index));
-			transformer.transform();			
-		} catch (Exception e) {
-			e.printStackTrace();
+			transformer.transform();
+		} catch (Exception e) {			
+			errorHandler.setValid(false);
+			errorHandler.setErrorMessage("Transformation error.");
 		}
 	} 
 	
@@ -269,9 +281,11 @@ public class WikiI5Processor {
 			reader.parse(i5.getName());			
 		} 
 		catch (SAXException e) {
+			errorHandler.setValid(false);
 			throw new I5Exception("Found an invalid I5 of a Wikipage", e);
 		}
 		catch (IOException e) {
+			errorHandler.setValid(false);
 			throw new I5Exception(e);
 		}
 	}
