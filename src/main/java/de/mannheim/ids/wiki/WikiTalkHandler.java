@@ -130,7 +130,7 @@ public class WikiTalkHandler {
 		
 		if (!baselineMode){
 			
-			// Help signature
+			// Special contribution and help signature
 			if (trimmedText.contains(this.contributionLabel)){
 				if (handleHelp(trimmedText)) return;			
 			}
@@ -188,6 +188,7 @@ public class WikiTalkHandler {
 			}
 			sigFlag=true;			
 			posting += matcher.group(1)+"\n";
+			
 			writePosting(matcher.group(3), matcher.group(2), timestamp, posting.trim(),rest.trim());
 						
 			matcher.reset();
@@ -333,6 +334,8 @@ public class WikiTalkHandler {
 		
 		if (!timestamp.isEmpty()){
 			sb.append(" synch=\""+time.getTimeId(timestamp)+"\"");
+			posting += " "+timestamp;
+			//System.out.println(posting+"\n");
 		}
 		sb.append(">\n");						
 				
