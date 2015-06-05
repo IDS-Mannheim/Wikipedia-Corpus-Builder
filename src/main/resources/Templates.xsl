@@ -7,7 +7,7 @@
 
     <xd:doc scope="stylesheet">
         <xd:desc>
-            <xd:p>Templates for procesing Wikipedia pages and grouping</xd:p>
+            <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
             <xd:p>Version 2.0</xd:p>
             <xd:p><xd:b>Revision:</xd:b> Jun 2013</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
@@ -58,17 +58,15 @@
         <!--Current index-->       
 
         <xsl:variable name="textSigle">
-            <xsl:if test="string-length(id) gt 7">
-                <xsl:message terminate="yes">ID länger als 7. Es kann kein gültiges textSigle
+            <xsl:if test="string-length(id) gt 10">
+                <xsl:message terminate="yes">ID länger als 10. Es kann kein gültiges textSigle
                     erzeugt werden. Abbruch.</xsl:message>
-            </xsl:if>
+            </xsl:if>            
             <xsl:variable name="intermediate">
                 <xsl:sequence
                     select="concat($korpusSigle,'/',
                     upper-case($letter), 
-                    if (string-length(id) lt 7)
-                    then(concat(string-join(for $i in 1 to (7-string-length(id)) return '0', ''),string(id)))
-                    else(string(id))
+                    format-number(id, '0000000000')
                     )"
                 />
             </xsl:variable>
