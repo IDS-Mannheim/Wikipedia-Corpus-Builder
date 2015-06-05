@@ -1,9 +1,5 @@
 package de.mannheim.ids.parser;
 
-import java.io.IOException;
-import javax.xml.bind.JAXBException;
-
-import org.sweble.wikitext.engine.CompilerException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
@@ -12,14 +8,20 @@ import org.sweble.wikitext.engine.nodes.EngCompiledPage;
 import org.sweble.wikitext.engine.output.HtmlRendererCallback;
 import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.utils.DefaultConfigEn;
-import org.sweble.wikitext.parser.parser.LinkTargetException;
+
+import de.mannheim.ids.util.WikiStatistics;
 
 /** Convert wikitext to XML
  *  
  *  @author margaretha
  *  
  * */
-public class Sweble2Parser {
+public class Sweble2Parser implements Runnable{
+	
+	private WikiConfig config;
+	private WtEngine engine;
+	private String wikitext, pagetitle, language, wikiXML;	
+	private WikiStatistics wikiStatistics;
 	
 	/** Generate an Abstract Syntax Tree representation (AST) representation 
 	 *  of a given wikitext using the Sweble Parser 2.0.0-alpha-2-SNAPSHOT version,
@@ -27,33 +29,22 @@ public class Sweble2Parser {
 	 * 
 	 * @param wikitext
 	 * @param pagetitle
-	 * @return wikitext in XML
-	 * @throws JAXBException
-	 * @throws CompilerException
-	 * @throws LinkTargetException
-	 * @throws IOException
+	 * @param language
 	 */
-	public String parseText(String wikitext, String pagetitle, String language) 
-			throws JAXBException, CompilerException, LinkTargetException, IOException {
-				
+	public Sweble2Parser(String wikitext, String pagetitle, String language, WikiStatistics wikiStatistics) {
+		config = DefaultConfigEn.generate();
+		// Instantiate Sweble parser
+		engine = new WtEngine(config);
+		
 		if (language==null || language.isEmpty()){
 			throw new IllegalArgumentException("Language cannot be null or empty.");
 		}
-		
-		WikiConfig config = DefaultConfigEn.generate();
-		// Instantiate Sweble parser
-		WtEngine engine = new WtEngine(config);
-
-		PageTitle pageTitle = PageTitle.make(config, pagetitle);		
-		PageId pageId = new PageId(pageTitle, -1);
-		// Parse Wikitext into AST
-		EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);	
-		// Render AST to XML		
-		String uri = language+".wikipedia.org/wiki/";
-		String wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage(),uri);
-		
-		return wikiXML;
-	}	
+		this.wikitext = wikitext;
+		this.pagetitle = pagetitle;
+		this.language = language;
+		this.wikiStatistics = wikiStatistics;		
+		this.wikiXML="";
+	}
 	
 	private static final class MyRendererCallback
 	implements
@@ -73,5 +64,30 @@ public class Sweble2Parser {
 		{
 			return null;
 		}
+	}
+
+	@Override
+	public void run(){		
+		try {
+			PageTitle pageTitle = PageTitle.make(config, pagetitle);
+			PageId pageId = new PageId(pageTitle, -1);
+			// Parse Wikitext into AST
+			EngCompiledPage cp = engine.postprocess(pageId, wikitext, null);
+			
+			// Render AST to XML		
+			String uri = language+".wikipedia.org/wiki/";
+			wikiXML = XMLRenderer.print(new MyRendererCallback(), config, pageTitle, cp.getPage(),uri);
+		}
+		catch (Exception e) {
+			wikiStatistics.addSwebleErrors();
+			wikiStatistics.logErrorPage("SWEBLE: "+pagetitle + ", cause: "+e.getMessage());
+		}
+	}
+	
+	public String getWikiXML() {
+		return wikiXML;
+	}
+	public void setWikiXML(String wikiXML) {
+		this.wikiXML = wikiXML;
 	}
 }

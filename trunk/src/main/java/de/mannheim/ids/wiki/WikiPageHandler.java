@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
@@ -43,8 +44,7 @@ public class WikiPageHandler {
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
 		
-		tagSoupParser = new TagSoupParser();
-		swebleParser = new Sweble2Parser();
+		tagSoupParser = new TagSoupParser();		
 		dp = new DOMParser();
 		
 		this.language=language;
@@ -101,19 +101,37 @@ public class WikiPageHandler {
 
 	}
 	
-	private String parseToXML(String wikitext, String pagetitle){
+	@SuppressWarnings("deprecation")
+	private String parseToXML(String wikitext, String pagetitle) throws IOException{
 		
 		wikitext = StringEscapeUtils.unescapeXml(wikitext); // unescape XML tags
 		wikitext = cleanPattern(wikitext);		
 		
-		try{
-			// italic and bold are not repaired because they have wiki-mark-ups
-			wikitext = tagSoupParser.generate(wikitext,true);
-			wikitext = swebleParser.parseText(wikitext.trim(), pagetitle, language);
+		// italic and bold are not repaired because they have wiki-mark-ups
+		try {
+			wikitext = tagSoupParser.generate(wikitext,true);		
+		} 
+		catch (SAXException e) {
+			//wikiStatistics.errorPages.add
+			wikiStatistics.logErrorPage("TAGSOUP: "+pagetitle + ", cause: "+e.getMessage());			
 		}
-		catch (Exception e) {
+		
+		swebleParser = new Sweble2Parser(wikitext.trim(), pagetitle, language, wikiStatistics);
+		Thread swebleThread = new Thread(swebleParser);
+		
+		try{			
+			swebleThread.start();
+			swebleThread.join(1000 * 60);
+			if (swebleThread.isAlive()){
+				swebleThread.stop();
+				//throw new RuntimeException("Sweble run time was too long.");
+			}
+			wikitext = swebleParser.getWikiXML();
+		}
+		catch (Exception e) {			
 			wikiStatistics.addSwebleErrors();
-			wikiStatistics.errorPages.add(pagetitle);
+			//wikiStatistics.errorPages.add
+			wikiStatistics.logErrorPage("SWEBLE: "+pagetitle + ", cause: "+e.getMessage());
 			wikitext="";
 		}
 		return wikitext;
@@ -160,7 +178,8 @@ public class WikiPageHandler {
 		}
 		catch (Exception e) {			
 			wikiStatistics.addParsingErrors();
-			wikiStatistics.errorPages.add("DOM "+wikiPage.getPageTitle());
+			//wikiStatistics.errorPages.add
+			wikiStatistics.logErrorPage("DOM: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
 			wikiPage.wikitext="";				
 		}
 		
@@ -168,8 +187,10 @@ public class WikiPageHandler {
 			wikiPage.pageStructure = tagSoupParser.generate(wikiPage.pageStructure, false);
 		} 
 		catch (Exception e) { 
-			System.err.println("Outer Error: "+wikiPage.getPageTitle());
+			//System.err.println("Outer Error: "+wikiPage.getPageTitle());
 			wikiStatistics.addPageStructureErrors();
+			//wikiStatistics.errorPages.add
+			wikiStatistics.logErrorPage("PAGE: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
 			e.printStackTrace(); 
 		}		
 	}

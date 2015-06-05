@@ -1,5 +1,9 @@
 package de.mannheim.ids.util;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +34,11 @@ public class WikiStatistics {
 	private int totalMetapages;
 	private int totalPostings;
 	
-	public List<String> errorPages;
-
-	public WikiStatistics() {
+	//public List<String> errorPages;
+	public OutputStreamWriter errorWriter;
+	private int errorCounter;
+	
+	public WikiStatistics(String inputFile) throws IOException {
 		this.swebleErrors=0;
 		this.parsingErrors=0;
 		this.pageStructureErrors=0;
@@ -46,7 +52,12 @@ public class WikiStatistics {
 		this.totalDiscussions=0;
 		this.totalArticles=0;	
 		this.totalPostings=0;
-		this.errorPages = new ArrayList<String>();
+		//this.errorPages = new ArrayList<String>();
+		
+		Utilities.createDirectory("logs");
+		String filename = Paths.get(inputFile).getFileName().toString();		
+		errorWriter = Utilities.createWriter("./logs/xml-"+filename.substring(0,15)+"-errors.log");		
+		errorCounter=1;
 	} 
 	
 	public int getSwebleErrors() {
@@ -188,11 +199,30 @@ public class WikiStatistics {
 		System.out.println("Total page structure exceptions "+ this.getPageStructureErrors());
 	}
 
-	public List<String> getErrorPages() {
-		return errorPages;
+//	public List<String> getErrorPages() {
+//		return errorPages;
+//	}
+//
+//	public void setErrorPages(List<String> errorPages) {
+//		this.errorPages = errorPages;
+//	}
+	
+	public void logErrorPage(String page){
+		//Utilities.createDirectory("logs");
+		//OutputStreamWriter writer = Utilities.createWriter("logs/"+inputFile.substring(0,15)+"-errors.xml");
+		//int i=1;
+		//for (String page : errorPages){
+		try {
+			errorWriter.append(String.valueOf(errorCounter++));
+			errorWriter.append(" ");
+			errorWriter.append(page);
+			errorWriter.append("\n");
+			errorWriter.flush();
+		} catch (IOException e) {
+			System.out.println("Failed writing error.");
+		}
+		
+		//}
+		//writer.close();
 	}
-
-	public void setErrorPages(List<String> errorPages) {
-		this.errorPages = errorPages;
-	}	
 }

@@ -28,7 +28,7 @@ public class WikiXMLProcessor {
 	public void createWikiXML(String inputFile, String xmlOutputDir) throws IOException {
 				
 		createOutputDirectories(xmlOutputDir);		
-		WikiStatistics wikiStatistics = new WikiStatistics();
+		WikiStatistics wikiStatistics = new WikiStatistics(inputFile);
 		WikiXMLWriter wikiXMLWriter = new MultipleXMLWriter(xmlOutputDir,
 				languageProperties.getLanguage(), wikiStatistics);
 		
@@ -37,7 +37,7 @@ public class WikiXMLProcessor {
 	
 	public void createSingleWikiXML(String inputFile, String xmlOutputDir) throws IOException {
 		Utilities.createDirectory(xmlOutputDir);		
-		WikiStatistics wikiStatistics = new WikiStatistics();
+		WikiStatistics wikiStatistics = new WikiStatistics(inputFile);
 		WikiXMLWriter wikiXMLWriter = new SingleXMLWriter(xmlOutputDir,
 				languageProperties.getLanguage(), wikiStatistics, namespaces);
 		
@@ -61,6 +61,7 @@ public class WikiXMLProcessor {
 		WikiPageReader wikiReader = new WikiPageReader(languageProperties,wikiStatistics);
 		wikiReader.read(inputFile,wikiXMLWriter);		
 		wikiStatistics.printStatistics();
+		wikiStatistics.errorWriter.close();
 	}
 	
 	private void createOutputDirectories(String xmlOutputDir){	

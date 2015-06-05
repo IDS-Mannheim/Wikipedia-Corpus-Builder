@@ -12,6 +12,8 @@ public class LanguageProperties {
 
 	private List<Integer> namespaces = new ArrayList<Integer>();
 	private String talk, language, user, contribution;
+	private static ArrayList<String> languages = new ArrayList<String>();
+	
 	
 	/** Define language properties for an unsupported language.
 	 * 
@@ -36,6 +38,7 @@ public class LanguageProperties {
 			throw new IllegalArgumentException("Namespaces cannot be null.");
 		}
 		
+		languages.add(language);
 		this.language = language;
 		this.talk = talk;
 		this.user = user;
@@ -56,7 +59,7 @@ public class LanguageProperties {
 			throw new IllegalArgumentException("Namespaces cannot be null.");
 		}
 		
-		this.setLanguage(language.toLowerCase());
+		setLanguage(language.toLowerCase());
 		setLanguageProperties(language);		
 		setNamespaces(namespaces);
 	}
@@ -74,6 +77,11 @@ public class LanguageProperties {
 			setTalk("Diskussion");
 			setUser("Benutzer");
 			setContribution("Spezial:Beiträge");			
+		}
+		else if (language.equals("en")){
+			setTalk("Talk");
+			setUser("User");
+			setContribution("Special:Contributions");
 		}
 		else if (language.equals("fr")){
 			setTalk("Discussion");
@@ -144,4 +152,16 @@ public class LanguageProperties {
 	public void setNamespaces(List<Integer> namespaces) {
 		this.namespaces = namespaces;
 	}
+	
+	public static ArrayList<String> getLanguages(){
+		languages.add("de");
+		languages.add("fr");
+		languages.add("hu");
+		languages.add("it");
+		languages.add("pl");
+		languages.add("no");
+		languages.add("en");
+		return languages;
+	}
+	
 }

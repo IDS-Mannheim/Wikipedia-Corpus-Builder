@@ -31,8 +31,9 @@ public class WikiTalkUser {
 		}
 		
 		user = new HashMap<String, String>();
-		userWriter = Utilities.createWriter(language+"wiki-talk-user.xml");
-		userWriter.append("<listPerson>\n");		
+		Utilities.createDirectory("talk");
+		userWriter = Utilities.createWriter("talk/"+language+"wiki-talk-user.xml");
+		userWriter.append("<listPerson>\n");
 		counter=0;
 		this.userUri=userUri;
 		getTalkUser("unknown","",false);		

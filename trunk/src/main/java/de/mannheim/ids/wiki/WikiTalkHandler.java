@@ -57,7 +57,7 @@ public class WikiTalkHandler {
 		specialContribution = Pattern.compile("(.*)\\[\\["+contribution+"/([^\\|]+)\\|[^\\]]+\\]\\](.*)");
 		
 		tagSoupParser = new TagSoupParser();
-		swebleParser = new Sweble2Parser();
+		
 		this.language = language;
 		this.wikiStatistics = wikiStatistics;		
 		this.user= new WikiTalkUser(language, language+".wikipedia.org/wiki/"+user+":");
@@ -292,10 +292,19 @@ public class WikiTalkHandler {
 		
 		try {
 			posting = tagSoupParser.generate(posting,true);			
-			posting = swebleParser.parseText(posting, wikiPage.getPageTitle(),language);
+			swebleParser = new Sweble2Parser(posting, wikiPage.getPageTitle(),language, wikiStatistics);
+			Thread swebleThread = new Thread(swebleParser);
+			swebleThread.start();
+			swebleThread.join(1000*60);
+			if (swebleThread.isAlive()){
+				swebleThread.stop();
+				//throw new RuntimeException("Sweble run time was too long.");
+			}
+			posting = swebleParser.getWikiXML();
 		} catch (Exception e) {			
 			wikiStatistics.addSwebleErrors();
-			wikiStatistics.errorPages.add(wikiPage.getPageTitle());
+			wikiStatistics.logErrorPage("SWEBLE: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
+			posting = "";
 		}
 		return posting;
 	}

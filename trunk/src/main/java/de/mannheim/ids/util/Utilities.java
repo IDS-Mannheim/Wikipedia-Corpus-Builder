@@ -25,7 +25,7 @@ public class Utilities {
 		if (!dir.exists()) { dir.mkdirs(); }
 	}
 
-	public static OutputStreamWriter createWriter (String outputFile) throws IOException {		
+	public static OutputStreamWriter createWriter (String outputFile) throws IOException {
 		File file = new File(outputFile);		
 		if (!file.exists()) file.createNewFile();
 

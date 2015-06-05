@@ -57,14 +57,14 @@ public class WikiXMLConverter {
 			throw new IllegalArgumentException("Please specify the Wiki dump file.");
 		}
 		
-		String[] languages = {"de","fr","hu","it","pl","no"};
+		ArrayList<String> languages = LanguageProperties.getLanguages();
 		if (language == null){
 			throw new IllegalArgumentException("Please specify the Wikipedia language.");
 		}				
-		else if (!Arrays.asList(languages).contains(language)){
+		else if (!languages.contains(language)){
 			throw new IllegalArgumentException("Language is not supported. Supported " +
 					"languages are de (german), fr (french), hu (hungarian), it (italian), " +
-					"pl (polish), no (norwegian).");
+					"pl (polish), no (norwegian), en (english).");
 		}
 		
 		List<Integer> namespaces= new ArrayList<Integer>();
