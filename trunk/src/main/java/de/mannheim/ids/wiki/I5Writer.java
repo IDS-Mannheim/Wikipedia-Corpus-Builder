@@ -447,10 +447,12 @@ public class I5Writer {
 					"and in the second stage, WikiXML is converted into I5 by " +
 					"a WikiI5Converter. The converters are available at " +
 					"http://corpora.ids-mannheim.de/pub/tools/. Reference: " +
-					"Margaretha and Lüngen. 2014. Building Linguistic " +
-					"Corpora from Wikipedia Articles and Discussions. Journal " +
-					"for Language Technology and Computational Linguistics. " +
-					"To appear.");
+					"Building Linguistic Corpora from Wikipedia Articles and Discussions. " +
+					"In: Beißwenger, Michael/Oostdijk, Nelleke/Storrer, Angelika/van " +
+					"den Heuvel, Henk (Hrsg.): Building and Annotating Corpora of " +
+					"Computer-mediated Communication: Issues and Challenges at the " +
+					"Interface between Computational and Corpus Linguistics. " +
+					"S. 59-82 - Regensburg: GSCL, 2014.");
 			level--; createIndent(level);
 			eventWriter.add(eventFactory.createEndElement("","","editorialDecl"));
 			eventWriter.add(newline);
