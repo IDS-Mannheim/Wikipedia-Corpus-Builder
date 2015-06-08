@@ -109,7 +109,8 @@ public class WikiPageHandler {
 		
 		// italic and bold are not repaired because they have wiki-mark-ups
 		try {
-			wikitext = tagSoupParser.generate(wikitext,true);		
+			wikitext = tagSoupParser.generate(wikitext,true);
+			//System.out.println(wikitext);
 		} 
 		catch (SAXException e) {
 			//wikiStatistics.errorPages.add
@@ -127,6 +128,7 @@ public class WikiPageHandler {
 				//throw new RuntimeException("Sweble run time was too long.");
 			}
 			wikitext = swebleParser.getWikiXML();
+			//System.out.println(wikitext);
 		}
 		catch (Exception e) {			
 			wikiStatistics.addSwebleErrors();

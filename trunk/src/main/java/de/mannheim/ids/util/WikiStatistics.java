@@ -38,7 +38,7 @@ public class WikiStatistics {
 	public OutputStreamWriter errorWriter;
 	private int errorCounter;
 	
-	public WikiStatistics(String inputFile) throws IOException {
+	public WikiStatistics(String inputFile, String encoding) throws IOException {
 		this.swebleErrors=0;
 		this.parsingErrors=0;
 		this.pageStructureErrors=0;
@@ -56,7 +56,7 @@ public class WikiStatistics {
 		
 		Utilities.createDirectory("logs");
 		String filename = Paths.get(inputFile).getFileName().toString();		
-		errorWriter = Utilities.createWriter("./logs/xml-"+filename.substring(0,15)+"-errors.log");		
+		errorWriter = Utilities.createWriter("./logs/xml-"+filename.substring(0,15)+"-errors.log",encoding);		
 		errorCounter=1;
 	} 
 	

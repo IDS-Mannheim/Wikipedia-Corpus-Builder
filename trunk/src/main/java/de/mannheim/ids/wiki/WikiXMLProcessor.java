@@ -25,21 +25,21 @@ public class WikiXMLProcessor {
 		this.namespaces = namespaces; 
 	}
 	
-	public void createWikiXML(String inputFile, String xmlOutputDir) throws IOException {
+	public void createWikiXML(String inputFile, String xmlOutputDir, String encoding) throws IOException {
 				
 		createOutputDirectories(xmlOutputDir);		
-		WikiStatistics wikiStatistics = new WikiStatistics(inputFile);
+		WikiStatistics wikiStatistics = new WikiStatistics(inputFile, encoding);
 		WikiXMLWriter wikiXMLWriter = new MultipleXMLWriter(xmlOutputDir,
-				languageProperties.getLanguage(), wikiStatistics);
+				languageProperties.getLanguage(), encoding, wikiStatistics);
 		
 		process(inputFile, wikiStatistics, wikiXMLWriter);
 	}
 	
-	public void createSingleWikiXML(String inputFile, String xmlOutputDir) throws IOException {
+	public void createSingleWikiXML(String inputFile, String xmlOutputDir, String encoding) throws IOException {
 		Utilities.createDirectory(xmlOutputDir);		
-		WikiStatistics wikiStatistics = new WikiStatistics(inputFile);
+		WikiStatistics wikiStatistics = new WikiStatistics(inputFile, encoding);
 		WikiXMLWriter wikiXMLWriter = new SingleXMLWriter(xmlOutputDir,
-				languageProperties.getLanguage(), wikiStatistics, namespaces);
+				languageProperties.getLanguage(), encoding, wikiStatistics, namespaces);
 		
 		process(inputFile, wikiStatistics, wikiXMLWriter);
 		wikiXMLWriter.close();

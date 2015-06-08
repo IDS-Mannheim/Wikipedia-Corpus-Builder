@@ -30,6 +30,7 @@ public class WikiXMLConverter {
 		options.addOption("w", true, "Wiki dump file");
 		options.addOption("t", true, "The type of Wikipages [articles | discussions | all]");
 		options.addOption("o", true, "The xml output directory");
+		options.addOption("e", true, "Encoding: utf-8 or iso-8859-1");
 	}
 	
 	public static void main(String[] args) throws Exception {		
@@ -46,12 +47,13 @@ public class WikiXMLConverter {
 		String type = cmd.getOptionValue("t");
 		String wikidump = cmd.getOptionValue("w");
 		String xmlOutputDir = cmd.getOptionValue("o");
+		String encoding = cmd.getOptionValue("e");
 		
-		convert(wikidump, language, type, xmlOutputDir);
+		convert(wikidump, language, type, xmlOutputDir, encoding);
 	}
 	
 	public static void convert(String wikidump, String language, String type, 
-			String xmlOutputDir) throws IOException{
+			String xmlOutputDir, String encoding) throws IOException{
 		
 		if (wikidump == null){
 			throw new IllegalArgumentException("Please specify the Wiki dump file.");
@@ -65,6 +67,10 @@ public class WikiXMLConverter {
 			throw new IllegalArgumentException("Language is not supported. Supported " +
 					"languages are de (german), fr (french), hu (hungarian), it (italian), " +
 					"pl (polish), no (norwegian), en (english).");
+		}
+		
+		if (encoding == null || encoding.isEmpty()){
+			encoding = "utf-8";
 		}
 		
 		List<Integer> namespaces= new ArrayList<Integer>();
@@ -92,7 +98,7 @@ public class WikiXMLConverter {
 		
 		WikiXMLProcessor wxp = new WikiXMLProcessor(lp,namespaces);
 		try {
-			wxp.createWikiXML(wikidump,xmlOutputDir);
+			wxp.createWikiXML(wikidump, xmlOutputDir, encoding);
 		} catch (IOException e) {
 			throw new IOException("Failed creating WikiXML.", e);
 		}

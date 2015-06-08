@@ -15,12 +15,13 @@ import de.mannheim.ids.util.WikiStatistics;
  */
 public class SingleXMLWriter implements WikiXMLWriter {
 
-	int counter;
-	private String language;	
+	private int counter;
+	private String language, encoding;	
 	private WikiStatistics wikiStatistics;
 	private OutputStreamWriter articleWriter, discussionWriter;
 	
-	public SingleXMLWriter(String xmlOutputDir, String language, WikiStatistics 
+	
+	public SingleXMLWriter(String xmlOutputDir, String language, String encoding, WikiStatistics 
 			wikiStatistics, List<Integer> namespaces) throws IOException {
 		
 		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
@@ -35,16 +36,16 @@ public class SingleXMLWriter implements WikiXMLWriter {
 		if (namespaces==null){
 			throw new IllegalArgumentException("Namespaces cannot be null.");
 		}
-		
-		
+				
 		this.language = language;
+		this.encoding = encoding;
 		this.wikiStatistics = wikiStatistics;
 		this.counter=1;
 		
 		if (namespaces.contains(0)) 
-			articleWriter = Utilities.createWriter(xmlOutputDir+"/wiki-articles.xml");		
+			articleWriter = Utilities.createWriter(xmlOutputDir+"/wiki-articles.xml", encoding);		
 		if (namespaces.contains(1)) 
-			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml");		
+			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml", encoding);		
 	}	
 	
 	@Override

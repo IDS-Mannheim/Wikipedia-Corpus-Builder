@@ -23,7 +23,7 @@ public class WikiTalkTime {
 			throw new IllegalArgumentException("Language cannot be null or empty.");
 		}
 		
-		timeWriter = Utilities.createWriter("talk/"+language+"wiki-talk-timeline.xml");
+		timeWriter = Utilities.createWriter("talk/"+language+"wiki-talk-timeline.xml", "utf-8");
 		counter=0;
 		
 		timeWriter.append("<timeline>\n");		

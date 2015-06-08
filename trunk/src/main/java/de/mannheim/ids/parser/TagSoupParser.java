@@ -20,7 +20,7 @@ import org.xml.sax.XMLReader;
  */
 public class TagSoupParser {
 	
-	private HTMLSchema theSchema = null;	
+	private HTMLSchema theSchema = null;
 	
 	/** Generate a clean HTML from a given wikitext containing improper HTML tags 
 	 *  (e.g tags that do not opened or closed properly) using TagSoup library. 
@@ -59,8 +59,7 @@ public class TagSoupParser {
 		String cleanWikitext = w.toString();
 		cleanWikitext = StringUtils.replaceEach(cleanWikitext, 
 				new String[] {"<html><body>", "</body></html>"}, 
-				new String[] {"", "\n"});		
-
+				new String[] {"", "\n"});
 		return cleanWikitext;
 		
 	}
@@ -68,7 +67,7 @@ public class TagSoupParser {
 	private ContentHandler chooseContentHandler(Writer w) {
 		XMLWriter x = new XMLWriter(w);		
 		x.setOutputProperty(XMLWriter.OMIT_XML_DECLARATION, "yes");		
-		x.setOutputProperty(XMLWriter.ENCODING, "utf-8");
+		//x.setOutputProperty(XMLWriter.ENCODING, encoding);
 		x.setPrefix(theSchema.getURI(), "");
 		return x;
 	}

@@ -13,11 +13,12 @@ import de.mannheim.ids.util.WikiStatistics;
  */
 public class MultipleXMLWriter implements WikiXMLWriter{
 
-	String xmlOutputDir, language;
-	int counter;
-	WikiStatistics wikiStatistics;
+	private String xmlOutputDir, language;
+	private int counter;
+	private WikiStatistics wikiStatistics;
+	private String encoding;
 	
-	public MultipleXMLWriter(String xmlOutputDir, String language, WikiStatistics wikiStatistics) {
+	public MultipleXMLWriter(String xmlOutputDir, String language, String encoding, WikiStatistics wikiStatistics) {
 		
 		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
 			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
@@ -33,6 +34,7 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 		this.counter=1;
 		this.wikiStatistics = wikiStatistics;
 		this.language=language;
+		this.encoding = encoding;
 	}
 	
 	@Override
@@ -50,7 +52,7 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 			
 			if (isDiscussion) path = this.xmlOutputDir+"/discussions/";		
 			else path = this.xmlOutputDir+"/articles/";		
-			writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
+			writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml", this.encoding);
 			System.out.println(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
 			writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 			

@@ -32,7 +32,7 @@ public class WikiTalkUser {
 		
 		user = new HashMap<String, String>();
 		Utilities.createDirectory("talk");
-		userWriter = Utilities.createWriter("talk/"+language+"wiki-talk-user.xml");
+		userWriter = Utilities.createWriter("talk/"+language+"wiki-talk-user.xml","utf-8");
 		userWriter.append("<listPerson>\n");
 		counter=0;
 		this.userUri=userUri;

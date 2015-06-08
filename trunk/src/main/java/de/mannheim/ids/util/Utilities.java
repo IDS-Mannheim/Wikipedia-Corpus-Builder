@@ -25,12 +25,12 @@ public class Utilities {
 		if (!dir.exists()) { dir.mkdirs(); }
 	}
 
-	public static OutputStreamWriter createWriter (String outputFile) throws IOException {
+	public static OutputStreamWriter createWriter (String outputFile, String encoding) throws IOException {
 		File file = new File(outputFile);		
 		if (!file.exists()) file.createNewFile();
 
 		OutputStreamWriter os = new OutputStreamWriter(new BufferedOutputStream(
-				new FileOutputStream(file)), "UTF-8");		
+				new FileOutputStream(file)), encoding);		
 
 		return os;	
 	}
