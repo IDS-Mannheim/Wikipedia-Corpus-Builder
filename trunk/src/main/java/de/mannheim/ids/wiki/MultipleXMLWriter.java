@@ -15,24 +15,19 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 
 	private String xmlOutputDir, language;
 	private int counter;
-	private WikiStatistics wikiStatistics;
 	private String encoding;
 	
-	public MultipleXMLWriter(String xmlOutputDir, String language, String encoding, WikiStatistics wikiStatistics) {
+	public MultipleXMLWriter(String xmlOutputDir, String language, String encoding) {
 		
 		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
 			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
-		}
-		if (wikiStatistics==null){
-			throw new IllegalArgumentException("WikiStatistics cannot be null.");
-		}
+		}		
 		if (language == null || language.isEmpty()){
 			throw new IllegalArgumentException("Language cannot be null or empty.");
 		}
 		
 		this.xmlOutputDir = xmlOutputDir;
 		this.counter=1;
-		this.wikiStatistics = wikiStatistics;
 		this.language=language;
 		this.encoding = encoding;
 	}
@@ -54,12 +49,13 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 			else path = this.xmlOutputDir+"/articles/";		
 			writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml", this.encoding);
 			System.out.println(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
-			writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+			writer.append("<?xml version=\"1.0\" encoding=\"");
+			writer.append(this.encoding);
+			writer.append("\"?>\n");
 			
 			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());					
 				
 			String [] arr = wikiPage.pageStructure.split("<text></text>");
-			//System.out.println(wikiPage.pageStructure);
 							
 			writer.append(indent);
 			writer.append(arr[0]);	

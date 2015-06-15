@@ -30,7 +30,7 @@ public class WikiXMLProcessor {
 		createOutputDirectories(xmlOutputDir);		
 		WikiStatistics wikiStatistics = new WikiStatistics(inputFile, encoding);
 		WikiXMLWriter wikiXMLWriter = new MultipleXMLWriter(xmlOutputDir,
-				languageProperties.getLanguage(), encoding, wikiStatistics);
+				languageProperties.getLanguage(), encoding);
 		
 		process(inputFile, wikiStatistics, wikiXMLWriter);
 	}
