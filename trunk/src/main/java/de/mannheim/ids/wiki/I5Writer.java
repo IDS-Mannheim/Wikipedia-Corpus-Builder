@@ -83,7 +83,7 @@ public class I5Writer {
 		eventReader.nextEvent(); // ignore processing instruction
 		eventReader.nextEvent(); // ignore dtd
 		
-		while (eventReader.hasNext()){			
+		while (eventReader.hasNext()){
 			eventWriter.add(eventReader.nextEvent());			
 		}
 		eventWriter.add(newline);
@@ -443,7 +443,7 @@ public class I5Writer {
 			createLeafNode(level,"transduction", null, "This document has been " +
 					"generated via a two-stage conversion by Eliza Margaretha. " +
 					"In the first stage, wikitext " +
-					"from a Wikidump is converted into WikiXML by a WikiXMLConverter" +
+					"from a Wikidump is converted into WikiXML by a WikiXMLConverter " +
 					"and in the second stage, WikiXML is converted into I5 by " +
 					"a WikiI5Converter. The converters are available at " +
 					"http://corpora.ids-mannheim.de/pub/tools/. Reference: " +

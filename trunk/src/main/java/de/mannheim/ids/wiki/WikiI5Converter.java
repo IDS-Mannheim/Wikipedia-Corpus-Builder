@@ -103,7 +103,7 @@ public class WikiI5Converter {
 		try{
 			w.open();
 			w.createCorpusHeader();			
-			// Do the converting and write
+			// Do the convertion and write the resulting I5
 			WikiI5Processor wikiI5Processor = new WikiI5Processor(corpus, inflectives);
 			wikiI5Processor.run(xmlFolder, index, w);
 			w.close();
