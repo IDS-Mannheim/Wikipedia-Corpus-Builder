@@ -33,10 +33,10 @@
         <name>source</name>
     </xsl:param>
 
-    <xsl:param name="inflectiveNames">      			
-   		<xsl:if test="$inflectives">
-   			<xsl:copy-of select="doc($inflectives)//inflectives//name"/>
-   		</xsl:if>        
+    <xsl:param name="inflectiveNames">
+        <xsl:if test="$inflectives">
+            <xsl:copy-of select="doc($inflectives)//inflectives//name"/>
+        </xsl:if>
     </xsl:param>
 
     <xsl:param name="divClasses">
@@ -46,14 +46,14 @@
         <name>tright</name>
         <name>sideBox</name>
     </xsl:param>
-	
+
     <!-- Paragraph Level Templates -->
 
-    <xsl:template match="p">   		
-        <xsl:if test="text()[normalize-space(.)] | *">           
+    <xsl:template match="p">
+        <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:choose>
                 <!-- Handle paragraph inside phrase elements -->
-                <xsl:when test="parent::node()[name()=$phraseNames/*]">                    
+                <xsl:when test="parent::node()[name()=$phraseNames/*]">
                     <xsl:choose>
                         <!-- When the phrase element contains header and is escaped -->
                         <xsl:when
@@ -380,7 +380,7 @@
 
 
     <!-- Posting Template -->
-    <xsl:template match="posting">   
+    <xsl:template match="posting">
         <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:element name="posting">
                 <xsl:attribute name="indentLevel" select="@indentLevel"/>
@@ -413,7 +413,7 @@
                                 <xsl:apply-templates/>
                             </p>
                             <!--  xsl:message>rest <xsl:copy-of select="."/-->
-<!--                            </xsl:message>-->
+                            <!--                            </xsl:message>-->
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:for-each>
@@ -498,7 +498,7 @@
             </xsl:when>
             <!--<xsl:when test="@class eq 'unknown-node'">                
                 <gap desc="{@name}" reason="omitted"/>
-            </xsl:when>  -->            
+            </xsl:when>  -->
             <xsl:otherwise>
                 <xsl:apply-templates/>
             </xsl:otherwise>
@@ -613,19 +613,19 @@
     </xsl:template>
 
     <xsl:template match="font">
-<!--        <xsl:if test="text()[normalize-space(.)] | *">-->
-            <hi rend="font-style">
-                <xsl:apply-templates/>
-            </hi>
-<!--        </xsl:if>-->
+        <!--        <xsl:if test="text()[normalize-space(.)] | *">-->
+        <hi rend="font-style">
+            <xsl:apply-templates/>
+        </hi>
+        <!--        </xsl:if>-->
     </xsl:template>
 
-    <xsl:template match="syntaxhighlight | Syntaxhighlight">      
-<!--        <xsl:if test="text()[normalize-space(.)] | *">-->
-            <hi rend="syntaxhighlight">
-                <xsl:apply-templates/>
-            </hi>
-<!--        </xsl:if>-->
+    <xsl:template match="syntaxhighlight | Syntaxhighlight">
+        <!--        <xsl:if test="text()[normalize-space(.)] | *">-->
+        <hi rend="syntaxhighlight">
+            <xsl:apply-templates/>
+        </hi>
+        <!--        </xsl:if>-->
     </xsl:template>
 
     <!-- Escaped Element Templates -->
@@ -639,11 +639,9 @@
     <xsl:template match="node()[name()=$inflectiveNames/*]">
         <xsl:message>
             <xsl:copy-of select="."/>
-        </xsl:message>
-        <xsl:call-template name="esc">
+        </xsl:message> &lt;<xsl:value-of select="name()"/>&gt;<xsl:call-template name="esc">
             <xsl:with-param name="name" select="name()"/>
-        </xsl:call-template>
-    </xsl:template>
+        </xsl:call-template>&lt;/<xsl:value-of select="name()"/>&gt; </xsl:template>
 
     <xsl:template match="*">
         <xsl:variable name="name">
