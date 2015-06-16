@@ -1,6 +1,7 @@
 package de.mannheim.ids.wiki;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -129,7 +130,9 @@ public class WikiI5Processor {
 		transformer.setParameter(new QName("pubYear"), 
 				new XdmAtomicValue(corpus.getYear()));				
 		transformer.setParameter(new QName("inflectives"), 
-					new XdmAtomicValue(inflectives));		
+					new XdmAtomicValue(inflectives));
+		transformer.setParameter(new QName("encoding"), 
+				new XdmAtomicValue(corpus.getEncoding()));
 	}
 	
 	private void setXmlBuilder() throws I5Exception {
@@ -195,6 +198,7 @@ public class WikiI5Processor {
 			throw new I5Exception(e);
 		}
 		
+		//String[] indexes = {"B"};
 		// Sort by index
 		for (String idx :indexes){
 			lastId = xPath.compile(type+"/index[@value='"+idx+"']/id[last()]");
@@ -207,13 +211,18 @@ public class WikiI5Processor {
 				String docSigle = idx + String.format("%02d",docNr) ;
 				System.out.println("DocId "+docSigle);				
 				
+				//if (!"B458".equals(docSigle)) { continue; }
+				
 				group = xPath.compile(type+"/index[@value='"+idx+"']/id[xs:integer" +
 						"(xs:integer(.) div 100000) = "+docNr+"]");
 				NodeList pagegroup = (NodeList) group.evaluate(wikiPageIndexes,
 						XPathConstants.NODESET);
 				
+				//System.out.println("Pagegroup LENGTH "+pagegroup.getLength());
+				
 				if (pagegroup.getLength()<1) {continue;}
 				
+					
 				i5Writer.createIdsDocStartElement(createDocId(idx, docSigle));
 				String docTitle = i5Writer.createIdsDocTitle(type, idx, docNr);
 				i5Writer.createIdsDocHeader(corpus.getKorpusSigle()+"/"+docSigle, docTitle);		
@@ -222,7 +231,7 @@ public class WikiI5Processor {
 				for (int j = 0; j < pagegroup.getLength(); j++) {					
 					String xmlPath= idx+"/"+pagegroup.item(j).getTextContent()+".xml";
 					System.out.println(xmlPath);	
-										
+					
 					errorHandler.reset();
 					
 					// Do XSLT transformation
@@ -263,16 +272,26 @@ public class WikiI5Processor {
 		}		
 	}
 
-	private void transform(String index,File xml) {		
-		serializer.setOutputFile(tempI5);		
-		try {			
-			XdmNode source = processor.newDocumentBuilder().build(xml);			
-			transformer.setInitialContextNode(source);
+	private void transform(String index,File xml) throws I5Exception {		
+		serializer.setOutputFile(tempI5);
+		InputStream is = null;
+		try {		
+			is = new FileInputStream(xml);			
+			StreamSource source = new StreamSource(is);
+			XdmNode node = processor.newDocumentBuilder().build(source);			
+			transformer.setInitialContextNode(node);
 			transformer.setParameter(new QName("letter"), new XdmAtomicValue(index));
 			transformer.transform();
 		} catch (Exception e) {			
 			errorHandler.setValid(false);
-			errorHandler.setErrorMessage("Transformation error.");
+			errorHandler.setErrorMessage(e.getMessage());
+		}
+		finally{
+			try {
+				is.close();
+			} catch (IOException e) {
+				throw new I5Exception("Error closing XML file input stream.");
+			}
 		}
 	} 
 	
