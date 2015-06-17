@@ -1,0 +1,7 @@
+/xml*
+/logs
+/i5
+/target
+.classpath
+.project
+.settings
