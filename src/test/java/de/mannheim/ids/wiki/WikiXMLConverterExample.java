@@ -10,9 +10,10 @@ public class WikiXMLConverterExample {
 		// Set output directory
 		String xmlOutputDir = "./xml-"+language;		
 		// Set wikidump filepath
-		String wikidump = "dewiki-20130728-sample.xml";
+		String wikidump = "data/dewiki-20130728-sample.xml";
 		String type = "all";
+		String encoding = "iso-8859-1";
 		
-		WikiXMLConverter.convert(wikidump, language, type, xmlOutputDir);		
+		WikiXMLConverter.convert(wikidump, language, type, xmlOutputDir, encoding);		
 	}	
 }
