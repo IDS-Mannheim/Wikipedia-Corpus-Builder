@@ -1,3 +1,6 @@
+/xml*
+/talk
+/logs
 /target
 .project
 .classpath
