@@ -39,7 +39,7 @@ public class Sweble2Parser implements Runnable{
 		config = DefaultConfigEnWp.generate();
 		// Instantiate Sweble parser
 		engine = new WtEngineImpl(config);
-		wikipedia_URI = language+".wikipedia.org/wiki/";
+		wikipedia_URI = "https://"+language+".wikipedia.org/wiki/";
 		
 		if (language==null || language.isEmpty()){
 			throw new IllegalArgumentException("Language cannot be null or empty.");
