@@ -11,9 +11,9 @@ import org.apache.log4j.Logger;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.CompleteEngineVisitorNoReturn;
-import org.sweble.wikitext.engine.nodes.EngCompiledPage;
 import org.sweble.wikitext.engine.nodes.EngNowiki;
 import org.sweble.wikitext.engine.nodes.EngPage;
+import org.sweble.wikitext.engine.nodes.EngProcessedPage;
 import org.sweble.wikitext.engine.nodes.EngSoftErrorNode;
 import org.sweble.wikitext.engine.nodes.EngineNodeFactory;
 import org.sweble.wikitext.engine.output.HtmlRendererBase;
@@ -93,6 +93,7 @@ import org.sweble.wikitext.parser.nodes.WtXmlEntityRef;
 import org.sweble.wikitext.parser.nodes.WtXmlStartTag;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
 import org.sweble.wikitext.parser.utils.StringConversionException;
+import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
@@ -108,7 +109,7 @@ public final class XMLRenderer
 			CompleteEngineVisitorNoReturn
 {
 	@Override
-	public void visit(EngCompiledPage n)
+	public void visit(EngProcessedPage n)
 	{
 		dispatch(n.getPage());
 	}
@@ -161,7 +162,6 @@ public final class XMLRenderer
 		iterate(n);
 		p.decIndent();
 		p.print("</dd>");
-//		p.indent("</dd>");
 	}
 	
 	public void visit(WtDefinitionListTerm n)
@@ -171,7 +171,6 @@ public final class XMLRenderer
 		iterate(n);
 		p.decIndent();
 		p.print("</dt>");
-//		p.indent("</dt>");
 	}
 	
 	public void visit(WtExternalLink n)
@@ -181,13 +180,13 @@ public final class XMLRenderer
 			p.indentAtBol();
 			
 			pt("<a rel=\"nofollow\" class=\"external text\" href=\"%s\">%!</a>",
-					makeUrl(n.getTarget()),
+					callback.makeUrl(n.getTarget()),
 					n.getTitle());
 		}
-		else
-		{
-			//throw new FmtNotYetImplementedError();
-		}
+//		else
+//		{
+//			throw new FmtNotYetImplementedError();
+//		}
 	}
 	
 	@Override
@@ -204,10 +203,7 @@ public final class XMLRenderer
 	}
 	
 	@Override
-	public void visit(WtIgnored n)
-	{
-		// Well, ignore it ...
-	}
+	public void visit(WtIgnored n){}
 	
 	@Override
 	public void visit(WtIllegalCodePoint n)
@@ -221,10 +217,16 @@ public final class XMLRenderer
 	
 	public void visit(WtImageLink n)
 	{
+		if (!n.getTarget().isResolved())
+		{
+			printAsWikitext(n);
+			return;
+		}
+		
 		PageTitle target;
 		try
 		{
-			target = PageTitle.make(wikiConfig, n.getTarget().getContent());
+			target = PageTitle.make(wikiConfig, n.getTarget().getAsString());
 		}
 		catch (LinkTargetException e)
 		{
@@ -304,6 +306,8 @@ public final class XMLRenderer
 			case THUMBNAIL:
 				imgClasses += " thumbimage";
 				break;
+			default:
+				break;
 		}
 		
 		if (n.getBorder())
@@ -319,18 +323,19 @@ public final class XMLRenderer
 				linkTarget = null;
 				break;
 			case PAGE:
-			{
 				WtPageName pageName = (WtPageName) n.getLink().getTarget();
-				try
-				{
-					linkTarget = PageTitle.make(wikiConfig, pageName.getContent());
+				if (pageName.isResolved()) {
+					try {
+						linkTarget = PageTitle.make(wikiConfig, pageName.getAsString());
+					}
+					catch (LinkTargetException e) {
+						throw new VisitingException(e);
+					}
 				}
-				catch (LinkTargetException e)
-				{
-					throw new VisitingException(e);
+				else {
+					linkTarget = null;
 				}
 				break;
-			}
 			case URL:
 				linkTarget = null;
 				linkUrl = (WtUrl) n.getLink().getTarget();
@@ -373,7 +378,7 @@ public final class XMLRenderer
 			}
 			else if (linkUrl != null)
 			{
-				aTitle = makeUrl(linkUrl);
+				aTitle = callback.makeUrl(linkUrl);
 			}
 		}
 		if (!aTitle.isEmpty())
@@ -395,9 +400,12 @@ public final class XMLRenderer
 		
 		// -- generate html --
 		
-		if (isImage &&
+		// start testing
+		boolean hasThumbFrame = isImage &&
 				n.getFormat() == ImageViewFormat.THUMBNAIL ||
-				n.getHAlign() != ImageHorizAlign.UNSPECIFIED)
+				n.getHAlign() != ImageHorizAlign.UNSPECIFIED;
+		
+		if (hasThumbFrame)
 		{
 			String align = "";
 			switch (n.getHAlign())
@@ -415,23 +423,23 @@ public final class XMLRenderer
 					break;
 			}
 			
-//			String thumb = "";
-//			String inner = "floatnone";
-//			String style = "";
-//			if (n.getFormat() == ImageViewFormat.THUMBNAIL)
-//			{
-//				thumb = "thumb";
-//				inner = "thumbinner";
-//				style = String.format(" style=\"width:%dpx;\"", width + 2);
-//			}
+			String thumb = "";
+			String inner = "floatnone";
+			String style = "";
+			if (n.getFormat() == ImageViewFormat.THUMBNAIL)
+			{
+				thumb = "thumb";
+				inner = "thumbinner";
+				style = String.format(" style=\"width:%dpx;\"", width + 2);
+			}
 			
-//			p.indent();
-//			pf("<div class=\"%s\">", (thumb + align).trim());
-//			p.incIndent();
-//			p.indent();
-//			pf("<div class=\"%s\"%s>", inner, style);
-//			p.println();
-//			p.incIndent();
+			p.indent();
+			pf("<div class=\"%s\">", (thumb + align).trim());
+			p.incIndent();
+			p.indent();
+			pf("<div class=\"%s\"%s>", inner, style);
+			p.println();
+			p.incIndent();
 			
 			aTitle = "";
 			if (!exists)
@@ -450,7 +458,7 @@ public final class XMLRenderer
 		if (linkTarget != null || linkUrl != null)
 		{
 			pf("<a href=\"%s\"%s%s>",
-					linkTarget != null ? LOCAL_URL + makeUrl(linkTarget) : makeUrl(linkUrl),
+					linkTarget != null ? callback.makeUrl(linkTarget) : callback.makeUrl(linkUrl),
 					aClasses,
 					aTitle);
 		}
@@ -492,7 +500,7 @@ public final class XMLRenderer
 				p.incIndent();
 				p.indent();
 				pf("<a href=\"%s\" class=\"internal\" title=\"Enlarge\"><img src=\"/mediawiki/skins/common/images/magnify-clip.png\" width=\"15\" height=\"11\" alt=\"\" /></a>",
-						LOCAL_URL + makeUrl(linkTarget));
+						callback.makeUrl(linkTarget));
 				p.decIndent();
 				p.indentln("</div>");
 				dispatch(n.getTitle());
@@ -506,14 +514,14 @@ public final class XMLRenderer
 			}
 		}
 		
-		/*if (n.getFormat() == ImageViewFormat.THUMBNAIL ||
-				n.getHAlign() != ImageHorizAlign.NONE)
+		if (hasThumbFrame)
 		{
 			p.decIndent();
 			p.indentln("</div>");
 			p.decIndent();
 			p.indentln("</div>");
-		}*/
+		}
+		// end testing
 	}
 	
 	@Override
@@ -537,7 +545,7 @@ public final class XMLRenderer
 		PageTitle target;
 		try
 		{
-			target = PageTitle.make(wikiConfig, n.getTarget().getContent());
+			target = PageTitle.make(wikiConfig, n.getTarget().getAsString());
 		}
 		catch (LinkTargetException e)
 		{
@@ -548,46 +556,43 @@ public final class XMLRenderer
 		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
 			return;
 		
-//		if (!callback.resourceExists(target))
-//		{
-//			String title = esc(target.getDenormalizedFullTitle());
-//			
-//			String path = esc(UrlEncoding.WIKI.encode(target.getNormalizedFullTitle()));
-//			
-//			if (n.hasTitle())
-//			{
-//				pt("<a href=\"%s%s%s\" class=\"new\" title=\"%s (page does not exist)\">%=%!%=</a>",
-//						"/mediawiki/index.php?title=",
-//						path,
-//						"&amp;action=edit&amp;redlink=1",
-//						title,
-//						n.getPrefix(),
-//						n.getTitle(),
-//						n.getPostfix());
-//			}
-//			else
-//			{
-//				String linkText = makeTitleFromTarget(n, target);
-//				
-//				pt("<a href=\"%s%s%s\" class=\"new\" title=\"%s (page does not exist)\">%=%=%=</a>",
-//						"/mediawiki/index.php?title=",
-//						path,
-//						"&amp;action=edit&amp;redlink=1",
-//						title,
-//						n.getPrefix(),
-//						linkText,
-//						n.getPostfix());
-//			}
-//		}
-//		else
-//		{
+		// START TESTING
+		if (!callback.resourceExists(target))
+		{
+			String title = target.getDenormalizedFullTitle();
+			
+			String path = UrlEncoding.WIKI.encode(target.getNormalizedFullTitle());
+			
+			if (n.hasTitle())
+			{
+				pt("<a href=\"%s\" class=\"new\" title=\"%s (page does not exist)\">%=%!%=</a>",
+						callback.makeUrlMissingTarget(path),
+						title,
+						n.getPrefix(),
+						n.getTitle(),
+						n.getPostfix());
+			}
+			else
+			{
+				String linkText = makeTitleFromTarget(n, target);
+				
+				pt("<a href=\"%s\" class=\"new\" title=\"%s (page does not exist)\">%=%=%=</a>",
+						callback.makeUrlMissingTarget(path),
+						title,
+						n.getPrefix(),
+						linkText,
+						n.getPostfix());
+			}
+		}
+		// END TESTING
+		else
+		{
 			if (!target.equals(pageTitle))
 			{
 				if (n.hasTitle())
 				{
-					pt("<a href=\"%s%s\" title=\"%s\">%=%!%=</a>",
-							LOCAL_URL,
-							makeUrl(target),
+					pt("<a href=\"%s\" title=\"%s\">%=%!%=</a>",
+							callback.makeUrl(target),
 							makeLinkTitle(n, target),
 							n.getPrefix(),
 							n.getTitle(),
@@ -595,9 +600,8 @@ public final class XMLRenderer
 				}
 				else
 				{
-					pt("<a href=\"%s%s\" title=\"%s\">%=%=%=</a>",
-							LOCAL_URL,
-							makeUrl(target),
+					pt("<a href=\"%s\" title=\"%s\">%=%=%=</a>",
+							callback.makeUrl(target),
 							makeLinkTitle(n, target),
 							n.getPrefix(),
 							makeTitleFromTarget(n, target),
@@ -621,7 +625,7 @@ public final class XMLRenderer
 							n.getPostfix());
 				}
 			}
-//		}
+		}
 	}
 	
 	public void visit(WtItalics n)
@@ -780,13 +784,7 @@ public final class XMLRenderer
 	@Override
 	public void visit(WtRedirect n)
 	{
-		// TODO: Implement
-		//throw new FmtNotYetImplementedError();
-		//System.out.println(esc(n.getTarget().getContent()));
-		/*p.print("<span class=\"");
-		p.print("redirect\">&#x21B3; ");		//↳
-		p.print(esc(n.getTarget().getContent()));
-		p.print("</span>");*/
+		//skipped
 	}
 	
 	public void visit(WtSection n)
@@ -795,7 +793,9 @@ public final class XMLRenderer
 		//pt("<h%d><span class=\"mw-headline\" id=\"%s\">%!</span></h%d>",
 		pt("<h%d>%!</h%d>",
 				n.getLevel(),
+				// TESTING
 				//makeSectionTitle(n.getHeading()),
+				// END TESTING
 				n.getHeading(),
 				n.getLevel());
 		
@@ -821,8 +821,6 @@ public final class XMLRenderer
 	@Override
 	public void visit(WtSignature n)
 	{
-		// TODO: Implement
-		//throw new FmtNotYetImplementedError();
 		System.out.println(n.toString());
 		p.print("<span class=\"");		
 		p.print("signature\"/>");
@@ -926,21 +924,6 @@ public final class XMLRenderer
 		else{ 
 			p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\"/>");
 		}
-		
-		//System.out.println("Tag extension "+n.getName());
-		//System.out.println("Body "+n.getBody().getContent());
-//		p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\">");
-//		p.print(esc(n.getBody().getContent()));
-//		p.print("</span>");		
-		//printAsWikitext(n);
-		
-		/*
-		pc("&lt;%s%!&gt;%=&lt;/%s&gt;",
-				n.getName(),
-				n.getXmlAttributes(),
-				n.getBody().getContent(),
-				n.getName());
-		*/
 	}
 	
 	@Override
@@ -955,10 +938,6 @@ public final class XMLRenderer
 	{	
 		//info box
 		p.print("<span class=\"template\"/>");
-//		p.print("<span class=\"template\">");
-//		iterate(n);		
-//		p.print("</span>");		
-		//printAsWikitext(n);		
 	}
 	
 	@Override
@@ -980,7 +959,6 @@ public final class XMLRenderer
 	public void visit(WtTemplateArguments n)
 	{
 		iterate(n);
-		//printAsWikitext(n);
 	}
 	
 	@Override
@@ -1014,7 +992,7 @@ public final class XMLRenderer
 	{
 		p.indentAtBol();
 		
-		String url = makeUrl(n);		
+		String url = callback.makeUrl(n);		
 		pf("<a href=\"%s\">%s</a>", url, url);
 	}
 	
@@ -1033,15 +1011,20 @@ public final class XMLRenderer
 	
 	public void visit(WtXmlAttribute n)
 	{
-		if (n.getName().contains(":") && !n.contains("xml")) return;
-			
-		if (n.hasValue())
+		if (!n.getName().isResolved())
 		{
-			pt(" %s=\"%~\"", n.getName(), cleanAttribValue(n.getValue()));
+			logger.warn("Unresolved attribute name: " + WtRtDataPrinter.print(n));
 		}
 		else
 		{
-			pf(" %s=\"%<s\"", n.getName());
+			if (n.hasValue())
+			{
+				pt(" %s=\"%~\"", n.getName().getAsString(), cleanAttribValue(n.getValue()));
+			}
+			else
+			{
+				pf(" %s=\"%<s\"", n.getName().getAsString());
+			}
 		}
 	}
 	
@@ -1053,7 +1036,19 @@ public final class XMLRenderer
 	@Override
 	public void visit(WtXmlAttributes n)
 	{
-		iterate(n);
+		for (WtNode n1 : n)
+		{
+			switch (n1.getNodeType())
+			{
+				case WtNode.NT_XML_ATTRIBUTE:
+				case WtNode.NT_XML_ATTRIBUTE_GARBAGE:
+					dispatch(n1);
+					break;
+				default:
+					logger.warn("Non-attribute node in attributes collection: " + WtRtDataPrinter.print(n));
+					break;
+			}
+		}
 	}
 	
 	public void visit(WtXmlCharRef n)
@@ -1072,10 +1067,7 @@ public final class XMLRenderer
 	{
 		if (n.hasBody())
 		{
-			/*if(n.getName().equals("tt")){
-				dispatch(n.getBody());
-			}				
-			else*/ if (blockElements.contains(n.getName().toLowerCase()))
+			if (blockElements.contains(n.getName().toLowerCase()))
 			{
 				p.indent();
 				pt("<%s%!>", n.getName(), cleanAttribs(n.getXmlAttributes()));
@@ -1266,7 +1258,7 @@ public final class XMLRenderer
 		return makeTitleFromNodes(n.getAlt());
 	}
 	
-	private String makeImageCaption(WtImageLink n)
+	protected String makeImageCaption(WtImageLink n)
 	{
 		return makeTitleFromNodes(n.getTitle());
 	}
@@ -1286,7 +1278,7 @@ public final class XMLRenderer
 		return esc(target.getDenormalizedFullTitle());
 	}
 	
-	private String makeImageTitle(WtImageLink n, PageTitle target)
+	protected String makeImageTitle(WtImageLink n, PageTitle target)
 	{
 		return esc(target.getDenormalizedFullTitle());
 	}
@@ -1298,27 +1290,13 @@ public final class XMLRenderer
 	
 	private String makeTitleFromTarget(PageTitle target, WtPageName title)
 	{
-		String targetStr = title.getContent();
+		String targetStr = title.getAsString();
 		if (target.hasInitialColon() && !targetStr.isEmpty() && targetStr.charAt(0) == ':')
 			targetStr = targetStr.substring(1);
 		return esc(targetStr);
 	}
 	
-	private static String makeUrl(PageTitle target)
-	{
-		String page = esc(UrlEncoding.WIKI.encode(target.getNormalizedFullTitle()));
-		String f = target.getFragment();
-		if (f == null || f.isEmpty())
-			return page;
-		return page + "#" + UrlEncoding.WIKI.encode(f);
-	}
 	
-	private String makeUrl(WtUrl linkUrl)
-	{
-		if (linkUrl.getProtocol() == "")
-			return esc(linkUrl.getPath());
-		return linkUrl.getProtocol() + ":" + esc(linkUrl.getPath());
-	}
 	
 	// =====================================================================
 	
@@ -1429,8 +1407,10 @@ public final class XMLRenderer
 			if (a instanceof WtXmlAttribute)
 			{
 				WtXmlAttribute attr = (WtXmlAttribute) a;
-				String name = attr.getName().toLowerCase();
-
+				if (!attr.getName().isResolved())
+					continue;
+				
+				String name = attr.getName().getAsString().toLowerCase();
 				if (name.equals("style"))
 				{
 					style = attr;
@@ -1458,7 +1438,7 @@ public final class XMLRenderer
 				if (a instanceof WtXmlAttribute)
 				{
 					WtXmlAttribute attr = (WtXmlAttribute) a;
-					String name = attr.getName().toLowerCase();
+					String name = attr.getName().getAsString().toLowerCase();
 					
 					if (!names.contains(name)){
 						names.add(name);
@@ -1478,7 +1458,10 @@ public final class XMLRenderer
 		
 		for (WtXmlAttribute a : clean)
 		{
-			String name = a.getName().toLowerCase();
+			if (!a.getName().isResolved())
+				continue;
+			
+			String name = a.getName().getAsString().toLowerCase();
 			if (name.equals("align"))
 			{
 				newStyle = String.format(
@@ -1496,7 +1479,7 @@ public final class XMLRenderer
 		}
 		
 		WtXmlAttribute newStyleAttrib = nf.attr(
-				"style",
+				nf.name(nf.list(nf.text("style"))),
 				nf.value(nf.list(nf.text(newStyle))));
 		
 		WtNodeList newAttribs = nf.attrs(nf.list());
@@ -1505,7 +1488,7 @@ public final class XMLRenderer
 		for (WtNode a : xmlAttributes)
 		{
 			WtXmlAttribute attr = (WtXmlAttribute) a;
-			String name = attr.getName().toLowerCase();
+			String name = attr.getName().getAsString().toLowerCase();
 			
 			if (!names.contains(name)){
 				names.add(name);			
@@ -1538,10 +1521,8 @@ public final class XMLRenderer
 			HtmlRendererCallback callback,
 			WikiConfig wikiConfig,
 			PageTitle pageTitle,
-			T node,
-			String uri)
+			T node)
 	{
-		LOCAL_URL = uri;
 		return print(callback, wikiConfig, new StringWriter(), pageTitle, node).toString();
 	}	
 	
@@ -1557,8 +1538,6 @@ public final class XMLRenderer
 	}
 	
 	// =========================================================================
-	
-	private static String LOCAL_URL;
 	
 	private static final Logger logger = Logger.getLogger(XMLRenderer.class);
 	
@@ -1638,7 +1617,7 @@ public final class XMLRenderer
 		this.wikiConfig = wikiConfig;
 		this.pageTitle = pageTitle;
 		this.nf = wikiConfig.getNodeFactory();
-		this.tu = wikiConfig.createAstTextUtils();
+		this.tu = wikiConfig.getAstTextUtils();
 		p.incIndent();
 	}
 }

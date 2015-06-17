@@ -110,10 +110,8 @@ public class WikiPageHandler {
 		// italic and bold are not repaired because they have wiki-mark-ups
 		try {
 			wikitext = tagSoupParser.generate(wikitext,true);
-			//System.out.println(wikitext);
 		} 
 		catch (SAXException e) {
-			//wikiStatistics.errorPages.add
 			wikiStatistics.logErrorPage("TAGSOUP: "+pagetitle + ", cause: "+e.getMessage());			
 		}
 		
@@ -125,14 +123,12 @@ public class WikiPageHandler {
 			swebleThread.join(1000 * 60);
 			if (swebleThread.isAlive()){
 				swebleThread.stop();
-				//throw new RuntimeException("Sweble run time was too long.");
 			}
 			wikitext = swebleParser.getWikiXML();
-			//System.out.println(wikitext);
+//			System.out.println(wikitext);
 		}
 		catch (Exception e) {			
 			wikiStatistics.addSwebleErrors();
-			//wikiStatistics.errorPages.add
 			wikiStatistics.logErrorPage("SWEBLE: "+pagetitle + ", cause: "+e.getMessage());
 			wikitext="";
 		}
@@ -180,7 +176,6 @@ public class WikiPageHandler {
 		}
 		catch (Exception e) {			
 			wikiStatistics.addParsingErrors();
-			//wikiStatistics.errorPages.add
 			wikiStatistics.logErrorPage("DOM: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
 			wikiPage.wikitext="";				
 		}
@@ -189,9 +184,7 @@ public class WikiPageHandler {
 			wikiPage.pageStructure = tagSoupParser.generate(wikiPage.pageStructure, false);
 		} 
 		catch (Exception e) { 
-			//System.err.println("Outer Error: "+wikiPage.getPageTitle());
 			wikiStatistics.addPageStructureErrors();
-			//wikiStatistics.errorPages.add
 			wikiStatistics.logErrorPage("PAGE: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
 			e.printStackTrace(); 
 		}		
