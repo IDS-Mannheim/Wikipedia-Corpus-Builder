@@ -58,8 +58,8 @@ public class TagSoupParser {
 		
 		String cleanWikitext = w.toString();
 		cleanWikitext = StringUtils.replaceEach(cleanWikitext, 
-				new String[] {"<html><body>", "</body></html>"}, 
-				new String[] {"", "\n"});
+				new String[] {"<html><body>", "</body></html>","<br clear=\"none\"></br>"}, 
+				new String[] {"", "\n","<br/>"});
 		return cleanWikitext;
 		
 	}
