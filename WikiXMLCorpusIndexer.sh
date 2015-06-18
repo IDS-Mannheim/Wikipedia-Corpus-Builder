@@ -1,8 +1,42 @@
-# Indexing WikiXML pages 
+# WikiXML Corpus Indexer
+# -------------------------------------------------------------------
+# This script lists all the WikiXML files, that are outputs of the 
+# WikiXMLConverter tool. The WikiXMLConverter generates WikiXML files 
+# under xml-[language] folder. Moreover, the WikiXML pages are grouped 
+# numerically and alphabetically.
+# 
+# Input parameters:
+# - pageType [articles/discussions]
+# - path to xmlFolder, for example: xml-de/articles to index the German 
+#   WikiXML articles
+# - output file name
+#
+# Example:
+# ./WikiXMLCorpusIndexer.sh articles xml-de/articles articleIndex.xml
+#
+# Output format:
+# <articles>
+#    <index value=0>
+#         <id>2173</id>
+#	  <id>2435</id>
+#         [....]
+#    </index>
+#    [....]
+#    <index value=A>
+#         <id>1</id>
+#	  <id>3</id>
+#         [....]
+#    </index>
+#    [....]
+# </articles>
+#
+# The index is used in WikiI5Converter for structuring the Wikipedia 
+# pages in the resulting Wikipedia I5 corpus file.
 #
 # Eliza Margaretha, Aug 2014
 # Institut für Deutsche Sprache
 # This script is licensed under GPL v3.
+# -------------------------------------------------------------------
 
 function createList {
     echo "<"$1">" > $2
@@ -38,7 +72,7 @@ fi
 
 if [ -z "$3" ];
 then
-    echo "Please specify the output file: "
+    echo "Please specify the output file name: "
     read output
 fi
 
