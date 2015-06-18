@@ -343,7 +343,7 @@ public class WikiTalkHandler {
 		
 		if (!timestamp.isEmpty()){
 			sb.append(" synch=\""+time.getTimeId(timestamp)+"\"");
-			posting += " "+timestamp;
+			posting += " <timestamp>"+timestamp+"</timestamp>";
 			//System.out.println(posting+"\n");
 		}
 		sb.append(">\n");						
