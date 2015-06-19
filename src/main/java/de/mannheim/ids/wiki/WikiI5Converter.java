@@ -1,5 +1,7 @@
 package de.mannheim.ids.wiki;
 
+import java.sql.SQLException;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.cli.BasicParser;
@@ -8,10 +10,13 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import de.mannheim.ids.db.DatabaseManager;
+
 /** This is the main class for converting the XML-ized Wikipages to XCES
  * 	An argument configuration example: 
  * 	-x xml-de/articles -t articles -w dewiki-20130728-sample.xml -o out.i5 
- * 	-e utf-8 -inf inflectives.xml -i articleIndex.xml 
+ * 	-e utf-8 -inf inflectives.xml -i xml-de/articleIndex.xml -u username 
+ * 	-p password -d jdbc:mysql://localhost:port/dbname
  *   
  * 	@author margaretha 
  */
@@ -30,7 +35,10 @@ public class WikiI5Converter {
 		options.addOption("o", true, "Output file");
 		options.addOption("e", true, "Encoding: utf-8 or iso-8859-1");
 		options.addOption("inf", true, "Inflective file");
-		options.addOption("i", true, "An index of Wiki article/discussion pages");		
+		options.addOption("i", true, "An index of Wiki article/discussion pages");
+		options.addOption("u", true, "Mysql database username");
+		options.addOption("p", true, "Mysql database password");
+		options.addOption("d", true, "Mysql database URL, i.e. jdbc:mysql://localhost:port/dbname");
 	}
 	
 	public static void main(String[] args) throws Exception {		
@@ -55,13 +63,18 @@ public class WikiI5Converter {
 		String encoding = cmd.getOptionValue("e");				
 		String inflectives = cmd.getOptionValue("inf");
 		String index = cmd.getOptionValue("i");
+		String dbUrl = cmd.getOptionValue("d");
+		String username = cmd.getOptionValue("u");
+		String password = cmd.getOptionValue("p","secret");
 		
-		convert(xmlFolder, type, dumpFilename, inflectives, encoding, outputFile, index);
+		convert(xmlFolder, type, dumpFilename, inflectives, encoding, outputFile, 
+				index, dbUrl, username, password);
 						
 	}
 	
 	public static void convert(String xmlFolder, String type, String dumpFilename,
-			String inflectives, String encoding, String outputFile, String index) throws 
+			String inflectives, String encoding, String outputFile, String index,
+			String dbUrl, String username, String password) throws 
 			I5Exception  {	
 		
 		if (xmlFolder == null){
@@ -90,17 +103,29 @@ public class WikiI5Converter {
 		if (encoding == null){
 			encoding = "utf-8"; // default encoding
 		}
-		
+		if (dbUrl == null){
+			throw new IllegalArgumentException("Please specify the Wikipedia language link " +
+					"Mysql Database URL.");
+		}		
+		if (username == null){
+			throw new IllegalArgumentException("Please specify the username of the Wikipedia " +
+					"language link Mysql Database.");
+		}
+		if (password == null){
+			throw new IllegalArgumentException("Please specify the password of  Wikipedia " +
+					"language link Mysql Database.");
+		}
 		
 		System.setProperty("entityExpansionLimit", "0");
 		System.setProperty("totalEntitySizeLimit", "0");
 		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
 				
 		I5Corpus corpus = new I5Corpus(dumpFilename, type, encoding);		
-							
 		long startTime=System.nanoTime();
-		I5Writer w = new I5Writer(corpus,outputFile);
-		try{
+		
+		try {
+			DatabaseManager dbManager = new DatabaseManager(dbUrl, username, password);
+			I5Writer  w = new I5Writer(corpus, outputFile, dbManager);
 			w.open();
 			w.createCorpusHeader();			
 			// Do the convertion and write the resulting I5
@@ -108,9 +133,10 @@ public class WikiI5Converter {
 			wikiI5Processor.run(xmlFolder, index, w);
 			w.close();
 		}
-		catch (XPathExpressionException e) {
+		catch (SQLException | XPathExpressionException e) {
 			throw new I5Exception(e);
 		}
+		
 		long endTime=System.nanoTime();					
 		System.out.println("Transformation time "+ (endTime-startTime));
 	}

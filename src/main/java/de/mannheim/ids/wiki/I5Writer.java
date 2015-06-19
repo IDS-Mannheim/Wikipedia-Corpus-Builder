@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.EventFilter;
@@ -25,6 +27,9 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import de.mannheim.ids.db.DatabaseManager;
+import de.mannheim.ids.db.LanguageLinks;
+
 /** This class defines how to write an IDS-I5 corpus for Wikipedia.
  * 
  * @author margaretha
@@ -38,10 +43,10 @@ public class I5Writer {
 	private XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 	private final String dtdfile = "http://corpora.ids-mannheim.de/I5/DTD/i5.dtd"; 
 	private I5Corpus corpus;
-	
+	private DatabaseManager dbManager;
 	BufferedOutputStream bos;
 	
-	public I5Writer(I5Corpus corpus,String outputFile) throws  I5Exception {
+	public I5Writer(I5Corpus corpus, String outputFile, DatabaseManager dbManager) throws  I5Exception {
 		
 		if (corpus == null){
 			throw new IllegalArgumentException("I5Corpus cannot be null or empty.");
@@ -70,10 +75,12 @@ public class I5Writer {
 		
 		eventFactory = XMLEventFactory.newInstance();
 		newline = eventFactory.createCharacters("\n");
-		tab = eventFactory.createCharacters("   ");		
+		tab = eventFactory.createCharacters("   ");
+		
+		this.dbManager = dbManager;
 	}
 	
-	protected void readIdsText(File inputFile) throws IOException, XMLStreamException {
+	protected void readIdsText(File inputFile, String pageId) throws IOException, XMLStreamException {
 		
 		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);		
 		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(inputFile),1024*1024);
@@ -83,12 +90,61 @@ public class I5Writer {
 		eventReader.nextEvent(); // ignore processing instruction
 		eventReader.nextEvent(); // ignore dtd
 		
+		XMLEvent event;
+		EndElement ee;
+//		boolean isLangLinksWritten = false;
+		
 		while (eventReader.hasNext()){
-			eventWriter.add(eventReader.nextEvent());			
+			event = eventReader.nextEvent();
+			eventWriter.add(event);
+			
+			if (
+					//!isLangLinksWritten && 
+					event.isEndElement()){
+				ee = (EndElement) event;				
+				if ("monogr".equals(ee.getName().getLocalPart())){					
+					try {
+						createLangLinks(dbManager.retrieveLanguageLinks(pageId));
+					} 
+					catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+	//			isLangLinksWritten = true;
+			}			
 		}
 		eventWriter.add(newline);
 		bis.close();
-		eventReader.close();		
+		eventReader.close();
+	}
+	
+	private void createLangLinks(LanguageLinks ll) throws XMLStreamException {
+		Map<String, String> map = ll.getTitleMap();
+		for(String key : map.keySet()){
+			eventWriter.add(newline);
+			createIndent(5);
+			eventWriter.add(eventFactory.createStartElement("","","relatedItem"));			
+			eventWriter.add(eventFactory.createAttribute("type", "langlink"));
+			
+			eventWriter.add(newline);
+			createIndent(6);
+			eventWriter.add(eventFactory.createStartElement("","","ref"));
+						
+			StringBuilder sb = new StringBuilder();
+			sb.append("https://");
+			sb.append(key);
+			sb.append(".wikipedia.org/wiki/");
+			sb.append(map.get(key).replace(" ", "_"));
+			eventWriter.add(eventFactory.createAttribute("target", sb.toString()));
+			eventWriter.add(eventFactory.createAttribute("xml:lang", key));
+			eventWriter.add(eventFactory.createCharacters(map.get(key)));
+			
+			eventWriter.add(eventFactory.createEndElement("","ref",""));
+			eventWriter.add(newline);
+			createIndent(5);
+			eventWriter.add(eventFactory.createEndElement("","relatedItem",""));
+		}
+
 	}
 	 
 	private EventFilter createEventFilter() {

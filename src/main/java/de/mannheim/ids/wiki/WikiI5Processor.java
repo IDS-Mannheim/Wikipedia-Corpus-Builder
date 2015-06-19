@@ -228,8 +228,9 @@ public class WikiI5Processor {
 				i5Writer.createIdsDocHeader(corpus.getKorpusSigle()+"/"+docSigle, docTitle);		
 								
 				// Do transformation and validation for each page in the group
-				for (int j = 0; j < pagegroup.getLength(); j++) {					
-					String xmlPath= idx+"/"+pagegroup.item(j).getTextContent()+".xml";
+				for (int j = 0; j < pagegroup.getLength(); j++) {
+					String pageId = pagegroup.item(j).getTextContent();
+					String xmlPath= idx+"/"+pageId+".xml";
 					System.out.println(xmlPath);	
 					
 					errorHandler.reset();
@@ -250,7 +251,7 @@ public class WikiI5Processor {
 					
 					// read and copy the i5 content to the corpus file
 					try {
-						i5Writer.readIdsText(tempI5);
+						i5Writer.readIdsText(tempI5, pageId);
 					} catch (IOException | XMLStreamException e) {
 						throw new I5Exception("Error reading and copying temp content " +
 								"to the I5 corpus.", e);

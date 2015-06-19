@@ -27,7 +27,7 @@ public class WikiI5ConverterExample {
 		
 		String xmlFolder= "xml-de/articles";
 		String type= "articles";
-		String index = "articleIndex.xml";
+		String index = "xml-de/articleIndex.xml";
 				
 		// The dumpFilename should be in the following format:
 		// [2 letter language code]wiki-[year][month][date]-[type]		
@@ -38,8 +38,12 @@ public class WikiI5ConverterExample {
 		String inflectives="inflectives.xml";		
 		String encoding="UTF-8";
 		
+		String url = "jdbc:mysql://host:port/dbname";
+		String username = "username";
+		String password = "password";
+		
 		WikiI5Converter.convert(xmlFolder, type, dumpFilename, inflectives, 
-				encoding, outputFile, index);
+				encoding, outputFile, index, url, username, password);
 	}
 	
 }
