@@ -2,42 +2,44 @@
 # ------------------------------------------------------------------------------------------
 # WIKIPEDIA CONVERSION
 #
-# Eliza Margaretha, Mar 2013
-# Institut für Deutsche Sprache
-#
-# This script runs the conversion of wikipedia dumps containing wiki mark-ups (i.e. wikitext) 
-# into wikipedia corpus in XCES format.
+# This script runs a set of programs that converts a wikipedia dump containing wiki mark-ups 
+# (wikitext) into a wikipedia corpus in I5 format.
 #
 # The conversion is done in two stages. In the first stage, each wikipage is converted into 
-# an XML file. In the second stage, each XML is converted into XCES and collected into one 
-# corpus file.
+# an XML file (WikiXML) by using WikiXMLConverter-0.0.1-jar-with-dependencies.jar. In the 
+# second stage, each WikiXML page is converted into I5 and collected into a single corpus file
+# by using WikiI5Converter-0.0.1.jar. The jars are available on http://corpora.ids-mannheim.de
+# /pub/tools/.
 #
-# This script takes input arguments as follows:
-#  - First argument is the language of the wikitext 
-#  - Second argument is the location of the wikidumps
-#  - Third argument is the option to split the XML output or not [ split | nosplit ]
+# The I5 corpus is subsequently validated against IDS I5 DTD (see http://corpora.ids-mannheim.
+# de/I5/DTD/i5.dtd) by using XMLlint. It is also validated against SGML by ONSGML (e.g. using 
+# OpenSP-1.5.1). 
 #
-# The outputs of the first conversion are grouped by an alphabeth or a digit, and written in 
+# This script takes input arguments sequentially as follows:
+#  1. The type of wikipedia pages [articles|discussions]. 
+#  2. 2-letter language code of the wikitext (e.g. de). 
+#  3. The location of the wikidumps.
+#
+#     The filename of wikipedia dumps must be in the following format: 
+#       [lang]wiki-[date]-pages-meta-current.xml
+#
+#  4. The desired encoding output, e.g iso-8859-1 or utf-8 (default).
+#  5. The list inflectives (currently provided only for german).
+#
+# The outputs of the first stage conversion are grouped by letters and digits, and located on: 
 #  - xml/articles for article pages
 #  - xml/discussions for discussion pages
 #
-# The article pages are listed in xml/articleList.xml and the discussion pages in 
-# xml/discussionList.xml.
-# 
-# The XSLT parameters required to run the second conversion are:
-# - wikidump = the filename of wikipedia dumps, in this format: [lang]wiki-[date]-pages-meta-current.xml
-# - type = articles or discussions
-# - xmlDir = the location of the xml files, e.g. ../xml/articles
-# - list = the location of the list of the xml files e.g. ../xml/articleList.xml
+# The second stage convertion requires lists of all the article and discussion pages. The 
+# function createList does this job. The article pages are listed in xml/articleList.xml and  
+# the discussion pages in xml/discussionList.xml.
 #
-# Note: XML file locations are relative to the location of the xsl file.
+# Logs of the conversion process are located in logs/ folder.
 #
-# The XSLT processor used is Saxon-EE 9.4.0.3 version.
 #
-# By default, all conversion logs are written in the parent directory.
+# Eliza Margaretha, Mar 2013
+# Institut für Deutsche Sprache
 # --------------------------------------------------------------------------------------------
-
-# Function
 
 function createList {
     echo "<"$1">" > $2
@@ -52,13 +54,13 @@ function createList {
     echo "</"$1">" >> $2    
 }
 
-# --------------------------------------------------------------------------------------------
-# Set variables
+# Arguments
 
 pageType=$1
 lang=$2
 wiki=$3
-inflec=$4
+encoding=$4
+inflec=$5
 
 if [ -z "$1" ];
 then
@@ -79,72 +81,83 @@ then
 fi
 
 if [ -z "$4" ];
-then
-    echo "Please specify the file containing the list of inflectives : "
-    read wiki
+then     
+     encoding=UTF-8
 fi
-
-
-if [ ! -d "xces" ];
-then
-    mkdir xces
-fi 
 
 if [ ! -d "logs" ];
 then
     mkdir logs
 fi 
 
+# Variables
 
 w=wiki
 filename=$(basename "$wiki")
 prefix=${filename%-pages*}
 xmlFolder=xml-$lang 
 wikiToXMLlog=xml-$prefix-$pageType.log
-dtd=dtd/i5.xlint.dtd
+dtd=dtd/i5.dtd
 
 if [ "$pageType" == "articles" ] 
 then
     
-    echo "Converting Wiki articles to XML ..." 
-    java -jar target/WikiXMLConverter-0.0.1-SNAPSHOT.jar $lang $wiki 0 null > logs/$wikiToXMLlog 2>&1 
+    echo "Converting $lang-wiki articles to XML ..." 
+    java -jar target/WikiXMLConverter-0.0.1-jar-with-dependencies.jar -l $lang -w $wiki -t articles -o $xmlFolder -e $encoding > logs/$wikiToXMLlog 2>&1 
 
     articleList=$xmlFolder/articleList.xml
-    articleOutput=xces/$prefix-articles.xces
-    articleLog=xces-$prefix-articles.log
+    articleOutput=i5/$prefix-articles.i5
+    articleLog=i5-$prefix-articles.log 
     
-    echo "Listing articles by index ..."    
+    echo "Listing $lang-wiki articles by index ..."    
     createList articles $articleList $xmlFolder
-    
-    echo "Converting XML articles to XCES ..."    
-    java -Xmx10g -jar target/WikiXCESConverter-0.0.1-SNAPSHOT-jar-with-dependencies.jar $xmlFolder articles $filename $articleOutput ../$inflec ../$dtd > logs/$articleLog 2>&1     
-        
-    echo "Validating XCES Wiki articles with xmllint"
-    xmllint -valid -stream -dtdvalid $dtd $articleOutput > logs/xces-$prefix-articles-xmllint-validation.log 2>&1    
-    
-    echo "Validating XCES Wiki articles with onsgmls"
-    /vol/work/kupietz/OpenSP-1.5.1/OpenSP-1.5.1/nsgmls/onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $articleOutput > logs/xces-$prefix-articles-onsgmls-validation.log 2>&1   
-        
-else 
 
-    echo "Converting Wiki talk pages to XML ..." 
-    java -jar target/WikiXMLConverter-0.0.1-SNAPSHOT.jar $lang $wiki null 1 > logs/$wikiToXMLlog 2>&1
+    echo "Converting $lang WikiXML articles to I5 ..."  
 
-    dicussionList=$xmlFolder/discussionList.xml
-    discussionOutput=xces/$prefix-discussions.xces
-    discussionLog=xces-$prefix-discussions.log
+    if [ ! -d "i5" ];
+    then
+       mkdir i5
+    fi
+
+    if [ -z "$inflec" ]
+    then
+        java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/articles -t articles -i $articleList -w $filename -o $articleOutput -e $encoding > logs/$articleLog 2>&1
+    else
+        java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/articles -t articles -i $articleList -w $filename -o $articleOutput -inf ../$inflec -e $encoding > logs/$articleLog 2>&1
+    fi
+        
+    echo "Validating I5 Wiki articles with xmllint"
+    xmllint -valid -stream -dtdvalid $dtd $articleOutput > logs/i5-$prefix-articles-xmllint-validation.log 2>&1    
+    
+    echo "Validating I5 Wiki articles with onsgmls"
+    onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $articleOutput > logs/i5-$prefix-articles-onsgmls-validation.log 2>&1   
+	        
+else
+
+    echo "Converting $lang-wiki talk pages to XML ..." 
+    java -jar target/WikiXMLConverter-0.0.1-jar-with-dependencies.jar -l $lang -w $wiki -t discussions -o $xmlFolder > logs/$wikiToXMLlog 2>&1
+
+    discussionList=$xmlFolder/discussionList.xml
+    discussionOutput=i5/$prefix-discussions.i5
+    discussionLog=i5-$prefix-discussions.log
         
     echo "Listing discussions by index ..."    
-    createList discussions $dicussionList $xmlFolder
+    createList discussions $discussionList $xmlFolder
     
-    echo "Converting XML discussions to XCES ..."    
-    java -Xmx10g -jar target/WikiXCESConverter-0.0.1-SNAPSHOT-jar-with-dependencies.jar $xmlFolder discussions $filename $discussionOutput ../$inflec ../$dtd > logs/$discussionLog 2>&1  
+    echo "Converting $lang XML discussions to XCES ..."    
     
-    echo "Validating XCES Wiki discussions with xmllint"
-    xmllint -valid -stream -dtdvalid $dtd $discussionOutput > logs/xces-$prefix-discussions-xmllint-validation.txt 2>&1
+    if [ -z "$inflec" ]
+    then
+	java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/discussions -t discussions -i $discussionList -w $filename -o $discussionOutput -e $encoding> logs/$discussionLog 2>&1
+    else
+	java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/discussions -t discussions -i $discussionList -w $filename -o $discussionOutput -inf ../$inflec -e $encoding > logs/$discussionLog 2>&1
+    fi
+
+    echo "Validating I5 Wiki discussions with xmllint"
+    xmllint -valid -stream -dtdvalid $dtd $discussionOutput > logs/i5-$prefix-discussions-xmllint-validation.txt 2>&1
     
-    echo "Validating XCES Wiki discussions with onsgml"
-    /vol/work/kupietz/OpenSP-1.5.1/OpenSP-1.5.1/nsgmls/onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $discussionOutput > logs/xces-$prefix-discussions-onsgmls-validation.log 2>&1
+    echo "Validating I5 Wiki discussions with onsgml"
+    onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $discussionOutput > logs/i5-$prefix-discussions-onsgmls-validation.log 2>&1
     
 fi
     
