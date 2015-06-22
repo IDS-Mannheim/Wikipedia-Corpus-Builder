@@ -67,7 +67,7 @@ public class TagSoupParser {
 	private ContentHandler chooseContentHandler(Writer w) {
 		XMLWriter x = new XMLWriter(w);		
 		x.setOutputProperty(XMLWriter.OMIT_XML_DECLARATION, "yes");		
-		//x.setOutputProperty(XMLWriter.ENCODING, encoding);
+		x.setOutputProperty(XMLWriter.ENCODING, "utf-8");
 		x.setPrefix(theSchema.getURI(), "");
 		return x;
 	}
