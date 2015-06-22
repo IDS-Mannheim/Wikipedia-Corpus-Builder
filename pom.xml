@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.mannheim.ids</groupId>
   <artifactId>WikiI5Converter</artifactId>
-  <version>0.0.1</version>
+  <version>1.0.1</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.java>1.7</version.java>
@@ -52,6 +52,9 @@
               <classpathPrefix>lib/</classpathPrefix>
               <addClasspath>true</addClasspath>
             </manifest>
+             <manifestEntries>
+            	<Class-Path>properties/</Class-Path>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>

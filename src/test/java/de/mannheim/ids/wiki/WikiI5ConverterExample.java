@@ -42,8 +42,8 @@ public class WikiI5ConverterExample {
 		String username = "username";
 		String password = "password";
 		
-		WikiI5Converter.convert(xmlFolder, type, dumpFilename, inflectives, 
-				encoding, outputFile, index, url, username, password);
+		WikiI5Converter.convert(new Configuration(xmlFolder, type, dumpFilename, inflectives, 
+				encoding, outputFile, index, url, username, password));
 	}
 	
 }

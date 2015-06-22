@@ -23,9 +23,9 @@ import de.mannheim.ids.db.DatabaseManager;
 
 public class WikiI5Converter {	
 	
-	private Options options;
+	private static Options options;
 	
-	public WikiI5Converter() {
+	public static void setOptions(){
 		options = new Options();
 		options.addOption("x", true, "WikiXML article/discussion folder");
 		options.addOption("t", true, "The type of Wikipages (articles or discussions)");
@@ -39,14 +39,11 @@ public class WikiI5Converter {
 		options.addOption("u", true, "Mysql database username");
 		options.addOption("p", true, "Mysql database password");
 		options.addOption("d", true, "Mysql database URL, i.e. jdbc:mysql://localhost:port/dbname");
+		options.addOption("prop", true, "Properties filename");
 	}
 	
-	public static void main(String[] args) throws Exception {		
-		WikiI5Converter converter = new WikiI5Converter();
-		converter.run(args);
-	}
-	
-	public void run(String[] args) throws I5Exception  {
+	public static void main(String[] args) throws Exception {
+		setOptions();
 		
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd;
@@ -55,87 +52,50 @@ public class WikiI5Converter {
 		} catch (ParseException e) {
 			throw new I5Exception(e);
 		}
-						
-		String xmlFolder = cmd.getOptionValue("x");
-		String type = cmd.getOptionValue("t");
-		String dumpFilename = cmd.getOptionValue("w");
-		String outputFile = cmd.getOptionValue("o");		
-		String encoding = cmd.getOptionValue("e");				
-		String inflectives = cmd.getOptionValue("inf");
-		String index = cmd.getOptionValue("i");
-		String dbUrl = cmd.getOptionValue("d");
-		String username = cmd.getOptionValue("u");
-		String password = cmd.getOptionValue("p","secret");
 		
-		convert(xmlFolder, type, dumpFilename, inflectives, encoding, outputFile, 
-				index, dbUrl, username, password);
-						
-	}
+		Configuration config = new Configuration();
+		String propertiesFilename = cmd.getOptionValue("prop");
+		if (propertiesFilename != null){
+			config.setConfigFromProperties(propertiesFilename);
+		}
+		else{
+			config.setConfigFromCommandLine(cmd);
+		}		
+		
+		convert(config);
+	}	
 	
-	public static void convert(String xmlFolder, String type, String dumpFilename,
-			String inflectives, String encoding, String outputFile, String index,
-			String dbUrl, String username, String password) throws 
+	public static void convert(Configuration config) throws 
 			I5Exception  {	
 		
-		if (xmlFolder == null){
-			throw new IllegalArgumentException("Please specify the WikiXML root folder.");
-		}
-		
-		if (type == null){
-			throw new IllegalArgumentException("Please specify a wiki dump file.");
-		}
-		if (!type.equals("articles") && !type.equals("discussions")){
-			throw new IllegalArgumentException("The type is not recognized. " +
-					"Please specify the type as: articles or dicussions");
-		}
-		
-		if (dumpFilename == null){
-			throw new IllegalArgumentException("Please specify the Wiki dump file.");
-		}
-		
-		if (outputFile == null){
-			throw new IllegalArgumentException("Please specify the output file.");
-		}
-		if (index == null){
-			throw new IllegalArgumentException("Please specify the index of the Wikipedia "
-					+type+".");
-		}
-		if (encoding == null){
-			encoding = "utf-8"; // default encoding
-		}
-		if (dbUrl == null){
-			throw new IllegalArgumentException("Please specify the Wikipedia language link " +
-					"Mysql Database URL.");
-		}		
-		if (username == null){
-			throw new IllegalArgumentException("Please specify the username of the Wikipedia " +
-					"language link Mysql Database.");
-		}
-		if (password == null){
-			throw new IllegalArgumentException("Please specify the password of  Wikipedia " +
-					"language link Mysql Database.");
-		}
-		
-		System.setProperty("entityExpansionLimit", "0");
-		System.setProperty("totalEntitySizeLimit", "0");
-		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
+		I5Corpus corpus = new I5Corpus(config.getDumpFilename(), config.getPageType(), 
+				config.getEncoding());
 				
-		I5Corpus corpus = new I5Corpus(dumpFilename, type, encoding);		
+		DatabaseManager dbManager = null;
 		long startTime=System.nanoTime();
-		
 		try {
-			DatabaseManager dbManager = new DatabaseManager(dbUrl, username, password);
-			I5Writer  w = new I5Writer(corpus, outputFile, dbManager);
-			w.open();
-			w.createCorpusHeader();			
-			// Do the convertion and write the resulting I5
-			WikiI5Processor wikiI5Processor = new WikiI5Processor(corpus, inflectives);
-			wikiI5Processor.run(xmlFolder, index, w);
-			w.close();
+			// Initializing DatabaseManager
+			dbManager = new DatabaseManager(config.getDatabaseUrl(), 
+					config.getDatabaseUsername(), config.getDatabasePassword());
 		}
-		catch (SQLException | XPathExpressionException e) {
+		catch (SQLException e) {
 			throw new I5Exception(e);
 		}
+		
+		// Initialzing I5Writer
+		I5Writer  w = new I5Writer(corpus, config.getOutputFile(), dbManager);
+		w.open();
+		w.createCorpusHeader();
+		
+		// Do the convertion and write the resulting I5
+		WikiI5Processor wikiI5Processor = new WikiI5Processor(corpus, config.getInflectives());
+		try {
+			wikiI5Processor.run(config.getWikiXMLFolder(), config.getWikiXMLIndex(), w);
+		} catch (XPathExpressionException e) {
+			throw new I5Exception(e);
+		}
+		w.close();
+			
 		
 		long endTime=System.nanoTime();					
 		System.out.println("Transformation time "+ (endTime-startTime));
