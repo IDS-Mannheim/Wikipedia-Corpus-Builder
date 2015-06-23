@@ -72,6 +72,9 @@
               <classpathPrefix>lib/</classpathPrefix>              
               <addClasspath>true</addClasspath>
             </manifest>
+            <manifestEntries>
+            	<Class-Path>properties/</Class-Path>
+            </manifestEntries>
           </archive>
         </configuration>
       </plugin>

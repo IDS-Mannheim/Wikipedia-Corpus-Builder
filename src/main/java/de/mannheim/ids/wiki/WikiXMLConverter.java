@@ -1,9 +1,6 @@
 package de.mannheim.ids.wiki;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -14,7 +11,21 @@ import org.apache.commons.cli.ParseException;
 import de.mannheim.ids.util.LanguageProperties;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 
-/** Main class for Wikitext to XML conversion
+/** Main class for Wikitext to WikiXML conversion
+ *	
+ *	WikiXMLConverter takes 5 arguments:
+ *	-l	2-letter language code of the Wikipedia [en | de | fr | hu | it | pl | no ]
+ *	-w 	Wikidump filename
+ *	-t	The type of Wikipages [articles | discussions | all]
+ * 	-o	The WikiXML output directory
+ * 	-e	The output encoding, e.g. utf-8 or iso-8859-1
+ *
+ *	Example arguments:
+ *	-l de -w dewiki-20130728-pages-meta-current.xml -t articles
+ *	-o xml-de/articles -e utf-8
+ *
+ *	Alternatively, WikiXMLConverter can read a properties file. 
+ *	Run with arguments: -prop config.properties
  * 
  * @author margaretha
  *
@@ -26,10 +37,10 @@ public class WikiXMLConverter {
 	
 	public WikiXMLConverter() {
 		options = new Options();
-		options.addOption("l", true, "The language of the Wikipedia");	
-		options.addOption("w", true, "Wiki dump file");
+		options.addOption("l", true, "2-letter language code of the Wikipedia");	
+		options.addOption("w", true, "Wikidump filename");
 		options.addOption("t", true, "The type of Wikipages [articles | discussions | all]");
-		options.addOption("o", true, "The xml output directory");
+		options.addOption("o", true, "The WikiXML output directory");
 		options.addOption("e", true, "Encoding: utf-8 or iso-8859-1");
 	}
 	
@@ -43,68 +54,26 @@ public class WikiXMLConverter {
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = parser.parse(options, args);		
 						
-		String language = cmd.getOptionValue("l");	
-		String type = cmd.getOptionValue("t");
-		String wikidump = cmd.getOptionValue("w");
-		String xmlOutputDir = cmd.getOptionValue("o");
-		String encoding = cmd.getOptionValue("e");
+		Configuration config = new Configuration();
+		config.setConfigFromCommandLine(cmd);
 		
-		convert(wikidump, language, type, xmlOutputDir, encoding);
+		convert(config);
 	}
 	
-	public static void convert(String wikidump, String language, String type, 
-			String xmlOutputDir, String encoding) throws IOException{
+	public static void convert(Configuration config) throws IOException{
 		
-		if (wikidump == null){
-			throw new IllegalArgumentException("Please specify the Wiki dump file.");
-		}
-		
-		ArrayList<String> languages = LanguageProperties.getLanguages();
-		if (language == null){
-			throw new IllegalArgumentException("Please specify the Wikipedia language.");
-		}				
-		else if (!languages.contains(language)){
-			throw new IllegalArgumentException("Language is not supported. Supported " +
-					"languages are de (german), fr (french), hu (hungarian), it (italian), " +
-					"pl (polish), no (norwegian), en (english).");
-		}
-		
-		if (encoding == null || encoding.isEmpty()){
-			encoding = "utf-8";
-		}
-		
-		List<Integer> namespaces= new ArrayList<Integer>();
-		if (type == null || type.equals("all")){
-			namespaces.add(0);
-			namespaces.add(1);
-		}
-		else if (type.equals("articles")){
-			namespaces.add(0);
-		}
-		else if (type.equals("discussions")){
-			namespaces.add(1);
-		}		
-		else {
-			throw new IllegalArgumentException("The type is not recognized. " +
-					"Please specify the type as: articles, discussions, or all");
-		}
-		
-		if (xmlOutputDir == null){
-			throw new IllegalArgumentException("Please specify the XML output directory.");
-		}
-				
+			
 		long startTime = System.nanoTime();
-		LanguageProperties lp = new LanguageProperties(language,namespaces);
+		LanguageProperties lp = new LanguageProperties(config.getLanguageCode(),
+				config.getNamespaces());
 		
-		WikiXMLProcessor wxp = new WikiXMLProcessor(lp,namespaces);
+		WikiXMLProcessor wxp = new WikiXMLProcessor(lp,config.getNamespaces());
 		try {
-			wxp.createWikiXML(wikidump, xmlOutputDir, encoding);
+			wxp.createWikiXML(config.getWikidump(), config.getOutputFolder(), config.getEncoding());
 		} catch (IOException e) {
 			throw new IOException("Failed creating WikiXML.", e);
 		}
-		
-		//wxp.createSingleWikiXML(wikidump,xmlOutputDir);	
-		
+				
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;
 		System.out.println("Wikitext to XML execution time "+duration);

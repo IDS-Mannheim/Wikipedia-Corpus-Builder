@@ -14,6 +14,6 @@ public class WikiXMLConverterExample {
 		String type = "all";
 		String encoding = "iso-8859-1";
 		
-		WikiXMLConverter.convert(wikidump, language, type, xmlOutputDir, encoding);		
+		WikiXMLConverter.convert(new Configuration(wikidump, language, type, xmlOutputDir, encoding));		
 	}	
 }
