@@ -21,41 +21,40 @@ public class SingleXMLWriter implements WikiXMLWriter {
 	private OutputStreamWriter articleWriter, discussionWriter;
 	
 	
-	public SingleXMLWriter(String xmlOutputDir, String language, String encoding, WikiStatistics 
-			wikiStatistics, List<Integer> namespaces) throws IOException {
-		
-		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
-			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
-		}		
-		if (language == null || language.isEmpty()){
-			throw new IllegalArgumentException("Language cannot be null or empty.");
+	public SingleXMLWriter(Configuration config, WikiStatistics 
+			wikiStatistics) throws IOException {
+				
+		if (config == null){
+			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		if (wikiStatistics==null){
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
-		if (namespaces==null){
-			throw new IllegalArgumentException("Namespaces cannot be null.");
-		}
-				
-		this.language = language;
-		this.encoding = encoding;
+						
+		this.language = config.getLanguageCode();
+		this.encoding = config.getOutputEncoding();
 		this.wikiStatistics = wikiStatistics;
 		this.counter=1;
 		
+		List<Integer> namespaces = config.getNamespaces();
 		if (namespaces.contains(0)) 
-			articleWriter = Utilities.createWriter(xmlOutputDir+"/wiki-articles.xml", encoding);		
+			articleWriter = Utilities.createWriter(config.getOutputFolder() +
+					"/wiki-articles.xml", encoding);		
 		if (namespaces.contains(1)) 
-			discussionWriter = Utilities.createWriter(xmlOutputDir+"/wiki-discussions.xml", encoding);		
+			discussionWriter = Utilities.createWriter(config.getOutputFolder() +
+					"/wiki-discussions.xml", encoding);		
 	}	
 	
 	@Override
 	public void write(WikiPage wikiPage, boolean isDiscussion, String indent)
 			throws IOException {		
 		
-		if (isDiscussion)
-			writePage(discussionWriter, wikiPage, indent);		
-		else
+		if (isDiscussion){
+			writePage(discussionWriter, wikiPage, indent);
+		}
+		else{
 			writePage(articleWriter, wikiPage, indent);
+		}
 	}
 	
 	public void writePage(OutputStreamWriter writer, WikiPage wikiPage, 

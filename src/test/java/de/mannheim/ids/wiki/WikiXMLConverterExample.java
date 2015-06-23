@@ -11,9 +11,22 @@ public class WikiXMLConverterExample {
 		String xmlOutputDir = "./xml-"+language;		
 		// Set wikidump filepath
 		String wikidump = "data/dewiki-20130728-sample.xml";
+		// User page in the Wikipedia language, e.g. Benutzer in German Wikipedia
+		String userPage = "Benutzer";
+		// Talk page in the Wikipedia language, e.g. Diskussion in German Wikipedia
+		String talkPage = "Diskussion";
+		// User contribution page in the Wikipedia language, e.g. 
+		// Spezial:Beiträge in German Wikipedia
+		String userContribution = "Spezial:Beiträge";
+		// The type of Wikipages to convert
 		String type = "all";
+		// the output encoding
 		String encoding = "iso-8859-1";
 		
-		WikiXMLConverter.convert(new Configuration(wikidump, language, type, xmlOutputDir, encoding));		
+		Configuration config = new Configuration (wikidump, language, userPage, 
+			talkPage, userContribution, type, xmlOutputDir, encoding);
+		
+		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
+		wxp.createWikiXML();	
 	}	
 }

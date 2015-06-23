@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import de.mannheim.ids.util.Utilities;
-import de.mannheim.ids.util.WikiStatistics;
 
 /** This class writes an XML file for each XML-ized wiki page.
  * 
@@ -17,19 +16,16 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 	private int counter;
 	private String encoding;
 	
-	public MultipleXMLWriter(String xmlOutputDir, String language, String encoding) {
+	public MultipleXMLWriter(Configuration config) {
 		
-		if (xmlOutputDir==null || xmlOutputDir.isEmpty()){
-			throw new IllegalArgumentException("Xml output directory cannot be null or empty.");
-		}		
-		if (language == null || language.isEmpty()){
-			throw new IllegalArgumentException("Language cannot be null or empty.");
+		if (config == null){
+			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		
-		this.xmlOutputDir = xmlOutputDir;
-		this.counter=1;
-		this.language=language;
-		this.encoding = encoding;
+		this.xmlOutputDir = config.getOutputFolder();
+		this.language = config.getLanguageCode();
+		this.encoding = config.getOutputEncoding();
+		this.counter = 1;
 	}
 	
 	@Override

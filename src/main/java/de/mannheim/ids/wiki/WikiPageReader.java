@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import de.mannheim.ids.util.LanguageProperties;
 import de.mannheim.ids.util.WikiStatistics;
 
 /** This class reads a Wiki page, identify some page metadata, 
@@ -24,7 +23,6 @@ import de.mannheim.ids.util.WikiStatistics;
 public class WikiPageReader {
 
 	private WikiPage wikiPage;	
-	private LanguageProperties languageProperties;
 	private WikiPageHandler wikiPageHandler;
 	private WikiTalkHandler wikiTalkHandler;
 	private WikiStatistics wikiStatistics;
@@ -33,24 +31,27 @@ public class WikiPageReader {
 	private Pattern nsPattern = Pattern.compile("<ns>(.+)</ns>");
 	private Pattern idPattern = Pattern.compile("<id>(.+)</id>");
 	
-	public WikiPageReader(LanguageProperties languageProperties,WikiStatistics 
+	private Configuration config;
+	
+	public WikiPageReader(Configuration config, WikiStatistics 
 			wikiStatistics) throws IOException {
 		
-		if (languageProperties==null){
-			throw new IllegalArgumentException("Language properties cannot be null.");
+		if (config == null){
+			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		if (wikiStatistics == null){
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
 		
-		this.languageProperties = languageProperties;
 		this.wikiStatistics = wikiStatistics;
-		
-		this.wikiPageHandler = new WikiPageHandler(languageProperties.getLanguage(),
+		this.config = config;
+		this.wikiPageHandler = new WikiPageHandler(config.getLanguageCode(),
 				wikiStatistics);
-		this.wikiTalkHandler = new WikiTalkHandler(languageProperties.getLanguage(), 
-				languageProperties.getUser(), languageProperties.getContribution(),
-				wikiStatistics);
+		if (config.getNamespaces().contains(1)){
+			this.wikiTalkHandler = new WikiTalkHandler(config.getLanguageCode(), 
+					config.getUserPage(), config.getUserContribution(),
+					wikiStatistics);
+		}
 	}
 	
 	public void read(String inputFile, WikiXMLWriter wikiXMLWriter) throws IOException {
@@ -106,7 +107,7 @@ public class WikiPageReader {
 					matcher = nsPattern.matcher(trimmedStrLine);
 					if (matcher.find()){
 						int ns = Integer.parseInt(matcher.group(1));
-						if (languageProperties.getNamespaces().contains(ns)){
+						if (config.getNamespaces().contains(ns)){
 							// Discussion namespace
 							if (ns == 1) isDiscussion = true;
 							wikiPage.pageStructure += setIndent(strLine)+ trimmedStrLine+"\n";
@@ -122,7 +123,7 @@ public class WikiPageReader {
 					matcher = idPattern.matcher(trimmedStrLine);
 					if (matcher.find()){
 						wikiPage.setPageId(matcher.group(1));					
-						wikiPage.setPageIndex(isDiscussion,languageProperties.getTalk());
+						wikiPage.setPageIndex(isDiscussion,config.getTalkPage());
 						wikiPage.pageStructure += strLine + "\n";
 						idFlag=false;
 					}
@@ -144,8 +145,11 @@ public class WikiPageReader {
 				}
 			}
 		}
-		wikiTalkHandler.user.closeWriter();
-		wikiTalkHandler.time.closeWriter();		
+		
+		if (wikiTalkHandler != null){
+			wikiTalkHandler.user.closeWriter();
+			wikiTalkHandler.time.closeWriter();
+		}		
 	}
 	
 	public String setIndent(String strLine){		
