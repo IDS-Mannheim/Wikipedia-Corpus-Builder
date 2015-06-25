@@ -7,7 +7,6 @@ import java.util.Map;
 
 import de.mannheim.ids.wiki.Utilities;
 
-
 /**
  * Class implementation for handling posting authors. <br/>
  * Generates a list of post authors / wikipedia users in XML.
@@ -41,26 +40,28 @@ public class WikiPostUser {
 		userWriter.append("<listPerson>\n");
 		counter = 0;
 		this.userUri = userUri;
-		getTalkUser("unknown", "", false);
+		createPostUser("unknown", "", false);
 	}
 
-	public String getTalkUser(String username, String speaker, boolean sigFlag)
+	public void createPostUser(String username, String userLink, boolean sigFlag)
 			throws IOException {
 		if (username == null) {
 			throw new IllegalArgumentException("Username cannot be null.");
 		}
-
-		String user = null;
+		if (userLink == null) {
+			throw new IllegalArgumentException("Speaker cannot be null.");
+		}
 		synchronized (userMap) {
 			if (!userMap.containsKey(username)) {
 				String userId = generateUserId();
 				userMap.put(username, userId);
-				createPerson(username, userId, speaker, sigFlag);
+				createPerson(username, userId, userLink, sigFlag);
 			}
-			user = userMap.get(username);
 		}
+	}
 
-		return user;
+	public String getUserId(String username) {
+		return userMap.get(username);
 	}
 
 	private String generateUserId() {
@@ -69,12 +70,9 @@ public class WikiPostUser {
 		return userId;
 	}
 
-	private void createPerson(String username, String userId, String speaker,
+	private void createPerson(String username, String userId, String userLink,
 			boolean sigFlag) throws IOException {
 
-		if (speaker == null) {
-			throw new IllegalArgumentException("Speaker cannot be null.");
-		}
 		synchronized (userWriter) {
 			userWriter.append("   <person xml:id=\"" + userId + "\">\n");
 			userWriter.append("      <persName>" + username + "</persName>\n");
@@ -82,7 +80,7 @@ public class WikiPostUser {
 			if (sigFlag) {
 				userWriter.append("      <signatureContent>\n");
 				userWriter.append("         <ref target=\"" + userUri);
-				userWriter.append(speaker.replaceAll("\\s", "_") + "\">");
+				userWriter.append(userLink.replaceAll("\\s", "_") + "\">");
 				userWriter.append(username + "</ref>\n");
 				userWriter.append("      </signatureContent>\n");
 			}

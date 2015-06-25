@@ -23,12 +23,22 @@ import de.mannheim.ids.writer.WikiPostUser;
 
 public class WikiPostHandler {
 
+	public enum SignatureType {
+		SIGNED, UNSIGNED, USER_CONSTRIBUTION, UNIDENTIFIED;
+		public String toString() {
+			return name().toLowerCase();
+		}
+	}
+
 	private Pattern levelPattern = Pattern.compile("^(:+)");
 	private Pattern headingPattern = Pattern.compile("^\'*(=+[^=]+=+)");
 	private Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 	private Pattern timePattern = Pattern
-			.compile("\\s*([0-9]{2}:[^\\)]*\\))(.*)");
+			.compile(".*\\s*([0-9]{2}:[^\\)]*\\))(.*)");
+
+	private Pattern timePattern2 = Pattern.compile("(.*)([0-9]{2}:[^\\)]*\\))");
+
 	private Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}");
 	private Pattern signaturePattern, specialContribution;
@@ -71,7 +81,8 @@ public class WikiPostHandler {
 		this.errorWriter = errorWriter;
 
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?" + userLabel
-				+ ":([^\\|]+)\\|([^\\]]+)\\]\\](.*)");
+				+ ":([^\\]]+)\\]\\](.*)");
+
 		specialContribution = Pattern.compile("(.*)\\[\\[" + contributionLabel
 				+ "/([^\\|]+)\\|[^\\]]+\\]\\](.*)");
 	}
@@ -83,7 +94,8 @@ public class WikiPostHandler {
 		}
 
 		if (!posting.trim().isEmpty()) {
-			writePosting("unknown", "", "", posting.trim(), "");
+			writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+					posting.trim(), "");
 			posting = "";
 		}
 	}
@@ -100,7 +112,8 @@ public class WikiPostHandler {
 		// Posting before a level marker
 		if (!baselineMode && trimmedText.startsWith(":")
 				&& !posting.trim().isEmpty()) {
-			writePosting("unknown", "", "", posting.trim(), "");
+			writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+					posting.trim(), "");
 			posting = "";
 		}
 
@@ -111,6 +124,12 @@ public class WikiPostHandler {
 		}
 
 		if (!baselineMode) {
+
+			// Timestamp only
+			if (trimmedText.endsWith(")")) {
+				if (handleTimestampOnly(trimmedText))
+					return;
+			}
 
 			// Special contribution and help signature
 			if (trimmedText.contains(this.contributionLabel)) {
@@ -126,14 +145,16 @@ public class WikiPostHandler {
 
 			// Level Marker
 			if (trimmedText.startsWith(":")) {
-				writePosting("unknown", "", "", trimmedText, "");
+				writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+						trimmedText, "");
 				return;
 			}
 
 			// Line Marker
 			if (trimmedText.startsWith("---")) {
 				if (!posting.trim().isEmpty()) {
-					writePosting("unknown", "", "", posting.trim(), "");
+					writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+							posting.trim(), "");
 					posting = "";
 				}
 				return;
@@ -151,12 +172,22 @@ public class WikiPostHandler {
 				if (headerHandler(matcher))
 					return;
 			}
-
 		}
 
-		// else posting+=trimmedText+"\n";
 		posting += text + "\n";
 
+	}
+
+	private boolean handleTimestampOnly(String trimmedText) throws IOException {
+		Matcher matcher = timePattern2.matcher(trimmedText);
+		if (matcher.find()) {
+			System.out.println(matcher.group(2));
+			posting = matcher.group(1);
+			writePosting(SignatureType.UNIDENTIFIED, "", "", matcher.group(2),
+					posting.trim(), "");
+			return true;
+		}
+		return false;
 	}
 
 	private boolean handleSignature(String trimmedText) throws IOException {
@@ -165,18 +196,34 @@ public class WikiPostHandler {
 		}
 
 		Matcher matcher = signaturePattern.matcher(trimmedText);
+		// System.out.println(matcher.find() + " " + trimmedText);
+
 		if (matcher.find()) {
 			String rest = "", timestamp = "";
-			Matcher matcher2 = timePattern.matcher(matcher.group(4));
+			Matcher matcher2 = timePattern.matcher(matcher.group(3));
 			if (matcher2.find()) {
 				timestamp = matcher2.group(1);
 				rest = matcher2.group(2);
 			}
+			else {
+				rest = matcher.group(3);
+			}
 			sigFlag = true;
 			posting += matcher.group(1) + "\n";
 
-			writePosting(matcher.group(3), matcher.group(2), timestamp,
-					posting.trim(), rest.trim());
+			String userLink, userLinkText;
+			if (matcher.group(2).contains("|")) {
+				String[] s = matcher.group(2).split("\\|");
+				userLink = s[0];
+				userLinkText = s[1];
+			}
+			else {
+				userLink = matcher.group(2);
+				userLinkText = userLink;
+			}
+
+			writePosting(SignatureType.SIGNED, userLinkText, userLink,
+					timestamp, posting.trim(), rest.trim());
 
 			matcher.reset();
 			posting = "";
@@ -204,7 +251,8 @@ public class WikiPostHandler {
 							"&lt;small&gt;(''nicht [[Hilfe:Signatur|signierter]] Beitrag von''",
 							"");
 			posting += temp + "\n";
-			writePosting(matcher.group(2), "", timestamp, posting.trim(), "");
+			writePosting(SignatureType.USER_CONSTRIBUTION, matcher.group(2),
+					"", timestamp, posting.trim(), "");
 
 			matcher.reset();
 			posting = "";
@@ -228,7 +276,8 @@ public class WikiPostHandler {
 				}
 			}
 			posting += matcher.group(1) + "\n";
-			writePosting(matcher.group(2), "", timestamp, posting.trim(), "");
+			writePosting(SignatureType.UNSIGNED, matcher.group(2), "",
+					timestamp, posting.trim(), "");
 
 			matcher.reset();
 			posting = "";
@@ -245,7 +294,8 @@ public class WikiPostHandler {
 
 		if (matcher.find()) {
 			if (!posting.trim().isEmpty()) {
-				writePosting("unknown", "", "", posting.trim(), "");
+				writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+						posting.trim(), "");
 				posting = "";
 			}
 
@@ -302,14 +352,14 @@ public class WikiPostHandler {
 		return posting;
 	}
 
-	private void writePosting(String speaker, String speakerLabel,
-			String timestamp, String posting, String postscript)
+	private void writePosting(SignatureType signatureType, String username,
+			String userLink, String timestamp, String posting, String postscript)
 			throws IOException {
 
 		if (posting == null) {
 			throw new IllegalArgumentException("Posting cannot be null.");
 		}
-		if (speaker == null) {
+		if (username == null) {
 			throw new IllegalArgumentException("Speaker cannot be null.");
 		}
 		if (timestamp == null) {
@@ -332,17 +382,17 @@ public class WikiPostHandler {
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"" + level + "\"");
 
-		if (!speaker.isEmpty()) {
-			sb.append(" who=\""
-					+ postUser.getTalkUser(speaker, speakerLabel, sigFlag)
-					+ "\"");
-			if (!speaker.equals("unknown"))
-				posting += "<autoSignature/>";
+		if (!username.isEmpty()) {
+			postUser.createPostUser(username, userLink, sigFlag);
+			sb.append(" who=\"" + postUser.getUserId(username) + "\"");
+			if (!username.equals("unknown")) {
+				posting += "<autoSignature @type=" + signatureType.toString()
+						+ "/>";
+			}
 		}
 
 		if (!timestamp.isEmpty()) {
-			sb.append(" synch=\"" + postTime.createTimestamp(timestamp)
-					+ "\"");
+			sb.append(" synch=\"" + postTime.createTimestamp(timestamp) + "\"");
 			posting += " <timestamp>" + timestamp + "</timestamp>";
 			// System.out.println(posting+"\n");
 		}
