@@ -36,7 +36,9 @@ public class WikiPostHandler {
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 	private Pattern timePattern = Pattern
 			.compile(".*\\s*([0-9]{2}:[^\\)]*\\))(.*)");
-	
+
+	private Pattern timePattern2 = Pattern.compile("(.*)([0-9]{2}:[^\\)]*\\))");
+
 	private Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}");
 	private Pattern signaturePattern, specialContribution;
@@ -123,7 +125,13 @@ public class WikiPostHandler {
 
 		if (!baselineMode) {
 
-					// Special contribution and help signature
+			// Timestamp only
+			if (trimmedText.endsWith(")")) {
+				if (handleTimestampOnly(trimmedText))
+					return;
+			}
+
+			// Special contribution and help signature
 			if (trimmedText.contains(this.contributionLabel)) {
 				if (handleHelp(trimmedText))
 					return;
@@ -168,6 +176,18 @@ public class WikiPostHandler {
 
 		posting += text + "\n";
 
+	}
+
+	private boolean handleTimestampOnly(String trimmedText) throws IOException {
+		Matcher matcher = timePattern2.matcher(trimmedText);
+		if (matcher.find()) {
+			// System.out.println(matcher.group(2));
+			posting = matcher.group(1);
+			writePosting(SignatureType.UNIDENTIFIED, "", "", matcher.group(2),
+					posting.trim(), "");
+			return true;
+		}
+		return false;
 	}
 
 	private boolean handleSignature(String trimmedText) throws IOException {
@@ -393,5 +413,4 @@ public class WikiPostHandler {
 		sb.append("        </posting>\n");
 		wikiPage.wikitext += sb.toString();
 	}
-
 }
