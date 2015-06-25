@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.wiki.page;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -10,7 +10,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import de.mannheim.ids.util.WikiStatistics;
+import de.mannheim.ids.wiki.Configuration;
+
 
 /**
  * This class reads a Wiki page, identify some page metadata, such as title,

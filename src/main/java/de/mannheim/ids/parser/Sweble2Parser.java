@@ -12,8 +12,8 @@ import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
 import org.sweble.wikitext.parser.nodes.WtUrl;
 
-import de.mannheim.ids.util.WikiErrorWriter;
-import de.mannheim.ids.util.WikiStatistics;
+import de.mannheim.ids.wiki.page.WikiStatistics;
+import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
  * Convert wikitext to XML using Sweble parser

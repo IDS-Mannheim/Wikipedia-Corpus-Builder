@@ -1,11 +1,12 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.writer;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.mannheim.ids.util.Utilities;
+import de.mannheim.ids.wiki.Utilities;
+
 
 /**
  * Class implementation for handling posting authors. <br/>

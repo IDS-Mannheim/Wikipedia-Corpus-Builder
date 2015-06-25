@@ -1,4 +1,4 @@
-package de.mannheim.ids.util;
+package de.mannheim.ids.wiki;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

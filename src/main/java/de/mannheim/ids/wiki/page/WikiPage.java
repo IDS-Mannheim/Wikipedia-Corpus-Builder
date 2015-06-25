@@ -1,10 +1,11 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.wiki.page;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.mannheim.ids.util.Utilities;
+import de.mannheim.ids.wiki.Utilities;
+
 
 /**
  * Wikipage Class

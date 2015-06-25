@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.wiki.page;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,8 +12,11 @@ import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
-import de.mannheim.ids.util.WikiErrorWriter;
-import de.mannheim.ids.util.WikiStatistics;
+import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.WikiXMLWriter;
+import de.mannheim.ids.writer.WikiErrorWriter;
+import de.mannheim.ids.writer.WikiPostTime;
+import de.mannheim.ids.writer.WikiPostUser;
 
 /**
  * This class implements methods for handling Wikipages including reading page

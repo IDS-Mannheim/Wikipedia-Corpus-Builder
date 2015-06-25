@@ -1,4 +1,4 @@
-package de.mannheim.ids.util;
+package de.mannheim.ids.wiki.page;
 
 /**
  * Collect statistical information about Wikipages and the errors found in the

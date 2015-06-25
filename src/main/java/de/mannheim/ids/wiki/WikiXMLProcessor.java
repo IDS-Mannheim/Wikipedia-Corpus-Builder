@@ -6,9 +6,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import de.mannheim.ids.util.Utilities;
-import de.mannheim.ids.util.WikiErrorWriter;
-import de.mannheim.ids.util.WikiStatistics;
+import de.mannheim.ids.wiki.page.WikiPage;
+import de.mannheim.ids.wiki.page.WikiPageHandler;
+import de.mannheim.ids.wiki.page.WikiPageReader;
+import de.mannheim.ids.wiki.page.WikiStatistics;
+import de.mannheim.ids.writer.WikiErrorWriter;
+import de.mannheim.ids.writer.WikiPostTime;
+import de.mannheim.ids.writer.WikiPostUser;
 
 /**
  * 

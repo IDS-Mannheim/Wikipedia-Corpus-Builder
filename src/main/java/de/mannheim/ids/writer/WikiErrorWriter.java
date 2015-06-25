@@ -1,10 +1,11 @@
-package de.mannheim.ids.util;
+package de.mannheim.ids.writer;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Paths;
 
 import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.Utilities;
 
 /**
  * Class for logging errors occurring during the wikitext to wikiXML conversion
