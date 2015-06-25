@@ -15,14 +15,14 @@ import de.mannheim.ids.util.Utilities;
  * 
  */
 
-public class WikiTalkUser {
+public class WikiPostUser {
 
 	private Map<String, String> userMap; // username, userid
 	private OutputStreamWriter userWriter;
 	private int counter;
 	private String userUri;
 
-	public WikiTalkUser(String prefixFileName, String userUri)
+	public WikiPostUser(String prefixFileName, String userUri)
 			throws IOException {
 
 		if (prefixFileName == null || prefixFileName.isEmpty()) {

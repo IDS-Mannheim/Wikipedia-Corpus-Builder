@@ -36,8 +36,8 @@ public class WikiPageHandler implements Runnable {
 	private WikiXMLWriter wikiXMLWriter;
 	private WikiErrorWriter errorWriter;
 
-	private WikiTalkUser postUser;
-	private WikiTalkTime postTime;
+	private WikiPostUser postUser;
+	private WikiPostTime postTime;
 
 	private Configuration config;
 
@@ -72,7 +72,7 @@ public class WikiPageHandler implements Runnable {
 
 		try {
 			if (config.isDiscussion()) {
-				WikiTalkHandler th = new WikiTalkHandler(config, wikiPage,
+				WikiPostHandler th = new WikiPostHandler(config, wikiPage,
 						wikiStatistics, errorWriter, postUser, postTime,
 						tagSoupParser);
 				th.handlePosts();
@@ -193,19 +193,19 @@ public class WikiPageHandler implements Runnable {
 		}
 	}
 
-	public WikiTalkUser getPostUser() {
+	public WikiPostUser getPostUser() {
 		return postUser;
 	}
 
-	public void setPostUser(WikiTalkUser postUser) {
+	public void setPostUser(WikiPostUser postUser) {
 		this.postUser = postUser;
 	}
 
-	public WikiTalkTime getPostTime() {
+	public WikiPostTime getPostTime() {
 		return postTime;
 	}
 
-	public void setPostTime(WikiTalkTime postTime) {
+	public void setPostTime(WikiPostTime postTime) {
 		this.postTime = postTime;
 	}
 }

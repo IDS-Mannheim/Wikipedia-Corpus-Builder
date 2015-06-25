@@ -19,7 +19,7 @@ import de.mannheim.ids.util.WikiStatistics;
  * 
  */
 
-public class WikiTalkHandler {
+public class WikiPostHandler {
 
 	private Pattern levelPattern = Pattern.compile("^(:+)");
 	private Pattern headingPattern = Pattern.compile("^\'*(=+[^=]+=+)");
@@ -37,17 +37,17 @@ public class WikiTalkHandler {
 	private WikiErrorWriter errorWriter;
 	private WikiPage wikiPage;
 
-	public WikiTalkUser postUser;
-	public WikiTalkTime postTime;
+	public WikiPostUser postUser;
+	public WikiPostTime postTime;
 
 	private String userLabel, contributionLabel;
 	private String posting = "", language;
 
 	private boolean sigFlag, baselineMode = false;
 
-	public WikiTalkHandler(Configuration config, WikiPage wikipage,
+	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
-			WikiTalkUser postUser, WikiTalkTime postTime,
+			WikiPostUser postUser, WikiPostTime postTime,
 			TagSoupParser tagSoupParser) throws IOException {
 
 		if (config == null) {

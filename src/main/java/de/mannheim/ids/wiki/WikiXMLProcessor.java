@@ -22,8 +22,8 @@ public class WikiXMLProcessor {
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
 	private LinkedBlockingQueue<WikiPage> wikipages;
-	private WikiTalkUser postUser;
-	private WikiTalkTime postTime;
+	private WikiPostUser postUser;
+	private WikiPostTime postTime;
 
 	public WikiXMLProcessor(Configuration config) throws IOException {
 		if (config == null) {
@@ -37,9 +37,9 @@ public class WikiXMLProcessor {
 		if (config.isDiscussion()) {
 			String prefix = Paths.get(config.getWikidump()).getFileName()
 					.toString().substring(0, 15);
-			postUser = new WikiTalkUser(prefix, config.getLanguageCode()
+			postUser = new WikiPostUser(prefix, config.getLanguageCode()
 					+ ".wikipedia.org/wiki/" + config.getUserPage() + ":");
-			postTime = new WikiTalkTime(prefix);
+			postTime = new WikiPostTime(prefix);
 		}
 	}
 

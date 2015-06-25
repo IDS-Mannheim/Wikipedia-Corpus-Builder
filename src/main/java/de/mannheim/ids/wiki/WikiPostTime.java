@@ -13,12 +13,12 @@ import de.mannheim.ids.util.Utilities;
  * 
  */
 
-public class WikiTalkTime {
+public class WikiPostTime {
 
 	private OutputStreamWriter timeWriter;
 	private int counter;
 
-	public WikiTalkTime(String prefixFileName) throws IOException {
+	public WikiPostTime(String prefixFileName) throws IOException {
 
 		if (prefixFileName == null || prefixFileName.isEmpty()) {
 			throw new IllegalArgumentException(
