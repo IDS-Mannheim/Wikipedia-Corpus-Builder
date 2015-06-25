@@ -13,10 +13,10 @@ import org.xml.sax.SAXException;
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Configuration;
-import de.mannheim.ids.wiki.WikiXMLWriter;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
+import de.mannheim.ids.writer.WikiXMLWriter;
 
 /**
  * This class implements methods for handling Wikipages including reading page
