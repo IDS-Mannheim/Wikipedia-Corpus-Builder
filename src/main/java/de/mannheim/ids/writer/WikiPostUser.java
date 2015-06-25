@@ -7,7 +7,6 @@ import java.util.Map;
 
 import de.mannheim.ids.wiki.Utilities;
 
-
 /**
  * Class implementation for handling posting authors. <br/>
  * Generates a list of post authors / wikipedia users in XML.
@@ -41,26 +40,28 @@ public class WikiPostUser {
 		userWriter.append("<listPerson>\n");
 		counter = 0;
 		this.userUri = userUri;
-		getTalkUser("unknown", "", false);
+		createPostUser("unknown", "", false);
 	}
 
-	public String getTalkUser(String username, String speaker, boolean sigFlag)
+	public void createPostUser(String username, String speaker, boolean sigFlag)
 			throws IOException {
 		if (username == null) {
 			throw new IllegalArgumentException("Username cannot be null.");
 		}
-
-		String user = null;
+		if (speaker == null) {
+			throw new IllegalArgumentException("Speaker cannot be null.");
+		}
 		synchronized (userMap) {
 			if (!userMap.containsKey(username)) {
 				String userId = generateUserId();
 				userMap.put(username, userId);
 				createPerson(username, userId, speaker, sigFlag);
 			}
-			user = userMap.get(username);
 		}
+	}
 
-		return user;
+	public String getUserId(String username) {
+		return userMap.get(username);
 	}
 
 	private String generateUserId() {
