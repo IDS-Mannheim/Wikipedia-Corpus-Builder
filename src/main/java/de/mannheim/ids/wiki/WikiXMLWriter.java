@@ -10,12 +10,12 @@ import de.mannheim.ids.util.Utilities;
  * @author margaretha
  *
  */
-public class MultipleXMLWriter{
+public class WikiXMLWriter{
 
 	private String xmlOutputDir, language;
 	private String encoding;
 	
-	public MultipleXMLWriter(Configuration config) {
+	public WikiXMLWriter(Configuration config) {
 		
 		if (config == null){
 			throw new IllegalArgumentException("Configuration cannot be null.");

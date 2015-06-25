@@ -33,7 +33,7 @@ public class WikiPageHandler implements Runnable {
 
 	private WikiPage wikiPage;
 	private WikiStatistics wikiStatistics;
-	private MultipleXMLWriter multipleXMLWriter;
+	private WikiXMLWriter wikiXMLWriter;
 	private WikiErrorWriter errorWriter;
 
 	private WikiTalkUser postUser;
@@ -62,7 +62,7 @@ public class WikiPageHandler implements Runnable {
 		this.errorWriter = errorWriter;
 		this.config = config;
 
-		multipleXMLWriter = new MultipleXMLWriter(config);
+		wikiXMLWriter = new WikiXMLWriter(config);
 		domParser = new DOMParser();
 		tagSoupParser = new TagSoupParser();
 	}
@@ -87,7 +87,7 @@ public class WikiPageHandler implements Runnable {
 			}
 			else {
 				validateXML(wikiPage);
-				multipleXMLWriter.write(wikiPage);
+				wikiXMLWriter.write(wikiPage);
 				wikiStatistics.addTotalNonEmptyPages();
 			}
 		}
