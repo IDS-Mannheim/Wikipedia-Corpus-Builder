@@ -1,13 +1,16 @@
 package de.mannheim.ids.wiki;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.mannheim.ids.util.Utilities;
 
-/** Wikipage Class
+/**
+ * Wikipage Class
  * 
  * @author margaretha
- *
+ * 
  */
 public class WikiPage {
 
@@ -15,17 +18,23 @@ public class WikiPage {
 	public String wikitext;
 	private String pageTitle;
 	private String pageIndex;
-	private String pageId;	
-	private boolean isEmpty, isRedirect;	
-	
-	static String[] indexList = {"A","B","C","D","E","F","G","H","I","J","K","L",
-	    "M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
-	    "0","1","2","3","4","5","6","7","8","9","Char"};	
-	
+	private String pageId;
+	private String pageIndent;
+
+	private boolean isTextEmpty, isRedirect;
+
+	public List<String> textSegments;
+
+	public static final String[] indexList = { "A", "B", "C", "D", "E", "F",
+			"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+			"T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5",
+			"6", "7", "8", "9", "Char" };
+
 	public WikiPage() {
-		wikitext="";		
+		wikitext = "";
+		textSegments = new ArrayList<String>();
 	}
-	
+
 	public String getPageTitle() {
 		return pageTitle;
 	}
@@ -38,18 +47,21 @@ public class WikiPage {
 		return pageIndex;
 	}
 
-	public void setPageIndex(boolean isDiscussion, String talk) throws IOException {
-		
-		if (talk==null || talk.isEmpty()){
+	public void setPageIndex(boolean isDiscussion, String talk)
+			throws IOException {
+
+		if (talk == null || talk.isEmpty()) {
 			throw new IllegalArgumentException("Talk cannot be null or empty.");
 		}
-		
-		int start = talk.length() +1;
-		if (isDiscussion){						
-			pageIndex = Utilities.normalizeIndex(this.pageTitle.substring(start, start+1), indexList);
+
+		int start = talk.length() + 1;
+		if (isDiscussion) {
+			pageIndex = Utilities.normalizeIndex(
+					this.pageTitle.substring(start, start + 1), indexList);
 		}
 		else {
-			pageIndex = Utilities.normalizeIndex(this.pageTitle.substring(0,1), indexList);			
+			pageIndex = Utilities.normalizeIndex(
+					this.pageTitle.substring(0, 1), indexList);
 		}
 	}
 
@@ -61,12 +73,12 @@ public class WikiPage {
 		this.pageId = pageId;
 	}
 
-	public boolean isEmpty() {
-		return isEmpty;
+	public boolean isTextEmpty() {
+		return isTextEmpty;
 	}
 
-	public void setEmpty(boolean isEmpty) {
-		this.isEmpty = isEmpty;
+	public void setTextEmpty(boolean isEmpty) {
+		this.isTextEmpty = isEmpty;
 	}
 
 	public boolean isRedirect() {
@@ -76,5 +88,13 @@ public class WikiPage {
 	public void setRedirect(boolean isRedirect) {
 		this.isRedirect = isRedirect;
 	}
-	
+
+	public String getPageIndent() {
+		return pageIndent;
+	}
+
+	public void setPageIndent(String pageIndent) {
+		this.pageIndent = pageIndent;
+	}
+
 }

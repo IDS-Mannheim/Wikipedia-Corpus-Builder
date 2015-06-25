@@ -10,10 +10,9 @@ import de.mannheim.ids.util.Utilities;
  * @author margaretha
  *
  */
-public class MultipleXMLWriter implements WikiXMLWriter{
+public class MultipleXMLWriter{
 
 	private String xmlOutputDir, language;
-	private int counter;
 	private String encoding;
 	
 	public MultipleXMLWriter(Configuration config) {
@@ -25,37 +24,30 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 		this.xmlOutputDir = config.getOutputFolder();
 		this.language = config.getLanguageCode();
 		this.encoding = config.getOutputEncoding();
-		this.counter = 1;
 	}
 	
-	@Override
-	public void write(WikiPage wikiPage, boolean isDiscussion, String indent)
-			throws IOException {	
+	public void write(WikiPage wikiPage) throws IOException {	
 		
 		if (wikiPage==null){
 			throw new IllegalArgumentException("WikiPage cannot be null.");
 		}
 		
 		OutputStreamWriter writer;
-		String path;		
 		
-		if (!wikiPage.isEmpty() && !wikiPage.wikitext.isEmpty()) {		
+		if (!wikiPage.isTextEmpty() && !wikiPage.wikitext.isEmpty()) {		
 			
-			if (isDiscussion) path = this.xmlOutputDir+"/discussions/";		
-			else path = this.xmlOutputDir+"/articles/";		
-			writer = Utilities.createWriter(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml", this.encoding);
-			System.out.println(path + wikiPage.getPageIndex()+"/"+wikiPage.getPageId()+".xml");
+			writer = Utilities.createWriter(xmlOutputDir + "/" + wikiPage.getPageIndex() + "/", 
+					wikiPage.getPageId()+".xml", this.encoding);
+			
+			System.out.println(xmlOutputDir + "/"+ wikiPage.getPageIndex()+
+					"/"+wikiPage.getPageId()+".xml");
+			
 			writer.append("<?xml version=\"1.0\" encoding=\"");
 			writer.append(this.encoding);
 			writer.append("\"?>\n");
 			
-			System.out.println(this.counter++ +" "+ wikiPage.getPageTitle());					
-				
-			String [] arr = wikiPage.pageStructure.split("<text></text>");
-							
-			writer.append(indent);
-			writer.append(arr[0]);	
-			
+			String [] arr = wikiPage.pageStructure.split("<text></text>");			
+			writer.append(arr[0]);				
 			if (wikiPage.wikitext.equals("")){
 				writer.append("<text lang=\""+language+"\"/>" );
 			}
@@ -68,8 +60,4 @@ public class MultipleXMLWriter implements WikiXMLWriter{
 			writer.close();
 		}		
 	}
-
-	@Override
-	public void close() {}
-
 }

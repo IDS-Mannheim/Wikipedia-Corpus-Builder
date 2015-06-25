@@ -1,9 +1,13 @@
 package de.mannheim.ids.wiki;
 
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.mannheim.ids.util.Utilities;
+import de.mannheim.ids.util.WikiErrorWriter;
 import de.mannheim.ids.util.WikiStatistics;
 
 /**
@@ -13,65 +17,89 @@ import de.mannheim.ids.util.WikiStatistics;
  * 
  * */
 public class WikiXMLProcessor {
-	
+
 	private Configuration config;
 	private WikiStatistics wikiStatistics;
-	
+	private WikiErrorWriter errorWriter;
+	private LinkedBlockingQueue<WikiPage> wikipages;
+	private WikiTalkUser postUser;
+	private WikiTalkTime postTime;
+
 	public WikiXMLProcessor(Configuration config) throws IOException {
-		if (config == null){
+		if (config == null) {
 			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		this.config = config;
-		this.wikiStatistics = new WikiStatistics(config.getWikidump(), 
-				config.getOutputEncoding());
-	}
-	
-	public void createWikiXML() throws IOException {
-		createOutputDirectories();	
-		process(new MultipleXMLWriter(config));
-	}
-	
-	public void createSingleWikiXML() throws IOException {
-		Utilities.createDirectory(config.getOutputFolder());		
-		WikiXMLWriter wikiXMLWriter = new SingleXMLWriter(config, wikiStatistics);		
-		process(wikiXMLWriter);
-		wikiXMLWriter.close();
-	}
-	
-	private void process(WikiXMLWriter wikiXMLWriter) throws IOException{
-				
-		if (wikiXMLWriter == null){
-			throw new IllegalArgumentException("WikiXMLwriter cannot be null.");
+		this.wikiStatistics = new WikiStatistics();
+		this.errorWriter = new WikiErrorWriter(config);
+		this.wikipages = new LinkedBlockingQueue<WikiPage>();
+
+		if (config.isDiscussion()) {
+			String prefix = Paths.get(config.getWikidump()).getFileName()
+					.toString().substring(0, 15);
+			postUser = new WikiTalkUser(prefix, config.getLanguageCode()
+					+ ".wikipedia.org/wiki/" + config.getUserPage() + ":");
+			postTime = new WikiTalkTime(prefix);
 		}
-		
-		WikiPageReader wikiReader = new WikiPageReader(config, wikiStatistics);
-		wikiReader.read(config.getWikidump(),wikiXMLWriter);		
-		wikiStatistics.printStatistics();
-		wikiStatistics.errorWriter.close();
 	}
-	
-	private void createOutputDirectories(){
+
+	public void run() throws IOException {
+
+		// createOutputDirectories();
+
+		WikiPageReader wikiReader = new WikiPageReader(config, wikipages,
+				wikiStatistics);
+		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
+		ExecutorService pool = Executors.newFixedThreadPool(200);
+
+		synchronized (wikipages) {
+			try {
+				wikiReaderThread.start();
+				while (wikiReaderThread.isAlive() || wikipages.size() > 0) {
+					if (wikipages.size() > 0) {
+
+						WikiPageHandler ph = new WikiPageHandler(config,
+								wikipages.take(), wikiStatistics, errorWriter);
+						if (config.isDiscussion()) {
+							ph.setPostTime(postTime);
+							ph.setPostUser(postUser);
+						}
+						pool.execute(ph);
+					}
+					else {
+						System.out.println("Wait for some Wikipages ...");
+						wikipages.wait(1000);
+					}
+				}
+				pool.shutdown();
+			}
+			catch (Exception e) {
+				pool.shutdownNow();
+			}
+		}
+
+		while (!pool.isTerminated()) {
+			System.out.println("Waiting for the thread pool to terminate ...");
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		wikiStatistics.print();
+		errorWriter.close();
+		postUser.close();
+		postTime.close();
+	}
+
+	@Deprecated
+	private void createOutputDirectories() {
 		String xmlOutputDir = config.getOutputFolder();
-		Utilities.createDirectory(xmlOutputDir);		
-		
-		List<Integer> namespaces = config.getNamespaces();
-		
-		if (namespaces.contains(0)) { 
-			for (String i:WikiPage.indexList) {
-				Utilities.createDirectory(xmlOutputDir+"/articles/"+i);
-			}
+		Utilities.createDirectory(xmlOutputDir);
+
+		for (String i : WikiPage.indexList) {
+			Utilities.createDirectory(xmlOutputDir + "/" + i);
 		}
-		
-		if (namespaces.contains(1)){ 
-			for (String i:WikiPage.indexList) {
-				Utilities.createDirectory(xmlOutputDir+"/discussions/"+i);
-			}
-		}
-		
-		if (namespaces.contains(3)){ 
-			for (String i:WikiPage.indexList) {
-				Utilities.createDirectory(xmlOutputDir+"/user_discussions/"+i);
-			}
-		}	
 	}
 }

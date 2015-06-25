@@ -1,71 +1,65 @@
 package de.mannheim.ids.util;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import de.mannheim.ids.wiki.WikiPage;
-
-/** Collect statistical information about wikipages and 
- *  the errors found in the conversion
+/**
+ * Collect statistical information about Wikipages and the errors found in the
+ * conversion process.
  * 
  * @author margaretha
- *
+ * 
  */
-public class WikiStatistics {	
-	
+public class WikiStatistics {
+
 	private int swebleErrors;
 	private int parsingErrors;
 	private int pageStructureErrors;
 
-	private int emptyArticles;
-	private int emptyDiscussions;
-	private int emptyParsedArticles;
-	private int emptyParsedDiscussions;
-	
-	private int redirectArticles;
-	private int redirectDiscussions;
-	
-	private int totalDiscussions;
-	private int totalArticles;
-	private int totalMetapages;
+	private int emptyPages;
+	private int emptyParsedPages;
+	private int redirectPages;
+
+	private int totalNonEmptyPages;
+	private int totalPages;
 	private int totalPostings;
-	
-	//public List<String> errorPages;
-	public OutputStreamWriter errorWriter;
-	private int errorCounter;
-	
-	public WikiStatistics(String inputFile, String encoding) throws IOException {
-		this.swebleErrors=0;
-		this.parsingErrors=0;
-		this.pageStructureErrors=0;
-		this.redirectArticles=0;
-		this.redirectDiscussions=0;
-		this.emptyArticles=0; 
-		this.emptyDiscussions=0;
-		this.emptyParsedDiscussions=0; 
-		this.emptyParsedArticles=0;		
-		this.totalMetapages=0;
-		this.totalDiscussions=0;
-		this.totalArticles=0;	
-		this.totalPostings=0;
-		//this.errorPages = new ArrayList<String>();
-		
-		Utilities.createDirectory("logs");
-		String filename = Paths.get(inputFile).getFileName().toString();		
-		errorWriter = Utilities.createWriter("./logs/xml-"+filename.substring(0,15)+"-errors.log",encoding);		
-		errorCounter=1;
-	} 
-	
+
+	public WikiStatistics() {
+		swebleErrors = 0;
+		parsingErrors = 0;
+		pageStructureErrors = 0;
+		emptyPages = 0;
+		emptyParsedPages = 0;
+		redirectPages = 0;
+		totalPostings = 0;
+		totalPages = 0;
+		totalNonEmptyPages = 0;
+	}
+
+	public void print() {
+		System.out.println("\n===============================================");
+		System.out.println("Total pages (without redirect pages) "
+				+ getTotalPages());
+		System.out.println("Total non-empty pages " + getTotalNonEmptyPages());
+		System.out.println("Total redirect pages " + getRedirectPages());
+		System.out.println("Total empty pages " + getEmptyPages());
+		System.out.println("Total empty parsed pages " + getEmptyParsedPages());
+
+		if (totalPostings > 0) {
+			System.out.println("Total postings " + getTotalPostings() + "\n");
+		}
+
+		System.out.println("Total Sweble exceptions " + getSwebleErrors());
+		System.out.println("Total XML parsing exceptions " 
+				+ getParsingErrors());
+		System.out.println("Total XML Page structure exceptions "
+				+ getPageStructureErrors());
+		System.out.println("===============================================");
+	}
+
 	public int getSwebleErrors() {
 		return swebleErrors;
 	}
 
 	public void addSwebleErrors() {
-		this.swebleErrors ++;
+		swebleErrors++;
 	}
 
 	public int getParsingErrors() {
@@ -73,7 +67,7 @@ public class WikiStatistics {
 	}
 
 	public void addParsingErrors() {
-		this.parsingErrors ++;
+		parsingErrors++;
 	}
 
 	public int getPageStructureErrors() {
@@ -81,148 +75,54 @@ public class WikiStatistics {
 	}
 
 	public void addPageStructureErrors() {
-		this.pageStructureErrors ++;
+		pageStructureErrors++;
 	}
 
-	public int getTotalDiscussions() {
-		return totalDiscussions;
-	}
-
-	public void addTotalDiscussions() {
-		this.totalDiscussions ++;
-	}	
-	
 	public int getTotalPostings() {
 		return totalPostings;
 	}
 
 	public void addTotalPostings() {
-		this.totalPostings++;
+		totalPostings++;
 	}
 
-	public int getTotalArticles() {
-		return totalArticles;
+	public int getEmptyPages() {
+		return emptyPages;
 	}
 
-	public void addTotalArticles() {
-		this.totalArticles ++;
+	public void addEmptyPages() {
+		emptyPages++;
 	}
 
-	public int getEmptyArticles() {
-		return emptyArticles;
+	public int getEmptyParsedPages() {
+		return emptyParsedPages;
 	}
 
-	public void addEmptyArticles() {
-		this.emptyArticles ++;
+	public void addEmptyParsedPages() {
+		emptyParsedPages++;
 	}
 
-	public int getEmptyDiscussions() {
-		return emptyDiscussions;
+	public int getRedirectPages() {
+		return redirectPages;
 	}
 
-	public void addEmptyDiscussions() {
-		this.emptyDiscussions ++;
+	public void addRedirectPages() {
+		redirectPages++;
 	}
 
-	public int getEmptyParsedArticles() {
-		return emptyParsedArticles;
+	public int getTotalPages() {
+		return totalPages;
 	}
 
-	public void addEmptyParsedArticles() {
-		this.emptyParsedArticles ++;
+	public void addTotalPages() {
+		totalPages++;
 	}
 
-	public int getEmptyParsedDiscussions() {
-		return emptyParsedDiscussions;
+	public int getTotalNonEmptyPages() {
+		return totalNonEmptyPages;
 	}
 
-	public void addEmptyParsedDiscussions() {
-		this.emptyParsedDiscussions ++;
-	}
-	
-	public int getRedirectArticles() {
-		return redirectArticles;
-	}
-
-	public void addRedirectArticles() {
-		this.redirectArticles++;
-	}
-
-	public int getRedirectDiscussions() {
-		return redirectDiscussions;
-	}
-
-	public void addRedirectDiscussions() {
-		this.redirectDiscussions++;
-	}
-
-	public int getTotalMetapages() {
-		return totalMetapages;
-	}
-
-	public void addTotalMetapages() {
-		this.totalMetapages ++;
-	}
-	
-	public void countStatistics(boolean isDiscussion, WikiPage wikiPage) {
-		
-		if (wikiPage == null){
-			throw new IllegalArgumentException("WikiPage cannot be null.");
-		}
-		if (isDiscussion){
-			if (!wikiPage.wikitext.isEmpty()){ addTotalDiscussions(); }
-			else if (wikiPage.isRedirect()){ addRedirectDiscussions(); }
-			else if (wikiPage.isEmpty()){ addEmptyDiscussions(); }
-			else { addEmptyParsedDiscussions(); }
-		}
-		else{
-			if (!wikiPage.wikitext.isEmpty()){ addTotalArticles(); }
-			else if (wikiPage.isRedirect()){ addRedirectArticles(); }
-			else if (wikiPage.isEmpty()){  addEmptyArticles(); }
-			else { addEmptyParsedArticles(); }
-		}
-	}
-	
-	public void printStatistics(){
-		System.out.println("Total non-empty articles "+ this.getTotalArticles());
-		System.out.println("Total non-empty discussions "+ this.getTotalDiscussions());
-		System.out.println("Total postings "+ this.getTotalPostings());
-		System.out.println("Total redirect articles "+ this.getRedirectArticles());
-		System.out.println("Total redirect discussions "+ this.getRedirectDiscussions());		
-		System.out.println("Total empty articles "+ this.getEmptyArticles());
-		System.out.println("Total empty discussions "+ this.getEmptyDiscussions());
-		System.out.println("Total empty parsed articles "+ this.getEmptyParsedArticles());
-		System.out.println("Total empty parsed discussions "+ this.getEmptyParsedDiscussions());		
-		//System.out.println("Total metapages "+ this.getTotalMetapages());
-		System.out.println("Total Sweble exceptions "+ this.getSwebleErrors());
-		System.out.println("Total XML parsing exceptions "+ this.getParsingErrors());
-		System.out.println("Total page structure exceptions "+ this.getPageStructureErrors());
-	}
-
-//	public List<String> getErrorPages() {
-//		return errorPages;
-//	}
-//
-//	public void setErrorPages(List<String> errorPages) {
-//		this.errorPages = errorPages;
-//	}
-	
-	public void logErrorPage(String page){
-		//Utilities.createDirectory("logs");
-		//OutputStreamWriter writer = Utilities.createWriter("logs/"+inputFile.substring(0,15)+"-errors.xml");
-		//int i=1;
-		//for (String page : errorPages){
-		try {
-			errorWriter.append(String.valueOf(errorCounter++));
-			errorWriter.append(" ");
-			errorWriter.append(page);
-			errorWriter.append("\n");
-			errorWriter.flush();
-		} catch (IOException e) {
-			System.out.println("Failed writing error.");
-		}
-		
-		//}
-		//writer.close();
+	public void addTotalNonEmptyPages() {
+		totalNonEmptyPages++;
 	}
 }

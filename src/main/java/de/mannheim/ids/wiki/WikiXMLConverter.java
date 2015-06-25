@@ -13,14 +13,14 @@ import de.mannheim.ids.wiki.WikiXMLProcessor;
 /** Main class for Wikitext to WikiXML conversion
  *	
  *	WikiXMLConverter takes 8 arguments:
+ * 	-w 	Wikidump filename
  *	-l	2-letter language code of the Wikipedia, e.g. en, de, fr, hu, it
- *	-w 	Wikidump filename
  *  -up User page in the Wikipedia language, e.g. Benutzer in German Wikipedia
  *  -tp Talk page in the Wikipedia language, e.g. Diskussion in German Wikipedia
  *  -up User contribution page in the Wikipedia language, e.g. 
  *  	Spezial:Beiträge in German Wikipedia  
- *	-t	The type of Wikipages [articles | discussions | all]
- * 	-o	The WikiXML output directory
+ *  -k	Namespace key of the Wikipedia pages to convert
+ *  -x	Number of maximal threads allowed to run concurrently
  * 	-e	The output encoding, e.g. utf-8 or iso-8859-1  
  *
  *	Example arguments:
@@ -40,6 +40,7 @@ public class WikiXMLConverter {
 	
 	public WikiXMLConverter() {
 		options = new Options();
+		options.addOption("w", true, "Wikidump filename");
 		options.addOption("l", true, "2-letter language code of the Wikipedia");	
 		options.addOption("up", true, "User page in the Wikipedia language, e.g. " +
 				"\"Benutzer\" in German Wikipedia");
@@ -47,9 +48,9 @@ public class WikiXMLConverter {
 				"\"Diskussion\" in German Wikipedia");
 		options.addOption("uc", true, "User contribution page in the Wikipedia " +
 				"language, e.g. \"Spezial:Beiträge\" in German Wikipedia");
-		options.addOption("w", true, "Wikidump filename");
-		options.addOption("t", true, "The type of Wikipages [articles | discussions | all]");
-		options.addOption("o", true, "The WikiXML output directory");
+		options.addOption("k", true, "Namespace key of the Wikipedia pages to convert");
+		options.addOption("x", true, "Number of maximal threads allowed to run " +
+				"concurrently");
 		options.addOption("e", true, "Encoding: utf-8 or iso-8859-1");
 		options.addOption("prop", true, "Properties file");
 	}
@@ -60,19 +61,19 @@ public class WikiXMLConverter {
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter.createConfig(args);
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
-		wxp.createWikiXML();	
+		wxp.run();	
 		
 		long endTime = System.nanoTime();
 		long duration = endTime - startTime;
-		System.out.println("Wikitext to XML execution time "+duration);
+		System.out.println("WikiXMLConverter execution time "+duration);
 	}
 	
 	public Configuration createConfig(String[] args) throws ParseException, IOException {
 		CommandLineParser parser = new BasicParser();
-		CommandLine cmd = parser.parse(options, args);		
+		CommandLine cmd = parser.parse(options, args);
 						
 		String propertiesFile = cmd.getOptionValue("prop");
-		if (propertiesFile != null){			
+		if (propertiesFile != null){
 			return new Configuration(propertiesFile);
 		}
 		else{

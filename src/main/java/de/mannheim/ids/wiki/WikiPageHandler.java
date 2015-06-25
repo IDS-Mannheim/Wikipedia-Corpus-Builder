@@ -12,181 +12,200 @@ import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
+import de.mannheim.ids.util.WikiErrorWriter;
 import de.mannheim.ids.util.WikiStatistics;
 
-/** This class implements methods for handling Wikipages including
- *  reading page content, cleaning wikitext (pre-processing), parsing, 
- *  and XML validation. 
+/**
+ * This class implements methods for handling Wikipages including reading page
+ * content, cleaning wikitext (pre-processing), parsing, and XML validation.
  * 
  * @author margaretha
- *
+ * 
  */
-public class WikiPageHandler {
+public class WikiPageHandler implements Runnable {
 
-	private static Pattern pattern =  Pattern.compile("<([^!!/a-zA-Z\\s])");
-	private static Pattern stylePattern = Pattern.compile("(\\[\\[.+>\\]\\])");
-	private static Pattern textPattern = Pattern.compile("<text.*\">");
-	
-	private TagSoupParser tagSoupParser;
-	private Sweble2Parser swebleParser;
-	private DOMParser dp;
-	
-	private boolean textFlag;
-	private String language;
+	private static final Pattern pattern = Pattern
+			.compile("<([^!!/a-zA-Z\\s])");
+	private static final Pattern stylePattern = Pattern
+			.compile("(\\[\\[.+>\\]\\])");
+	private static final Pattern textPattern = Pattern
+			.compile("<text.*\">(.*)");
+
+	private WikiPage wikiPage;
 	private WikiStatistics wikiStatistics;
+	private MultipleXMLWriter multipleXMLWriter;
+	private WikiErrorWriter errorWriter;
 
-	public WikiPageHandler(String language, WikiStatistics wikiStatistics) {
-		
-		if (language==null || language.isEmpty()){
-			throw new IllegalArgumentException("Language cannot be null or empty.");
+	private WikiTalkUser postUser;
+	private WikiTalkTime postTime;
+
+	private Configuration config;
+
+	private DOMParser domParser;
+	private TagSoupParser tagSoupParser;
+
+	public WikiPageHandler(Configuration config, WikiPage wikipage,
+			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
+
+		if (config == null) {
+			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
-		if (wikiStatistics == null){
+		if (wikipage == null) {
+			throw new IllegalArgumentException("Wikipage cannot be null.");
+		}
+		if (wikiStatistics == null) {
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
-		
-		tagSoupParser = new TagSoupParser();		
-		dp = new DOMParser();
-		
-		this.language=language;
-		this.wikiStatistics=wikiStatistics;
-	}
-	
-	public void handlePageContent(WikiPage wikiPage, String strLine, String trimmedStrLine) 
-			throws IOException {
-		
-		if (wikiPage == null){
-			throw new IllegalArgumentException("WikiPage cannot be null.");
-		}
-		
-		// Finish collecting text
-		if (trimmedStrLine.endsWith("</text>")){ 
-			if (trimmedStrLine.startsWith("<text")){ // text starts and ends at the same line
-				trimmedStrLine = cleanTextStart(trimmedStrLine);				
-			}						
-			trimmedStrLine = StringUtils.replaceOnce(trimmedStrLine, "</text>", ""); // remove </text>
-			
-			wikiPage.wikitext += (trimmedStrLine + "\n").trim(); 
-			if (wikiPage.wikitext.equals("")){ // empty text
-				wikiPage.setEmpty(true); 
-				return; 
-			} 
-						
-			wikiPage.wikitext= parseToXML(wikiPage.wikitext, wikiPage.getPageTitle());
-			// To do: if wikitext is empty after parsing?
-			wikiPage.pageStructure += "      <text/>\n";
-			textFlag=false;
-		}
-		
-		// Continue collecting text
-		else if (textFlag){
-			wikiPage.wikitext += strLine+"\n";
-		}		
-		
-		else if(trimmedStrLine.startsWith("<text")) {
-			// empty text
-			if (trimmedStrLine.endsWith("<text/>") || 
-					trimmedStrLine.equals("<text xml:space=\"preserve\" />")){ 				
-				wikiPage.pageStructure += "        <text lang=\""+language+"\"/>\n";
-				wikiPage.wikitext="";
-				wikiPage.setEmpty(true);
-			}
-			else { // start collecting text
-				wikiPage.wikitext += cleanTextStart(trimmedStrLine);
-				this.textFlag=true;
-			}
-		}
-		else{ // copy page metadata			
-			wikiPage.pageStructure += strLine + "\n";
-		}	
 
+		this.wikiPage = wikipage;
+		this.wikiStatistics = wikiStatistics;
+		this.errorWriter = errorWriter;
+		this.config = config;
+
+		multipleXMLWriter = new MultipleXMLWriter(config);
+		domParser = new DOMParser();
+		tagSoupParser = new TagSoupParser();
 	}
-	
+
+	@Override
+	public void run() {
+
+		try {
+			if (config.isDiscussion()) {
+				WikiTalkHandler th = new WikiTalkHandler(config, wikiPage,
+						wikiStatistics, errorWriter, postUser, postTime,
+						tagSoupParser);
+				th.handlePosts();
+			}
+			else {
+				wikiPage.wikitext = parseToXML(wikiPage.wikitext,
+						wikiPage.getPageTitle());
+			}
+
+			if (wikiPage.wikitext.isEmpty()) {
+				wikiStatistics.addEmptyParsedPages();
+			}
+			else {
+				validateXML(wikiPage);
+				multipleXMLWriter.write(wikiPage);
+				wikiStatistics.addTotalNonEmptyPages();
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String cleanPattern(String wikitext) {
+		wikitext = StringUtils.replaceEach(wikitext,
+		// new String[] { ":{|" , "<br/>", "<br />"},
+		// new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table
+		// notation
+				new String[] { ":{|" }, new String[] { "{|" }); // start table
+																// notation
+
+		Matcher matcher = pattern.matcher(wikitext); // space for non-tag
+		wikitext = matcher.replaceAll("&lt; $1");
+		matcher.reset();
+
+		matcher = stylePattern.matcher(wikitext); // escape for style containing
+													// tag
+		StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
+			replace = Matcher.quoteReplacement(replace);
+			matcher.appendReplacement(sb, replace);
+		}
+		matcher.appendTail(sb);
+		wikitext = sb.toString();
+		return wikitext;
+	}
+
+	public static String cleanTextStart(String trimmedStrLine)
+			throws IOException {
+		Matcher matcher = textPattern.matcher(trimmedStrLine);
+		return matcher.replaceFirst("") + "\n";
+	}
+
 	@SuppressWarnings("deprecation")
-	private String parseToXML(String wikitext, String pagetitle) throws IOException{
-		
+	public String parseToXML(String wikitext, String pagetitle)
+			throws IOException {
+
 		wikitext = StringEscapeUtils.unescapeXml(wikitext); // unescape XML tags
-		wikitext = cleanPattern(wikitext);		
-		
+		wikitext = WikiPageHandler.cleanPattern(wikitext);
+
 		// italic and bold are not repaired because they have wiki-mark-ups
 		try {
-			wikitext = tagSoupParser.generate(wikitext,true);
-		} 
-		catch (SAXException e) {
-			wikiStatistics.logErrorPage("TAGSOUP: "+pagetitle + ", cause: "+e.getMessage());			
+			wikitext = tagSoupParser.generate(wikitext, true);
 		}
-		
-		swebleParser = new Sweble2Parser(wikitext.trim(), pagetitle, language, wikiStatistics);
+		catch (SAXException e) {
+			errorWriter.logErrorPage("TAGSOUP", pagetitle, e.getCause());
+		}
+
+		Sweble2Parser swebleParser = new Sweble2Parser(wikitext.trim(),
+				pagetitle, config.getLanguageCode(), wikiStatistics,
+				errorWriter);
 		Thread swebleThread = new Thread(swebleParser);
-		
-		try{			
+
+		try {
 			swebleThread.start();
-			swebleThread.join(1000 * 60);
-			if (swebleThread.isAlive()){
+			swebleThread.join(1000 * 6);
+			if (swebleThread.isAlive()) {
 				swebleThread.stop();
 			}
 			wikitext = swebleParser.getWikiXML();
-//			System.out.println(wikitext);
 		}
-		catch (Exception e) {			
+		catch (InterruptedException e) {
 			wikiStatistics.addSwebleErrors();
-			wikiStatistics.logErrorPage("SWEBLE: "+pagetitle + ", cause: "+e.getMessage());
-			wikitext="";
+			errorWriter.logErrorPage("SWEBLE", pagetitle, e.getCause());
+			wikitext = "";
 		}
 		return wikitext;
 	}
-	
-	public static String cleanPattern(String wikitext){		 
-		wikitext = StringUtils.replaceEach(wikitext, 
-//				new String[] { ":{|" , "<br/>", "<br />"}, 
-//				new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table notation	
-		new String[] { ":{|" }, 
-		new String[] { "{|" }); //start table notation
-	
-		Matcher matcher = pattern.matcher(wikitext); // space for non-tag			
-		wikitext = matcher.replaceAll("&lt; $1");			
-		matcher.reset();
-		
-		matcher = stylePattern.matcher(wikitext); // escape for style containing tag
-		StringBuffer sb = new StringBuffer();
-        while(matcher.find()){
-        	String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
-        	replace = Matcher.quoteReplacement(replace);
-        	matcher.appendReplacement(sb,replace);
-        }
-        matcher.appendTail(sb);		        
-	    wikitext=sb.toString();    
-	    return wikitext;
-	}
-	
-	public static String cleanTextStart(String trimmedStrLine) throws IOException{
-		Matcher matcher = textPattern.matcher(trimmedStrLine);		
-		return matcher.replaceFirst("")+"\n";		
-	}
-	
+
 	public void validateXML(WikiPage wikiPage) {
-		
-		if (wikiPage == null){
+
+		if (wikiPage == null) {
 			throw new IllegalArgumentException("WikiPage cannot be null.");
 		}
 
-		String t="";
-		try{ //test XML validity
-			 t = "<text>"+wikiPage.wikitext+"</text>";
-			dp.parseXML(new ByteArrayInputStream(t.getBytes("utf-8")));				
+		String t = "";
+		try {
+			t = "<text>" + wikiPage.wikitext + "</text>";
+			// test XML validity
+			domParser.parseXML(new ByteArrayInputStream(t.getBytes("utf-8")));
 		}
-		catch (Exception e) {			
+		catch (Exception e) {
 			wikiStatistics.addParsingErrors();
-			wikiStatistics.logErrorPage("DOM: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
-			wikiPage.wikitext="";				
+			errorWriter.logErrorPage("DOM", wikiPage.getPageTitle(),
+					e.getCause());
+			wikiPage.wikitext = "";
 		}
-		
-		try { 
-			wikiPage.pageStructure = tagSoupParser.generate(wikiPage.pageStructure, false);
-		} 
-		catch (Exception e) { 
+
+		try {
+			wikiPage.pageStructure = wikiPage.getPageIndent()
+					+ tagSoupParser.generate(wikiPage.pageStructure, false);
+		}
+		catch (Exception e) {
 			wikiStatistics.addPageStructureErrors();
-			wikiStatistics.logErrorPage("PAGE: "+wikiPage.getPageTitle() + ", cause: "+e.getMessage());
-			e.printStackTrace(); 
-		}		
+			errorWriter.logErrorPage("PAGE ", wikiPage.getPageTitle(),
+					e.getCause());
+		}
+	}
+
+	public WikiTalkUser getPostUser() {
+		return postUser;
+	}
+
+	public void setPostUser(WikiTalkUser postUser) {
+		this.postUser = postUser;
+	}
+
+	public WikiTalkTime getPostTime() {
+		return postTime;
+	}
+
+	public void setPostTime(WikiTalkTime postTime) {
+		this.postTime = postTime;
 	}
 }

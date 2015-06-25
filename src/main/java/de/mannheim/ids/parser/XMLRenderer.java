@@ -98,7 +98,7 @@ import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
 
-/** Modified Class from the HTMLRenderer Class in Sweble library
+/** Modified Class from the HTMLRenderer Class in the Sweble library
  * 
  * @author margaretha
  */ 

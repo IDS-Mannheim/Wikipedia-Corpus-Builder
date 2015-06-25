@@ -5,52 +5,57 @@ import java.io.OutputStreamWriter;
 
 import de.mannheim.ids.util.Utilities;
 
-/** Object model for time information of a posting.
- *  Generate a list of timestamps in XML.
+/**
+ * Time information of postings. <br/>
+ * Generates a list of timestamps in XML.
  * 
  * @author margaretha
- *
+ * 
  */
 
 public class WikiTalkTime {
 
-	private OutputStreamWriter timeWriter; 
+	private OutputStreamWriter timeWriter;
 	private int counter;
-	
-	public WikiTalkTime(String language) throws IOException{
-		
-		if (language==null || language.isEmpty()){
-			throw new IllegalArgumentException("Language cannot be null or empty.");
+
+	public WikiTalkTime(String prefixFileName) throws IOException {
+
+		if (prefixFileName == null || prefixFileName.isEmpty()) {
+			throw new IllegalArgumentException(
+					"prefixFileName cannot be null or empty.");
 		}
-		
-		timeWriter = Utilities.createWriter("talk/"+language+"wiki-talk-timeline.xml", "utf-8");
-		counter=0;
-		
-		timeWriter.append("<timeline>\n");		
-	}	
-	
-	public String getTimeId(String timeline) throws IOException{
-		
-		if (timeline==null || timeline.isEmpty()){
-			throw new IllegalArgumentException("Timeline cannot be null or empty.");
+
+		timeWriter = Utilities.createWriter("post", prefixFileName
+				+ "-post-timeline.xml", "utf-8");
+		counter = 0;
+
+		timeWriter.append("<timeline>\n");
+	}
+
+	public String createTimestamp(String timeline) throws IOException {
+
+		if (timeline == null || timeline.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Timeline cannot be null or empty.");
 		}
-		
+
 		String timeId = generateTimeId();
-		timeWriter.append("   <when xml:id=\""+timeId+"\"");
-		timeWriter.append(" absolute=\""+timeline+"\"/>\n");
+		synchronized (timeWriter) {
+			timeWriter.append("   <when xml:id=\"" + timeId + "\"");
+			timeWriter.append(" absolute=\"" + timeline + "\"/>\n");
+		}
 		return timeId;
 	}
-	
+
 	private String generateTimeId() {
-		String timeId = "t"+String.format("%08d", counter);
+		String timeId = "t" + String.format("%08d", counter);
 		counter++;
 		return timeId;
-	}		
-	
-	public void closeWriter() throws IOException{
+	}
+
+	public void close() throws IOException {
 		timeWriter.append("</timeline>\n");
 		timeWriter.close();
 	}
-	
-	
+
 }

@@ -7,82 +7,93 @@ import java.util.Map;
 
 import de.mannheim.ids.util.Utilities;
 
-/** Class implementation for handling posting authors.
- *  Generate a list of authours / users in XML.
- *  
+/**
+ * Class implementation for handling posting authors. <br/>
+ * Generates a list of post authors / wikipedia users in XML.
+ * 
  * @author margaretha
- *
+ * 
  */
 
 public class WikiTalkUser {
 
-	private Map<String, String> user; // username, userid
+	private Map<String, String> userMap; // username, userid
 	private OutputStreamWriter userWriter;
 	private int counter;
 	private String userUri;
-	
-	public WikiTalkUser(String language, String userUri) throws IOException {		
-		
-		if (language==null || language.isEmpty()){
-			throw new IllegalArgumentException("Language cannot be null or empty.");
+
+	public WikiTalkUser(String prefixFileName, String userUri)
+			throws IOException {
+
+		if (prefixFileName == null || prefixFileName.isEmpty()) {
+			throw new IllegalArgumentException(
+					"prefixFileName cannot be null or empty.");
 		}
-		if (userUri==null || userUri.isEmpty()){
-			throw new IllegalArgumentException("UserUri cannot be null or empty.");
+		if (userUri == null || userUri.isEmpty()) {
+			throw new IllegalArgumentException(
+					"UserUri cannot be null or empty.");
 		}
-		
-		user = new HashMap<String, String>();
-		Utilities.createDirectory("talk");
-		userWriter = Utilities.createWriter("talk/"+language+"wiki-talk-user.xml","utf-8");
+
+		userMap = new HashMap<String, String>();
+		userWriter = Utilities.createWriter("post", prefixFileName
+				+ "-post-user.xml", "utf-8");
 		userWriter.append("<listPerson>\n");
-		counter=0;
-		this.userUri=userUri;
-		getTalkUser("unknown","",false);		
+		counter = 0;
+		this.userUri = userUri;
+		getTalkUser("unknown", "", false);
 	}
-	
-	public String getTalkUser(String username, String speaker, 
-			boolean sigFlag) throws IOException {
-		if (username == null){
+
+	public String getTalkUser(String username, String speaker, boolean sigFlag)
+			throws IOException {
+		if (username == null) {
 			throw new IllegalArgumentException("Username cannot be null.");
-		}		
-		
-		if (!user.containsKey(username)){
-			String userId = generateUserId();
-			user.put(username, userId);	
-			createUser(username,userId,speaker,sigFlag);			
 		}
-		return user.get(username);		
-	}	
-		
+
+		String user = null;
+		synchronized (userMap) {
+			if (!userMap.containsKey(username)) {
+				String userId = generateUserId();
+				userMap.put(username, userId);
+				createPerson(username, userId, speaker, sigFlag);
+			}
+			user = userMap.get(username);
+		}
+
+		return user;
+	}
+
 	private String generateUserId() {
-		String userId = "WU"+String.format("%08d", counter);
+		String userId = "WU" + String.format("%08d", counter);
 		counter++;
 		return userId;
-	}	
-	
-	private void createUser(String username,String userId, String speaker, 
-			boolean sigFlag) throws IOException{
-		
-		if (speaker == null){
+	}
+
+	private void createPerson(String username, String userId, String speaker,
+			boolean sigFlag) throws IOException {
+
+		if (speaker == null) {
 			throw new IllegalArgumentException("Speaker cannot be null.");
 		}
-		
-		userWriter.append("   <person xml:id=\""+userId+"\">\n");
-		userWriter.append("      <persName>"+username+"</persName>\n");
-		
-		if (sigFlag){
-			userWriter.append("      <signatureContent>\n");
-			userWriter.append("         <ref target=\""+userUri);
-			userWriter.append(speaker.replaceAll("\\s", "_")+"\">");
-			userWriter.append(username+"</ref>\n");
-			userWriter.append("      </signatureContent>\n");
+		synchronized (userWriter) {
+			userWriter.append("   <person xml:id=\"" + userId + "\">\n");
+			userWriter.append("      <persName>" + username + "</persName>\n");
+
+			if (sigFlag) {
+				userWriter.append("      <signatureContent>\n");
+				userWriter.append("         <ref target=\"" + userUri);
+				userWriter.append(speaker.replaceAll("\\s", "_") + "\">");
+				userWriter.append(username + "</ref>\n");
+				userWriter.append("      </signatureContent>\n");
+			}
+
+			userWriter.append("   </person>\n");
+			userWriter.flush();
 		}
-		
-		userWriter.append("   </person>\n");		
 	}
-	
-	public void closeWriter() throws IOException{
+
+	public void close() throws IOException {
 		userWriter.append("</listPerson>");
 		userWriter.close();
 	}
-	
+
 }
