@@ -198,11 +198,7 @@ public class Configuration {
 	}
 
 	public void setDiscussion(int namespaceKey) {
-		if ((namespaceKey & 1) == 0) {
-			isDiscussion = false;
-		}
-		else
-			isDiscussion = true;
+		this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
 	}
 
 	public int getMaxThreads() {
