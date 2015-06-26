@@ -6,7 +6,6 @@ import java.util.List;
 
 import de.mannheim.ids.wiki.Utilities;
 
-
 /**
  * Wikipage Class
  * 
@@ -48,22 +47,16 @@ public class WikiPage {
 		return pageIndex;
 	}
 
-	public void setPageIndex(boolean isDiscussion, String talk)
-			throws IOException {
-
-		if (talk == null || talk.isEmpty()) {
-			throw new IllegalArgumentException("Talk cannot be null or empty.");
-		}
-
-		int start = talk.length() + 1;
+	public void setPageIndex(boolean isDiscussion) throws IOException {
+		String firstLetter = null;
 		if (isDiscussion) {
-			pageIndex = Utilities.normalizeIndex(
-					this.pageTitle.substring(start, start + 1), indexList);
+			String[] a = pageTitle.split(":");
+			firstLetter = a[1].substring(0, 1);
 		}
 		else {
-			pageIndex = Utilities.normalizeIndex(
-					this.pageTitle.substring(0, 1), indexList);
+			firstLetter = this.pageTitle.substring(0, 1);
 		}
+		pageIndex = Utilities.normalizeIndex(firstLetter, indexList);
 	}
 
 	public String getPageId() {

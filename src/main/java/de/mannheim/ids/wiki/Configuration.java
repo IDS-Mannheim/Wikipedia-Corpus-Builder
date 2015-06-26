@@ -13,8 +13,8 @@ public class Configuration {
 	private String wikidump;
 	private String languageCode;
 	private String userPage;
-	private String talkPage;
 	private String userContribution;
+	private String signature;
 	private String outputFolder;
 	private String outputEncoding;
 	private String pageType;
@@ -45,14 +45,14 @@ public class Configuration {
 	}
 
 	public Configuration(String wikidump, String language, String userPage,
-			String talkPage, String userContribution, int namespaceKey,
+			String userContribution, String helpSignature, int namespaceKey,
 			String encoding, int maxThread) {
 
 		setWikidump(wikidump);
 		setLanguageCode(language);
 		setUserPage(userPage);
-		setTalkPage(talkPage);
 		setUserContribution(userContribution);
+		setSignature(helpSignature);
 		setNamespaceKey(namespaceKey);
 		setDiscussion(namespaceKey);
 		setPageType(namespaceMap.get(namespaceKey));
@@ -64,9 +64,9 @@ public class Configuration {
 	public Configuration(CommandLine cmd) {
 		setWikidump(cmd.getOptionValue("w"));
 		setLanguageCode(cmd.getOptionValue("l"));
-		setUserPage(cmd.getOptionValue("up"));
-		setTalkPage(cmd.getOptionValue("tp"));
-		setUserContribution(cmd.getOptionValue("uc"));
+		setUserPage(cmd.getOptionValue("u"));
+		setUserContribution(cmd.getOptionValue("c"));
+		setSignature(cmd.getOptionValue("s"));
 
 		int namespaceKey = Integer.parseInt(cmd.getOptionValue("k"));
 		int maxThread = Integer.parseInt(cmd.getOptionValue("x"));
@@ -89,8 +89,8 @@ public class Configuration {
 		setWikidump(config.getProperty("wikidump"));
 		setLanguageCode(config.getProperty("language_code"));
 		setUserPage(config.getProperty("user_page"));
-		setTalkPage(config.getProperty("talk_page"));
 		setUserContribution(config.getProperty("user_contribution"));
+		setSignature(config.getProperty("signature"));
 
 		int namespaceKey = Integer
 				.parseInt(config.getProperty("namespace_key"));
@@ -151,18 +151,6 @@ public class Configuration {
 		this.userPage = userPage;
 	}
 
-	public String getTalkPage() {
-		return talkPage;
-	}
-
-	public void setTalkPage(String talkPage) {
-		if (isDiscussion && (talkPage == null || talkPage.isEmpty())) {
-			throw new IllegalArgumentException("Please specify the talk page "
-					+ "in the language of the Wikipedia dump.");
-		}
-		this.talkPage = talkPage;
-	}
-
 	public String getUserContribution() {
 		return userContribution;
 	}
@@ -175,6 +163,18 @@ public class Configuration {
 							+ "contribution page in the language of the Wikipedia dump.");
 		}
 		this.userContribution = userContribution;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		if (isDiscussion && (signature == null || signature.isEmpty())) {
+			throw new IllegalArgumentException(
+					"Please specify the signature page in the language of the Wikipedia dump.");
+		}
+		this.signature = signature;
 	}
 
 	public int getNamespaceKey() {
@@ -216,5 +216,4 @@ public class Configuration {
 	public void setPageType(String pageType) {
 		this.pageType = pageType;
 	}
-
 }

@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 
 import de.mannheim.ids.wiki.Configuration;
 
-
 /**
  * This class reads a Wiki page, identify some page metadata, such as title,
  * namespace and id, and pass the page content to a corresponding handler
@@ -132,8 +131,7 @@ public class WikiPageReader implements Runnable {
 					matcher = idPattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
 						wikiPage.setPageId(matcher.group(1));
-						wikiPage.setPageIndex(isDiscussion,
-								config.getTalkPage());
+						wikiPage.setPageIndex(isDiscussion);
 						wikiPage.pageStructure += strLine + "\n";
 						searchId = false;
 					}
