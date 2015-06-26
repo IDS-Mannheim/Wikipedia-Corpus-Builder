@@ -24,24 +24,26 @@ import de.mannheim.ids.writer.WikiPostUser;
 public class WikiPostHandler {
 
 	public enum SignatureType {
-		SIGNED, UNSIGNED, USER_CONSTRIBUTION, UNIDENTIFIED;
+		SIGNED, UNSIGNED, USER_CONSTRIBUTION, HEURISTIC;
 		public String toString() {
 			return name().toLowerCase();
 		}
 	}
 
-	private Pattern levelPattern = Pattern.compile("^(:+)");
-	private Pattern headingPattern = Pattern.compile("^\'*(=+[^=]+=+)");
-	private Pattern headingPattern2 = Pattern
+	private static final Pattern levelPattern = Pattern.compile("^(:+)");
+	private static final Pattern headingPattern = Pattern
+			.compile("^\'*(=+[^=]+=+)");
+	private static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
-	private Pattern timePattern = Pattern
-			.compile(".*\\s*([0-9]{2}:[^\\)]*\\))(.*)");
+	private static final Pattern timePattern = Pattern
+			.compile(".*([0-9]{2}:[^\\)]*\\))(.*)");
 
-	private Pattern timePattern2 = Pattern.compile("(.*)([0-9]{2}:[^\\)]*\\))");
+	private static final Pattern timePattern2 = Pattern
+			.compile("(.*)([0-9]{2}:[^\\)]*\\))");
 
-	private Pattern unsignedPattern = Pattern
+	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}");
-	private Pattern signaturePattern, specialContribution;
+	private static Pattern signaturePattern, userContribution;
 
 	private TagSoupParser tagSoupParser;
 
@@ -52,9 +54,9 @@ public class WikiPostHandler {
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
 
-	private String userLabel, contributionLabel;
-	private String posting = "", language;
+	private String posting;
 
+	private final Configuration config;
 	private boolean sigFlag, baselineMode = false;
 
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
@@ -69,21 +71,21 @@ public class WikiPostHandler {
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
 
-		this.language = config.getLanguageCode();
-		this.userLabel = config.getUserPage();
-		this.contributionLabel = config.getUserContribution();
 		this.tagSoupParser = tagSoupParser;
+		this.config = config;
 
 		this.postUser = postUser;
 		this.postTime = postTime;
 		this.wikiStatistics = wikiStatistics;
 		this.wikiPage = wikipage;
 		this.errorWriter = errorWriter;
+		this.posting = "";
 
-		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?" + userLabel
-				+ ":([^\\]]+)\\]\\](.*)");
+		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?"
+				+ config.getUserPage() + ":([^\\]]+)\\]\\].*([0-9]{2}:.*)");
 
-		specialContribution = Pattern.compile("(.*)\\[\\[" + contributionLabel
+		userContribution = Pattern.compile("(.*)\\[\\["
+				+ config.getUserContribution()
 				+ "/([^\\|]+)\\|[^\\]]+\\]\\](.*)");
 	}
 
@@ -94,7 +96,7 @@ public class WikiPostHandler {
 		}
 
 		if (!posting.trim().isEmpty()) {
-			writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+			writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 					posting.trim(), "");
 			posting = "";
 		}
@@ -112,28 +114,22 @@ public class WikiPostHandler {
 		// Posting before a level marker
 		if (!baselineMode && trimmedText.startsWith(":")
 				&& !posting.trim().isEmpty()) {
-			writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+			writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 					posting.trim(), "");
 			posting = "";
 		}
 
 		// User signature
-		if (trimmedText.contains(this.userLabel)) {
+		if (trimmedText.contains(config.getUserPage())) {
 			if (handleSignature(trimmedText))
 				return;
 		}
 
 		if (!baselineMode) {
 
-			// Timestamp only
-			if (trimmedText.endsWith(")")) {
-				if (handleTimestampOnly(trimmedText))
-					return;
-			}
-
 			// Special contribution and help signature
-			if (trimmedText.contains(this.contributionLabel)) {
-				if (handleHelp(trimmedText))
+			if (trimmedText.contains(config.getUserContribution())) {
+				if (handleUserContribution(trimmedText))
 					return;
 			}
 
@@ -143,9 +139,15 @@ public class WikiPostHandler {
 					return;
 			}
 
+			// Timestamp only
+			if (trimmedText.endsWith(")")) {
+				if (handleTimestampOnly(trimmedText))
+					return;
+			}
+
 			// Level Marker
 			if (trimmedText.startsWith(":")) {
-				writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+				writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 						trimmedText, "");
 				return;
 			}
@@ -153,7 +155,7 @@ public class WikiPostHandler {
 			// Line Marker
 			if (trimmedText.startsWith("---")) {
 				if (!posting.trim().isEmpty()) {
-					writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+					writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 							posting.trim(), "");
 					posting = "";
 				}
@@ -183,7 +185,7 @@ public class WikiPostHandler {
 		if (matcher.find()) {
 			// System.out.println(matcher.group(2));
 			posting = matcher.group(1);
-			writePosting(SignatureType.UNIDENTIFIED, "", "", matcher.group(2),
+			writePosting(SignatureType.HEURISTIC, "", "", matcher.group(2),
 					posting.trim(), "");
 			return true;
 		}
@@ -212,18 +214,20 @@ public class WikiPostHandler {
 			posting += matcher.group(1) + "\n";
 
 			String userLink, userLinkText;
-			if (matcher.group(2).contains("|")) {
-				String[] s = matcher.group(2).split("\\|");
+			String mg = matcher.group(2);
+			if (mg.contains("|")) {
+				String[] s = mg.split("\\|");
 				userLink = s[0];
 				userLinkText = s[1];
 			}
 			else {
-				userLink = matcher.group(2);
+				userLink = mg;
 				userLinkText = userLink;
 			}
 
-			writePosting(SignatureType.SIGNED, userLinkText, userLink,
-					timestamp, posting.trim(), rest.trim());
+			writePosting(chooseSignatureType(SignatureType.SIGNED, rest),
+					userLinkText, userLink, timestamp, posting.trim(),
+					rest.trim());
 
 			matcher.reset();
 			posting = "";
@@ -232,27 +236,44 @@ public class WikiPostHandler {
 		return false;
 	}
 
-	private boolean handleHelp(String trimmedText) throws IOException {
+	private SignatureType chooseSignatureType(SignatureType type, String rest) {
+		if (baselineMode) {
+			return SignatureType.SIGNED;
+		}
+		else if (posting.contains(config.getSignature())) {
+			return SignatureType.UNSIGNED;
+		}
+		else if (rest != null && !rest.isEmpty()
+				&& rest.contains(config.getSignature())) {
+			return SignatureType.UNSIGNED;
+		}
+		return type;
+	}
+
+	private boolean handleUserContribution(String trimmedText)
+			throws IOException {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
 
-		Matcher matcher = specialContribution.matcher(trimmedText);
+		Matcher matcher = userContribution.matcher(trimmedText);
 		if (matcher.find()) {
-			String timestamp = "";
+			String timestamp = "", rest = "";
 			Matcher matcher2 = timePattern.matcher(matcher.group(3));
 			if (matcher2.find()) {
 				timestamp = matcher2.group(1);
+				rest = matcher2.group(2);
 			}
 
 			String temp = matcher.group(1);
-			temp = temp
-					.replace(
-							"&lt;small&gt;(''nicht [[Hilfe:Signatur|signierter]] Beitrag von''",
-							"");
+			// temp = temp
+			// .replace(
+			// "&lt;small&gt;(''nicht [[Hilfe:Signatur|signierter]] Beitrag von''",
+			// "");
 			posting += temp + "\n";
-			writePosting(SignatureType.USER_CONSTRIBUTION, matcher.group(2),
-					"", timestamp, posting.trim(), "");
+			writePosting(
+					chooseSignatureType(SignatureType.USER_CONSTRIBUTION, rest),
+					matcher.group(2), "", timestamp, posting.trim(), rest);
 
 			matcher.reset();
 			posting = "";
@@ -294,7 +315,7 @@ public class WikiPostHandler {
 
 		if (matcher.find()) {
 			if (!posting.trim().isEmpty()) {
-				writePosting(SignatureType.UNIDENTIFIED, "unknown", "", "",
+				writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 						posting.trim(), "");
 				posting = "";
 			}
@@ -333,8 +354,8 @@ public class WikiPostHandler {
 		try {
 			posting = tagSoupParser.generate(posting, true);
 			Sweble2Parser swebleParser = new Sweble2Parser(posting,
-					wikiPage.getPageTitle(), language, wikiStatistics,
-					errorWriter);
+					wikiPage.getPageTitle(), config.getLanguageCode(),
+					wikiStatistics, errorWriter);
 			Thread swebleThread = new Thread(swebleParser);
 			swebleThread.start();
 			swebleThread.join(1000 * 60);
@@ -403,11 +424,11 @@ public class WikiPostHandler {
 		if (postscript.toLowerCase().startsWith("ps")
 				|| postscript.toLowerCase().startsWith("p.s")) {
 			sb.append("<seg type=\"postscript\">");
-			sb.append(postscript);
+			sb.append(parseToXML(postscript));
 			sb.append("</seg>\n");
 		}
 		else {
-			sb.append(postscript);
+			sb.append(parseToXML(postscript));
 		}
 
 		sb.append("        </posting>\n");
