@@ -36,10 +36,11 @@ public class WikiPageReader implements Runnable {
 	private Configuration config;
 	private LinkedBlockingQueue<WikiPage> wikipages;
 	private boolean textFlag;
+	private WikiPage endPage;
 
 	public WikiPageReader(Configuration config,
 			LinkedBlockingQueue<WikiPage> wikipages,
-			WikiStatistics wikiStatistics) {
+			WikiPage endwikipage, WikiStatistics wikiStatistics) {
 
 		if (config == null) {
 			throw new IllegalArgumentException("Configuration cannot be null.");
@@ -50,6 +51,7 @@ public class WikiPageReader implements Runnable {
 
 		this.config = config;
 		this.wikipages = wikipages;
+		this.endPage = endwikipage;
 		this.wikiStatistics = wikiStatistics;
 	}
 
@@ -153,6 +155,7 @@ public class WikiPageReader implements Runnable {
 				}
 			}
 		}
+		wikipages.add(endPage); // end of wikipages queue
 	}
 
 	public String setIndent(String strLine) {
