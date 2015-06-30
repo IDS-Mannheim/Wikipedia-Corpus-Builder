@@ -35,14 +35,14 @@ public class WikiPostHandler {
 			.compile("^\'*(=+[^=]+=+)");
 	private static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
-	private static final Pattern timePattern = Pattern
-			.compile(".*([0-9]{2}:[^\\)]*\\))(.*)");
 
-	private static final Pattern timePattern2 = Pattern
-			.compile("(.*)([0-9]{2}:[^\\)]*\\))");
+	private static final Pattern timePattern = Pattern
+			.compile("([^0-9]*)([0-9]{1,2}:.+[0-9]{4})(.*)");
+	private static final Pattern timeZone = Pattern
+			.compile("(.*\\(\\w+\\b\\))(.*)");
 
 	private static final Pattern unsignedPattern = Pattern
-			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}");
+			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 	private static Pattern signaturePattern, userContribution;
 
 	private TagSoupParser tagSoupParser;
@@ -82,7 +82,7 @@ public class WikiPostHandler {
 		this.posting = "";
 
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?"
-				+ config.getUserPage() + ":([^\\]]+)\\]\\].*([0-9]{2}:.*)");
+				+ config.getUserPage() + ":([^\\]]+)\\]\\](.*[0-9]{2}:.*)");
 
 		userContribution = Pattern.compile("(.*)\\[\\["
 				+ config.getUserContribution()
@@ -127,7 +127,7 @@ public class WikiPostHandler {
 
 		if (!baselineMode) {
 
-			// Special contribution and help signature
+			// Special contribution
 			if (trimmedText.contains(config.getUserContribution())) {
 				if (handleUserContribution(trimmedText))
 					return;
@@ -176,17 +176,21 @@ public class WikiPostHandler {
 			}
 		}
 
-		posting += text + "\n";
+		posting += text;
 
 	}
 
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
-		Matcher matcher = timePattern2.matcher(trimmedText);
-		if (matcher.find()) {
-			// System.out.println(matcher.group(2));
-			posting = matcher.group(1);
-			writePosting(SignatureType.HEURISTIC, "", "", matcher.group(2),
-					posting.trim(), "");
+
+		String[] a = matchTimeStamp(trimmedText);
+		posting = a[0];
+		String timestamp = a[1];
+		String rest = a[2];
+
+		writePosting(SignatureType.HEURISTIC, "", "", timestamp,
+				posting.trim(), rest);
+		if (timestamp != null) {
+			posting = "";
 			return true;
 		}
 		return false;
@@ -198,20 +202,13 @@ public class WikiPostHandler {
 		}
 
 		Matcher matcher = signaturePattern.matcher(trimmedText);
-		// System.out.println(matcher.find() + " " + trimmedText);
 
 		if (matcher.find()) {
-			String rest = "", timestamp = "";
-			Matcher matcher2 = timePattern.matcher(matcher.group(3));
-			if (matcher2.find()) {
-				timestamp = matcher2.group(1);
-				rest = matcher2.group(2);
-			}
-			else {
-				rest = matcher.group(3);
-			}
+			String[] a = matchTimeStamp(matcher.group(3));
+			String timestamp = a[1];
+			String rest = a[2];
 			sigFlag = true;
-			posting += matcher.group(1) + "\n";
+			posting += matcher.group(1);
 
 			String userLink, userLinkText;
 			String mg = matcher.group(2);
@@ -236,6 +233,27 @@ public class WikiPostHandler {
 		return false;
 	}
 
+	private String[] matchTimeStamp(String text) {
+		String[] strArr = new String[3];
+		Matcher matcher2 = timePattern.matcher(text);
+		if (matcher2.find()) {
+			strArr[0] = matcher2.group(1); // pretext
+			strArr[1] = matcher2.group(2); // timestamp
+			Matcher matcher3 = timeZone.matcher(matcher2.group(3));
+			if (matcher3.find()) {
+				strArr[1] += matcher3.group(1); // timezone
+				strArr[2] = matcher3.group(2); // rest
+			}
+			else {
+				strArr[2] = matcher2.group(2);
+			}
+		}
+		else {
+			strArr[2] = text;
+		}
+		return strArr;
+	}
+
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
 		if (baselineMode) {
 			return SignatureType.SIGNED;
@@ -258,19 +276,12 @@ public class WikiPostHandler {
 
 		Matcher matcher = userContribution.matcher(trimmedText);
 		if (matcher.find()) {
-			String timestamp = "", rest = "";
-			Matcher matcher2 = timePattern.matcher(matcher.group(3));
-			if (matcher2.find()) {
-				timestamp = matcher2.group(1);
-				rest = matcher2.group(2);
-			}
+			String[] a = matchTimeStamp(matcher.group(3));
+			String timestamp = a[1];
+			String rest = a[2];
 
 			String temp = matcher.group(1);
-			// temp = temp
-			// .replace(
-			// "&lt;small&gt;(''nicht [[Hilfe:Signatur|signierter]] Beitrag von''",
-			// "");
-			posting += temp + "\n";
+			posting += temp;
 			writePosting(
 					chooseSignatureType(SignatureType.USER_CONSTRIBUTION, rest),
 					matcher.group(2), "", timestamp, posting.trim(), rest);
@@ -289,16 +300,16 @@ public class WikiPostHandler {
 
 		Matcher matcher = unsignedPattern.matcher(trimmedText);
 		if (matcher.find()) {
-			String timestamp = "";
+			String timestamp = "", rest = "";
 			if (matcher.group(3) != null) {
-				Matcher matcher2 = timePattern.matcher(matcher.group(3));
-				if (matcher2.find()) {
-					timestamp = matcher2.group(1);
-				}
+				String[] a = matchTimeStamp(matcher.group(3));
+				timestamp = a[1];
+				rest = a[2];
 			}
-			posting += matcher.group(1) + "\n";
+			rest += matcher.group(4);
+			posting += matcher.group(1);
 			writePosting(SignatureType.UNSIGNED, matcher.group(2), "",
-					timestamp, posting.trim(), "");
+					timestamp, posting.trim(), rest);
 
 			matcher.reset();
 			posting = "";
@@ -321,7 +332,7 @@ public class WikiPostHandler {
 			}
 
 			String text = WikiPageHandler.cleanTextStart(matcher.group(1));
-			wikiPage.wikitext += parseToXML(text.trim()) + "\n";
+			wikiPage.wikitext += parseToXML(text.trim());
 			matcher.reset();
 			return true;
 		}
@@ -383,12 +394,6 @@ public class WikiPostHandler {
 		if (username == null) {
 			throw new IllegalArgumentException("Speaker cannot be null.");
 		}
-		if (timestamp == null) {
-			throw new IllegalArgumentException("Timestamp cannot be null.");
-		}
-		if (postscript == null) {
-			throw new IllegalArgumentException("Postscript cannot be null.");
-		}
 
 		if (posting.isEmpty())
 			return;
@@ -406,32 +411,33 @@ public class WikiPostHandler {
 		if (!username.isEmpty()) {
 			postUser.createPostUser(username, userLink, sigFlag);
 			sb.append(" who=\"" + postUser.getUserId(username) + "\"");
-			if (!username.equals("unknown")) {
-				posting += "<autoSignature @type=" + signatureType.toString()
-						+ "/>";
+		}
+
+		// if (!username.equals("unknown")) {
+		posting += "<autoSignature @type=" + signatureType.toString() + "/>";
+		// }
+
+		if (timestamp != null && !timestamp.isEmpty()) {
+			sb.append(" synch=\"" + postTime.createTimestamp(timestamp) + "\"");
+			posting += " <timestamp>" + timestamp + "</timestamp>";
+		}
+		sb.append(">");
+
+		sb.append(parseToXML(posting));
+
+		if (postscript != null) {
+			if (postscript.toLowerCase().startsWith("ps")
+					|| postscript.toLowerCase().startsWith("p.s")) {
+				sb.append("<seg type=\"postscript\">");
+				sb.append(parseToXML(postscript));
+				sb.append("</seg>");
+			}
+			else {
+				sb.append(parseToXML(postscript));
 			}
 		}
 
-		if (!timestamp.isEmpty()) {
-			sb.append(" synch=\"" + postTime.createTimestamp(timestamp) + "\"");
-			posting += " <timestamp>" + timestamp + "</timestamp>";
-			// System.out.println(posting+"\n");
-		}
-		sb.append(">\n");
-
-		sb.append(parseToXML(posting) + "\n");
-
-		if (postscript.toLowerCase().startsWith("ps")
-				|| postscript.toLowerCase().startsWith("p.s")) {
-			sb.append("<seg type=\"postscript\">");
-			sb.append(parseToXML(postscript));
-			sb.append("</seg>\n");
-		}
-		else {
-			sb.append(parseToXML(postscript));
-		}
-
-		sb.append("        </posting>\n");
+		sb.append("        </posting>");
 		wikiPage.wikitext += sb.toString();
 	}
 }
