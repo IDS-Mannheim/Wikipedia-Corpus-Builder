@@ -35,24 +35,20 @@ public class WikiPostUser {
 		userWriter = Utilities.createWriter("post", prefixFileName
 				+ "-post-user.xml", "utf-8");
 		userWriter.append("<listPerson>\n");
-		counter = 0;
-
-		createPostUser("unknown", "");
+		counter = 1;
 	}
 
-	public void createPostUser(String username, String speaker)
+	public void createPostUser(String username, String userLink)
 			throws IOException {
 		if (username == null) {
 			throw new IllegalArgumentException("Username cannot be null.");
 		}
-		if (speaker == null) {
-			throw new IllegalArgumentException("Speaker cannot be null.");
-		}
+
 		synchronized (userMap) {
 			if (!userMap.containsKey(username)) {
 				String userId = generateUserId();
 				userMap.put(username, userId);
-				createPerson(username, userId, speaker);
+				createPerson(username, userId, userLink);
 			}
 		}
 	}
@@ -67,21 +63,18 @@ public class WikiPostUser {
 		return userId;
 	}
 
-	private void createPerson(String username, String userId, String speaker)
+	private void createPerson(String username, String userId, String userLink)
 			throws IOException {
 
-		if (speaker == null) {
-			throw new IllegalArgumentException("Speaker cannot be null.");
-		}
 		synchronized (userWriter) {
 			userWriter.append("   <person xml:id=\"" + userId + "\">\n");
 			userWriter.append("      <persName>" + username + "</persName>\n");
 
-			if (!speaker.isEmpty()) {
+			if (userLink != null && !userLink.isEmpty()) {
 				userWriter.append("      <signatureContent>\n");
 				userWriter.append("         <ref target=\"");
 				userWriter.append(WikiXMLProcessor.Wikipedia_URI);
-				userWriter.append(speaker.replaceAll("\\s", "_") + "\">");
+				userWriter.append(userLink.replaceAll("\\s", "_") + "\">");
 				userWriter.append(username + "</ref>\n");
 				userWriter.append("      </signatureContent>\n");
 			}
