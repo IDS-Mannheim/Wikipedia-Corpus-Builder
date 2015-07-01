@@ -12,6 +12,7 @@ import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
 import org.sweble.wikitext.parser.nodes.WtUrl;
 
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
@@ -23,7 +24,6 @@ import de.mannheim.ids.writer.WikiErrorWriter;
  * */
 public class Sweble2Parser implements Runnable {
 
-	public static String wikipedia_URI;
 	private WikiConfig config;
 	private WtEngine engine;
 	private String wikitext, pagetitle, wikiXML;
@@ -64,7 +64,6 @@ public class Sweble2Parser implements Runnable {
 		config = DefaultConfigEnWp.generate();
 		// Instantiate Sweble parser
 		engine = new WtEngineImpl(config);
-		wikipedia_URI = "https://" + language + ".wikipedia.org/wiki/";
 
 		this.wikitext = wikitext;
 		this.pagetitle = pagetitle;
@@ -101,7 +100,7 @@ public class Sweble2Parser implements Runnable {
 
 	private static final class MyRendererCallback implements
 			HtmlRendererCallback {
-		protected static final String LOCAL_URL = wikipedia_URI;
+		protected static final String LOCAL_URL = WikiXMLProcessor.Wikipedia_URI;
 
 		@Override
 		public boolean resourceExists(PageTitle target) {

@@ -29,8 +29,9 @@ public class WikiXMLProcessor {
 	private LinkedBlockingQueue<WikiPage> wikipages;
 	private WikiPostUser postUser;
 	private WikiPostTime postTime;
-	
+
 	public static final WikiPage endPage = new WikiPage();
+	public static String Wikipedia_URI;
 
 	public WikiXMLProcessor(Configuration config) throws IOException {
 		if (config == null) {
@@ -44,28 +45,30 @@ public class WikiXMLProcessor {
 		if (config.isDiscussion()) {
 			String prefix = Paths.get(config.getWikidump()).getFileName()
 					.toString().substring(0, 15);
-			postUser = new WikiPostUser(prefix, config.getLanguageCode()
-					+ ".wikipedia.org/wiki/" + config.getUserPage() + ":");
+			postUser = new WikiPostUser(prefix, config);
 			postTime = new WikiPostTime(prefix);
 		}
+
+		Wikipedia_URI = "https://" + config.getLanguageCode()
+				+ ".wikipedia.org/wiki/";
 	}
 
 	public void run() throws IOException {
 
 		// createOutputDirectories();
 
-		WikiPageReader wikiReader = new WikiPageReader(config, wikipages, endPage,
-				wikiStatistics);
+		WikiPageReader wikiReader = new WikiPageReader(config, wikipages,
+				endPage, wikiStatistics);
 		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
-		ExecutorService pool = Executors.newFixedThreadPool(config.getMaxThreads());
-		
+		ExecutorService pool = Executors.newFixedThreadPool(config
+				.getMaxThreads());
+
 		try {
 			wikiReaderThread.start();
-			for (WikiPage wp = wikipages.take(); 
-					!wp.equals(endPage); 
-					wp = wikipages.take()){
-				WikiPageHandler ph = new WikiPageHandler(config,
-						wp, wikiStatistics, errorWriter);
+			for (WikiPage wp = wikipages.take(); !wp.equals(endPage); wp = wikipages
+					.take()) {
+				WikiPageHandler ph = new WikiPageHandler(config, wp,
+						wikiStatistics, errorWriter);
 				if (config.isDiscussion()) {
 					ph.setPostTime(postTime);
 					ph.setPostUser(postUser);
@@ -78,25 +81,26 @@ public class WikiXMLProcessor {
 			Thread.currentThread().interrupt();
 			pool.shutdownNow();
 		}
-		
+
 		try {
 			pool.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
-		} 
+		}
 		catch (InterruptedException e) {
 			pool.shutdownNow();
 			try {
 				pool.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
-			} catch (InterruptedException e1) {
+			}
+			catch (InterruptedException e1) {
 				System.err.println("Pool termination was interrupted.");
 			}
 			Thread.currentThread().interrupt();
 		}
-		
+
 		errorWriter.close();
 		postUser.close();
 		postTime.close();
 		wikiStatistics.print();
-	} 
+	}
 
 	@Deprecated
 	private void createOutputDirectories() {

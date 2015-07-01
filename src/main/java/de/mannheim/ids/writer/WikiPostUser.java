@@ -5,7 +5,9 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.Utilities;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 
 /**
  * Class implementation for handling posting authors. <br/>
@@ -20,18 +22,13 @@ public class WikiPostUser {
 	private Map<String, String> userMap; // username, userid
 	private OutputStreamWriter userWriter;
 	private int counter;
-	private String userUri;
 
-	public WikiPostUser(String prefixFileName, String userUri)
+	public WikiPostUser(String prefixFileName, Configuration config)
 			throws IOException {
 
 		if (prefixFileName == null || prefixFileName.isEmpty()) {
 			throw new IllegalArgumentException(
 					"prefixFileName cannot be null or empty.");
-		}
-		if (userUri == null || userUri.isEmpty()) {
-			throw new IllegalArgumentException(
-					"UserUri cannot be null or empty.");
 		}
 
 		userMap = new HashMap<String, String>();
@@ -39,11 +36,11 @@ public class WikiPostUser {
 				+ "-post-user.xml", "utf-8");
 		userWriter.append("<listPerson>\n");
 		counter = 0;
-		this.userUri = userUri;
-		createPostUser("unknown", "", false);
+
+		createPostUser("unknown", "");
 	}
 
-	public void createPostUser(String username, String speaker, boolean sigFlag)
+	public void createPostUser(String username, String speaker)
 			throws IOException {
 		if (username == null) {
 			throw new IllegalArgumentException("Username cannot be null.");
@@ -55,7 +52,7 @@ public class WikiPostUser {
 			if (!userMap.containsKey(username)) {
 				String userId = generateUserId();
 				userMap.put(username, userId);
-				createPerson(username, userId, speaker, sigFlag);
+				createPerson(username, userId, speaker);
 			}
 		}
 	}
@@ -70,8 +67,8 @@ public class WikiPostUser {
 		return userId;
 	}
 
-	private void createPerson(String username, String userId, String speaker,
-			boolean sigFlag) throws IOException {
+	private void createPerson(String username, String userId, String speaker)
+			throws IOException {
 
 		if (speaker == null) {
 			throw new IllegalArgumentException("Speaker cannot be null.");
@@ -80,9 +77,10 @@ public class WikiPostUser {
 			userWriter.append("   <person xml:id=\"" + userId + "\">\n");
 			userWriter.append("      <persName>" + username + "</persName>\n");
 
-			if (sigFlag) {
+			if (!speaker.isEmpty()) {
 				userWriter.append("      <signatureContent>\n");
-				userWriter.append("         <ref target=\"" + userUri);
+				userWriter.append("         <ref target=\"");
+				userWriter.append(WikiXMLProcessor.Wikipedia_URI);
 				userWriter.append(speaker.replaceAll("\\s", "_") + "\">");
 				userWriter.append(username + "</ref>\n");
 				userWriter.append("      </signatureContent>\n");

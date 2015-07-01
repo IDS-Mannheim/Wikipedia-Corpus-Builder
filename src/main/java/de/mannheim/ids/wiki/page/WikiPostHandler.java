@@ -55,10 +55,9 @@ public class WikiPostHandler {
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
 
-	private String posting;
-
-	private final Configuration config;
-	private boolean sigFlag, baselineMode = false;
+	private Configuration config;
+	private String posting;	
+	private boolean baselineMode = false;
 
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
@@ -82,13 +81,13 @@ public class WikiPostHandler {
 		this.errorWriter = errorWriter;
 		this.posting = "";
 
-		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?"
-				+ config.getUserPage() + ":([^\\]]+)\\]\\](.*)");
+		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
+				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
 		// (.*[0-9]{2}:.*)");
 
-		userContribution = Pattern.compile("(.*)\\[\\["
+		userContribution = Pattern.compile("(.*)\\[\\[("
 				+ config.getUserContribution()
-				+ "/([^\\|]+)\\|[^\\]]+\\]\\](.*)");
+				+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 	}
 
 	public void handlePosts() throws IOException {
@@ -100,7 +99,6 @@ public class WikiPostHandler {
 		if (!posting.trim().isEmpty()) {
 			writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 					posting.trim(), "");
-			posting = "";
 		}
 	}
 
@@ -111,14 +109,12 @@ public class WikiPostHandler {
 		}
 
 		String trimmedText = text.trim();
-		sigFlag = false;
 
 		// Posting before a level marker
 		if (!baselineMode && trimmedText.startsWith(":")
 				&& !posting.trim().isEmpty()) {
 			writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 					posting.trim(), "");
-			posting = "";
 		}
 
 		// User signature
@@ -159,7 +155,6 @@ public class WikiPostHandler {
 				if (!posting.trim().isEmpty()) {
 					writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 							posting.trim(), "");
-					posting = "";
 				}
 				return;
 			}
@@ -193,7 +188,6 @@ public class WikiPostHandler {
 		writePosting(SignatureType.HEURISTIC, "", "", timestamp,
 				posting.trim(), rest);
 		if (timestamp != null) {
-			posting = "";
 			return true;
 		}
 		return false;
@@ -207,7 +201,6 @@ public class WikiPostHandler {
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			sigFlag = true;
 			posting += matcher.group(1);
 
 			String userLink, userLinkText;
@@ -231,7 +224,6 @@ public class WikiPostHandler {
 					rest.trim());
 
 			matcher.reset();
-			posting = "";
 			return true;
 		}
 		return false;
@@ -288,10 +280,10 @@ public class WikiPostHandler {
 			posting += temp;
 			writePosting(
 					chooseSignatureType(SignatureType.USER_CONSTRIBUTION, rest),
-					matcher.group(2), "", timestamp, posting.trim(), rest);
+					matcher.group(3), matcher.group(2), timestamp,
+					posting.trim(), rest);
 
 			matcher.reset();
-			posting = "";
 			return true;
 		}
 		return false;
@@ -311,7 +303,6 @@ public class WikiPostHandler {
 
 			writePosting(SignatureType.UNSIGNED, "", "", "", posting.trim(),
 					rest);
-			posting = "";
 			return true;
 		}
 		else {
@@ -329,7 +320,6 @@ public class WikiPostHandler {
 						timestamp, posting.trim(), rest);
 
 				matcher.reset();
-				posting = "";
 				return true;
 			}
 		}
@@ -347,7 +337,6 @@ public class WikiPostHandler {
 			if (!posting.trim().isEmpty()) {
 				writePosting(SignatureType.HEURISTIC, "unknown", "", "",
 						posting.trim(), "");
-				posting = "";
 			}
 
 			String text = WikiPageHandler.cleanTextStart(matcher.group(1));
@@ -429,7 +418,7 @@ public class WikiPostHandler {
 		sb.append("        <posting indentLevel=\"" + level + "\"");
 
 		if (!username.isEmpty()) {
-			postUser.createPostUser(username, userLink, sigFlag);
+			postUser.createPostUser(username, userLink);
 			sb.append(" who=\"" + postUser.getUserId(username) + "\"");
 		}
 
@@ -458,5 +447,6 @@ public class WikiPostHandler {
 
 		sb.append("</posting>\n");
 		wikiPage.wikitext += sb.toString();
+		this.posting = "";
 	}
 }
