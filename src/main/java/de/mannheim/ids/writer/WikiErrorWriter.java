@@ -45,7 +45,8 @@ public class WikiErrorWriter {
 	 * @param pagetitle the wiki page title where the error has occurred
 	 * @param cause the cause of the error
 	 */
-	public void logErrorPage(String type, String pagetitle, Throwable cause) {
+	public void logErrorPage(String type, String pagetitle, String pageId,
+			Throwable cause, String wikitext) {
 		synchronized (errorWriter) {
 			try {
 				errorWriter.append(String.valueOf(errorCounter++));
@@ -53,15 +54,19 @@ public class WikiErrorWriter {
 				errorWriter.append(type);
 				errorWriter.append(": ");
 				errorWriter.append(pagetitle);
+				errorWriter.append(" #");
+				errorWriter.append(pageId);
 				errorWriter.append(", cause: ");
 				errorWriter.append(cause.toString());
-				errorWriter.append("\n");
-				errorWriter.append("\n");
+				if (!wikitext.isEmpty()) {
+					errorWriter.append("\n");
+					errorWriter.append(wikitext);
+				}
+				errorWriter.append("\n\n");
 				errorWriter.flush();
 			}
 			catch (IOException e) {
 				System.out.println("Failed writing error.");
-				// throw new IOException(e);
 			}
 		}
 	}

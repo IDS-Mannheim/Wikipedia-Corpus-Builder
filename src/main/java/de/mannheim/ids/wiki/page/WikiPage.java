@@ -16,12 +16,13 @@ public class WikiPage {
 
 	public String pageStructure;
 	public String wikitext;
+	private String wikiXML;
 	private String pageTitle;
 	private String pageIndex;
 	private String pageId;
 	private String pageIndent;
 
-	private boolean isTextEmpty, isRedirect;
+	private boolean isRedirect;
 
 	public List<String> textSegments;
 
@@ -32,6 +33,7 @@ public class WikiPage {
 
 	public WikiPage() {
 		wikitext = "";
+		wikiXML = "";
 		textSegments = new ArrayList<String>();
 	}
 
@@ -67,14 +69,6 @@ public class WikiPage {
 		this.pageId = pageId;
 	}
 
-	public boolean isTextEmpty() {
-		return isTextEmpty;
-	}
-
-	public void setTextEmpty(boolean isEmpty) {
-		this.isTextEmpty = isEmpty;
-	}
-
 	public boolean isRedirect() {
 		return isRedirect;
 	}
@@ -91,4 +85,15 @@ public class WikiPage {
 		this.pageIndent = pageIndent;
 	}
 
+	public String getWikiXML() {
+		return wikiXML;
+	}
+
+	public void setWikiXML(String wikiXML) {
+		this.wikiXML = wikiXML;
+	}
+
+	public void appendWikiXML(String wikiXML) {
+		this.wikiXML += wikiXML;
+	}
 }

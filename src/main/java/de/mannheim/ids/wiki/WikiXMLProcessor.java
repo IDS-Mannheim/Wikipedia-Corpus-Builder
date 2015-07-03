@@ -7,9 +7,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;
 import de.mannheim.ids.wiki.page.WikiPageReader;
+import de.mannheim.ids.wiki.page.WikiPostHandler;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
@@ -67,11 +69,20 @@ public class WikiXMLProcessor {
 			wikiReaderThread.start();
 			for (WikiPage wp = wikipages.take(); !wp.equals(endPage); wp = wikipages
 					.take()) {
-				WikiPageHandler ph = new WikiPageHandler(config, wp,
-						wikiStatistics, errorWriter);
+
+				if (wp.getPageId() == null) {
+					wikiStatistics.addNoId();
+					continue;
+				}
+
+				WikiPageHandler ph;
 				if (config.isDiscussion()) {
-					ph.setPostTime(postTime);
-					ph.setPostUser(postUser);
+					ph = new WikiPostHandler(config, wp, wikiStatistics,
+							errorWriter, postUser, postTime);
+				}
+				else {
+					ph = new WikiArticleHandler(config, wp, wikiStatistics,
+							errorWriter);
 				}
 				pool.execute(ph);
 			}
@@ -96,9 +107,11 @@ public class WikiXMLProcessor {
 			Thread.currentThread().interrupt();
 		}
 
+		if (config.isDiscussion()) {
+			postUser.close();
+			postTime.close();
+		}
 		errorWriter.close();
-		postUser.close();
-		postTime.close();
 		wikiStatistics.print();
 	}
 

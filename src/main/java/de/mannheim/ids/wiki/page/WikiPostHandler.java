@@ -4,10 +4,6 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
-import de.mannheim.ids.parser.Sweble2Parser;
-import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
@@ -21,7 +17,7 @@ import de.mannheim.ids.writer.WikiPostUser;
  * 
  */
 
-public class WikiPostHandler {
+public class WikiPostHandler extends WikiPageHandler {
 
 	public enum SignatureType {
 		SIGNED, UNSIGNED, USER_CONSTRIBUTION, HEURISTIC;
@@ -30,7 +26,10 @@ public class WikiPostHandler {
 		}
 	}
 
+	// private static final Pattern textPattern = Pattern
+	// .compile("<text.*\">(.*)");
 	private static final Pattern levelPattern = Pattern.compile("^(:+)");
+
 	private static final Pattern headingPattern = Pattern
 			.compile("^\'*(=+[^=]+=+)");
 	private static final Pattern headingPattern2 = Pattern
@@ -46,42 +45,27 @@ public class WikiPostHandler {
 
 	private static Pattern signaturePattern, userContribution;
 
-	private TagSoupParser tagSoupParser;
-
-	private WikiStatistics wikiStatistics;
-	private WikiErrorWriter errorWriter;
-	private WikiPage wikiPage;
-
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
 
-	private Configuration config;
-	// private String posting;
 	private boolean baselineMode = false;
-
 	private StringBuilder postingBuilder;
 
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
-			WikiPostUser postUser, WikiPostTime postTime,
-			TagSoupParser tagSoupParser) throws IOException {
+			WikiPostUser postUser, WikiPostTime postTime) throws IOException {
 
-		if (config == null) {
-			throw new IllegalArgumentException("Configuration cannot be null.");
-		}
-		if (wikiStatistics == null) {
-			throw new IllegalArgumentException("WikiStatistics cannot be null.");
-		}
+		super(config, wikipage, wikiStatistics, errorWriter);
 
-		this.tagSoupParser = tagSoupParser;
-		this.config = config;
+		if (postUser == null) {
+			throw new IllegalArgumentException("Post user cannot be null.");
+		}
+		if (postTime == null) {
+			throw new IllegalArgumentException("Post time cannot be null.");
+		}
 
 		this.postUser = postUser;
 		this.postTime = postTime;
-		this.wikiStatistics = wikiStatistics;
-		this.wikiPage = wikipage;
-		this.errorWriter = errorWriter;
-		// this.posting = "";
 
 		postingBuilder = new StringBuilder();
 
@@ -93,16 +77,26 @@ public class WikiPostHandler {
 				+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 	}
 
-	public void handlePosts() throws IOException {
+	@Override
+	public void run() {
+		try {
+			for (String text : wikiPage.textSegments) {
+				segmentPosting(text);
+			}
 
-		for (String text : wikiPage.textSegments) {
-			segmentPosting(text);
+			// last posting
+			if (!postingBuilder.toString().trim().isEmpty()) {
+				addSignature(SignatureType.HEURISTIC, null);
+				writePosting(null, null, null, null);
+			}
+
+			if (config.isWikitextToGenerate()) {
+				writeWikitext();
+			}
+			writeWikiXML();
 		}
-
-		// if (!posting.trim().isEmpty()) {
-		if (!postingBuilder.toString().trim().isEmpty()) {
-			addSignature(SignatureType.HEURISTIC, null);
-			writePosting(null, null, null, null);
+		catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -356,9 +350,10 @@ public class WikiPostHandler {
 				writePosting(null, null, null, null);
 			}
 
-			String text = WikiPageHandler.cleanTextStart(matcher.group(1));
-			wikiPage.wikitext += parseToXML(text.trim());
-			wikiPage.wikitext += "\n";
+			String text = WikiPageReader.cleanTextStart(matcher.group(1));
+			wikiPage.appendWikiXML(parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), text.trim()));
+			wikiPage.appendWikiXML("\n");
 			matcher.reset();
 			return true;
 		}
@@ -378,45 +373,16 @@ public class WikiPostHandler {
 		return 0;
 	}
 
-	@SuppressWarnings("deprecation")
-	private String parseToXML(String posting) {
-
-		if (posting == null) {
-			throw new IllegalArgumentException("Posting cannot be null.");
-		}
-
-		posting = StringEscapeUtils.unescapeXml(posting); // unescape XML tags
-		posting = WikiPageHandler.cleanPattern(posting);
-
-		try {
-			posting = tagSoupParser.generate(posting, true);
-			Sweble2Parser swebleParser = new Sweble2Parser(posting,
-					wikiPage.getPageTitle(), config.getLanguageCode(),
-					wikiStatistics, errorWriter);
-			Thread swebleThread = new Thread(swebleParser);
-			swebleThread.start();
-			swebleThread.join(1000 * 60);
-			if (swebleThread.isAlive()) {
-				swebleThread.stop();
-			}
-			posting = swebleParser.getWikiXML();
-		}
-		catch (Exception e) {
-			wikiStatistics.addSwebleErrors();
-			errorWriter.logErrorPage("SWEBLE", wikiPage.getPageTitle(),
-					e.getCause());
-			posting = "";
-		}
-		return posting;
-	}
-
 	private void writePosting(String username, String userLink,
 			String timestamp, String postscript) throws IOException {
 
 		String posting = postingBuilder.toString().trim();
 		postingBuilder = new StringBuilder(); // reset postingBuilder
 
-		if (posting.isEmpty()) {
+		String wikiXML = parseToXML(wikiPage.getPageId(),
+				wikiPage.getPageTitle(), posting);
+
+		if (posting.isEmpty() || wikiXML.isEmpty()) {
 			return;
 		}
 		else {
@@ -424,10 +390,14 @@ public class WikiPostHandler {
 		}
 
 		int level = identifyLevel(posting);
-		if (level > 0) {
-			posting = posting.substring(level, posting.length());
-		}
 
+		wikiPage.appendWikiXML(createPostingElement(level, username, userLink,
+				timestamp, wikiXML, postscript));
+	}
+
+	private String createPostingElement(int level, String username, String userLink,
+			String timestamp, String wikiXML, String postscript)
+			throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"" + level + "\"");
 		if (username != null && !username.isEmpty()) {
@@ -439,23 +409,25 @@ public class WikiPostHandler {
 
 		}
 		sb.append(">\n");
-		sb.append(parseToXML(posting));
+
+		sb.append(wikiXML);
 		sb.append("\n");
 
 		if (postscript != null && !postscript.isEmpty()) {
 			if (postscript.toLowerCase().startsWith("ps")
 					|| postscript.toLowerCase().startsWith("p.s")) {
 				sb.append("<seg type=\"postscript\">");
-				sb.append(parseToXML(postscript));
+				sb.append(parseToXML(wikiPage.getPageId(),
+						wikiPage.getPageTitle(), postscript));
 				sb.append("</seg>\n");
 			}
 			else {
-				sb.append(parseToXML(postscript));
+				sb.append(parseToXML(wikiPage.getPageId(),
+						wikiPage.getPageTitle(), postscript));
 				sb.append("\n");
 			}
 		}
 		sb.append("        </posting>\n");
-
-		wikiPage.wikitext += sb.toString();
+		return sb.toString();
 	}
 }

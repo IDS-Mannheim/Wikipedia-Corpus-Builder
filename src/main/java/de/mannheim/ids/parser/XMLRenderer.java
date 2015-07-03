@@ -98,341 +98,299 @@ import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
 
-/** Modified Class from the HTMLRenderer Class in the Sweble library
+/**
+ * Modified Class from the HTMLRenderer Class in the Sweble library
  * 
  * @author margaretha
- */ 
-public final class XMLRenderer
-		extends
-			HtmlRendererBase
-		implements
-			CompleteEngineVisitorNoReturn
-{
+ */
+public final class XMLRenderer extends HtmlRendererBase implements
+		CompleteEngineVisitorNoReturn {
 	@Override
-	public void visit(EngProcessedPage n)
-	{
+	public void visit(EngProcessedPage n) {
 		dispatch(n.getPage());
 	}
-	
+
 	@Override
-	public void visit(EngNowiki n)
-	{
+	public void visit(EngNowiki n) {
 		wrapText(n.getContent());
 	}
-	
-	public void visit(EngPage n)
-	{
+
+	public void visit(EngPage n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(EngSoftErrorNode n)
-	{
+	public void visit(EngSoftErrorNode n) {
 		visit((WtXmlElement) n);
 	}
-	
+
 	@Override
-	public void visit(WtBody n)
-	{
+	public void visit(WtBody n) {
 		iterate(n);
 	}
-	
-	public void visit(WtBold n)
-	{
+
+	public void visit(WtBold n) {
 		p.indentAtBol("<b>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
 		p.indentAtBol("</b>");
 	}
-	
-	public void visit(WtDefinitionList n)
-	{
+
+	public void visit(WtDefinitionList n) {
 		p.indent("<dl>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
 		p.indent("</dl>");
 	}
-	
-	public void visit(WtDefinitionListDef n)
-	{
+
+	public void visit(WtDefinitionListDef n) {
 		p.indent("<dd>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
 		p.print("</dd>");
 	}
-	
-	public void visit(WtDefinitionListTerm n)
-	{
+
+	public void visit(WtDefinitionListTerm n) {
 		p.indent("<dt>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
 		p.print("</dt>");
 	}
-	
-	public void visit(WtExternalLink n)
-	{
-		if (n.hasTitle())
-		{
+
+	public void visit(WtExternalLink n) {
+		if (n.hasTitle()) {
 			p.indentAtBol();
-			
+
 			pt("<a rel=\"nofollow\" class=\"external text\" href=\"%s\">%!</a>",
-					callback.makeUrl(n.getTarget()),
-					n.getTitle());
+					callback.makeUrl(n.getTarget()), n.getTitle());
 		}
-//		else
-//		{
-//			throw new FmtNotYetImplementedError();
-//		}
+		// else
+		// {
+		// throw new FmtNotYetImplementedError();
+		// }
 	}
-	
+
 	@Override
-	public void visit(WtHeading n)
-	{
+	public void visit(WtHeading n) {
 		// We handle this case in WtSection and don't dispatch to the heading.
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtHorizontalRule n)
-	{
+	public void visit(WtHorizontalRule n) {
 		p.indentAtBol("<hr />");
 	}
-	
+
 	@Override
-	public void visit(WtIgnored n){}
-	
+	public void visit(WtIgnored n) {
+	}
+
 	@Override
-	public void visit(WtIllegalCodePoint n)
-	{
+	public void visit(WtIllegalCodePoint n) {
 		p.indentAtBol();
-		
+
 		final String cp = n.getCodePoint();
 		for (int i = 0; i < cp.length(); ++i)
 			pf("&amp;#%d;", (int) cp.charAt(i));
 	}
-	
-	public void visit(WtImageLink n)
-	{
-		if (!n.getTarget().isResolved())
-		{
+
+	public void visit(WtImageLink n) {
+		if (!n.getTarget().isResolved()) {
 			printAsWikitext(n);
 			return;
 		}
-		
+
 		PageTitle target;
-		try
-		{
+		try {
 			target = PageTitle.make(wikiConfig, n.getTarget().getAsString());
 		}
-		catch (LinkTargetException e)
-		{
+		catch (LinkTargetException e) {
 			throw new VisitingException(e);
 		}
-		
+
 		int imgWidth = n.getWidth();
 		int imgHeight = n.getHeight();
-		
-		switch (n.getFormat())
-		{
-			case THUMBNAIL: // FALL THROUGH
-			case FRAMELESS:
-				if (imgWidth <= 0)
-					imgWidth = 180;
-				break;
+
+		switch (n.getFormat()) {
+		case THUMBNAIL: // FALL THROUGH
+		case FRAMELESS:
+			if (imgWidth <= 0)
+				imgWidth = 180;
+			break;
 		}
-		
-		if (n.getUpright())
-		{
+
+		if (n.getUpright()) {
 			imgWidth = 140;
 			imgHeight = -1;
 		}
-		
+
 		MediaInfo info;
-		try
-		{
-			info = callback.getMediaInfo(
-					target.getNormalizedFullTitle(),
-					imgWidth,
-					imgHeight);
+		try {
+			info = callback.getMediaInfo(target.getNormalizedFullTitle(),
+					imgWidth, imgHeight);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			throw new VisitingException(e);
 		}
-		
+
 		boolean exists = (info != null && info.getImgUrl() != null);
-		
+
 		boolean isImage = !target.getTitle().endsWith(".ogg");
-		
-		if (exists && imgHeight > 0)
-		{
+
+		if (exists && imgHeight > 0) {
 			int altWidth = imgHeight * info.getImgWidth() / info.getImgHeight();
-			if (altWidth < imgWidth)
-			{
+			if (altWidth < imgWidth) {
 				imgWidth = altWidth;
-				try
-				{
+				try {
 					info = callback.getMediaInfo(
-							target.getNormalizedFullTitle(),
-							imgWidth,
+							target.getNormalizedFullTitle(), imgWidth,
 							imgHeight);
 				}
-				catch (Exception e)
-				{
+				catch (Exception e) {
 					throw new VisitingException(e);
 				}
 			}
 		}
-		
+
 		boolean scaled = imgWidth > 0 || imgHeight > 0;
-		
+
 		String imgUrl = null;
-		if (exists)
-		{
+		if (exists) {
 			imgUrl = info.getImgUrl();
 			if (scaled && info.getThumbUrl() != null)
 				imgUrl = info.getThumbUrl();
 		}
-		
+
 		String aClasses = "";
 		String imgClasses = "";
-		
-		switch (n.getFormat())
-		{
-			case THUMBNAIL:
-				imgClasses += " thumbimage";
-				break;
-			default:
-				break;
+
+		switch (n.getFormat()) {
+		case THUMBNAIL:
+			imgClasses += " thumbimage";
+			break;
+		default:
+			break;
 		}
-		
+
 		if (n.getBorder())
 			imgClasses += " thumbborder";
-		
+
 		// -- does the image link something? --
-		
+
 		WtUrl linkUrl = null;
 		PageTitle linkTarget = target;
-		switch (n.getLink().getTargetType())
-		{
-			case NO_LINK:
-				linkTarget = null;
-				break;
-			case PAGE:
-				WtPageName pageName = (WtPageName) n.getLink().getTarget();
-				if (pageName.isResolved()) {
-					try {
-						linkTarget = PageTitle.make(wikiConfig, pageName.getAsString());
-					}
-					catch (LinkTargetException e) {
-						throw new VisitingException(e);
-					}
+		switch (n.getLink().getTargetType()) {
+		case NO_LINK:
+			linkTarget = null;
+			break;
+		case PAGE:
+			WtPageName pageName = (WtPageName) n.getLink().getTarget();
+			if (pageName.isResolved()) {
+				try {
+					linkTarget = PageTitle.make(wikiConfig,
+							pageName.getAsString());
 				}
-				else {
-					linkTarget = null;
+				catch (LinkTargetException e) {
+					throw new VisitingException(e);
 				}
-				break;
-			case URL:
+			}
+			else {
 				linkTarget = null;
-				linkUrl = (WtUrl) n.getLink().getTarget();
-				break;
-			case DEFAULT:
-				if (exists && isImage)
-					aClasses += " image";
-				break;
+			}
+			break;
+		case URL:
+			linkTarget = null;
+			linkUrl = (WtUrl) n.getLink().getTarget();
+			break;
+		case DEFAULT:
+			if (exists && isImage)
+				aClasses += " image";
+			break;
 		}
-		
+
 		// -- string caption --
-		
+
 		String strCaption = null;
 		if (n.hasTitle())
 			strCaption = makeImageCaption(n);
-		
+
 		// -- <img> alt --
-		
+
 		String alt = null;
 		if (n.hasAlt())
 			alt = makeImageAltText(n);
-		
+
 		// -- <a> classes
-		
+
 		if (!aClasses.isEmpty())
 			aClasses = String.format(" class=\"%s\"", aClasses.trim());
-		
+
 		// -- <a> title --
-		
+
 		String aTitle = "";
-		if (n.getFormat() != ImageViewFormat.FRAMELESS)
-		{
-			if (strCaption != null)
-			{
+		if (n.getFormat() != ImageViewFormat.FRAMELESS) {
+			if (strCaption != null) {
 				aTitle = esc(strCaption);
 			}
-			else if (linkTarget != null)
-			{
-				aTitle = makeImageTitle(n, target);//makeUrl(linkTarget);
+			else if (linkTarget != null) {
+				aTitle = makeImageTitle(n, target);// makeUrl(linkTarget);
 			}
-			else if (linkUrl != null)
-			{
+			else if (linkUrl != null) {
 				aTitle = callback.makeUrl(linkUrl);
 			}
 		}
 		if (!aTitle.isEmpty())
 			aTitle = String.format(" title=\"%s\"", aTitle);
-		
+
 		// -- width & height --
-		
+
 		int width = -1;
 		int height = -1;
-		
-		if (exists)
-		{
+
+		if (exists) {
 			width = scaled ? info.getThumbWidth() : info.getImgWidth();
-			
+
 			height = scaled ? info.getThumbHeight() : info.getImgHeight();
 		}
 		else
 			width = 180;
-		
+
 		// -- generate html --
-		
+
 		// start testing
-		boolean hasThumbFrame = isImage &&
-				n.getFormat() == ImageViewFormat.THUMBNAIL ||
-				n.getHAlign() != ImageHorizAlign.UNSPECIFIED;
-		
-		if (hasThumbFrame)
-		{
+		boolean hasThumbFrame = isImage
+				&& n.getFormat() == ImageViewFormat.THUMBNAIL
+				|| n.getHAlign() != ImageHorizAlign.UNSPECIFIED;
+
+		if (hasThumbFrame) {
 			String align = "";
-			switch (n.getHAlign())
-			{
-				case CENTER:
-					align = " center";
-					break;
-				case LEFT:
-					align = " tleft";
-					break;
-				case RIGHT: // FALL THROUGH
-				case NONE: // FALL THROUGH
-				default:
-					align = " tright";
-					break;
+			switch (n.getHAlign()) {
+			case CENTER:
+				align = " center";
+				break;
+			case LEFT:
+				align = " tleft";
+				break;
+			case RIGHT: // FALL THROUGH
+			case NONE: // FALL THROUGH
+			default:
+				align = " tright";
+				break;
 			}
-			
+
 			String thumb = "";
 			String inner = "floatnone";
 			String style = "";
-			if (n.getFormat() == ImageViewFormat.THUMBNAIL)
-			{
+			if (n.getFormat() == ImageViewFormat.THUMBNAIL) {
 				thumb = "thumb";
 				inner = "thumbinner";
 				style = String.format(" style=\"width:%dpx;\"", width + 2);
 			}
-			
+
 			p.indent();
 			pf("<div class=\"%s\">", (thumb + align).trim());
 			p.incIndent();
@@ -440,60 +398,48 @@ public final class XMLRenderer
 			pf("<div class=\"%s\"%s>", inner, style);
 			p.println();
 			p.incIndent();
-			
+
 			aTitle = "";
 			if (!exists)
-				aTitle = String.format(" title=\"%s\"", makeImageTitle(n, target));
+				aTitle = String.format(" title=\"%s\"",
+						makeImageTitle(n, target));
 		}
-		else
-		{
+		else {
 			if (alt == null)
 				alt = strCaption;
 		}
-		
+
 		if (alt == null)
 			alt = "";
-		
+
 		p.indentAtBol();
-		if (linkTarget != null || linkUrl != null)
-		{
+		if (linkTarget != null || linkUrl != null) {
 			pf("<a href=\"%s\"%s%s>",
-					linkTarget != null ? callback.makeUrl(linkTarget) : callback.makeUrl(linkUrl),
-					aClasses,
-					aTitle);
+					linkTarget != null ? callback.makeUrl(linkTarget)
+							: callback.makeUrl(linkUrl), aClasses, aTitle);
 		}
-		
+
 		if (!imgClasses.isEmpty())
 			imgClasses = String.format(" class=\"%s\"", imgClasses.trim());
-		
-		if (exists)
-		{
-			if (isImage)
-			{
+
+		if (exists) {
+			if (isImage) {
 				pt("<img alt=\"%s\" src=\"%s\" width=\"%d\" height=\"%d\"%s />",
-						alt.trim(),
-						imgUrl,
-						width,
-						height,
-						imgClasses);
+						alt.trim(), imgUrl, width, height, imgClasses);
 			}
-			else
-			{
+			else {
 				p.print(esc(makeImageTitle(n, target)));
 			}
 		}
-		else
-		{
+		else {
 			p.print(esc(makeImageTitle(n, target)));
 		}
-		
+
 		if (linkTarget != null || linkUrl != null)
 			p.print("</a>");
-		
-		if (n.getFormat() == ImageViewFormat.THUMBNAIL)
-		{
-			if (exists)
-			{
+
+		if (n.getFormat() == ImageViewFormat.THUMBNAIL) {
+			if (exists) {
 				p.indentln("<div class=\"thumbcaption\">");
 				p.incIndent();
 				p.indentln("<div class=\"magnify\">");
@@ -507,15 +453,13 @@ public final class XMLRenderer
 				p.decIndent();
 				p.indentln("</div>");
 			}
-			else
-			{
+			else {
 				p.indent();
 				pt("<div class=\"thumbcaption\">%!</div>", n.getTitle());
 			}
 		}
-		
-		if (hasThumbFrame)
-		{
+
+		if (hasThumbFrame) {
 			p.decIndent();
 			p.indentln("</div>");
 			p.decIndent();
@@ -523,232 +467,187 @@ public final class XMLRenderer
 		}
 		// end testing
 	}
-	
+
 	@Override
-	public void visit(WtImEndTag n)
-	{
+	public void visit(WtImEndTag n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtImStartTag n)
-	{
+	public void visit(WtImStartTag n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
-	public void visit(WtInternalLink n)
-	{		
+
+	public void visit(WtInternalLink n) {
 		p.indentAtBol();
-		
+
 		PageTitle target;
-		try
-		{
+		try {
 			target = PageTitle.make(wikiConfig, n.getTarget().getAsString());
 		}
-		catch (LinkTargetException e)
-		{
+		catch (LinkTargetException e) {
 			throw new VisitingException(e);
 		}
-		
+
 		// FIXME: I think these should be removed in the parser already?!
 		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
 			return;
-		
+
 		// START TESTING
-		if (!callback.resourceExists(target))
-		{
+		if (!callback.resourceExists(target)) {
 			String title = target.getDenormalizedFullTitle();
-			
-			String path = UrlEncoding.WIKI.encode(target.getNormalizedFullTitle());
-			
-			if (n.hasTitle())
-			{
+
+			String path = UrlEncoding.WIKI.encode(target
+					.getNormalizedFullTitle());
+
+			if (n.hasTitle()) {
 				pt("<a href=\"%s\" class=\"new\" title=\"%s (page does not exist)\">%=%!%=</a>",
-						callback.makeUrlMissingTarget(path),
-						title,
-						n.getPrefix(),
-						n.getTitle(),
-						n.getPostfix());
+						callback.makeUrlMissingTarget(path), title,
+						n.getPrefix(), n.getTitle(), n.getPostfix());
 			}
-			else
-			{
+			else {
 				String linkText = makeTitleFromTarget(n, target);
-				
+
 				pt("<a href=\"%s\" class=\"new\" title=\"%s (page does not exist)\">%=%=%=</a>",
-						callback.makeUrlMissingTarget(path),
-						title,
-						n.getPrefix(),
-						linkText,
-						n.getPostfix());
+						callback.makeUrlMissingTarget(path), title,
+						n.getPrefix(), linkText, n.getPostfix());
 			}
 		}
 		// END TESTING
-		else
-		{
-			if (!target.equals(pageTitle))
-			{
-				if (n.hasTitle())
-				{
+		else {
+			if (!target.equals(pageTitle)) {
+				if (n.hasTitle()) {
 					pt("<a href=\"%s\" title=\"%s\">%=%!%=</a>",
-							callback.makeUrl(target),
-							makeLinkTitle(n, target),
-							n.getPrefix(),
-							n.getTitle(),
-							n.getPostfix());
+							callback.makeUrl(target), makeLinkTitle(n, target),
+							n.getPrefix(), n.getTitle(), n.getPostfix());
 				}
-				else
-				{
+				else {
 					pt("<a href=\"%s\" title=\"%s\">%=%=%=</a>",
-							callback.makeUrl(target),
-							makeLinkTitle(n, target),
-							n.getPrefix(),
-							makeTitleFromTarget(n, target),
+							callback.makeUrl(target), makeLinkTitle(n, target),
+							n.getPrefix(), makeTitleFromTarget(n, target),
 							n.getPostfix());
 				}
 			}
-			else
-			{
-				if (n.hasTitle())
-				{
+			else {
+				if (n.hasTitle()) {
 					pt("<strong class=\"selflink\">%=%!%=</strong>",
-							n.getPrefix(),
-							n.getTitle(),
-							n.getPostfix());
+							n.getPrefix(), n.getTitle(), n.getPostfix());
 				}
-				else
-				{
+				else {
 					pt("<strong class=\"selflink\">%=%=%=</strong>",
-							n.getPrefix(),
-							makeTitleFromTarget(n, target),
+							n.getPrefix(), makeTitleFromTarget(n, target),
 							n.getPostfix());
 				}
 			}
 		}
 	}
-	
-	public void visit(WtItalics n)
-	{
+
+	public void visit(WtItalics n) {
 		p.print("<i>");
-		//p.incIndent();
+		// p.incIndent();
 		iterate(n);
-		//p.decIndent();
+		// p.decIndent();
 		p.print("</i>");
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptionAltText n)
-	{
+	public void visit(WtLinkOptionAltText n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptionGarbage n)
-	{
+	public void visit(WtLinkOptionGarbage n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptionKeyword n)
-	{
+	public void visit(WtLinkOptionKeyword n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptionLinkTarget n)
-	{
+	public void visit(WtLinkOptionLinkTarget n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptionResize n)
-	{
+	public void visit(WtLinkOptionResize n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkOptions n)
-	{
+	public void visit(WtLinkOptions n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtLinkTitle n)
-	{
+	public void visit(WtLinkTitle n) {
 		iterate(n);
 	}
-	
-	public void visit(WtListItem n)
-	{
+
+	public void visit(WtListItem n) {
 		p.indent("<li>");
 		p.incIndent();
 		iterate(n);
-		p.decIndent();		
-		//p.indent("</li>");
+		p.decIndent();
+		// p.indent("</li>");
 		p.print("</li>");
 	}
-	
+
 	@Override
-	public void visit(WtName n)
-	{
+	public void visit(WtName n) {
 		iterate(n);
 	}
-	
-	public void visit(WtNewline n)
-	{
+
+	public void visit(WtNewline n) {
 		if (!p.atBol())
 			p.print(" ");
 	}
-	
+
 	@Override
-	public void visit(WtNodeList n)
-	{
+	public void visit(WtNodeList n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(WtOnlyInclude n)
-	{
+	public void visit(WtOnlyInclude n) {
 		iterate(n);
 	}
-	
-	public void visit(WtOrderedList n)
-	{
+
+	public void visit(WtOrderedList n) {
 		p.indent("<ol>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
 		p.indent("</ol>");
 	}
-	
+
 	@Override
-	public void visit(WtPageName n)
-	{
+	public void visit(WtPageName n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtPageSwitch n)
-	{
+	public void visit(WtPageSwitch n) {
 		// Hide those...
 	}
-	
-	public void visit(WtParagraph n)
-	{
-		if (!n.isEmpty()){			
+
+	public void visit(WtParagraph n) {
+		if (!n.isEmpty()) {
 			p.indent("<p>");
 			iterate(n);
-			p.print("</p>");			
+			p.print("</p>");
 		}
-		
+
 		/*
 		 if (!n.isEmpty()){			
 			
@@ -768,381 +667,328 @@ public final class XMLRenderer
 		  
 		 * */
 	}
-	
+
 	@Override
-	public void visit(WtParsedWikitextPage n)
-	{
+	public void visit(WtParsedWikitextPage n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(WtPreproWikitextPage n)
-	{
+	public void visit(WtPreproWikitextPage n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(WtRedirect n)
-	{
-		//skipped
+	public void visit(WtRedirect n) {
+		// skipped
 	}
-	
-	public void visit(WtSection n)
-	{
+
+	public void visit(WtSection n) {
 		p.indent();
-		//pt("<h%d><span class=\"mw-headline\" id=\"%s\">%!</span></h%d>",
-		pt("<h%d>%!</h%d>",
-				n.getLevel(),
-				// TESTING
-				//makeSectionTitle(n.getHeading()),
-				// END TESTING
-				n.getHeading(),
-				n.getLevel());
-		
-		//p.println();
+		// pt("<h%d><span class=\"mw-headline\" id=\"%s\">%!</span></h%d>",
+		pt("<h%d>%!</h%d>", n.getLevel(),
+		// TESTING
+		// makeSectionTitle(n.getHeading()),
+		// END TESTING
+				n.getHeading(), n.getLevel());
+
+		// p.println();
 		dispatch(n.getBody());
 	}
-	
-	public void visit(WtSemiPre n)
-	{		
+
+	public void visit(WtSemiPre n) {
 		p.indent();
 		++inPre;
 		pt("<pre>%!</pre>", n);
 		--inPre;
-		//p.println();
+		// p.println();
 	}
-	
-	public void visit(WtSemiPreLine n)
-	{
+
+	public void visit(WtSemiPreLine n) {
 		iterate(n);
 		p.println();
 	}
-	
+
 	@Override
-	public void visit(WtSignature n)
-	{
-		System.out.println(n.toString());
-		p.print("<span class=\"");		
+	public void visit(WtSignature n) {
+		p.print("<span class=\"");
 		p.print("signature\"/>");
 	}
-	
-	public void visit(WtTable n)
-	{
+
+	public void visit(WtTable n) {
 		p.indent();
-		//pt("<table%!>", cleanAttribs(n.getXmlAttributes()));
-		//p.println();
+		// pt("<table%!>", cleanAttribs(n.getXmlAttributes()));
+		// p.println();
 		p.print("<table>");
 		p.incIndent();
 		fixTableBody(n.getBody());
-		p.decIndent();		
+		p.decIndent();
 		p.indent("</table>");
 	}
-	
+
 	@Override
-	public void visit(WtTableCaption n)
-	{
-		//p.indent();
-		//pt("<caption%!>", cleanAttribs(n.getXmlAttributes()));
+	public void visit(WtTableCaption n) {
+		// p.indent();
+		// pt("<caption%!>", cleanAttribs(n.getXmlAttributes()));
 		p.indent("<caption>");
-		//p.println();
+		// p.println();
 		p.incIndent();
 		dispatch(getCellContent(n.getBody()));
 		p.decIndent();
 		p.indent("</caption>");
 	}
-	
-	public void visit(WtTableCell n)
-	{
-		//p.indent();
-		//pt("<td%!>", cleanAttribs(n.getXmlAttributes()));
+
+	public void visit(WtTableCell n) {
+		// p.indent();
+		// pt("<td%!>", cleanAttribs(n.getXmlAttributes()));
 		p.indent("<td>");
-		//p.println();
+		// p.println();
 		p.incIndent();
 		dispatch(getCellContent(n.getBody()));
 		p.decIndent();
 		p.indent("</td>");
 	}
-	
-	public void visit(WtTableHeader n)
-	{
-		//p.indent();		
-		//pt("<th%!>", cleanAttribs(n.getXmlAttributes()));
+
+	public void visit(WtTableHeader n) {
+		// p.indent();
+		// pt("<th%!>", cleanAttribs(n.getXmlAttributes()));
 		p.indent("<th>");
-		//p.println();
+		// p.println();
 		p.incIndent();
 		dispatch(getCellContent(n.getBody()));
 		p.decIndent();
 		p.indent("</th>");
 	}
-	
-	public void visit(WtTableRow n)
-	{
+
+	public void visit(WtTableRow n) {
 		boolean cellsDefined = false;
-		for (WtNode cell : n.getBody())
-		{
-			switch (cell.getNodeType())
-			{
-				case WtNode.NT_TABLE_CELL:
-				case WtNode.NT_TABLE_HEADER:
-					cellsDefined = true;
-					break;
+		for (WtNode cell : n.getBody()) {
+			switch (cell.getNodeType()) {
+			case WtNode.NT_TABLE_CELL:
+			case WtNode.NT_TABLE_HEADER:
+				cellsDefined = true;
+				break;
 			}
 		}
-		
-		if (cellsDefined)
-		{
-			//p.indent();
-			//pt("<tr%!>", cleanAttribs(n.getXmlAttributes()));
+
+		if (cellsDefined) {
+			// p.indent();
+			// pt("<tr%!>", cleanAttribs(n.getXmlAttributes()));
 			p.indent("<tr>");
-			//p.println();
+			// p.println();
 			p.incIndent();
 			dispatch(getCellContent(n.getBody()));
 			p.decIndent();
 			p.indent("</tr>");
 		}
-		else
-		{
+		else {
 			iterate(n.getBody());
 		}
 	}
-	
-	public void visit(WtTableImplicitTableBody n)
-	{
+
+	public void visit(WtTableImplicitTableBody n) {
 		iterate(n.getBody());
 	}
-	
-	public void visit(WtTagExtension n)
-	{	
+
+	public void visit(WtTagExtension n) {
 		// ref, nowiki, math
-		if (n.getName().equals("ref")){
-			pt("&lt;%s%!&gt;%=&lt;/%s&gt;",
-					n.getName(),
-					n.getXmlAttributes(),
-					n.getBody().getContent(),
-					n.getName());
+		if (n.getName().equals("ref")) {
+			pt("&lt;%s%!&gt;%=&lt;/%s&gt;", n.getName(), n.getXmlAttributes(),
+					n.getBody().getContent(), n.getName());
 		}
-		else{ 
-			p.print("<span id=\""+n.getName()+"\" class=\"tag-extension\"/>");
+		else {
+			p.print("<span id=\"" + n.getName()
+					+ "\" class=\"tag-extension\"/>");
 		}
 	}
-	
+
 	@Override
-	public void visit(WtTagExtensionBody n)
-	{
+	public void visit(WtTagExtensionBody n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
+
 	@Override
-	public void visit(WtTemplate n)
-	{	
-		//info box
+	public void visit(WtTemplate n) {
+		// info box
 		p.print("<span class=\"template\"/>");
 	}
-	
+
 	@Override
-	public void visit(WtTemplateArgument n)
-	{	
-		try{
+	public void visit(WtTemplateArgument n) {
+		try {
 			Object obj = n.getValue().get(0);
-			if (obj instanceof WtText){	
-				//System.out.print(" "+((WtText) obj).getContent());
-				p.print(" "+((WtText) obj).getContent());
+			if (obj instanceof WtText) {
+				// System.out.print(" "+((WtText) obj).getContent());
+				p.print(" " + ((WtText) obj).getContent());
 			}
 		}
-		catch (Exception e) {			
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public void visit(WtTemplateArguments n)
-	{
+	public void visit(WtTemplateArguments n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(WtTemplateParameter n)
-	{
+	public void visit(WtTemplateParameter n) {
 		printAsWikitext(n);
 	}
-	
-	public void visit(WtText n)
-	{
+
+	public void visit(WtText n) {
 		wrapText(n.getContent());
 	}
-	
+
 	@Override
-	public void visit(WtTicks n)
-	{
+	public void visit(WtTicks n) {
 		// Should not happen ...
 		throw new InternalError();
 	}
-	
-	public void visit(WtUnorderedList n)
-	{
+
+	public void visit(WtUnorderedList n) {
 		p.indent("<ul>");
 		p.incIndent();
 		iterate(n);
 		p.decIndent();
-		p.indent("</ul>");		
+		p.indent("</ul>");
 	}
-	
-	public void visit(WtUrl n)
-	{
+
+	public void visit(WtUrl n) {
 		p.indentAtBol();
-		
-		String url = callback.makeUrl(n);		
+
+		String url = callback.makeUrl(n);
 		pf("<a href=\"%s\">%s</a>", url, url);
 	}
-	
+
 	@Override
-	public void visit(WtValue n)
-	{
+	public void visit(WtValue n) {
 		iterate(n);
 	}
-	
+
 	@Override
-	public void visit(WtWhitespace n)
-	{
+	public void visit(WtWhitespace n) {
 		if (!p.atBol())
 			p.println(" ");
 	}
-	
-	public void visit(WtXmlAttribute n)
-	{
-		if (!n.getName().isResolved())
-		{
-			logger.warn("Unresolved attribute name: " + WtRtDataPrinter.print(n));
+
+	public void visit(WtXmlAttribute n) {
+		if (!n.getName().isResolved()) {
+			logger.warn("Unresolved attribute name: "
+					+ WtRtDataPrinter.print(n));
 		}
-		else
-		{
-			if (n.hasValue())
-			{
-				pt(" %s=\"%~\"", n.getName().getAsString(), cleanAttribValue(n.getValue()));
+		else {
+			if (n.hasValue()) {
+				pt(" %s=\"%~\"", n.getName().getAsString(),
+						cleanAttribValue(n.getValue()));
 			}
-			else
-			{
+			else {
 				pf(" %s=\"%<s\"", n.getName().getAsString());
 			}
 		}
 	}
-	
-	public void visit(WtXmlAttributeGarbage n)
-	{
-		//logger.warn("Attribute garbage: " + RtDataPrinter.print(n));
+
+	public void visit(WtXmlAttributeGarbage n) {
+		// logger.warn("Attribute garbage: " + RtDataPrinter.print(n));
 	}
-	
+
 	@Override
-	public void visit(WtXmlAttributes n)
-	{
-		for (WtNode n1 : n)
-		{
-			switch (n1.getNodeType())
-			{
-				case WtNode.NT_XML_ATTRIBUTE:
-				case WtNode.NT_XML_ATTRIBUTE_GARBAGE:
-					dispatch(n1);
-					break;
-				default:
-					logger.warn("Non-attribute node in attributes collection: " + WtRtDataPrinter.print(n));
-					break;
+	public void visit(WtXmlAttributes n) {
+		for (WtNode n1 : n) {
+			switch (n1.getNodeType()) {
+			case WtNode.NT_XML_ATTRIBUTE:
+			case WtNode.NT_XML_ATTRIBUTE_GARBAGE:
+				dispatch(n1);
+				break;
+			default:
+				logger.warn("Non-attribute node in attributes collection: "
+						+ WtRtDataPrinter.print(n));
+				break;
 			}
 		}
 	}
-	
-	public void visit(WtXmlCharRef n)
-	{
+
+	public void visit(WtXmlCharRef n) {
 		p.indentAtBol();
 		pf("&amp;#%d;", n.getCodePoint());
 	}
-	
+
 	@Override
-	public void visit(WtXmlComment n)
-	{		
+	public void visit(WtXmlComment n) {
 		// Hide those...
 	}
-	
-	public void visit(WtXmlElement n)
-	{
-		if (n.hasBody())
-		{
-			if (blockElements.contains(n.getName().toLowerCase()))
-			{
+
+	public void visit(WtXmlElement n) {
+		if (n.hasBody()) {
+			if (blockElements.contains(n.getName().toLowerCase())) {
 				p.indent();
 				pt("<%s%!>", n.getName(), cleanAttribs(n.getXmlAttributes()));
-				//p.println();
+				// p.println();
 				p.incIndent();
 				dispatch(n.getBody());
 				p.decIndent();
-				//p.indent();
+				// p.indent();
 				pf("</%s>", n.getName());
-				//p.println();
-			}			
-			else if (n.getName().contains(":"))
-			{				
+				// p.println();
+			}
+			else if (n.getName().contains(":")) {
 				p.indentAtBol();
-				pt("&lt;%s%!&gt;", n.getName(), cleanAttribs(n.getXmlAttributes()));
+				pt("&lt;%s%!&gt;", n.getName(),
+						cleanAttribs(n.getXmlAttributes()));
 				p.incIndent();
 				dispatch(n.getBody());
 				p.decIndent();
-				//p.indentAtBol();
+				// p.indentAtBol();
 				pf("&lt;/%s&gt;", n.getName());
 			}
-			else //if (inlineElements.contains(n.getName().toLowerCase())){
-			{				
+			else // if (inlineElements.contains(n.getName().toLowerCase())){
+			{
 				p.indentAtBol();
 				pt("<%s%!>", n.getName(), cleanAttribs(n.getXmlAttributes()));
 				p.incIndent();
 				dispatch(n.getBody());
 				p.decIndent();
-				//p.indentAtBol();
+				// p.indentAtBol();
 				pf("</%s>", n.getName());
 			}
 		}
-		else
-		{
+		else {
 			p.indentAtBol();
 			pt("<%s%! />", n.getName(), cleanAttribs(n.getXmlAttributes()));
 		}
-		//System.out.println(n.getName());
+		// System.out.println(n.getName());
 	}
-	
-	public void visit(WtXmlEmptyTag n)
-	{
+
+	public void visit(WtXmlEmptyTag n) {
 		printAsWikitext(n);
 	}
-	
-	public void visit(WtXmlEndTag n)
-	{
+
+	public void visit(WtXmlEndTag n) {
 		printAsWikitext(n);
 	}
-	
-	public void visit(WtXmlEntityRef n)
-	{
+
+	public void visit(WtXmlEntityRef n) {
 		p.indentAtBol();
-		pf("&amp;%s;", n.getName());		
+		pf("&amp;%s;", n.getName());
 	}
-	
-	public void visit(WtXmlStartTag n)
-	{
+
+	public void visit(WtXmlStartTag n) {
 		printAsWikitext(n);
 	}
-	
+
 	// =====================================================================
-	
-	private void wrapText(String text)
-	{	
-		if (inPre > 0)
-		{
+
+	private void wrapText(String text) {
+		if (inPre > 0) {
 			p.print(esc(text));
 		}
-		else
-		{
+		else {
 			p.indentAtBol(esc(StringUtils.collapseWhitespace(text)));
 		}
 	}
-	
+
 	/*
 	private void wrapText(String text)
 	{
@@ -1201,363 +1047,308 @@ public final class XMLRenderer
 		}
 	}
 	*/
-	
-	private void printAsWikitext(WtNode n)
-	{
+
+	private void printAsWikitext(WtNode n) {
 		// TODO: Implement/
-		//throw new FmtNotYetImplementedError();
-		//p.indentAtBol();
-		//System.out.println(n.getNodeName() +" "+ n);
-		
+		// throw new FmtNotYetImplementedError();
+		// p.indentAtBol();
+		// System.out.println(n.getNodeName() +" "+ n);
+
 	}
-	
-	private String toWikitext(WtNode value)
-	{
+
+	private String toWikitext(WtNode value) {
 		// TODO: Implement
-		//throw new FmtNotYetImplementedError();
+		// throw new FmtNotYetImplementedError();
 		return "";
 	}
-	
+
 	// =====================================================================
-	
-	private String makeSectionTitle(WtHeading n)
-	{
+
+	private String makeSectionTitle(WtHeading n) {
 		byte[] title;
-		try
-		{
+		try {
 			title = makeTitleFromNodes(n).getBytes("UTF8");
 		}
-		catch (UnsupportedEncodingException e)
-		{
+		catch (UnsupportedEncodingException e) {
 			throw new VisitingException(e);
 		}
-		
+
 		StringBuilder b = new StringBuilder();
-		for (byte u : title)
-		{
-			if (u < 0)
-			{
+		for (byte u : title) {
+			if (u < 0) {
 				b.append('.');
 				b.append(String.format("%02X", u));
 			}
-			else if (u == ' ')
-			{
+			else if (u == ' ') {
 				b.append('_');
 			}
-			else
-			{
+			else {
 				b.append((char) u);
 			}
 		}
-		
+
 		return esc(b.toString());
 	}
-	
-	private String makeImageAltText(WtImageLink n)
-	{
+
+	private String makeImageAltText(WtImageLink n) {
 		return makeTitleFromNodes(n.getAlt());
 	}
-	
-	protected String makeImageCaption(WtImageLink n)
-	{
+
+	protected String makeImageCaption(WtImageLink n) {
 		return makeTitleFromNodes(n.getTitle());
 	}
-	
-	private String makeTitleFromNodes(WtNodeList titleNode)
-	{
+
+	private String makeTitleFromNodes(WtNodeList titleNode) {
 		StringWriter w = new StringWriter();
 		SafeLinkTitlePrinter p = new SafeLinkTitlePrinter(w, wikiConfig);
 		p.go(titleNode);
 		return w.toString();
 	}
-	
+
 	// =====================================================================
-	
-	static String makeLinkTitle(WtInternalLink n, PageTitle target)
-	{
+
+	static String makeLinkTitle(WtInternalLink n, PageTitle target) {
 		return esc(target.getDenormalizedFullTitle());
 	}
-	
-	protected String makeImageTitle(WtImageLink n, PageTitle target)
-	{
+
+	protected String makeImageTitle(WtImageLink n, PageTitle target) {
 		return esc(target.getDenormalizedFullTitle());
 	}
-	
-	private String makeTitleFromTarget(WtInternalLink n, PageTitle target)
-	{ 
+
+	private String makeTitleFromTarget(WtInternalLink n, PageTitle target) {
 		return esc(makeTitleFromTarget(target, n.getTarget()));
 	}
-	
-	private String makeTitleFromTarget(PageTitle target, WtPageName title)
-	{
+
+	private String makeTitleFromTarget(PageTitle target, WtPageName title) {
 		String targetStr = title.getAsString();
-		if (target.hasInitialColon() && !targetStr.isEmpty() && targetStr.charAt(0) == ':')
+		if (target.hasInitialColon() && !targetStr.isEmpty()
+				&& targetStr.charAt(0) == ':')
 			targetStr = targetStr.substring(1);
 		return esc(targetStr);
 	}
-	
-	
-	
+
 	// =====================================================================
-	
+
 	/**
 	 * Pull garbage in between rows in front of the table.
 	 */
-	private void fixTableBody(WtNodeList body)
-	{
+	private void fixTableBody(WtNodeList body) {
 		boolean hadRow = false;
 		WtTableRow implicitRow = null;
-		for (WtNode c : body)
-		{
-			switch (c.getNodeType())
-			{
-				case WtNode.NT_TABLE_HEADER: // fall through!
-				case WtNode.NT_TABLE_CELL:
-				{
-					if (hadRow)
-					{
-						dispatch(c);
-					}
-					else
-					{
-						if (implicitRow == null)
-							implicitRow = nf.tr(nf.emptyAttrs(), nf.body(nf.list()));
-						implicitRow.getBody().add(c);
-					}
-					break;
-				}
-				
-				case WtNode.NT_TABLE_CAPTION:
-				{
-					if (!hadRow && implicitRow != null)
-						dispatch(implicitRow);
-					implicitRow = null;
+		for (WtNode c : body) {
+			switch (c.getNodeType()) {
+			case WtNode.NT_TABLE_HEADER: // fall through!
+			case WtNode.NT_TABLE_CELL: {
+				if (hadRow) {
 					dispatch(c);
-					break;
 				}
-				
-				case WtNode.NT_TABLE_ROW:
-				{
-					if (!hadRow && implicitRow != null)
-						dispatch(implicitRow);
-					hadRow = true;
+				else {
+					if (implicitRow == null)
+						implicitRow = nf
+								.tr(nf.emptyAttrs(), nf.body(nf.list()));
+					implicitRow.getBody().add(c);
+				}
+				break;
+			}
+
+			case WtNode.NT_TABLE_CAPTION: {
+				if (!hadRow && implicitRow != null)
+					dispatch(implicitRow);
+				implicitRow = null;
+				dispatch(c);
+				break;
+			}
+
+			case WtNode.NT_TABLE_ROW: {
+				if (!hadRow && implicitRow != null)
+					dispatch(implicitRow);
+				hadRow = true;
+				dispatch(c);
+				break;
+			}
+
+			default: {
+				if (!hadRow && implicitRow != null)
+					implicitRow.getBody().add(c);
+				else
 					dispatch(c);
-					break;
-				}
-				
-				default:
-				{
-					if (!hadRow && implicitRow != null)
-						implicitRow.getBody().add(c);
-					else
-						dispatch(c);
-					break;
-				}
+				break;
+			}
 			}
 		}
 	}
-	
+
 	/**
 	 * If the cell content is only one paragraph, the content of the paragraph
 	 * is returned. Otherwise the whole cell content is returned. This is done
 	 * to render cells with a single paragraph without the paragraph tags.
 	 */
-	protected static WtNode getCellContent(WtNodeList body)
-	{
-		if (body.size() >= 1 && body.get(0) instanceof WtParagraph)
-		{
+	protected static WtNode getCellContent(WtNodeList body) {
+		if (body.size() >= 1 && body.get(0) instanceof WtParagraph) {
 			boolean ok = true;
-			for (int i = 1; i < body.size(); ++i)
-			{
-				if (!(body.get(i) instanceof WtNewline))
-				{
+			for (int i = 1; i < body.size(); ++i) {
+				if (!(body.get(i) instanceof WtNewline)) {
 					ok = false;
 					break;
 				}
 			}
-			
+
 			if (ok)
 				body = (WtParagraph) body.get(0);
 		}
-		
+
 		return body;
 	}
-	
+
 	// =====================================================================
-	
-	protected String cleanAttribValue(WtNodeList value)
-	{
-		try
-		{
+
+	protected String cleanAttribValue(WtNodeList value) {
+		try {
 			return StringUtils.collapseWhitespace(tu.astToText(value)).trim();
 		}
-		catch (StringConversionException e)
-		{
+		catch (StringConversionException e) {
 			return toWikitext(value);
 		}
 	}
-	
-	protected WtNodeList cleanAttribs(WtNodeList xmlAttributes)
-	{	
+
+	protected WtNodeList cleanAttribs(WtNodeList xmlAttributes) {
 		ArrayList<WtXmlAttribute> clean = null;
-		
+
 		WtXmlAttribute style = null;
-		for (WtNode a : xmlAttributes)
-		{				
-			if (a instanceof WtXmlAttribute)
-			{
+		for (WtNode a : xmlAttributes) {
+			if (a instanceof WtXmlAttribute) {
 				WtXmlAttribute attr = (WtXmlAttribute) a;
 				if (!attr.getName().isResolved())
 					continue;
-				
+
 				String name = attr.getName().getAsString().toLowerCase();
-				if (name.equals("style"))
-				{
+				if (name.equals("style")) {
 					style = attr;
 				}
-				else if (name.equals("width"))
-				{
+				else if (name.equals("width")) {
 					if (clean == null)
 						clean = new ArrayList<WtXmlAttribute>();
 					clean.add(attr);
 				}
-				else if (name.equals("align"))
-				{
+				else if (name.equals("align")) {
 					if (clean == null)
 						clean = new ArrayList<WtXmlAttribute>();
 					clean.add(attr);
 				}
 			}
 		}
-		
-		if (clean == null || clean.isEmpty()){
-			
+
+		if (clean == null || clean.isEmpty()) {
+
 			ArrayList<String> names = new ArrayList<>();
-			for (WtNode a : xmlAttributes)
-			{
-				if (a instanceof WtXmlAttribute)
-				{
+			for (WtNode a : xmlAttributes) {
+				if (a instanceof WtXmlAttribute) {
 					WtXmlAttribute attr = (WtXmlAttribute) a;
 					String name = attr.getName().getAsString().toLowerCase();
-					
-					if (!names.contains(name)){
+
+					if (!names.contains(name)) {
 						names.add(name);
 					}
-					else{ // remove duplicate attributes
+					else { // remove duplicate attributes
 						xmlAttributes.remove(a);
 					}
 				}
-			}			
-			
+			}
+
 			return xmlAttributes;
 		}
-		
+
 		String newStyle = "";
 		if (style != null)
 			newStyle = cleanAttribValue(style.getValue());
-		
-		for (WtXmlAttribute a : clean)
-		{
+
+		for (WtXmlAttribute a : clean) {
 			if (!a.getName().isResolved())
 				continue;
-			
+
 			String name = a.getName().getAsString().toLowerCase();
-			if (name.equals("align"))
-			{
+			if (name.equals("align")) {
 				newStyle = String.format(
-						//"text-align: %s; ",
-						"align: %s; ",
-						cleanAttribValue(a.getValue())) + newStyle;
+				// "text-align: %s; ",
+						"align: %s; ", cleanAttribValue(a.getValue()))
+						+ newStyle;
 			}
-			else
-			{
-				newStyle = String.format(
-						"%s: %s; ",
-						name,
-						cleanAttribValue(a.getValue())) + newStyle;
+			else {
+				newStyle = String.format("%s: %s; ", name,
+						cleanAttribValue(a.getValue()))
+						+ newStyle;
 			}
 		}
-		
+
 		WtXmlAttribute newStyleAttrib = nf.attr(
 				nf.name(nf.list(nf.text("style"))),
 				nf.value(nf.list(nf.text(newStyle))));
-		
+
 		WtNodeList newAttribs = nf.attrs(nf.list());
-		
+
 		ArrayList<String> names = new ArrayList<>();
-		for (WtNode a : xmlAttributes)
-		{
+		for (WtNode a : xmlAttributes) {
 			WtXmlAttribute attr = (WtXmlAttribute) a;
 			String name = attr.getName().getAsString().toLowerCase();
-			
-			if (!names.contains(name)){
-				names.add(name);			
-			
-				if (a == style)
-				{
+
+			if (!names.contains(name)) {
+				names.add(name);
+
+				if (a == style) {
 					newAttribs.add(newStyleAttrib);
 				}
-				else if (clean.contains(a))
-				{
+				else if (clean.contains(a)) {
 					// Remove
-				}			
-				else
-				{
+				}
+				else {
 					// Copy the rest
 					newAttribs.add(a);
 				}
 			}
 		}
-		
+
 		if (style == null)
 			newAttribs.add(newStyleAttrib);
-		
+
 		return newAttribs;
 	}
-	
+
 	// =========================================================================
-	
+
 	public static <T extends WtNode> String print(
-			HtmlRendererCallback callback,
-			WikiConfig wikiConfig,
-			PageTitle pageTitle,
-			T node)
-	{
-		return print(callback, wikiConfig, new StringWriter(), pageTitle, node).toString();
-	}	
-	
+			HtmlRendererCallback callback, WikiConfig wikiConfig,
+			PageTitle pageTitle, T node) {
+		return print(callback, wikiConfig, new StringWriter(), pageTitle, node)
+				.toString();
+	}
+
 	public static <T extends WtNode> Writer print(
-			HtmlRendererCallback callback,
-			WikiConfig wikiConfig,
-			Writer writer,
-			PageTitle pageTitle,
-			T node)
-	{
+			HtmlRendererCallback callback, WikiConfig wikiConfig,
+			Writer writer, PageTitle pageTitle, T node) {
 		new XMLRenderer(callback, wikiConfig, pageTitle, writer).go(node);
 		return writer;
 	}
-	
+
 	// =========================================================================
-	
+
 	private static final Logger logger = Logger.getLogger(XMLRenderer.class);
-	
+
 	private static final Set<String> blockElements = new HashSet<String>();
 	private static final Set<String> inlineElements = new HashSet<String>();
-	
+
 	private final WikiConfig wikiConfig;
-	
+
 	private final PageTitle pageTitle;
-	
+
 	private final EngineNodeFactory nf;
-	
+
 	private final EngineAstTextUtils tu;
-	
+
 	private final HtmlRendererCallback callback;
-	
+
 	private int inPre = 0;
-	
-	static
-	{
+
+	static {
 		// left out del and ins, added table elements
 		blockElements.add("div");
 		blockElements.add("address");
@@ -1592,26 +1383,21 @@ public final class XMLRenderer
 		blockElements.add("colgroup");
 		blockElements.add("thead");
 		blockElements.add("tbody");
-		blockElements.add("tfoot");		
+		blockElements.add("tfoot");
 	}
-	
-	
-	static{
+
+	static {
 		inlineElements.add("small");
 		inlineElements.add("big");
 		inlineElements.add("sup");
 		inlineElements.add("sub");
 		inlineElements.add("u");
 	}
-	
+
 	// =========================================================================
-	
-	protected XMLRenderer(
-			HtmlRendererCallback callback,
-			WikiConfig wikiConfig,
-			PageTitle pageTitle,
-			Writer w)
-	{
+
+	protected XMLRenderer(HtmlRendererCallback callback, WikiConfig wikiConfig,
+			PageTitle pageTitle, Writer w) {
 		super(w);
 		this.callback = callback;
 		this.wikiConfig = wikiConfig;

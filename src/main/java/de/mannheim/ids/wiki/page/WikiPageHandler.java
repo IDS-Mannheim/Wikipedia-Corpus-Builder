@@ -7,15 +7,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
-import de.mannheim.ids.writer.WikiPostUser;
 import de.mannheim.ids.writer.WikiXMLWriter;
 
 /**
@@ -25,31 +22,28 @@ import de.mannheim.ids.writer.WikiXMLWriter;
  * @author margaretha
  * 
  */
-public class WikiPageHandler implements Runnable {
+public abstract class WikiPageHandler implements Runnable {
 
-	private static final Pattern pattern = Pattern
+	private static final Pattern nonTagPattern = Pattern
 			.compile("<([^!!/a-zA-Z\\s])");
+	private static final Pattern nonTagPattern2 = Pattern.compile("<([^>]*)");
+
 	private static final Pattern stylePattern = Pattern
 			.compile("(\\[\\[.+>\\]\\])");
-	private static final Pattern textPattern = Pattern
-			.compile("<text.*\">(.*)");
 
-	private WikiPage wikiPage;
-	private WikiStatistics wikiStatistics;
-	private WikiXMLWriter wikiXMLWriter;
-	private WikiErrorWriter errorWriter;
+	protected WikiPage wikiPage;
+	protected WikiStatistics wikiStatistics;
 
-	private WikiPostUser postUser;
-	private WikiPostTime postTime;
+	protected WikiXMLWriter wikiXMLWriter;
+	protected WikiErrorWriter errorWriter;
 
-	private Configuration config;
+	protected Configuration config;
 
-	private DOMParser domParser;
-	private TagSoupParser tagSoupParser;
+	protected DOMParser domParser;
+	protected TagSoupParser tagSoupParser;
 
 	public WikiPageHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
-
 		if (config == null) {
 			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
@@ -59,60 +53,87 @@ public class WikiPageHandler implements Runnable {
 		if (wikiStatistics == null) {
 			throw new IllegalArgumentException("WikiStatistics cannot be null.");
 		}
+		if (errorWriter == null) {
+			throw new IllegalArgumentException("Error writer cannot be null.");
+		}
 
+		this.config = config;
 		this.wikiPage = wikipage;
 		this.wikiStatistics = wikiStatistics;
 		this.errorWriter = errorWriter;
-		this.config = config;
 
-		wikiXMLWriter = new WikiXMLWriter(config);
-		domParser = new DOMParser();
-		tagSoupParser = new TagSoupParser();
+		this.wikiXMLWriter = new WikiXMLWriter(config);
+
+		this.domParser = new DOMParser();
+		this.tagSoupParser = new TagSoupParser();
 	}
 
-	@Override
-	public void run() {
+	@SuppressWarnings("deprecation")
+	protected String parseToXML(String pageId, String pageTitle, String wikitext)
+			throws IOException {
+		if (wikitext == null) {
+			throw new IllegalArgumentException("Wikitext cannot be null.");
+		}
 
+		// unescape XML tags
+		wikitext = StringEscapeUtils.unescapeXml(wikitext);
+		wikitext = cleanPattern(wikitext);
+
+		// italic and bold are not repaired because they are written in
+		// wiki-mark-ups
 		try {
-			if (config.isDiscussion()) {
-				WikiPostHandler th = new WikiPostHandler(config, wikiPage,
-						wikiStatistics, errorWriter, postUser, postTime,
-						tagSoupParser);
-				th.handlePosts();
-			}
-			else {
-				wikiPage.wikitext = parseToXML(wikiPage.wikitext,
-						wikiPage.getPageTitle());
-			}
+			wikitext = tagSoupParser.generate(wikitext, true);
+		}
+		catch (SAXException e) {
+			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId,
+					e.getCause(), "");
+		}
 
-			if (wikiPage.wikitext.isEmpty()) {
-				wikiStatistics.addEmptyParsedPages();
+		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
+				wikitext, config.getLanguageCode(), wikiStatistics, errorWriter);
+		Thread swebleThread = new Thread(swebleParser, pageTitle);
+
+		String wikiXML = "";
+		try {
+			swebleThread.start();
+			swebleThread.join(1000 * 6);
+			if (swebleThread.isAlive()) {
+				swebleThread.stop();
 			}
-			else {
-				validateXML(wikiPage);
-				wikiXMLWriter.write(wikiPage);
-				wikiStatistics.addTotalNonEmptyPages();
-			}
+			wikiXML = swebleParser.getWikiXML();
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			// wikiStatistics.addSwebleErrors();
+			errorWriter.logErrorPage("THREAD", pageTitle, pageId, e.getCause(),
+					"");
+			wikiXML = "";
 		}
+		return wikiXML;
 	}
 
-	public static String cleanPattern(String wikitext) {
-		wikitext = StringUtils.replaceEach(wikitext,
-		// new String[] { ":{|" , "<br/>", "<br />"},
-		// new String[] { "{|" , "&lt;br/&gt;", "&lt;br /&gt;"}); //start table
-		// notation
-				new String[] { ":{|" }, new String[] { "{|" }); // start table
-																// notation
-
-		Matcher matcher = pattern.matcher(wikitext); // space for non-tag
+	private String cleanPattern(String wikitext) {
+		// start table notation
+		wikitext = wikitext.replace(":{|", "{|");
+		wikitext = wikitext.replace("<Fn", "&lt;Fn");
+		wikitext = wikitext.replace("Fn>", "Fn&gt;");
+		// space for non-tag
+		Matcher matcher = nonTagPattern.matcher(wikitext);
 		wikitext = matcher.replaceAll("&lt; $1");
 		matcher.reset();
+		// < without >
+		matcher = nonTagPattern2.matcher(wikitext);
+		if (matcher.find()) {
+			if (matcher.group(1).contains("<")
+			// hack for page id #7420769
+					|| matcher.group(1).contains("In:")) {
+				wikitext = matcher.replaceAll("&lt;$1");
+			}
+		}
+		matcher.reset();
 
-		matcher = stylePattern.matcher(wikitext); // escape for style containing
-													// tag
+		// escape for style containing tag
+		matcher = stylePattern.matcher(wikitext);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
 			String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
@@ -124,91 +145,50 @@ public class WikiPageHandler implements Runnable {
 		return wikitext;
 	}
 
-	public static String cleanTextStart(String trimmedStrLine)
-			throws IOException {
-		Matcher matcher = textPattern.matcher(trimmedStrLine);
-		return matcher.replaceFirst("") + "\n";
+	protected void writeWikiXML() throws IOException {
+		if (wikiPage.getWikiXML().isEmpty()) {
+			wikiStatistics.addEmptyParsedPages();
+		}
+		else if (validateDOM() && validatePageStructure()) {
+			wikiXMLWriter.write(wikiPage, wikiPage.getWikiXML(),
+					config.getOutputFolder());
+			wikiStatistics.addTotalNonEmptyPages();
+		}
 	}
 
-	@SuppressWarnings("deprecation")
-	public String parseToXML(String wikitext, String pagetitle)
-			throws IOException {
-
-		wikitext = StringEscapeUtils.unescapeXml(wikitext); // unescape XML tags
-		wikitext = WikiPageHandler.cleanPattern(wikitext);
-
-		// italic and bold are not repaired because they have wiki-mark-ups
-		try {
-			wikitext = tagSoupParser.generate(wikitext, true);
-		}
-		catch (SAXException e) {
-			errorWriter.logErrorPage("TAGSOUP", pagetitle, e.getCause());
-		}
-
-		Sweble2Parser swebleParser = new Sweble2Parser(wikitext.trim(),
-				pagetitle, config.getLanguageCode(), wikiStatistics,
-				errorWriter);
-		Thread swebleThread = new Thread(swebleParser);
-
-		try {
-			swebleThread.start();
-			swebleThread.join(1000 * 6);
-			if (swebleThread.isAlive()) {
-				swebleThread.stop();
-			}
-			wikitext = swebleParser.getWikiXML();
-		}
-		catch (InterruptedException e) {
-			wikiStatistics.addSwebleErrors();
-			errorWriter.logErrorPage("SWEBLE", pagetitle, e.getCause());
-			wikitext = "";
-		}
-		return wikitext;
+	protected void writeWikitext() throws IOException {
+		wikiXMLWriter.write(wikiPage, wikiPage.wikitext,
+				config.getWikitextFolder());
 	}
 
-	public void validateXML(WikiPage wikiPage) {
-
-		if (wikiPage == null) {
-			throw new IllegalArgumentException("WikiPage cannot be null.");
-		}
-
-		String t = "";
+	private boolean validateDOM() {
 		try {
-			t = "<text>" + wikiPage.wikitext + "</text>";
+			String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 			// test XML validity
-			domParser.parseXML(new ByteArrayInputStream(t.getBytes("utf-8")));
+			domParser.parseXML(new ByteArrayInputStream(wikiXML
+					.getBytes("utf-8")));
 		}
 		catch (Exception e) {
 			wikiStatistics.addParsingErrors();
 			errorWriter.logErrorPage("DOM", wikiPage.getPageTitle(),
-					e.getCause());
-			wikiPage.wikitext = "";
+					wikiPage.getPageId(), e.getCause(), "");
+			return false;
 		}
+		return true;
+	}
 
+	private boolean validatePageStructure() {
 		try {
+			// try fixing missing tags
 			wikiPage.pageStructure = wikiPage.getPageIndent()
 					+ tagSoupParser.generate(wikiPage.pageStructure, false);
 		}
 		catch (Exception e) {
 			wikiStatistics.addPageStructureErrors();
 			errorWriter.logErrorPage("PAGE ", wikiPage.getPageTitle(),
-					e.getCause());
+					wikiPage.getPageId(), e.getCause(), "");
+			return false;
 		}
-	}
-
-	public WikiPostUser getPostUser() {
-		return postUser;
-	}
-
-	public void setPostUser(WikiPostUser postUser) {
-		this.postUser = postUser;
-	}
-
-	public WikiPostTime getPostTime() {
-		return postTime;
-	}
-
-	public void setPostTime(WikiPostTime postTime) {
-		this.postTime = postTime;
+		return true;
 	}
 }

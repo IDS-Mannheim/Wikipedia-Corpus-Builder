@@ -26,7 +26,8 @@ public class Sweble2Parser implements Runnable {
 
 	private WikiConfig config;
 	private WtEngine engine;
-	private String wikitext, pagetitle, wikiXML;
+	private String wikitext, wikiXML;
+	private String pagetitle, pageId;
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
 
@@ -39,11 +40,16 @@ public class Sweble2Parser implements Runnable {
 	 * @param pagetitle
 	 * @param language
 	 */
-	public Sweble2Parser(String wikitext, String pagetitle, String language,
-			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
+	public Sweble2Parser(String pageId, String pagetitle, String wikitext,
+			String language, WikiStatistics wikiStatistics,
+			WikiErrorWriter errorWriter) {
 		if (wikitext == null || wikitext.isEmpty()) {
 			throw new IllegalArgumentException(
 					"Wikitext cannot be null or empty.");
+		}
+		if (pageId == null || pageId.isEmpty()) {
+			throw new IllegalArgumentException(
+					"PageId cannot be null or empty.");
 		}
 		if (pagetitle == null || pagetitle.isEmpty()) {
 			throw new IllegalArgumentException(
@@ -62,10 +68,10 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		config = DefaultConfigEnWp.generate();
-		// Instantiate Sweble parser
 		engine = new WtEngineImpl(config);
 
 		this.wikitext = wikitext;
+		this.pageId = pageId;
 		this.pagetitle = pagetitle;
 		this.wikiStatistics = wikiStatistics;
 		this.errorWriter = errorWriter;
@@ -79,14 +85,14 @@ public class Sweble2Parser implements Runnable {
 			PageId pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
 			EngProcessedPage cp = engine.postprocess(pageId, wikitext, null);
-
 			// Render AST to XML
 			wikiXML = XMLRenderer.print(new MyRendererCallback(), config,
 					pageTitle, cp.getPage());
 		}
 		catch (Exception e) {
 			wikiStatistics.addSwebleErrors();
-			errorWriter.logErrorPage("SWEBLE", pagetitle, e.getCause());
+			errorWriter.logErrorPage("SWEBLE", pagetitle, pageId, e.getCause(),
+					wikitext);
 		}
 	}
 
@@ -124,9 +130,25 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		public String makeUrl(WtUrl target) {
+			// Hack for URL ending with &amp; due to Sweble/AST invalid parsing
+			// leaving out the ;
+			String path = target.getPath();
+			if (path.contains("&amp")) {
+				path = path.replace("&amp;", "&amp");
+				path = path.replace("&amp", "&amp;");
+			}
+			if (path.contains("&lt")) {
+				path = path.replace("&lt;", "&lt");
+				path = path.replace("&lt", "&lt;");
+			}
+			if (path.contains("&gt")) {
+				path = path.replace("&gt;", "&gt");
+				path = path.replace("&gt", "&gt;");
+			}
+
 			if (target.getProtocol() == "")
-				return target.getPath();
-			return target.getProtocol() + ":" + target.getPath();
+				return path;
+			return target.getProtocol() + ":" + path;
 		}
 
 		public String makeUrlMissingTarget(String path) {

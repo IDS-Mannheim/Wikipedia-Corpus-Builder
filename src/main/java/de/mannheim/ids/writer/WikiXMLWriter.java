@@ -15,8 +15,7 @@ import de.mannheim.ids.wiki.page.WikiPage;
  */
 public class WikiXMLWriter {
 
-	private String xmlOutputDir, language;
-	private String encoding;
+	private Configuration config;
 
 	public WikiXMLWriter(Configuration config) {
 
@@ -24,42 +23,40 @@ public class WikiXMLWriter {
 			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 
-		this.xmlOutputDir = config.getOutputFolder();
-		this.language = config.getLanguageCode();
-		this.encoding = config.getOutputEncoding();
+		this.config = config;
 	}
 
-	public void write(WikiPage wikiPage) throws IOException {
+	public void write(WikiPage wikiPage, String content, String outputFolder)
+			throws IOException {
 
 		if (wikiPage == null) {
 			throw new IllegalArgumentException("WikiPage cannot be null.");
 		}
+		if (outputFolder == null || outputFolder.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Output folder cannot be null or empty.");
+		}
 
-		OutputStreamWriter writer;
+		if (content != null && !content.isEmpty()) {
 
-		if (!wikiPage.isTextEmpty() && !wikiPage.wikitext.isEmpty()) {
+			String path = outputFolder + "/" + wikiPage.getPageIndex() + "/";
+			System.out.println(path + wikiPage.getPageId() + ".xml");
 
-			writer = Utilities.createWriter(
-					xmlOutputDir + "/" + wikiPage.getPageIndex() + "/",
-					wikiPage.getPageId() + ".xml", this.encoding);
-
-			System.out.println(xmlOutputDir + "/" + wikiPage.getPageIndex()
-					+ "/" + wikiPage.getPageId() + ".xml");
+			OutputStreamWriter writer = Utilities.createWriter(path,
+					wikiPage.getPageId() + ".xml", config.getOutputEncoding());
 
 			writer.append("<?xml version=\"1.0\" encoding=\"");
-			writer.append(this.encoding);
+			writer.append(config.getOutputEncoding());
 			writer.append("\"?>\n");
 
 			String[] arr = wikiPage.pageStructure.split("<text></text>");
 			writer.append(arr[0]);
-			if (wikiPage.wikitext.equals("")) {
-				writer.append("<text lang=\"" + language + "\"/>");
+			writer.append("<text lang=\"" + config.getLanguageCode() + "\">\n");
+			writer.append(content);
+			if (!config.isDiscussion()) {
+				writer.append("\n");
 			}
-			else {
-				writer.append("<text lang=\"" + language + "\">\n");
-				writer.append(wikiPage.wikitext + "\n");
-				writer.append("      </text>");
-			}
+			writer.append("      </text>");
 			writer.append(arr[1]);
 			writer.close();
 		}

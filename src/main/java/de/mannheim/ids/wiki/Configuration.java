@@ -17,11 +17,13 @@ public class Configuration {
 	private String signature;
 	private String outputFolder;
 	private String outputEncoding;
+	private String wikitextFolder;
 	private String pageType;
 	private int namespaceKey;
 	private int maxThreads;
 
 	private boolean isDiscussion;
+	private boolean wikitextToGenerate = false;
 
 	private static final Map<Integer, String> namespaceMap;
 	static {
@@ -46,7 +48,7 @@ public class Configuration {
 
 	public Configuration(String wikidump, String language, String userPage,
 			String userContribution, String helpSignature, int namespaceKey,
-			String encoding, int maxThread) {
+			String encoding, int maxThread, boolean generateWikitext) {
 
 		setWikidump(wikidump);
 		setLanguageCode(language);
@@ -57,8 +59,10 @@ public class Configuration {
 		setDiscussion(namespaceKey);
 		setPageType(namespaceMap.get(namespaceKey));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
+		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
 		setOutputEncoding(encoding);
 		setMaxThreads(maxThread);
+		setWikitextToGenerate(generateWikitext);
 	}
 
 	public Configuration(CommandLine cmd) {
@@ -77,6 +81,9 @@ public class Configuration {
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
 		setOutputEncoding(cmd.getOptionValue("e"));
 		setMaxThreads(maxThread);
+
+		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		setWikitextToGenerate(Boolean.valueOf(cmd.getOptionValue("g", "false")));
 	}
 
 	public Configuration(String properties) throws IOException {
@@ -100,6 +107,10 @@ public class Configuration {
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
 		setOutputEncoding(config.getProperty("output_encoding"));
 		setMaxThreads(Integer.parseInt(config.getProperty("max_threads")));
+
+		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		setWikitextToGenerate(Boolean.valueOf(config.getProperty(
+				"generate_wikipage", "false")));
 
 		is.close();
 	}
@@ -215,5 +226,21 @@ public class Configuration {
 
 	public void setPageType(String pageType) {
 		this.pageType = pageType;
+	}
+
+	public String getWikitextFolder() {
+		return wikitextFolder;
+	}
+
+	public void setWikitextFolder(String wikitextFolder) {
+		this.wikitextFolder = wikitextFolder;
+	}
+
+	public boolean isWikitextToGenerate() {
+		return wikitextToGenerate;
+	}
+
+	public void setWikitextToGenerate(boolean wikitextToGenerate) {
+		this.wikitextToGenerate = wikitextToGenerate;
 	}
 }

@@ -17,6 +17,8 @@ public class WikiStatistics {
 	private int emptyParsedPages;
 	private int redirectPages;
 
+	private int noId;
+
 	private int totalNonEmptyPages;
 	private int totalPages;
 	private int totalPostings;
@@ -31,6 +33,7 @@ public class WikiStatistics {
 		totalPostings = 0;
 		totalPages = 0;
 		totalNonEmptyPages = 0;
+		noId = 0;
 	}
 
 	public void print() {
@@ -41,14 +44,15 @@ public class WikiStatistics {
 		System.out.println("Total redirect pages " + getRedirectPages());
 		System.out.println("Total empty pages " + getEmptyPages());
 		System.out.println("Total empty parsed pages " + getEmptyParsedPages());
+		System.out.println("Total pages without id " + getNoId());
 
 		if (totalPostings > 0) {
 			System.out.println("Total postings " + getTotalPostings() + "\n");
 		}
 
 		System.out.println("Total Sweble exceptions " + getSwebleErrors());
-		System.out.println("Total XML parsing exceptions " 
-				+ getParsingErrors());
+		System.out
+				.println("Total XML parsing exceptions " + getParsingErrors());
 		System.out.println("Total XML Page structure exceptions "
 				+ getPageStructureErrors());
 		System.out.println("===============================================");
@@ -125,4 +129,13 @@ public class WikiStatistics {
 	public void addTotalNonEmptyPages() {
 		totalNonEmptyPages++;
 	}
+
+	public int getNoId() {
+		return noId;
+	}
+
+	public void addNoId() {
+		this.noId++;
+	}
+
 }

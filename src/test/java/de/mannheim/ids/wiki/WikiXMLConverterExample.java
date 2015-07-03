@@ -25,9 +25,12 @@ public class WikiXMLConverterExample {
 		// Set maximum number of threads running concurrently, e.g. as many as
 		// the number of CPUs
 		int maxThreads = 4;
+		// Set whether a file for each wikipage is to be created or not.
+		boolean generateWikitext = true;
 
 		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, signature, namespaceKey, encoding, maxThreads);
+				userContribution, signature, namespaceKey, encoding,
+				maxThreads, generateWikitext);
 
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
