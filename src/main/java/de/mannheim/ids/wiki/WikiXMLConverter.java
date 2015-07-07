@@ -1,6 +1,7 @@
 package de.mannheim.ids.wiki;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -66,7 +67,7 @@ public class WikiXMLConverter {
 		wxp.run();
 
 		long endTime = System.nanoTime();
-		long duration = endTime - startTime;
+		long duration = TimeUnit.NANOSECONDS.toHours(endTime - startTime);
 		System.out.println("WikiXMLConverter execution time " + duration);
 	}
 

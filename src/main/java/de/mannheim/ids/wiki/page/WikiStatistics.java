@@ -10,8 +10,9 @@ package de.mannheim.ids.wiki.page;
 public class WikiStatistics {
 
 	private int swebleErrors;
-	private int parsingErrors;
+	private int domErrors;
 	private int pageStructureErrors;
+	private int unknownErrors;
 
 	private int emptyPages;
 	private int emptyParsedPages;
@@ -25,7 +26,7 @@ public class WikiStatistics {
 
 	public WikiStatistics() {
 		swebleErrors = 0;
-		parsingErrors = 0;
+		domErrors = 0;
 		pageStructureErrors = 0;
 		emptyPages = 0;
 		emptyParsedPages = 0;
@@ -51,10 +52,10 @@ public class WikiStatistics {
 		}
 
 		System.out.println("Total Sweble exceptions " + getSwebleErrors());
-		System.out
-				.println("Total XML parsing exceptions " + getParsingErrors());
+		System.out.println("Total DOM exceptions " + getDomErrors());
 		System.out.println("Total XML Page structure exceptions "
 				+ getPageStructureErrors());
+		System.out.println("Total unknown errors: " + getUnknownErrors());
 		System.out.println("===============================================");
 	}
 
@@ -66,12 +67,12 @@ public class WikiStatistics {
 		swebleErrors++;
 	}
 
-	public int getParsingErrors() {
-		return parsingErrors;
+	public int getDomErrors() {
+		return domErrors;
 	}
 
-	public void addParsingErrors() {
-		parsingErrors++;
+	public void addDomErrors() {
+		domErrors++;
 	}
 
 	public int getPageStructureErrors() {
@@ -136,6 +137,14 @@ public class WikiStatistics {
 
 	public void addNoId() {
 		this.noId++;
+	}
+
+	public int getUnknownErrors() {
+		return unknownErrors;
+	}
+
+	public void addUnknownErrors() {
+		this.unknownErrors++;
 	}
 
 }

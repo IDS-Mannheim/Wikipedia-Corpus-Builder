@@ -21,15 +21,18 @@ public class WikiArticleHandler extends WikiPageHandler {
 	public void run() {
 
 		try {
-			wikiPage.setWikiXML(parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), wikiPage.wikitext));
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
 			}
+
+			wikiPage.setWikiXML(parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), wikiPage.wikitext));
 			writeWikiXML();
 		}
 		catch (Exception e) {
-			throw new RuntimeException(e);
+			wikiStatistics.addUnknownErrors();
+			errorWriter.logErrorPage("HANDLER", wikiPage.getPageTitle(),
+					wikiPage.getPageId(), e, "");
 		}
 	}
 }

@@ -96,11 +96,11 @@ public class WikiPageReader implements Runnable {
 				wikiPage.setPageIndent(setIndent(strLine));
 				if (!wikiPage.wikitext.isEmpty()) {
 					wikipages.add(wikiPage);
+					wikiStatistics.addTotalPages();
 				}
 				else {
 					wikiStatistics.addEmptyPages();
 				}
-				wikiStatistics.addTotalPages();
 				isToRead = false;
 			}
 			else if (isToRead && !trimmedStrLine.equals("</mediawiki>")) {
@@ -111,8 +111,8 @@ public class WikiPageReader implements Runnable {
 						wikiPage.setPageTitle(matcher.group(1));
 						wikiPage.pageStructure += strLine + "\n";
 					}
-					else { // Pagetitle cannot be parsed.
-						isToRead = false; // Skip page
+					else { // Skip page
+						isToRead = false;
 					}
 				}
 				// Page namespace
@@ -124,8 +124,8 @@ public class WikiPageReader implements Runnable {
 							wikiPage.pageStructure += setIndent(strLine)
 									+ trimmedStrLine + "\n";
 						}
-						else {
-							isToRead = false; // Stop reading. Skip this page.
+						else { // Stop reading. Skip this page.
+							isToRead = false;
 						}
 					}
 				}
@@ -137,6 +137,10 @@ public class WikiPageReader implements Runnable {
 						wikiPage.setPageIndex(isDiscussion);
 						wikiPage.pageStructure += strLine + "\n";
 						searchId = false;
+					}
+					else { // Skip page
+						isToRead = false;
+						wikiStatistics.addNoId();
 					}
 				}
 				// Redirect page

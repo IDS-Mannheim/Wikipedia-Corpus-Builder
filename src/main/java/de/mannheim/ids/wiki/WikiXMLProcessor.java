@@ -67,22 +67,16 @@ public class WikiXMLProcessor {
 
 		try {
 			wikiReaderThread.start();
-			for (WikiPage wp = wikipages.take(); !wp.equals(endPage); wp = wikipages
-					.take()) {
-
-				if (wp.getPageId() == null) {
-					wikiStatistics.addNoId();
-					continue;
-				}
-
+			for (WikiPage wikiPage = wikipages.take(); !wikiPage
+					.equals(endPage); wikiPage = wikipages.take()) {
 				WikiPageHandler ph;
-				if (config.isDiscussion()) {
-					ph = new WikiPostHandler(config, wp, wikiStatistics,
+				if (config.isDiscussion()) {					
+					ph = new WikiPostHandler(config, wikiPage, wikiStatistics,
 							errorWriter, postUser, postTime);
 				}
 				else {
-					ph = new WikiArticleHandler(config, wp, wikiStatistics,
-							errorWriter);
+					ph = new WikiArticleHandler(config, wikiPage,
+							wikiStatistics, errorWriter);
 				}
 				pool.execute(ph);
 			}

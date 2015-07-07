@@ -104,7 +104,6 @@ public abstract class WikiPageHandler implements Runnable {
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			// wikiStatistics.addSwebleErrors();
 			errorWriter.logErrorPage("THREAD", pageTitle, pageId, e.getCause(),
 					"");
 			wikiXML = "";
@@ -169,7 +168,7 @@ public abstract class WikiPageHandler implements Runnable {
 					.getBytes("utf-8")));
 		}
 		catch (Exception e) {
-			wikiStatistics.addParsingErrors();
+			wikiStatistics.addDomErrors();
 			errorWriter.logErrorPage("DOM", wikiPage.getPageTitle(),
 					wikiPage.getPageId(), e.getCause(), "");
 			return false;

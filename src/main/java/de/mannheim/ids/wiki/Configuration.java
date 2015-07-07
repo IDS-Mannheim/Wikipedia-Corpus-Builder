@@ -25,7 +25,7 @@ public class Configuration {
 	private boolean isDiscussion;
 	private boolean wikitextToGenerate = false;
 
-	private static final Map<Integer, String> namespaceMap;
+	public static final Map<Integer, String> namespaceMap;
 	static {
 		namespaceMap = new HashMap<Integer, String>();
 		namespaceMap.put(0, "article");

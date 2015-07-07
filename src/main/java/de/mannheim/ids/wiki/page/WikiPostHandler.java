@@ -80,6 +80,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	@Override
 	public void run() {
 		try {
+			if (config.isWikitextToGenerate()) {
+				writeWikitext();
+			}
+
 			for (String text : wikiPage.textSegments) {
 				segmentPosting(text);
 			}
@@ -90,13 +94,12 @@ public class WikiPostHandler extends WikiPageHandler {
 				writePosting(null, null, null, null);
 			}
 
-			if (config.isWikitextToGenerate()) {
-				writeWikitext();
-			}
 			writeWikiXML();
 		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
+		catch (Exception e) {
+			wikiStatistics.addUnknownErrors();
+			errorWriter.logErrorPage("HANDLER", wikiPage.getPageTitle(),
+					wikiPage.getPageId(), e, "");
 		}
 	}
 
@@ -112,7 +115,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		postingBuilder.append("</autoSignature>");
 	}
 
-	private void segmentPosting(String text) throws IOException {
+	private void segmentPosting(String text) throws Exception {
 
 		if (text == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
@@ -171,7 +174,7 @@ public class WikiPostHandler extends WikiPageHandler {
 			}
 
 			// Heading
-			if (trimmedText.contains("=")) {
+			if (trimmedText.contains("==")) {
 				Matcher matcher = headingPattern.matcher(trimmedText);
 				if (headerHandler(matcher))
 					return;
@@ -205,7 +208,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
-	private boolean handleSignature(String trimmedText) throws IOException {
+	private boolean handleSignature(String trimmedText) throws Exception {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
@@ -219,6 +222,9 @@ public class WikiPostHandler extends WikiPageHandler {
 			String mg = matcher.group(2);
 			if (mg.contains("|")) {
 				String[] s = mg.split("\\|");
+				if (s.length < 2) {
+					return false;
+				}
 				userLink = s[0];
 				userLinkText = s[1];
 			}
@@ -306,11 +312,13 @@ public class WikiPostHandler extends WikiPageHandler {
 		}
 
 		if (trimmedText.contains("{{unsigned}}")) {
-			String[] a = trimmedText.split("\\{\\{unsigned\\}\\}");
-			postingBuilder.append(a[0]);
 			String rest = "";
-			if (a.length > 1)
-				rest = a[1];
+			String[] a = trimmedText.split("\\{\\{unsigned\\}\\}");
+			if (a.length > 0) {
+				postingBuilder.append(a[0]);
+				if (a.length > 1)
+					rest = a[1];
+			}
 
 			addSignature(SignatureType.UNSIGNED, "");
 			writePosting("", null, null, rest);
@@ -395,8 +403,8 @@ public class WikiPostHandler extends WikiPageHandler {
 				timestamp, wikiXML, postscript));
 	}
 
-	private String createPostingElement(int level, String username, String userLink,
-			String timestamp, String wikiXML, String postscript)
+	private String createPostingElement(int level, String username,
+			String userLink, String timestamp, String wikiXML, String postscript)
 			throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"" + level + "\"");

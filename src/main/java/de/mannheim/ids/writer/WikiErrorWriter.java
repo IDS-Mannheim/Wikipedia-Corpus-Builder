@@ -2,6 +2,7 @@ package de.mannheim.ids.writer;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 
 import de.mannheim.ids.wiki.Configuration;
@@ -15,7 +16,7 @@ import de.mannheim.ids.wiki.Utilities;
  * */
 public class WikiErrorWriter {
 
-	public OutputStreamWriter errorWriter;
+	public OutputStreamWriter writer;
 	private int errorCounter;
 
 	/**
@@ -30,7 +31,7 @@ public class WikiErrorWriter {
 		String filename = Paths.get(config.getWikidump()).getFileName()
 				.toString();
 
-		errorWriter = Utilities.createWriter(
+		writer = Utilities.createWriter(
 				"logs",
 				"wikiXML-" + filename.substring(0, 15) + "-"
 						+ config.getPageType() + "-errors.log",
@@ -47,23 +48,27 @@ public class WikiErrorWriter {
 	 */
 	public void logErrorPage(String type, String pagetitle, String pageId,
 			Throwable cause, String wikitext) {
-		synchronized (errorWriter) {
+		synchronized (writer) {
 			try {
-				errorWriter.append(String.valueOf(errorCounter++));
-				errorWriter.append(" ");
-				errorWriter.append(type);
-				errorWriter.append(": ");
-				errorWriter.append(pagetitle);
-				errorWriter.append(" #");
-				errorWriter.append(pageId);
-				errorWriter.append(", cause: ");
-				errorWriter.append(cause.toString());
+				writer.append(String.valueOf(errorCounter++));
+				writer.append(" ");
+				writer.append(type);
+				writer.append(": ");
+				writer.append(pagetitle);
+				writer.append(" #");
+				writer.append(pageId);
+				writer.append(", cause: ");
+				writer.append(cause.toString());
 				if (!wikitext.isEmpty()) {
-					errorWriter.append("\n");
-					errorWriter.append(wikitext);
+					writer.append("\n");
+					writer.append(wikitext);
 				}
-				errorWriter.append("\n\n");
-				errorWriter.flush();
+				else {
+					writer.append("\n");
+					cause.printStackTrace(new PrintWriter(writer));
+				}
+				writer.append("\n\n");
+				writer.flush();
 			}
 			catch (IOException e) {
 				System.out.println("Failed writing error.");
@@ -78,8 +83,8 @@ public class WikiErrorWriter {
 	 */
 	public void close() throws IOException {
 		try {
-			if (errorWriter != null) {
-				errorWriter.close();
+			if (writer != null) {
+				writer.close();
 			}
 		}
 		catch (IOException e) {
