@@ -112,7 +112,7 @@
 		        <mainClass>de.mannheim.ids.wiki.WikiXMLConverter</mainClass>
 		      </manifest>
 		      <manifestEntries>
-            	<Class-Path>properties/</Class-Path>
+            	<Class-Path>../</Class-Path>
             </manifestEntries>
 		    </archive>
           <descriptorRefs>
