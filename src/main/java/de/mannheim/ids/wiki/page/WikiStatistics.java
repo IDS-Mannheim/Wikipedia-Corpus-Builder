@@ -63,7 +63,7 @@ public class WikiStatistics {
 		return swebleErrors;
 	}
 
-	public void addSwebleErrors() {
+	public synchronized void addSwebleErrors() {
 		swebleErrors++;
 	}
 
@@ -71,7 +71,7 @@ public class WikiStatistics {
 		return domErrors;
 	}
 
-	public void addDomErrors() {
+	public synchronized void addDomErrors() {
 		domErrors++;
 	}
 
@@ -79,7 +79,7 @@ public class WikiStatistics {
 		return pageStructureErrors;
 	}
 
-	public void addPageStructureErrors() {
+	public synchronized void addPageStructureErrors() {
 		pageStructureErrors++;
 	}
 
@@ -87,7 +87,7 @@ public class WikiStatistics {
 		return totalPostings;
 	}
 
-	public void addTotalPostings() {
+	public synchronized void addTotalPostings() {
 		totalPostings++;
 	}
 
@@ -103,7 +103,7 @@ public class WikiStatistics {
 		return emptyParsedPages;
 	}
 
-	public void addEmptyParsedPages() {
+	public synchronized void addEmptyParsedPages() {
 		emptyParsedPages++;
 	}
 
@@ -127,7 +127,7 @@ public class WikiStatistics {
 		return totalNonEmptyPages;
 	}
 
-	public void addTotalNonEmptyPages() {
+	public synchronized void addTotalNonEmptyPages() {
 		totalNonEmptyPages++;
 	}
 
@@ -143,7 +143,7 @@ public class WikiStatistics {
 		return unknownErrors;
 	}
 
-	public void addUnknownErrors() {
+	public synchronized void addUnknownErrors() {
 		this.unknownErrors++;
 	}
 
