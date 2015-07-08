@@ -6,16 +6,16 @@
 # numerically and alphabetically.
 # 
 # Input parameters:
-# - pageType [articles/discussions]
-# - path to xmlFolder, for example: xml-de/articles to index the German 
-#   WikiXML articles
-# - output file name
+# - pageType [e.g. article, talk, user-talk]
+# - path to xmlFolder, for example: wikixml-de/article to index the 
+#   German WikiXML article pages
+# - output file
 #
 # Example:
-# ./WikiXMLCorpusIndexer.sh articles xml-de/articles articleIndex.xml
+# ./WikiXMLCorpusIndexer.sh article wikixml-de/article article-index.xml
 #
 # Output format:
-# <articles>
+# <article>
 #    <index value=0>
 #         <id>2173</id>
 #	  <id>2435</id>
@@ -28,27 +28,27 @@
 #         [....]
 #    </index>
 #    [....]
-# </articles>
+# </article>
 #
 # The index is used in WikiI5Converter for structuring the Wikipedia 
 # pages in the resulting Wikipedia I5 corpus file.
 #
-# Eliza Margaretha, Aug 2014
+# Eliza Margaretha, Juli 2015
 # Institut für Deutsche Sprache
 # This script is licensed under GPL v3.
 # -------------------------------------------------------------------
 
 function createList {
-    echo "<"$1">" > $2
+    echo "<"$1">" > $3
     
-    for index in $(find $3 -type d | sed 's/.*\///' | sort);
+    for index in $(find $2 -type d | sed 's/.*\///' | sort);
     do  
-        echo "  <index value=\""$index"\">" >> $2 
-        find $3/$index/ -type f 2>/dev/null | sed 's/.*\/\(.*\)\.xml/\1/' | sort -n | sed 's/\(.*\)/    <id>\1<\/id>/' >> $2        
-        echo "  </index>" >> $2
+        echo "  <index value=\""$index"\">" >> $3 
+        find $2/$index/ -type f 2>/dev/null | sed 's/.*\/\(.*\)\.xml/\1/' | sort -n | sed 's/\(.*\)/    <id>\1<\/id>/' >> $3        
+        echo "  </index>" >> $3
     done
 
-    echo "</"$1">" >> $2    
+    echo "</"$1">" >> $3
 }
 
 
@@ -60,13 +60,13 @@ output=$3
 
 if [ -z "$1" ];
 then
-    echo "Please specify the Wikipage type [articles|discussions]:  "
+    echo "Please specify the Wikipage type:  "
     read pageType
 fi
 
 if [ -z "$2" ];
 then
-    echo "Please specify the WikiXML article or discussion folder: "
+    echo "Please specify the WikiXML folder: "
     read xmlFolder
 fi
 
@@ -78,5 +78,5 @@ fi
 
 
 
-echo "Indexing WikiXML pages"    
-createList $pageType $output $xmlFolder
+echo "Indexing WikiXML" $1 "pages"    
+createList $pageType $xmlFolder $output
