@@ -20,7 +20,7 @@ import de.mannheim.ids.writer.WikiPostUser;
 public class WikiPostHandler extends WikiPageHandler {
 
 	public enum SignatureType {
-		SIGNED, UNSIGNED, USER_CONSTRIBUTION, HEURISTIC;
+		SIGNED, UNSIGNED, USER_CONTRIBUTION, HEURISTIC;
 		public String toString() {
 			return name().toLowerCase();
 		}
@@ -296,7 +296,7 @@ public class WikiPostHandler extends WikiPageHandler {
 
 			postingBuilder.append(matcher.group(1));
 			addSignature(
-					chooseSignatureType(SignatureType.USER_CONSTRIBUTION, rest),
+					chooseSignatureType(SignatureType.USER_CONTRIBUTION, rest),
 					timestamp);
 			writePosting(matcher.group(3), matcher.group(2), timestamp, rest);
 

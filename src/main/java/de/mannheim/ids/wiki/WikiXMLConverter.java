@@ -68,7 +68,8 @@ public class WikiXMLConverter {
 
 		long endTime = System.nanoTime();
 		long duration = TimeUnit.NANOSECONDS.toHours(endTime - startTime);
-		System.out.println("WikiXMLConverter execution time " + duration);
+		System.out.println("WikiXMLConverter execution time " + duration
+				+ " hours");
 	}
 
 	public Configuration createConfig(String[] args) throws ParseException,
