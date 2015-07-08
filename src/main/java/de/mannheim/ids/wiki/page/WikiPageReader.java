@@ -199,7 +199,7 @@ public class WikiPageReader implements Runnable {
 			 * if (wikiPage.wikitext.equals("")){ // empty text
 			 * wikiPage.setEmpty(true); return; }
 			 */
-			wikiPage.pageStructure += "      <text/>\n";
+			wikiPage.pageStructure += "</text>\n";
 			textFlag = false;
 		}
 
@@ -215,6 +215,7 @@ public class WikiPageReader implements Runnable {
 				return false;
 			}
 			else { // start collecting text
+				wikiPage.pageStructure += "      <text>";
 				wikiPage.wikitext += cleanTextStart(trimmedStrLine);
 				this.textFlag = true;
 			}
