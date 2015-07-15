@@ -13,6 +13,8 @@ public class WikiStatistics {
 	private int domErrors;
 	private int pageStructureErrors;
 	private int unknownErrors;
+	private int rendererErrors;
+	private int numOfThreadDeaths;
 
 	private int emptyPages;
 	private int emptyParsedPages;
@@ -35,6 +37,8 @@ public class WikiStatistics {
 		totalPages = 0;
 		totalNonEmptyPages = 0;
 		noId = 0;
+		rendererErrors = 0;
+		numOfThreadDeaths = 0;
 	}
 
 	public void print() {
@@ -52,10 +56,13 @@ public class WikiStatistics {
 		}
 
 		System.out.println("Total Sweble exceptions " + getSwebleErrors());
+		System.out.println("Total Renderer exceptions " + getRendererErrors());
 		System.out.println("Total DOM exceptions " + getDomErrors());
 		System.out.println("Total XML Page structure exceptions "
 				+ getPageStructureErrors());
+		System.out.println("Total thread deaths: " + getNumOfThreadDeaths());
 		System.out.println("Total unknown errors: " + getUnknownErrors());
+
 		System.out.println("===============================================");
 	}
 
@@ -147,4 +154,19 @@ public class WikiStatistics {
 		this.unknownErrors++;
 	}
 
+	public int getRendererErrors() {
+		return rendererErrors;
+	}
+
+	public synchronized void addRendererErrors() {
+		this.rendererErrors++;
+	}
+
+	public int getNumOfThreadDeaths() {
+		return numOfThreadDeaths;
+	}
+
+	public synchronized void addNumOfThreadDeaths() {
+		this.numOfThreadDeaths++;
+	}
 }

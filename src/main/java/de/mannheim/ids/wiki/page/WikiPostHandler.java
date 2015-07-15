@@ -20,14 +20,12 @@ import de.mannheim.ids.writer.WikiPostUser;
 public class WikiPostHandler extends WikiPageHandler {
 
 	public enum SignatureType {
-		SIGNED, UNSIGNED, USER_CONTRIBUTION, HEURISTIC;
+		SIGNED, UNSIGNED, USER_CONTRIBUTION;
 		public String toString() {
 			return name().toLowerCase();
 		}
 	}
 
-	// private static final Pattern textPattern = Pattern
-	// .compile("<text.*\">(.*)");
 	private static final Pattern levelPattern = Pattern.compile("^(:+)");
 
 	private static final Pattern headingPattern = Pattern
@@ -43,13 +41,14 @@ public class WikiPostHandler extends WikiPageHandler {
 	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
-	private static Pattern signaturePattern, userContribution;
+	private static Pattern signaturePattern, userContribution,
+			unsignedPattern2;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
 
 	private boolean baselineMode = false;
-	private StringBuilder postingBuilder;
+	private String post;
 
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
@@ -67,7 +66,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		this.postUser = postUser;
 		this.postTime = postTime;
 
-		postingBuilder = new StringBuilder();
+		post = "";
 
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
 				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
@@ -75,6 +74,9 @@ public class WikiPostHandler extends WikiPageHandler {
 		userContribution = Pattern.compile("(.*)\\[\\[("
 				+ config.getUserContribution()
 				+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
+
+		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + config.getUnsigned()
+				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 	}
 
 	@Override
@@ -89,30 +91,31 @@ public class WikiPostHandler extends WikiPageHandler {
 			}
 
 			// last posting
-			if (!postingBuilder.toString().trim().isEmpty()) {
-				addSignature(SignatureType.HEURISTIC, null);
-				writePosting(null, null, null, null);
+			if (!post.trim().isEmpty()) {
+				writePost(null, null, null, null);
 			}
 
 			writeWikiXML();
 		}
 		catch (Exception e) {
 			wikiStatistics.addUnknownErrors();
+			e.printStackTrace();
+
 			errorWriter.logErrorPage("HANDLER", wikiPage.getPageTitle(),
 					wikiPage.getPageId(), e, "");
 		}
 	}
 
 	private void addSignature(SignatureType sigType, String timestamp) {
-		postingBuilder.append("<autoSignature @type=");
-		postingBuilder.append(sigType.toString());
-		postingBuilder.append(">");
+		post += "<autoSignature @type=";
+		post += sigType.toString();
+		post += ">";
 		if (timestamp != null && !timestamp.isEmpty()) {
-			postingBuilder.append(" <timestamp>");
-			postingBuilder.append(timestamp);
-			postingBuilder.append("</timestamp>");
+			post += " <timestamp>";
+			post += timestamp;
+			post += "</timestamp>";
 		}
-		postingBuilder.append("</autoSignature>");
+		post += "</autoSignature>";
 	}
 
 	private void segmentPosting(String text) throws Exception {
@@ -125,50 +128,46 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		// Posting before a level marker
 		if (!baselineMode && trimmedText.startsWith(":")
-				&& !postingBuilder.toString().trim().isEmpty()) {
-			addSignature(SignatureType.HEURISTIC, null);
-			writePosting(null, null, null, null);
+				&& !post.trim().isEmpty()) {
+			writePost(null, null, null, null);
 		}
 
 		// User signature
-		if (trimmedText.contains(config.getUserPage())) {
-			if (handleSignature(trimmedText))
-				return;
+		if (trimmedText.contains(config.getUserPage() + ":")) {
+			if (handleSignature(trimmedText)) return;
 		}
 
 		if (!baselineMode) {
 
 			// Special contribution
 			if (trimmedText.contains(config.getUserContribution())) {
-				if (handleUserContribution(trimmedText))
-					return;
+				if (handleUserContribution(trimmedText)) return;
 			}
 
 			// Unsigned
 			if (trimmedText.contains("unsigned")) {
-				if (handleUnsigned(trimmedText))
-					return;
+				if (handleUnsigned(trimmedText, "unsigned")) return;
+			}
+			if (trimmedText.contains(config.getUnsigned())) {
+				if (handleUnsigned(trimmedText, config.getUnsigned())) return;
 			}
 
 			// Timestamp only
 			if (trimmedText.endsWith(")")) {
-				if (handleTimestampOnly(trimmedText))
-					return;
+				if (handleTimestampOnly(trimmedText)) return;
 			}
 
 			// Level Marker
 			if (trimmedText.startsWith(":")) {
-				postingBuilder.append(trimmedText);
-				addSignature(SignatureType.HEURISTIC, null);
-				writePosting(null, null, null, null);
+				post += trimmedText;
+				writePost(null, null, null, null);
 				return;
 			}
 
 			// Line Marker
 			if (trimmedText.startsWith("---")) {
-				if (!postingBuilder.toString().trim().isEmpty()) {
-					addSignature(SignatureType.HEURISTIC, null);
-					writePosting(null, null, null, null);
+				if (!post.trim().isEmpty()) {
+					writePost(null, null, null, null);
 				}
 				return;
 			}
@@ -176,33 +175,30 @@ public class WikiPostHandler extends WikiPageHandler {
 			// Heading
 			if (trimmedText.contains("==")) {
 				Matcher matcher = headingPattern.matcher(trimmedText);
-				if (headerHandler(matcher))
-					return;
+				if (headerHandler(matcher)) return;
 			}
 
 			if (trimmedText.contains("&lt;h")) {
 				Matcher matcher = headingPattern2.matcher(trimmedText);
-				if (headerHandler(matcher))
-					return;
+				if (headerHandler(matcher)) return;
 			}
 		}
 
-		postingBuilder.append(trimmedText);
-		postingBuilder.append("\n");
+		post += trimmedText + "\n";
 	}
 
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
 
 		String[] a = matchTimeStamp(trimmedText);
 		if (a[0] != null) {
-			postingBuilder.append(a[0]);
+			post += a[0];
 		}
 		String timestamp = a[1];
 		String rest = a[2];
 
-		addSignature(SignatureType.HEURISTIC, timestamp);
-		writePosting("", null, timestamp, rest);
 		if (timestamp != null) {
+			addSignature(SignatureType.SIGNED, timestamp);
+			writePost("", null, timestamp, rest);
 			return true;
 		}
 		return false;
@@ -216,7 +212,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			postingBuilder.append(matcher.group(1));
+			post += matcher.group(1);
 
 			String userLink, userLinkText;
 			String mg = matcher.group(2);
@@ -239,7 +235,7 @@ public class WikiPostHandler extends WikiPageHandler {
 
 			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
 					timestamp);
-			writePosting(userLinkText, userLink, timestamp, rest.trim());
+			writePost(userLinkText, userLink, timestamp, rest.trim());
 
 			matcher.reset();
 			return true;
@@ -272,7 +268,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		if (baselineMode) {
 			return SignatureType.SIGNED;
 		}
-		else if (postingBuilder.toString().contains(config.getSignature())) {
+		else if (post.contains(config.getSignature())) {
 			return SignatureType.UNSIGNED;
 		}
 		else if (rest != null && !rest.isEmpty()
@@ -290,15 +286,15 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		Matcher matcher = userContribution.matcher(trimmedText);
 		if (matcher.find()) {
-			String[] a = matchTimeStamp(matcher.group(3));
+			String[] a = matchTimeStamp(matcher.group(4));
 			String timestamp = a[1];
 			String rest = a[2];
 
-			postingBuilder.append(matcher.group(1));
+			post += matcher.group(1);
 			addSignature(
 					chooseSignatureType(SignatureType.USER_CONTRIBUTION, rest),
 					timestamp);
-			writePosting(matcher.group(3), matcher.group(2), timestamp, rest);
+			writePost(matcher.group(3), matcher.group(2), timestamp, rest);
 
 			matcher.reset();
 			return true;
@@ -306,26 +302,33 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
-	private boolean handleUnsigned(String trimmedText) throws IOException {
+	private boolean handleUnsigned(String trimmedText, String unsigned)
+			throws IOException {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
 
-		if (trimmedText.contains("{{unsigned}}")) {
+		if (trimmedText.contains("{{" + unsigned + "}}")) {
 			String rest = "";
-			String[] a = trimmedText.split("\\{\\{unsigned\\}\\}");
+			String[] a = trimmedText.split("\\{\\{" + unsigned + "\\}\\}");
 			if (a.length > 0) {
-				postingBuilder.append(a[0]);
-				if (a.length > 1)
-					rest = a[1];
+				post += a[0];
+				if (a.length > 1) rest = a[1];
 			}
 
 			addSignature(SignatureType.UNSIGNED, "");
-			writePosting("", null, null, rest);
+			writePost("", null, null, rest);
 			return true;
 		}
 		else {
-			Matcher matcher = unsignedPattern.matcher(trimmedText);
+			Matcher matcher;
+			if (unsigned.equals("unsigned")) {
+				matcher = unsignedPattern.matcher(trimmedText);
+			}
+			else {
+				matcher = unsignedPattern2.matcher(trimmedText);
+			}
+
 			if (matcher.find()) {
 				String timestamp = "", rest = "";
 				if (matcher.group(3) != null) {
@@ -334,9 +337,9 @@ public class WikiPostHandler extends WikiPageHandler {
 					rest = a[2];
 				}
 				rest += matcher.group(4);
-				postingBuilder.append(matcher.group(1));
+				post += matcher.group(1);
 				addSignature(SignatureType.UNSIGNED, timestamp);
-				writePosting(matcher.group(2), null, timestamp, rest);
+				writePost(matcher.group(2), null, timestamp, rest);
 
 				matcher.reset();
 				return true;
@@ -353,67 +356,73 @@ public class WikiPostHandler extends WikiPageHandler {
 		}
 
 		if (matcher.find()) {
-			if (!postingBuilder.toString().trim().isEmpty()) {
-				addSignature(SignatureType.HEURISTIC, "");
-				writePosting(null, null, null, null);
+			if (!post.trim().isEmpty()) {
+				writePost(null, null, null, null);
 			}
 
 			String text = WikiPageReader.cleanTextStart(matcher.group(1));
-			wikiPage.appendWikiXML(parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), text.trim()));
-			wikiPage.appendWikiXML("\n");
+			String wikiXML = parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), text.trim());
+			if (!Thread.interrupted()) {
+				wikiPage.appendWikiXML(wikiXML + "\n");
+			}
 			matcher.reset();
 			return true;
 		}
 		return false;
 	}
 
-	private int identifyLevel(String posting) {
+	private int identifyLevel(String post) {
 
-		if (posting == null) {
-			throw new IllegalArgumentException("Posting cannot be null.");
+		if (post == null) {
+			throw new IllegalArgumentException("Post cannot be null.");
 		}
 
-		Matcher matcher = levelPattern.matcher(posting);
+		Matcher matcher = levelPattern.matcher(post);
 		if (matcher.find()) {
 			return matcher.group(1).length();
 		}
 		return 0;
 	}
 
-	private void writePosting(String username, String userLink,
-			String timestamp, String postscript) throws IOException {
+	private void writePost(String username, String userLink, String timestamp,
+			String postscript) throws IOException {
 
-		String posting = postingBuilder.toString().trim();
-		postingBuilder = new StringBuilder(); // reset postingBuilder
+		String post = this.post.trim();
+		this.post = ""; // reset post
+
+		int level = identifyLevel(post);
+		post = post.substring(level, post.length() - 1);
+		if (post.isEmpty()) return;
 
 		String wikiXML = parseToXML(wikiPage.getPageId(),
-				wikiPage.getPageTitle(), posting);
+				wikiPage.getPageTitle(), post);
+		if (wikiXML.isEmpty()) return;
 
-		if (posting.isEmpty() || wikiXML.isEmpty()) {
-			return;
-		}
-		else {
-			wikiStatistics.addTotalPostings();
-		}
+		wikiStatistics.addTotalPostings();
 
-		int level = identifyLevel(posting);
-
-		wikiPage.appendWikiXML(createPostingElement(level, username, userLink,
-				timestamp, wikiXML, postscript));
+		String postingElement = createPostingElement(level, username, userLink,
+				timestamp, wikiXML, postscript);
+		wikiPage.appendWikiXML(postingElement);
 	}
 
 	private String createPostingElement(int level, String username,
 			String userLink, String timestamp, String wikiXML, String postscript)
 			throws IOException {
 		StringBuilder sb = new StringBuilder();
-		sb.append("        <posting indentLevel=\"" + level + "\"");
+		sb.append("        <posting indentLevel=\"");
+		sb.append(level);
+		sb.append("\"");
 		if (username != null && !username.isEmpty()) {
 			postUser.createPostUser(username, userLink);
-			sb.append(" who=\"" + postUser.getUserId(username) + "\"");
+			sb.append(" who=\"");
+			sb.append(postUser.getUserId(username));
+			sb.append("\"");
 		}
 		if (timestamp != null && !timestamp.isEmpty()) {
-			sb.append(" synch=\"" + postTime.createTimestamp(timestamp) + "\"");
+			sb.append(" synch=\"");
+			sb.append(postTime.createTimestamp(timestamp));
+			sb.append("\"");
 
 		}
 		sb.append(">\n");
@@ -422,17 +431,20 @@ public class WikiPostHandler extends WikiPageHandler {
 		sb.append("\n");
 
 		if (postscript != null && !postscript.isEmpty()) {
-			if (postscript.toLowerCase().startsWith("ps")
-					|| postscript.toLowerCase().startsWith("p.s")) {
-				sb.append("<seg type=\"postscript\">");
-				sb.append(parseToXML(wikiPage.getPageId(),
-						wikiPage.getPageTitle(), postscript));
-				sb.append("</seg>\n");
-			}
-			else {
-				sb.append(parseToXML(wikiPage.getPageId(),
-						wikiPage.getPageTitle(), postscript));
-				sb.append("\n");
+			String ps = parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), postscript);
+
+			if (!Thread.interrupted()) {
+				if (postscript.toLowerCase().startsWith("ps")
+						|| postscript.toLowerCase().startsWith("p.s")) {
+					sb.append("<seg type=\"postscript\">");
+					sb.append(ps);
+					sb.append("</seg>\n");
+				}
+				else {
+					sb.append(ps);
+					sb.append("\n");
+				}
 			}
 		}
 		sb.append("        </posting>\n");

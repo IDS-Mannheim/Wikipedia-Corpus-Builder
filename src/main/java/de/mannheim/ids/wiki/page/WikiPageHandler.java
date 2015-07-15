@@ -96,17 +96,27 @@ public abstract class WikiPageHandler implements Runnable {
 		String wikiXML = "";
 		try {
 			swebleThread.start();
-			swebleThread.join(1000 * 6);
+			swebleThread.join(1000 * 60 * 5);
 			if (swebleThread.isAlive()) {
+				wikiStatistics.addNumOfThreadDeaths();
+				InterruptedException e = new InterruptedException(
+						"Sweble thread is taking too long.");
+				errorWriter.logErrorPage("THREAD", pageTitle, pageId, e,
+						e.getMessage());
+
+				// Usually the sweble thread should be interrupted. However,
+				// sweble process would not stop in this way.
+				// This event occurs when the wikitext contains very long
+				// errors, such as numerous nested opening link mark ups without
+				// the corresponding ending mark ups.
+
 				swebleThread.stop();
+				throw e;
 			}
 			wikiXML = swebleParser.getWikiXML();
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			errorWriter.logErrorPage("THREAD", pageTitle, pageId, e.getCause(),
-					"");
-			wikiXML = "";
 		}
 		return wikiXML;
 	}

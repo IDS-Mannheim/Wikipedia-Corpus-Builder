@@ -7,6 +7,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
+
 import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;
@@ -57,7 +59,7 @@ public class WikiXMLProcessor {
 
 	public void run() throws IOException {
 
-		// createOutputDirectories();
+		long startTime = System.currentTimeMillis();
 
 		WikiPageReader wikiReader = new WikiPageReader(config, wikipages,
 				endPage, wikiStatistics);
@@ -70,7 +72,7 @@ public class WikiXMLProcessor {
 			for (WikiPage wikiPage = wikipages.take(); !wikiPage
 					.equals(endPage); wikiPage = wikipages.take()) {
 				WikiPageHandler ph;
-				if (config.isDiscussion()) {					
+				if (config.isDiscussion()) {
 					ph = new WikiPostHandler(config, wikiPage, wikiStatistics,
 							errorWriter, postUser, postTime);
 				}
@@ -107,6 +109,13 @@ public class WikiXMLProcessor {
 		}
 		errorWriter.close();
 		wikiStatistics.print();
+
+		long endTime = System.currentTimeMillis();
+		String duration = DurationFormatUtils.formatDuration(
+				(endTime - startTime), "H:mm:ss");
+		System.out.println("WikiXMLConverter execution time "
+		// + (endTime - startTime));
+				+ duration);
 	}
 
 	@Deprecated

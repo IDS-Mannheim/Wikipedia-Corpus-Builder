@@ -14,6 +14,7 @@ public class Configuration {
 	private String languageCode;
 	private String userPage;
 	private String userContribution;
+	private String unsigned;
 	private String signature;
 	private String outputFolder;
 	private String outputEncoding;
@@ -47,16 +48,18 @@ public class Configuration {
 	}
 
 	public Configuration(String wikidump, String language, String userPage,
-			String userContribution, String helpSignature, int namespaceKey,
-			String encoding, int maxThread, boolean generateWikitext) {
+			String userContribution, String helpSignature, String unsigned,
+			int namespaceKey, String encoding, int maxThread,
+			boolean generateWikitext) {
 
+		setNamespaceKey(namespaceKey);
+		setDiscussion(namespaceKey);
 		setWikidump(wikidump);
 		setLanguageCode(language);
 		setUserPage(userPage);
 		setUserContribution(userContribution);
+		setUnsigned(unsigned);
 		setSignature(helpSignature);
-		setNamespaceKey(namespaceKey);
-		setDiscussion(namespaceKey);
 		setPageType(namespaceMap.get(namespaceKey));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
 		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
@@ -66,17 +69,19 @@ public class Configuration {
 	}
 
 	public Configuration(CommandLine cmd) {
-		setWikidump(cmd.getOptionValue("w"));
-		setLanguageCode(cmd.getOptionValue("l"));
-		setUserPage(cmd.getOptionValue("u"));
-		setUserContribution(cmd.getOptionValue("c"));
-		setSignature(cmd.getOptionValue("s"));
-
 		int namespaceKey = Integer.parseInt(cmd.getOptionValue("k"));
 		int maxThread = Integer.parseInt(cmd.getOptionValue("x"));
 
 		setNamespaceKey(namespaceKey);
 		setDiscussion(namespaceKey);
+
+		setWikidump(cmd.getOptionValue("w"));
+		setLanguageCode(cmd.getOptionValue("l"));
+		setUserPage(cmd.getOptionValue("u"));
+		setUserContribution(cmd.getOptionValue("c"));
+		setUnsigned(cmd.getOptionValue("us"));
+		setSignature(cmd.getOptionValue("s"));
+
 		setPageType(namespaceMap.get(namespaceKey));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
 		setOutputEncoding(cmd.getOptionValue("e"));
@@ -93,16 +98,18 @@ public class Configuration {
 		Properties config = new Properties();
 		config.load(is);
 
-		setWikidump(config.getProperty("wikidump"));
-		setLanguageCode(config.getProperty("language_code"));
-		setUserPage(config.getProperty("user_page"));
-		setUserContribution(config.getProperty("user_contribution"));
-		setSignature(config.getProperty("signature"));
-
 		int namespaceKey = Integer
 				.parseInt(config.getProperty("namespace_key"));
 		setDiscussion(namespaceKey);
 		setNamespaceKey(namespaceKey);
+
+		setWikidump(config.getProperty("wikidump"));
+		setLanguageCode(config.getProperty("language_code"));
+		setUserPage(config.getProperty("user_page"));
+		setUserContribution(config.getProperty("user_contribution"));
+		setUnsigned(config.getProperty("unsigned"));
+		setSignature(config.getProperty("signature"));
+
 		setPageType(namespaceMap.get(namespaceKey));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
 		setOutputEncoding(config.getProperty("output_encoding"));
@@ -173,6 +180,7 @@ public class Configuration {
 					"Please specify the user "
 							+ "contribution page in the language of the Wikipedia dump.");
 		}
+
 		this.userContribution = userContribution;
 	}
 
@@ -242,5 +250,17 @@ public class Configuration {
 
 	public void setWikitextToGenerate(boolean wikitextToGenerate) {
 		this.wikitextToGenerate = wikitextToGenerate;
+	}
+
+	public String getUnsigned() {
+		return unsigned;
+	}
+
+	public void setUnsigned(String unsigned) {
+		if (isDiscussion && (unsigned == null || unsigned.isEmpty())) {
+			throw new IllegalArgumentException(
+					"Please specify the unsigned template in the language of the Wikipedia dump.");
+		}
+		this.unsigned = unsigned;
 	}
 }

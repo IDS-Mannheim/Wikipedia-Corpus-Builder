@@ -5,8 +5,6 @@ import java.io.IOException;
 public class WikiXMLConverterExample {
 
 	public static void main(String[] args) throws IOException {
-		long startTime = System.nanoTime();
-
 		// Set the language of the Wikipedia
 		String language = "de";
 		// Set wikidump filepath
@@ -26,17 +24,15 @@ public class WikiXMLConverterExample {
 		// the number of CPUs
 		int maxThreads = 4;
 		// Set whether a file for each wikipage is to be created or not.
-		boolean generateWikitext = true;
+		boolean generateWikitext = false;
+		// Unsigned template in the Wikipedia language, e.g. unsigniert in German.
+		String unsigned = "unsigniert";
 
 		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, signature, namespaceKey, encoding,
+				userContribution, signature, unsigned, namespaceKey, encoding,
 				maxThreads, generateWikitext);
 
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
-
-		long endTime = System.nanoTime();
-		long duration = endTime - startTime;
-		System.out.println("Wikitext to XML execution time " + duration);
 	}
 }

@@ -1,5 +1,6 @@
 package de.mannheim.ids.parser;
 
+import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
@@ -11,6 +12,7 @@ import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
 import org.sweble.wikitext.parser.nodes.WtUrl;
+import org.sweble.wikitext.parser.parser.LinkTargetException;
 
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiStatistics;
@@ -80,20 +82,44 @@ public class Sweble2Parser implements Runnable {
 
 	@Override
 	public void run() {
+		PageTitle pageTitle = null;
+		EngProcessedPage cp = null;
 		try {
-			PageTitle pageTitle = PageTitle.make(config, pagetitle);
+			pageTitle = PageTitle.make(config, pagetitle);
 			PageId pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
-			EngProcessedPage cp = engine.postprocess(pageId, wikitext, null);
+			cp = engine.postprocess(pageId, wikitext, null);
 			// Render AST to XML
+		}
+		catch (LinkTargetException | EngineException e) {
+			if (!Thread.interrupted()) {
+				wikiStatistics.addSwebleErrors();
+				errorWriter.logErrorPage("SWEBLE ", pagetitle, pageId,
+						e.getCause(), wikitext);
+			}
+			else {
+				System.err.println("In SWEBLE, Thread " + pagetitle
+						+ " was interrupted.");
+			}
+			return;
+		}
+
+		try {
 			wikiXML = XMLRenderer.print(new MyRendererCallback(), config,
 					pageTitle, cp.getPage());
 		}
 		catch (Exception e) {
-			wikiStatistics.addSwebleErrors();
-			errorWriter.logErrorPage("SWEBLE", pagetitle, pageId, e.getCause(),
-					wikitext);
+			if (!Thread.interrupted()) {
+				wikiStatistics.addRendererErrors();
+				errorWriter.logErrorPage("RENDERER ", pagetitle, pageId,
+						e.getCause(), wikitext);
+			}
+			else {
+				System.err.println("In RENDERER, Thread " + pagetitle
+						+ " was interrupted.");
+			}
 		}
+
 	}
 
 	public String getWikiXML() {
@@ -146,8 +172,7 @@ public class Sweble2Parser implements Runnable {
 				path = path.replace("&gt", "&gt;");
 			}
 
-			if (target.getProtocol() == "")
-				return path;
+			if (target.getProtocol() == "") return path;
 			return target.getProtocol() + ":" + path;
 		}
 

@@ -25,8 +25,13 @@ public class WikiArticleHandler extends WikiPageHandler {
 				writeWikitext();
 			}
 
-			wikiPage.setWikiXML(parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), wikiPage.wikitext));
+			String wikiXML = parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), wikiPage.wikitext);
+			if (Thread.interrupted()) {
+				return;
+			}
+
+			wikiPage.setWikiXML(wikiXML);
 			writeWikiXML();
 		}
 		catch (Exception e) {
