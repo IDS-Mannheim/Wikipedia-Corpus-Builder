@@ -14,8 +14,8 @@ import de.mannheim.ids.wiki.Utilities;
  */
 public class WikiPage {
 
-	public String pageStructure;
-	public String wikitext;
+	private String pageStructure;
+	private String wikitext;
 	private String wikiXML;
 	private String pageTitle;
 	private String pageIndex;
@@ -32,7 +32,7 @@ public class WikiPage {
 			"6", "7", "8", "9", "Char" };
 
 	public WikiPage() {
-		wikitext = "";
+		setWikitext("");
 		wikiXML = "";
 		textSegments = new ArrayList<String>();
 	}
@@ -93,7 +93,19 @@ public class WikiPage {
 		this.wikiXML = wikiXML;
 	}
 
-	public void appendWikiXML(String wikiXML) {
-		this.wikiXML += wikiXML;
+	public String getWikitext() {
+		return wikitext;
+	}
+
+	public void setWikitext(String wikitext) {
+		this.wikitext = wikitext;
+	}
+
+	public String getPageStructure() {
+		return pageStructure;
+	}
+
+	public void setPageStructure(String pageStructure) {
+		this.pageStructure = pageStructure;
 	}
 }

@@ -49,6 +49,7 @@ public class WikiPostHandler extends WikiPageHandler {
 
 	private boolean baselineMode = false;
 	private String post;
+	private StringBuilder wikiXMLBuilder;
 
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
@@ -85,7 +86,9 @@ public class WikiPostHandler extends WikiPageHandler {
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
 			}
+			wikiPage.setWikitext(null);
 
+			wikiXMLBuilder = new StringBuilder();
 			for (String text : wikiPage.textSegments) {
 				segmentPosting(text);
 			}
@@ -94,7 +97,7 @@ public class WikiPostHandler extends WikiPageHandler {
 			if (!post.trim().isEmpty()) {
 				writePost(null, null, null, null);
 			}
-
+			wikiPage.setWikiXML(wikiXMLBuilder.toString());
 			writeWikiXML();
 		}
 		catch (Exception e) {
@@ -364,7 +367,8 @@ public class WikiPostHandler extends WikiPageHandler {
 			String wikiXML = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), text.trim());
 			if (!Thread.interrupted()) {
-				wikiPage.appendWikiXML(wikiXML + "\n");
+				wikiXMLBuilder.append(wikiXML);
+				wikiXMLBuilder.append("\n");
 			}
 			matcher.reset();
 			return true;
@@ -391,9 +395,13 @@ public class WikiPostHandler extends WikiPageHandler {
 		String post = this.post.trim();
 		this.post = ""; // reset post
 
-		int level = identifyLevel(post);
-		post = post.substring(level, post.length() - 1);
 		if (post.isEmpty()) return;
+		int level = identifyLevel(post);
+
+		if (level > 0) {
+			post = new String(post.substring(level, post.length()).trim());
+
+		}
 
 		String wikiXML = parseToXML(wikiPage.getPageId(),
 				wikiPage.getPageTitle(), post);
@@ -403,12 +411,13 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		String postingElement = createPostingElement(level, username, userLink,
 				timestamp, wikiXML, postscript);
-		wikiPage.appendWikiXML(postingElement);
+		wikiXMLBuilder.append(postingElement);
 	}
 
 	private String createPostingElement(int level, String username,
 			String userLink, String timestamp, String wikiXML, String postscript)
 			throws IOException {
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"");
 		sb.append(level);
@@ -440,8 +449,7 @@ public class WikiPostHandler extends WikiPageHandler {
 					sb.append("<seg type=\"postscript\">");
 					sb.append(ps);
 					sb.append("</seg>\n");
-				}
-				else {
+				} else {
 					sb.append(ps);
 					sb.append("\n");
 				}
@@ -449,5 +457,31 @@ public class WikiPostHandler extends WikiPageHandler {
 		}
 		sb.append("        </posting>\n");
 		return sb.toString();
+		/*String element = "        <posting indentLevel=\"" + level + "\"";
+		if (username != null && !username.isEmpty()) {
+			postUser.createPostUser(username, userLink);
+			element += " who=\"" + postUser.getUserId(username) + "\"";
+		}
+		if (timestamp != null && !timestamp.isEmpty()) {
+			element += " synch=\"" + postTime.createTimestamp(timestamp) + "\"";
+
+		}
+		element += ">\n" + wikiXML + "\n";
+		
+		if (postscript != null && !postscript.isEmpty()) {
+			String ps = parseToXML(wikiPage.getPageId(),
+					wikiPage.getPageTitle(), postscript);
+
+			if (!Thread.interrupted()) {
+				if (postscript.toLowerCase().startsWith("ps")
+						|| postscript.toLowerCase().startsWith("p.s")) {
+					element += "<seg type=\"postscript\">" + ps + "</seg>\n";
+				} else {
+					element += ps + "\n";
+				}
+			}
+		}
+		element += "        </posting>\n";
+		return element;*/
 	}
 }

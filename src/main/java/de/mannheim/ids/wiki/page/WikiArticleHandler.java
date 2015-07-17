@@ -26,7 +26,7 @@ public class WikiArticleHandler extends WikiPageHandler {
 			}
 
 			String wikiXML = parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), wikiPage.wikitext);
+					wikiPage.getPageTitle(), wikiPage.getWikitext());
 			if (Thread.interrupted()) {
 				return;
 			}

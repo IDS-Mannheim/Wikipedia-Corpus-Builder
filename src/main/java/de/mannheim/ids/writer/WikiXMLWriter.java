@@ -49,7 +49,7 @@ public class WikiXMLWriter {
 			writer.append(config.getOutputEncoding());
 			writer.append("\"?>\n");
 
-			String[] arr = wikiPage.pageStructure.split("<text></text>");
+			String[] arr = wikiPage.getPageStructure().split("<text></text>");
 			writer.append(arr[0]);
 			writer.append("<text lang=\"" + config.getLanguageCode() + "\">\n");
 			writer.append(content);

@@ -89,7 +89,6 @@ public class Sweble2Parser implements Runnable {
 			PageId pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
 			cp = engine.postprocess(pageId, wikitext, null);
-			// Render AST to XML
 		}
 		catch (LinkTargetException | EngineException e) {
 			if (!Thread.interrupted()) {
@@ -105,6 +104,7 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		try {
+			// Render AST to XML
 			wikiXML = XMLRenderer.print(new MyRendererCallback(), config,
 					pageTitle, cp.getPage());
 		}
@@ -119,7 +119,6 @@ public class Sweble2Parser implements Runnable {
 						+ " was interrupted.");
 			}
 		}
-
 	}
 
 	public String getWikiXML() {

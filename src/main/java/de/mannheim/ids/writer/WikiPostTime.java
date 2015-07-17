@@ -19,15 +19,20 @@ public class WikiPostTime {
 	private OutputStreamWriter timeWriter;
 	private int counter;
 
-	public WikiPostTime(String prefixFileName) throws IOException {
+	public WikiPostTime(String prefixFileName, String pageType)
+			throws IOException {
 
 		if (prefixFileName == null || prefixFileName.isEmpty()) {
 			throw new IllegalArgumentException(
 					"prefixFileName cannot be null or empty.");
 		}
+		if (pageType == null || pageType.isEmpty()) {
+			throw new IllegalArgumentException(
+					"pageType cannot be null or empty.");
+		}
 
-		timeWriter = Utilities.createWriter("post", prefixFileName
-				+ "-post-timeline.xml", "utf-8");
+		timeWriter = Utilities.createWriter("post", prefixFileName + "-post-"
+				+ pageType + "-timeline.xml", "utf-8");
 		counter = 0;
 
 		timeWriter.append("<timeline>\n");

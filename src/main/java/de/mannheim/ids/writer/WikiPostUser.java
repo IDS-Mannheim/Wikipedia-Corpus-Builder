@@ -32,8 +32,8 @@ public class WikiPostUser {
 		}
 
 		userMap = new HashMap<String, String>();
-		userWriter = Utilities.createWriter("post", prefixFileName
-				+ "-post-user.xml", "utf-8");
+		userWriter = Utilities.createWriter("post", prefixFileName + "-post-"
+				+ config.getPageType() + "-user.xml", "utf-8");
 		userWriter.append("<listPerson>\n");
 		counter = 1;
 	}

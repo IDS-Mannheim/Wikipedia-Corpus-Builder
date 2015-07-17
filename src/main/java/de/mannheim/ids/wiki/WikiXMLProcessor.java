@@ -2,9 +2,10 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -30,7 +31,7 @@ public class WikiXMLProcessor {
 	private Configuration config;
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
-	private LinkedBlockingQueue<WikiPage> wikipages;
+	private BlockingQueue<WikiPage> wikipages;
 	private WikiPostUser postUser;
 	private WikiPostTime postTime;
 
@@ -44,13 +45,14 @@ public class WikiXMLProcessor {
 		this.config = config;
 		this.wikiStatistics = new WikiStatistics();
 		this.errorWriter = new WikiErrorWriter(config);
-		this.wikipages = new LinkedBlockingQueue<WikiPage>();
+		this.wikipages = new ArrayBlockingQueue<WikiPage>(
+				config.getMaxThreads());
 
 		if (config.isDiscussion()) {
 			String prefix = Paths.get(config.getWikidump()).getFileName()
 					.toString().substring(0, 15);
 			postUser = new WikiPostUser(prefix, config);
-			postTime = new WikiPostTime(prefix);
+			postTime = new WikiPostTime(prefix, config.getPageType());
 		}
 
 		Wikipedia_URI = "https://" + config.getLanguageCode()

@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,12 +33,14 @@ public class WikiPageReader implements Runnable {
 			.compile("<text.*\">(.*)");
 
 	private Configuration config;
-	private LinkedBlockingQueue<WikiPage> wikipages;
+	private BlockingQueue<WikiPage> wikipages;
 	private boolean textFlag;
 	private WikiPage endPage;
 
+	private StringBuilder pageStructureBuilder;
+
 	public WikiPageReader(Configuration config,
-			LinkedBlockingQueue<WikiPage> wikipages, WikiPage endwikipage,
+			BlockingQueue<WikiPage> wikipages, WikiPage endwikipage,
 			WikiStatistics wikiStatistics) {
 
 		if (config == null) {
@@ -59,13 +61,13 @@ public class WikiPageReader implements Runnable {
 		try {
 			read();
 		}
-		catch (IOException e) {
+		catch (InterruptedException | IOException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void read() throws IOException {
+	private void read() throws IOException, InterruptedException {
 
 		String inputFile = config.getWikidump();
 		FileInputStream fs = new FileInputStream(inputFile);
@@ -84,7 +86,9 @@ public class WikiPageReader implements Runnable {
 			// Start reading a page
 			if (trimmedStrLine.startsWith("<page>")) {
 				wikiPage = new WikiPage();
-				wikiPage.pageStructure = strLine + "\n";
+				pageStructureBuilder = new StringBuilder();
+				pageStructureBuilder.append(strLine);
+				pageStructureBuilder.append("\n");
 
 				isToRead = true;
 				searchId = true;
@@ -92,10 +96,12 @@ public class WikiPageReader implements Runnable {
 			}
 			// End reading a page
 			else if (isToRead && trimmedStrLine.endsWith("</page>")) {
-				wikiPage.pageStructure += strLine;
-				wikiPage.setPageIndent(setIndent(strLine));
-				if (!wikiPage.wikitext.isEmpty()) {
-					wikipages.add(wikiPage);
+				if (!wikiPage.getWikitext().isEmpty()) {
+					pageStructureBuilder.append(strLine);
+					wikiPage.setPageStructure(pageStructureBuilder.toString());
+					wikiPage.setPageIndent(setIndent(strLine));
+
+					wikipages.put(wikiPage);
 					wikiStatistics.addTotalPages();
 				}
 				else {
@@ -109,7 +115,8 @@ public class WikiPageReader implements Runnable {
 					matcher = titlePattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
 						wikiPage.setPageTitle(matcher.group(1));
-						wikiPage.pageStructure += strLine + "\n";
+						pageStructureBuilder.append(strLine);
+						pageStructureBuilder.append("\n");
 					}
 					else { // Skip page
 						isToRead = false;
@@ -121,8 +128,9 @@ public class WikiPageReader implements Runnable {
 					if (matcher.find()) {
 						int ns = Integer.parseInt(matcher.group(1));
 						if (config.getNamespaceKey() == ns) {
-							wikiPage.pageStructure += setIndent(strLine)
-									+ trimmedStrLine + "\n";
+							pageStructureBuilder.append(strLine);
+							pageStructureBuilder.append(trimmedStrLine);
+							pageStructureBuilder.append("\n");
 						}
 						else { // Stop reading. Skip this page.
 							isToRead = false;
@@ -135,7 +143,8 @@ public class WikiPageReader implements Runnable {
 					if (matcher.find()) {
 						wikiPage.setPageId(matcher.group(1));
 						wikiPage.setPageIndex(isDiscussion);
-						wikiPage.pageStructure += strLine + "\n";
+						pageStructureBuilder.append(strLine);
+						pageStructureBuilder.append("\n");
 						searchId = false;
 					}
 					else { // Skip page
@@ -149,14 +158,8 @@ public class WikiPageReader implements Runnable {
 					wikiStatistics.addRedirectPages();
 					isToRead = false;
 				}
-
-				else if (isDiscussion) {
-					isToRead = collectDiscussionText(wikiPage, strLine,
-							trimmedStrLine);
-				}
 				else {
-					isToRead = collectArticleText(wikiPage, strLine,
-							trimmedStrLine);
+					isToRead = collectText(wikiPage, strLine, trimmedStrLine);
 				}
 			}
 		}
@@ -172,62 +175,10 @@ public class WikiPageReader implements Runnable {
 		if (matcher.find()) {
 			return matcher.group(1) + "\n";
 		}
-		else
-			return trimmedStrLine.replace("<text xml:space=\"preserve\">", "");
+		else return trimmedStrLine.replace("<text xml:space=\"preserve\">", "");
 	}
 
-	private boolean collectArticleText(WikiPage wikiPage, String strLine,
-			String trimmedStrLine) {
-
-		if (wikiPage == null) {
-			throw new IllegalArgumentException("WikiPage cannot be null.");
-		}
-
-		// Finish collecting text
-		if (trimmedStrLine.endsWith("</text>")) {
-			// text starts and ends at the same line
-			if (trimmedStrLine.startsWith("<text")) {
-				wikiPage.pageStructure += "      <text>";
-				trimmedStrLine = cleanTextStart(trimmedStrLine);
-			}
-			// remove </text>
-			trimmedStrLine = trimmedStrLine.replaceFirst("</text>", "");
-
-			wikiPage.wikitext += trimmedStrLine + "\n";
-			wikiPage.wikitext = wikiPage.wikitext.trim();
-			/*
-			 * if (wikiPage.wikitext.equals("")){ // empty text
-			 * wikiPage.setEmpty(true); return; }
-			 */
-			wikiPage.pageStructure += "</text>\n";
-			textFlag = false;
-		}
-
-		// Continue collecting text
-		else if (textFlag) {
-			wikiPage.wikitext += strLine + "\n";
-		}
-
-		else if (trimmedStrLine.startsWith("<text")) {
-			// empty text
-			if (trimmedStrLine.endsWith("<text/>")
-					|| trimmedStrLine.equals("<text xml:space=\"preserve\" />")) {
-				return false;
-			}
-			else { // start collecting text
-				wikiPage.pageStructure += "      <text>";
-				wikiPage.wikitext += cleanTextStart(trimmedStrLine);
-				this.textFlag = true;
-			}
-		}
-		else { // copy page metadata
-			wikiPage.pageStructure += strLine + "\n";
-		}
-
-		return true;
-	}
-
-	private boolean collectDiscussionText(WikiPage wikiPage, String strLine,
+	private boolean collectText(WikiPage wikiPage, String strLine,
 			String trimmedStrLine) {
 
 		if (wikiPage == null) {
@@ -237,18 +188,24 @@ public class WikiPageReader implements Runnable {
 		if (trimmedStrLine.endsWith("</text>")) { // finish collecting text
 			// text starts and ends at the same line
 			if (trimmedStrLine.startsWith("<text")) {
-				wikiPage.pageStructure += "      <text>";
+				pageStructureBuilder.append("      <text>");
 				trimmedStrLine = cleanTextStart(trimmedStrLine);
 			}
 			trimmedStrLine = trimmedStrLine.replaceFirst("</text>", "");
 			wikiPage.textSegments.add(trimmedStrLine);
 
+			// String w = buildWikitext(wikiPage);
+			String w = "";
 			for (String segment : wikiPage.textSegments) {
-				wikiPage.wikitext += segment + "\n";
+				w += segment + "\n";
+			}
+			wikiPage.setWikitext(w.trim());
+
+			if (!config.isDiscussion()) {
+				wikiPage.textSegments = null;
 			}
 
-			wikiPage.wikitext = wikiPage.wikitext.trim();
-			wikiPage.pageStructure += "</text>\n";
+			pageStructureBuilder.append("</text>\n");
 			textFlag = false;
 		}
 		else if (trimmedStrLine.startsWith("<text")) {
@@ -259,7 +216,7 @@ public class WikiPageReader implements Runnable {
 			}
 			// start collecting text
 			else {
-				wikiPage.pageStructure += "      <text>";
+				pageStructureBuilder.append("      <text>");
 				wikiPage.textSegments.add(cleanTextStart(trimmedStrLine));
 				this.textFlag = true;
 			}
@@ -268,9 +225,25 @@ public class WikiPageReader implements Runnable {
 		else if (textFlag) {
 			wikiPage.textSegments.add(strLine);
 		}
-		else { // copy page metadata
-			wikiPage.pageStructure += strLine + "\n";
+		// copy page metadata
+		else {
+			pageStructureBuilder.append(strLine);
+			pageStructureBuilder.append("\n");
 		}
 		return true;
+	}
+
+	/* Strangely, using StringBuilder leads to memory leaks because its internal
+	   char[] is kept in memory.
+	  */
+	@SuppressWarnings("unused")
+	private String buildWikitext(WikiPage wikiPage) {
+		StringBuilder sb = new StringBuilder();
+		for (String segment : wikiPage.textSegments) {
+			sb.append(segment);
+			sb.append("\n");
+		}
+		return sb.toString();
+
 	}
 }

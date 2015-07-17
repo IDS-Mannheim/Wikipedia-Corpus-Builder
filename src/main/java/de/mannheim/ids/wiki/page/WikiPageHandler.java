@@ -166,7 +166,7 @@ public abstract class WikiPageHandler implements Runnable {
 	}
 
 	protected void writeWikitext() throws IOException {
-		wikiXMLWriter.write(wikiPage, wikiPage.wikitext,
+		wikiXMLWriter.write(wikiPage, wikiPage.getWikitext(),
 				config.getWikitextFolder());
 	}
 
@@ -189,8 +189,11 @@ public abstract class WikiPageHandler implements Runnable {
 	private boolean validatePageStructure() {
 		try {
 			// try fixing missing tags
-			wikiPage.pageStructure = wikiPage.getPageIndent()
-					+ tagSoupParser.generate(wikiPage.pageStructure, false);
+			StringBuilder sb = new StringBuilder();
+			sb.append(wikiPage.getPageIndent());
+			sb.append(tagSoupParser.generate(wikiPage.getPageStructure(), false));
+			wikiPage.setPageStructure(sb.toString());
+			sb = null;
 		}
 		catch (Exception e) {
 			wikiStatistics.addPageStructureErrors();
