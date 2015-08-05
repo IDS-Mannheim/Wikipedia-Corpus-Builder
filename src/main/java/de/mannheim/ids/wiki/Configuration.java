@@ -1,7 +1,10 @@
 package de.mannheim.ids.wiki;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
@@ -11,6 +14,10 @@ public class Configuration {
 	private String wikiXMLFolder;
 	private String pageType;
 	private String dumpFilename;
+	private String language;
+	private String languageCode;
+	private String year;
+
 	private String outputFile;
 	private String encoding;
 	private String inflectives;
@@ -18,96 +25,145 @@ public class Configuration {
 	private String databaseUrl;
 	private String databaseUsername;
 	private String databasePassword;
-		
+
+	private String korpusSigle;
+
+	private int namespaceKey;
+	private int maxThreads;
+
+	private boolean isDiscussion;
+
+	public static final Map<Integer, String> namespaceMap;
+	static {
+		namespaceMap = new HashMap<Integer, String>();
+		namespaceMap.put(0, "article");
+		namespaceMap.put(1, "talk");
+		namespaceMap.put(2, "user");
+		namespaceMap.put(3, "user-talk");
+		namespaceMap.put(4, "wikipedia");
+		namespaceMap.put(5, "wikipedia-talk");
+		namespaceMap.put(6, "file");
+		namespaceMap.put(7, "file-talk");
+		namespaceMap.put(8, "mediawiki");
+		namespaceMap.put(9, "mediawiki-talk");
+		namespaceMap.put(10, "template");
+		namespaceMap.put(11, "template-talk");
+		namespaceMap.put(12, "help");
+		namespaceMap.put(13, "help-talk");
+		namespaceMap.put(14, "category");
+		namespaceMap.put(15, "category-talk");
+	}
+
+	public static final Map<Integer, String> typeAbbr;
+	static {
+		typeAbbr = new HashMap<Integer, String>();
+		typeAbbr.put(0, "WP");
+		typeAbbr.put(1, "WD");
+		typeAbbr.put(2, "WB");
+		typeAbbr.put(3, "WBD");
+		typeAbbr.put(4, "WPR");
+		typeAbbr.put(5, "WPRD");
+		typeAbbr.put(6, "WDA");
+		typeAbbr.put(7, "WDAD");
+		typeAbbr.put(8, "WM");
+		typeAbbr.put(9, "WMD");
+		typeAbbr.put(10, "WV");
+		typeAbbr.put(11, "WVD");
+		typeAbbr.put(12, "WH");
+		typeAbbr.put(13, "WHD");
+		typeAbbr.put(14, "WK");
+		typeAbbr.put(15, "WKD");
+	}
+
+	public static final String[] indexes = { "A", "B", "C", "D", "E", "F", "G",
+			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
+			"7", "8", "9" };
+
 	public Configuration() {
 		System.setProperty("entityExpansionLimit", "0");
 		System.setProperty("totalEntitySizeLimit", "0");
 		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
 	}
-	
-	public Configuration(String xmlFolder, String type, String dumpFilename, 
-			String inflectives, String encoding, String outputFile, String index, 
-			String url, String username, String password){
-		
-		this.setDumpFilename(dumpFilename);
-		this.setPageType(type);
-		this.setWikiXMLFolder(xmlFolder);
-		this.setWikiXMLIndex(index);
-		this.setOutputFile(outputFile);
-		this.setEncoding(encoding);
-		this.setInflectives(inflectives);
-		this.setDatabaseUrl(url);
-		this.setDatabaseUsername(username);
-		this.setDatabasePassword(password);
-		
-		System.setProperty("entityExpansionLimit", "0");
-		System.setProperty("totalEntitySizeLimit", "0");
-		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
+
+	public Configuration(String xmlFolder, String type, String dumpFilename,
+			String inflectives, String encoding, String outputFile,
+			String index, String url, String username, String password) {
+		this();
+		setDumpFilename(dumpFilename);
+		setPageType(type);
+		setWikiXMLFolder(xmlFolder);
+		setWikiXMLIndex(index);
+		setOutputFile(outputFile);
+		setEncoding(encoding);
+		setInflectives(inflectives);
+		setDatabaseUrl(url);
+		setDatabaseUsername(username);
+		setDatabasePassword(password);
 	}
-	
-	public void setConfigFromProperties(String propertiesFilename) 
-			throws I5Exception {
-		
-		InputStream is = Configuration.class.getClassLoader().
-				getResourceAsStream(propertiesFilename);		
+
+	public Configuration(String propertiesFilename) throws IOException {
+		InputStream is = Configuration.class.getClassLoader()
+				.getResourceAsStream(propertiesFilename);
 		Properties config = new Properties();
-		try {
-			config.load(is);
-			this.setDumpFilename(config.getProperty("wikidump"));
-			this.setPageType(config.getProperty("page_type"));
-			this.setWikiXMLFolder(config.getProperty("wikixml_folder"));
-			this.setWikiXMLIndex(config.getProperty("wikixml_index"));
-			this.setOutputFile(config.getProperty("output_file"));			
-			this.setEncoding(config.getProperty("output_encoding"));
-			this.setInflectives(config.getProperty("inflective_file"));
-			this.setDatabaseUrl(config.getProperty("db_url"));
-			this.setDatabaseUsername(config.getProperty("db_username"));
-			this.setDatabasePassword(config.getProperty("db_password"));
-			is.close();
-			
-		} catch (IOException e) {
-			throw new I5Exception(e.getMessage());
-		}
+		config.load(is);
+
+		int namespaceKey = Integer.parseInt(config.getProperty("namespace_key",
+				"1"));
+		setNamespaceKey(namespaceKey);
+		setPageType(namespaceMap.get(namespaceKey));
+		setDiscussion(namespaceKey);
+
+		setDumpFilename(config.getProperty("wikidump"));
+		setLanguage(config.getProperty("language"));
+		setLanguageCode();
+		setYear();
+		setKorpusSigle();
+
+		setWikiXMLFolder(config.getProperty("wikixml_folder"));
+		setWikiXMLIndex(config.getProperty("wikixml_index"));
+		setOutputFile(config.getProperty("output_file"));
+		setEncoding(config.getProperty("output_encoding"));
+		setInflectives(config.getProperty("inflective_file"));
+		setDatabaseUrl(config.getProperty("db_url"));
+		setDatabaseUsername(config.getProperty("db_username"));
+		setDatabasePassword(config.getProperty("db_password"));
+
+		setMaxThreads(Integer.parseInt(config.getProperty("max_threads", "2")));
+
+		is.close();
 	}
-	
-	public void setConfigFromCommandLine(CommandLine cmd){
-		this.setWikiXMLFolder(cmd.getOptionValue("x"));
-		this.setPageType(cmd.getOptionValue("t"));
-		this.setDumpFilename(cmd.getOptionValue("w"));
-		this.setOutputFile(cmd.getOptionValue("o"));
-		this.setEncoding(cmd.getOptionValue("e"));
-		this.setInflectives(cmd.getOptionValue("inf"));
-		this.setWikiXMLIndex(cmd.getOptionValue("i"));
-		this.setDatabaseUrl(cmd.getOptionValue("d"));
-		this.setDatabaseUsername(cmd.getOptionValue("u"));
-		this.setDatabasePassword(cmd.getOptionValue("p"));
+
+	public Configuration(CommandLine cmd) {
+		setWikiXMLFolder(cmd.getOptionValue("x"));
+		setPageType(cmd.getOptionValue("t"));
+		setDumpFilename(cmd.getOptionValue("w"));
+		setOutputFile(cmd.getOptionValue("o"));
+		setEncoding(cmd.getOptionValue("e"));
+		setInflectives(cmd.getOptionValue("inf"));
+		setWikiXMLIndex(cmd.getOptionValue("i"));
+		setDatabaseUrl(cmd.getOptionValue("d"));
+		setDatabaseUsername(cmd.getOptionValue("u"));
+		setDatabasePassword(cmd.getOptionValue("p"));
 	}
 
 	public String getWikiXMLFolder() {
 		return wikiXMLFolder;
 	}
-	
+
 	public void setWikiXMLFolder(String wikiXMLFolder) {
-		if (wikiXMLFolder == null){
-			throw new IllegalArgumentException("Please specify the WikiXML root folder.");
-		}		
+		if (wikiXMLFolder == null || wikiXMLFolder.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the WikiXML folder (e.g wikixml-de/articles).");
+		}
 		this.wikiXMLFolder = wikiXMLFolder;
 	}
-	
+
 	public String getPageType() {
 		return pageType;
 	}
 
 	public void setPageType(String type) {
-		if (type == null){
-			throw new IllegalArgumentException("Please specify the Wikipage type.");
-		}
-		if (!type.equals("articles") && 
-				!type.equals("discussions") && 
-				!type.equals("user_discussions")){
-			throw new IllegalArgumentException("The type is not recognized. " +
-					"Please specify the type as: articles / dicussions / user_discussions");
-		}
 		this.pageType = type;
 	}
 
@@ -116,10 +172,12 @@ public class Configuration {
 	}
 
 	public void setDumpFilename(String dumpFilename) {
-		if (dumpFilename == null){
-			throw new IllegalArgumentException("Please specify the Wiki dump file.");
+		if (dumpFilename == null || dumpFilename.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the Wiki dump file.");
 		}
-		this.dumpFilename = dumpFilename;
+		File f = new File(dumpFilename);
+		this.dumpFilename = f.getName();
 	}
 
 	public String getOutputFile() {
@@ -127,8 +185,9 @@ public class Configuration {
 	}
 
 	public void setOutputFile(String outputFile) {
-		if (outputFile == null){
-			throw new IllegalArgumentException("Please specify the output file.");
+		if (outputFile == null || outputFile.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the output file.");
 		}
 		this.outputFile = outputFile;
 	}
@@ -138,10 +197,10 @@ public class Configuration {
 	}
 
 	public void setEncoding(String encoding) {
-		if (encoding == null){
-			encoding = "utf-8"; // default encoding
+		if (encoding == null || encoding.isEmpty()) {
+			encoding = "UTF-8"; // default encoding
 		}
-		this.encoding = encoding;
+		this.encoding = encoding.toUpperCase();
 	}
 
 	public String getInflectives() {
@@ -149,17 +208,23 @@ public class Configuration {
 	}
 
 	public void setInflectives(String inflectives) {
-		this.inflectives = inflectives;
+		if (inflectives.isEmpty()) {
+			this.inflectives = null;
+		}
+		else {
+			this.inflectives = inflectives;
+		}
 	}
 
 	public String getWikiXMLIndex() {
 		return wikiXMLIndex;
 	}
-	
+
 	public void setWikiXMLIndex(String wikiXMLIndex) {
-		if (wikiXMLIndex == null){
-			throw new IllegalArgumentException("Please specify the index of the Wikipage "
-					+this.pageType+".");
+		if (wikiXMLIndex == null || wikiXMLIndex.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the index of the Wikipage " + this.pageType
+							+ ".");
 		}
 		this.wikiXMLIndex = wikiXMLIndex;
 	}
@@ -169,10 +234,11 @@ public class Configuration {
 	}
 
 	public void setDatabaseUrl(String databaseUrl) {
-		if (databaseUrl == null){
-			throw new IllegalArgumentException("Please specify the Wikipedia language link " +
-					"Mysql Database URL.");
-		}	
+		if (databaseUrl == null || databaseUrl.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the Wikipedia language link "
+							+ "Mysql Database URL.");
+		}
 		this.databaseUrl = databaseUrl;
 	}
 
@@ -181,9 +247,10 @@ public class Configuration {
 	}
 
 	public void setDatabaseUsername(String databaseUsername) {
-		if (databaseUsername == null){
-			throw new IllegalArgumentException("Please specify the username of the Wikipedia " +
-					"language link Mysql Database.");
+		if (databaseUsername == null || databaseUsername.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the username of the Wikipedia "
+							+ "language link Mysql Database.");
 		}
 		this.databaseUsername = databaseUsername;
 	}
@@ -193,10 +260,71 @@ public class Configuration {
 	}
 
 	public void setDatabasePassword(String databasePassword) {
-		if (databasePassword == null){
-			throw new IllegalArgumentException("Please specify the password of  Wikipedia " +
-					"language link Mysql Database.");
+		if (databasePassword == null || databasePassword.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the password of  Wikipedia "
+							+ "language link Mysql Database.");
 		}
 		this.databasePassword = databasePassword;
+	}
+
+	public int getNamespaceKey() {
+		return namespaceKey;
+	}
+
+	public void setNamespaceKey(int namespaceKey) {
+		this.namespaceKey = namespaceKey;
+	}
+
+	public boolean isDiscussion() {
+		return isDiscussion;
+	}
+
+	public void setDiscussion(int namespaceKey) {
+		this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getLanguageCode() {
+		return languageCode;
+	}
+
+	public void setLanguageCode() {
+		this.languageCode = dumpFilename.substring(0, 2);
+	}
+
+	public String getYear() {
+		return year;
+	}
+
+	public void setYear() {
+		this.year = dumpFilename.substring(7, 11);
+	}
+
+	public String getKorpusSigle() {
+		return korpusSigle;
+	}
+
+	public void setKorpusSigle() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(typeAbbr.get(namespaceKey));
+		sb.append(new String(languageCode.substring(0, 1).toUpperCase()));
+		sb.append(new String(year.substring(2, 4)));
+		this.korpusSigle = sb.toString();
+	}
+
+	public int getMaxThreads() {
+		return maxThreads;
+	}
+
+	public void setMaxThreads(int maxThreads) {
+		this.maxThreads = maxThreads;
 	}
 }
