@@ -30,8 +30,42 @@
     	<artifactId>commons-dbcp2</artifactId>
     	<version>2.1</version>
     </dependency>
+    <dependency>
+    	<groupId>net.java.dev.stax-utils</groupId>
+    	<artifactId>stax-utils</artifactId>
+    	<version>20070216</version>
+    </dependency> 
+     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+	   <groupId>cocoon</groupId>
+	   <artifactId>cocoon</artifactId>
+	   <version>2.1.11</version>
+	</dependency> 
+	<dependency>
+		<groupId>excalibur-pool</groupId>
+		<artifactId>excalibur-pool-api</artifactId>
+		<version>2.1</version>
+	</dependency>
+	<dependency>
+		<groupId>org.dspace.xmlui.excalibur</groupId>
+		<artifactId>excalibur-xmlutil</artifactId>
+		<version>2.1</version>
+	</dependency>
   </dependencies>
   <build>
+  <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>        
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -85,6 +119,10 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        </plugin>
     </plugins>
   </build>
 </project>
