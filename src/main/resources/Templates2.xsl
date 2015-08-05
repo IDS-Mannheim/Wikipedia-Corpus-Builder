@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-    xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com"
-    exclude-result-prefixes="xs xd saxon functx" version="3.0">
+    xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com" version="3.0"
+    extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
 
     <xd:doc scope="stylesheet">
         <xd:desc>TES <xd:p>Templates for various elements</xd:p>
@@ -46,6 +46,8 @@
         <name>tright</name>
         <name>sideBox</name>
     </xsl:param>
+
+    <xsl:variable name="inflectiveCounter" select="0" saxon:assignable="yes"/>
 
     <!-- Paragraph Level Templates -->
 
@@ -400,7 +402,7 @@
                                 <xsl:apply-templates/>
                             </p>
                         </xsl:when>
-                        <xsl:when test="name()=('div','poem','dl','ul','ol','table','gap')">
+                        <xsl:when test="name()=('div','poem','dl','ul','ol','table','gap','seg')">
                             <xsl:apply-templates select="."/>
                         </xsl:when>
                         <xsl:when test="name()=('pre','center','blockquote','strike','s')">
@@ -418,7 +420,6 @@
                     </xsl:choose>
                 </xsl:for-each>
             </xsl:element>
-            <!--        </div>    -->
         </xsl:if>
     </xsl:template>
 
@@ -426,7 +427,7 @@
     <!-- Phrase Level Templates -->
 
     <xsl:template match="autoSignature">
-        <autoSignature/>
+        <xsl:copy-of select="."/>
     </xsl:template>
 
     <xsl:template match="seg">
@@ -639,9 +640,38 @@
     <xsl:template match="node()[name()=$inflectiveNames/*]">
         <xsl:message>
             <xsl:copy-of select="."/>
-        </xsl:message> &lt;<xsl:value-of select="name()"/>&gt;<xsl:call-template name="esc">
+        </xsl:message>
+
+        <saxon:assign name="inflectiveCounter" select="$inflectiveCounter+1"/>
+        <xsl:variable name="openNum" select="$inflectiveCounter"/>
+        <xsl:variable name="openId" select="concat($sigle,'-',$openNum,'-iaw',$openNum)"/>
+
+        <saxon:assign name="inflectiveCounter" select="$inflectiveCounter+1"/>
+        <xsl:variable name="closeNum" select="$inflectiveCounter"/>
+        <xsl:variable name="closeId" select="concat($sigle,'-',$closeNum,'-iaw',$closeNum)"/>
+
+        <xsl:element name="interactionTerm">
+            <xsl:element name="interactionWord">
+                <xsl:attribute name="id" select="$openId"/>
+                <xsl:attribute name="n" select="$openNum"/>
+                <xsl:attribute name="next" select="$closeId"/>
+                <xsl:attribute name="topology">openingTag</xsl:attribute>
+                <xsl:value-of select="name()"/>
+            </xsl:element>
+        </xsl:element>
+        <xsl:call-template name="esc">
             <xsl:with-param name="name" select="name()"/>
-        </xsl:call-template>&lt;/<xsl:value-of select="name()"/>&gt; </xsl:template>
+        </xsl:call-template>
+        <xsl:element name="interactionTerm">
+            <xsl:element name="interactionWord">
+                <xsl:attribute name="id" select="$closeId"/>
+                <xsl:attribute name="n" select="$closeNum"/>
+                <xsl:attribute name="prev" select="$openId"/>
+                <xsl:attribute name="topology">closingTag</xsl:attribute>
+                <xsl:value-of select="name()"/>
+            </xsl:element>
+        </xsl:element>
+    </xsl:template>
 
     <xsl:template match="*">
         <xsl:variable name="name">
