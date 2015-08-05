@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.transform;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;

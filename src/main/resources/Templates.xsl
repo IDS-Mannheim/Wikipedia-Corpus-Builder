@@ -3,7 +3,7 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
     xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com" version="3.0"
     extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
-    <!--   xmlns:err="http://www.w3.org/2005/xqt-errors" >-->
+<!--       xmlns:err="http://www.w3.org/2005/xqt-errors" >-->
 
     <xd:doc scope="stylesheet">
         <xd:desc>
@@ -28,11 +28,11 @@
     <xsl:param name="letter" required="yes"/>
     <xsl:param name="encoding" required="yes"/>
     
-    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.dtd"
+    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.new.dtd"
         method="xml" encoding="{$encoding}" indent="yes"/>
-   
     <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
-
+    <xsl:variable name="sigle" saxon:assignable="yes"/>
+    
     <xsl:param name="headerNames">
         <name>h1</name>
         <name>h2</name>
@@ -53,26 +53,28 @@
 
     </xsl:template>
 
-    <xsl:template match="page">
-        <!--Current index-->
 
+    <xsl:template match="page">
         <xsl:variable name="textSigle">
-            <xsl:if test="string-length(id) gt 10">
-                <xsl:message terminate="yes">ID länger als 10. Es kann kein gültiges textSigle
+            <xsl:if test="string-length(id) gt 7">
+                <xsl:message terminate="yes">ID länger als 7. Es kann kein gültiges textSigle
                     erzeugt werden. Abbruch.</xsl:message>
             </xsl:if>
             <xsl:variable name="intermediate">
                 <xsl:sequence
                     select="concat($korpusSigle,'/',
                     upper-case($letter), 
-                    format-number(id, '0000000000')
+                    format-number(id, '0000000')
                     )"
                 />
             </xsl:variable>
             <xsl:sequence
-                select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"/>
+                select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"/>            
         </xsl:variable>
-
+                
+        <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
+        
+        <!--Current index-->
         <xsl:variable name="t.title">
             <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
             <xsl:value-of select="concat($textSigle,': ')"/>
@@ -91,7 +93,7 @@
             <xsl:attribute name="n"
                 select="concat(revision/text/@lang,concat('.',translate(title,' ','_')))"/>
             <xsl:attribute name="version" select="1.0"/>
-
+            
             <!-- * idsHeader * -->
             <idsHeader type="text" pattern="text" status="new" version="1.0" TEIform="teiHeader">
                 <fileDesc>
@@ -213,12 +215,14 @@
         <xsl:try>
             <xsl:apply-templates select="text"/>
             <xsl:catch>
-                <xsl:message>
-                    <xsl:copy-of select="../title"/>
-                    <xsl:text>error
-                    </xsl:text>
-                </xsl:message>
                 <saxon:assign name="errorCounter" select="$errorCounter+1"/>
+                <xsl:message terminate="yes">
+                    <xsl:text>Title: </xsl:text><xsl:value-of select="../title"/>
+                    <!--
+Error code: <xsl:value-of select="$err:code"/>
+Reason: <xsl:value-of select="$err:description"/-->                                        
+                </xsl:message>                
+                
             </xsl:catch>
         </xsl:try>
     </xsl:template>

@@ -22,7 +22,6 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
 import de.mannheim.ids.wiki.Configuration;
-import de.mannheim.ids.wiki.TemplateURIResolver;
 
 public class Transformer implements Callable<WikiI5Part> {
 
