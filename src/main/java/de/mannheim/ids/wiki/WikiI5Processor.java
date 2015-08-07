@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import de.mannheim.ids.transform.WikiI5Part;
-import de.mannheim.ids.wikixml.WikiXMLSorter;
+import de.mannheim.ids.transform.WikiXMLSorter;
 
 public class WikiI5Processor {
 

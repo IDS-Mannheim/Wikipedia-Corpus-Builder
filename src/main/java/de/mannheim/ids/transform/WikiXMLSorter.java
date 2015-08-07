@@ -1,4 +1,4 @@
-package de.mannheim.ids.wikixml;
+package de.mannheim.ids.transform;
 
 import java.io.File;
 import java.util.List;
@@ -25,8 +25,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import de.mannheim.ids.transform.Transformer;
-import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.WikiI5Processor;
