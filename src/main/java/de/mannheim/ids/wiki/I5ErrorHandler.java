@@ -49,7 +49,7 @@ public class I5ErrorHandler implements ErrorHandler {
 
 	private String createFileName(Configuration config) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("logs/i5-");
+		sb.append("logs/wikiI5-");
 		sb.append(config.getDumpFilename().substring(0, 16));
 		sb.append(config.getPageType());
 		sb.append("-error.txt");
@@ -78,9 +78,14 @@ public class I5ErrorHandler implements ErrorHandler {
 			errorWriter.append(numOfInvalidText + " ");
 			errorWriter.append(xmlPath);
 			errorWriter.append(": ");
-			errorWriter.append(message);
+			errorWriter.append(message);			
 			errorWriter.append("\n");
-			errorWriter.append(t.getCause().toString());
+			if (t.getCause() != null){
+				errorWriter.append(t.getCause().toString());
+			}
+			else{
+				errorWriter.append(t.getMessage());
+			}
 			errorWriter.append("\n\n");
 			errorWriter.flush();
 		}

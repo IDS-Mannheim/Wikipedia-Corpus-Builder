@@ -83,16 +83,40 @@
           <archive>
             <manifest>
               <mainClass>de.mannheim.ids.wiki.WikiI5Converter</mainClass>
-              <classpathPrefix>lib/</classpathPrefix>
+              <classpathPrefix>../lib/</classpathPrefix>
               <addClasspath>true</addClasspath>
             </manifest>
              <manifestEntries>
-            	<Class-Path>properties/</Class-Path>
+            	<Class-Path>../</Class-Path>
             </manifestEntries>
           </archive>
         </configuration>
       </plugin>
-
+ 	<plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+		      <manifest>
+		        <mainClass>de.mannheim.ids.wiki.WikiI5Converter</mainClass>
+		      </manifest>
+		      <manifestEntries>
+            	<Class-Path>../ ../lib/</Class-Path>
+            </manifestEntries>
+		    </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -110,6 +134,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
         <executions>
           <execution>
             <id>attach-sources</id>

@@ -144,7 +144,7 @@ public class I5Writer {
 				writer.writeStartDocument("iso-8859-1", "1.0");
 
 				writer.writeDTD("<!DOCTYPE idsCorpus PUBLIC \"-//IDS//DTD IDS-I5 1.0//EN\" "
-						+ "\"http://corpora.ids-mannheim.de/idsxces1/DTD/ids.xcesdoc.dtd\">");
+						+ "\"http://corpora.ids-mannheim.de/I5/DTD/i5.dtd\">");
 
 				IdsCorpusBuilder cb = new IdsCorpusBuilder(writer, config);
 				cb.createIdsCorpusStartElement();

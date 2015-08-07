@@ -1,20 +1,29 @@
 package de.mannheim.ids.wikixml;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathFactoryConfigurationException;
+
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.xpath.XPathEvaluator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import de.mannheim.ids.transform.Transformer;
 import de.mannheim.ids.transform.WikiI5Part;
@@ -24,24 +33,42 @@ import de.mannheim.ids.wiki.WikiI5Processor;
 
 public class WikiXMLSorter extends Thread {
 
-	private final XPathFactory xPathFactory;
+	private XPathFactory xPathFactory;
 	private final XPath xPath;
 	private final Configuration config;
-	private final Document wikiPageIndexes;
+	//private final Document wikiPageIndexes;
+	NodeInfo wikiPageIndexes;
 	private ExecutorService pool;
 	private Future<WikiI5Part> endFuture;
 
 	public WikiXMLSorter(Configuration config, Future<WikiI5Part> endFuture,
 			ExecutorService pool) {
 		this.config = config;
-		this.xPathFactory = XPathFactory.newInstance();
+		
+		System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
+				                "net.sf.saxon.xpath.XPathFactoryImpl");
+		
+		try {
+			this.xPathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
+		}
+		catch (XPathFactoryConfigurationException e) {
+			e.printStackTrace();
+		}
 		this.xPath = xPathFactory.newXPath();
 		this.endFuture = endFuture;
 		this.pool = pool;
 
-		WikiXMLIndex xmlIndex = new WikiXMLIndex(config.getWikiXMLIndex());
-		wikiPageIndexes = xmlIndex.getIndexDoc();
-
+		//WikiXMLIndex xmlIndex = new WikiXMLIndex(config.getWikiXMLIndex());
+		//wikiPageIndexes = xmlIndex.getIndexDoc();
+		
+		InputSource is = new InputSource(new File(config.getWikiXMLIndex()).toURI().toString());        
+		SAXSource ss = new SAXSource(is);
+		try {
+			wikiPageIndexes = ((XPathEvaluator) xPath).setSource(ss);
+		}
+		catch (XPathException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -92,12 +119,12 @@ public class WikiXMLSorter extends Thread {
 			docSigle = idx + String.format("%02d", docNr);
 			System.out.println("DocId " + docSigle);
 
-			NodeList pagegroup = null;
+			List pagegroup = null;
 			try {
 				group = xPath.compile(config.getPageType() + "/index[@value='"
 						+ idx + "']/id[xs:integer"
 						+ "(xs:integer(.) div 100000) = " + docNr + "]");
-				pagegroup = (NodeList) group.evaluate(wikiPageIndexes,
+				pagegroup = (List) group.evaluate(wikiPageIndexes,
 						XPathConstants.NODESET);
 			}
 			catch (XPathExpressionException e) {
@@ -105,7 +132,7 @@ public class WikiXMLSorter extends Thread {
 						"Failed acquiring the pagegroup for doc sigle "
 								+ docSigle, e);
 			}
-			if (pagegroup.getLength() < 1) {
+			if (pagegroup.size() < 1) {
 				continue;
 			}
 
@@ -171,12 +198,13 @@ public class WikiXMLSorter extends Thread {
 		};
 	}
 
-	private void createFilesFromGroup(NodeList pagegroup, String idx)
+	private void createFilesFromGroup(List pagegroup, String idx)
 			throws I5Exception {
 
 		// Do transformation and validation for each page in the group
-		for (int j = 0; j < pagegroup.getLength(); j++) {
-			String pageId = pagegroup.item(j).getTextContent();
+		for (int j = 0; j < pagegroup.size(); j++) {
+			NodeInfo pg = (NodeInfo) pagegroup.get(j);
+			String pageId = pg.getStringValue();
 			String xmlPath = idx + "/" + pageId + ".xml";
 			System.out.println(xmlPath);
 
