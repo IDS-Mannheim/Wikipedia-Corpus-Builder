@@ -164,6 +164,7 @@ public class WikiPageReader implements Runnable {
 			}
 		}
 		wikipages.add(endPage); // end of wikipages queue
+		br.close();
 	}
 
 	public String setIndent(String strLine) {

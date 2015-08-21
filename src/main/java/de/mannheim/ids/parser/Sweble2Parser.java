@@ -26,8 +26,6 @@ import de.mannheim.ids.writer.WikiErrorWriter;
  * */
 public class Sweble2Parser implements Runnable {
 
-	private WikiConfig config;
-	private WtEngine engine;
 	private String wikitext, wikiXML;
 	private String pagetitle, pageId;
 	private WikiStatistics wikiStatistics;
@@ -69,9 +67,6 @@ public class Sweble2Parser implements Runnable {
 					"WikiErrorWriter cannot be null.");
 		}
 
-		config = DefaultConfigEnWp.generate();
-		engine = new WtEngineImpl(config);
-
 		this.wikitext = wikitext;
 		this.pageId = pageId;
 		this.pagetitle = pagetitle;
@@ -82,6 +77,10 @@ public class Sweble2Parser implements Runnable {
 
 	@Override
 	public void run() {
+
+		WikiConfig config = DefaultConfigEnWp.generate();
+		WtEngine engine = new WtEngineImpl(config);
+
 		PageTitle pageTitle = null;
 		EngProcessedPage cp = null;
 		try {

@@ -40,7 +40,7 @@ public class Configuration {
 		namespaceMap.put(8, "mediawiki");
 		namespaceMap.put(9, "mediawiki-talk");
 		namespaceMap.put(10, "template");
-		namespaceMap.put(11, "template talk");
+		namespaceMap.put(11, "template-talk");
 		namespaceMap.put(12, "help");
 		namespaceMap.put(13, "help-talk");
 		namespaceMap.put(14, "category");

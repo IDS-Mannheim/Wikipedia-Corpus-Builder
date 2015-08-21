@@ -33,15 +33,15 @@ public class WikiPostHandler extends WikiPageHandler {
 	private static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 
-	private static final Pattern timePattern = Pattern
+	/*private static final Pattern timePattern = Pattern
 			.compile("([^0-9]*)([0-9]{1,2}:.+[0-9]{4})(.*)");
 	private static final Pattern timeZone = Pattern
-			.compile("(.*\\(\\w+\\b\\))(.*)");
+			.compile("(.*\\(\\w+\\b\\))(.*)");*/
 
 	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
-	private static Pattern signaturePattern, userContribution,
+	private Pattern signaturePattern, userContribution,
 			unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -86,7 +86,6 @@ public class WikiPostHandler extends WikiPageHandler {
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
 			}
-			wikiPage.setWikitext(null);
 
 			wikiXMLBuilder = new StringBuilder();
 			for (String text : wikiPage.textSegments) {
@@ -192,12 +191,12 @@ public class WikiPostHandler extends WikiPageHandler {
 
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
 
-		String[] a = matchTimeStamp(trimmedText);
-		if (a[0] != null) {
-			post += a[0];
+		WikiTimestamp t = new WikiTimestamp(trimmedText);
+		if (t.getPretext() != null) {
+			post += t.getPretext();
 		}
-		String timestamp = a[1];
-		String rest = a[2];
+		String timestamp = t.getTimestamp();
+		String rest = t.getPostscript();
 
 		if (timestamp != null) {
 			addSignature(SignatureType.SIGNED, timestamp);
@@ -232,39 +231,18 @@ public class WikiPostHandler extends WikiPageHandler {
 				userLinkText = userLink;
 			}
 
-			String[] a = matchTimeStamp(matcher.group(3));
-			String timestamp = a[1];
-			String rest = a[2];
+			WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+			String timestamp = t.getTimestamp();
+			String rest = t.getPostscript();
 
 			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
 					timestamp);
-			writePost(userLinkText, userLink, timestamp, rest.trim());
+			writePost(userLinkText, userLink, timestamp, rest);
 
 			matcher.reset();
 			return true;
 		}
 		return false;
-	}
-
-	private String[] matchTimeStamp(String text) {
-		String[] strArr = new String[3];
-		Matcher matcher2 = timePattern.matcher(text);
-		if (matcher2.find()) {
-			strArr[0] = matcher2.group(1); // pretext
-			strArr[1] = matcher2.group(2); // timestamp
-			Matcher matcher3 = timeZone.matcher(matcher2.group(3));
-			if (matcher3.find()) {
-				strArr[1] += matcher3.group(1); // timezone
-				strArr[2] = matcher3.group(2); // rest
-			}
-			else {
-				strArr[2] = "";
-			}
-		}
-		else {
-			strArr[2] = text;
-		}
-		return strArr;
 	}
 
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
@@ -289,16 +267,14 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		Matcher matcher = userContribution.matcher(trimmedText);
 		if (matcher.find()) {
-			String[] a = matchTimeStamp(matcher.group(4));
-			String timestamp = a[1];
-			String rest = a[2];
-
+			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
 			post += matcher.group(1);
 			addSignature(
-					chooseSignatureType(SignatureType.USER_CONTRIBUTION, rest),
-					timestamp);
-			writePost(matcher.group(3), matcher.group(2), timestamp, rest);
-
+					chooseSignatureType(SignatureType.USER_CONTRIBUTION,
+							t.getPostscript()),
+					t.getTimestamp());
+			writePost(matcher.group(3), matcher.group(2), t.getTimestamp(),
+					t.getPostscript());
 			matcher.reset();
 			return true;
 		}
@@ -335,9 +311,9 @@ public class WikiPostHandler extends WikiPageHandler {
 			if (matcher.find()) {
 				String timestamp = "", rest = "";
 				if (matcher.group(3) != null) {
-					String[] a = matchTimeStamp(matcher.group(3));
-					timestamp = a[1];
-					rest = a[2];
+					WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+					timestamp = t.getTimestamp();
+					rest = t.getPostscript();
 				}
 				rest += matcher.group(4);
 				post += matcher.group(1);

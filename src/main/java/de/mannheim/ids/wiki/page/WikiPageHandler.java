@@ -39,9 +39,6 @@ public abstract class WikiPageHandler implements Runnable {
 
 	protected Configuration config;
 
-	protected DOMParser domParser;
-	protected TagSoupParser tagSoupParser;
-
 	public WikiPageHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
 		if (config == null) {
@@ -63,9 +60,6 @@ public abstract class WikiPageHandler implements Runnable {
 		this.errorWriter = errorWriter;
 
 		this.wikiXMLWriter = new WikiXMLWriter(config);
-
-		this.domParser = new DOMParser();
-		this.tagSoupParser = new TagSoupParser();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -82,6 +76,7 @@ public abstract class WikiPageHandler implements Runnable {
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
+			TagSoupParser tagSoupParser = new TagSoupParser();
 			wikitext = tagSoupParser.generate(wikitext, true);
 		}
 		catch (SAXException e) {
@@ -93,7 +88,6 @@ public abstract class WikiPageHandler implements Runnable {
 				wikitext, config.getLanguageCode(), wikiStatistics, errorWriter);
 		Thread swebleThread = new Thread(swebleParser, pageTitle);
 
-		String wikiXML = "";
 		try {
 			swebleThread.start();
 			swebleThread.join(1000 * 60 * 5);
@@ -113,12 +107,11 @@ public abstract class WikiPageHandler implements Runnable {
 				swebleThread.stop();
 				throw e;
 			}
-			wikiXML = swebleParser.getWikiXML();
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
-		return wikiXML;
+		return swebleParser.getWikiXML();
 	}
 
 	private String cleanPattern(String wikitext) {
@@ -151,6 +144,7 @@ public abstract class WikiPageHandler implements Runnable {
 		}
 		matcher.appendTail(sb);
 		wikitext = sb.toString();
+		matcher.reset();
 		return wikitext;
 	}
 
@@ -168,12 +162,14 @@ public abstract class WikiPageHandler implements Runnable {
 	protected void writeWikitext() throws IOException {
 		wikiXMLWriter.write(wikiPage, wikiPage.getWikitext(),
 				config.getWikitextFolder());
+		wikiPage.setWikitext(null);
 	}
 
 	private boolean validateDOM() {
 		try {
 			String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 			// test XML validity
+			DOMParser domParser = new DOMParser();
 			domParser.parseXML(new ByteArrayInputStream(wikiXML
 					.getBytes("utf-8")));
 		}
@@ -191,6 +187,8 @@ public abstract class WikiPageHandler implements Runnable {
 			// try fixing missing tags
 			StringBuilder sb = new StringBuilder();
 			sb.append(wikiPage.getPageIndent());
+			
+			TagSoupParser tagSoupParser = new TagSoupParser();
 			sb.append(tagSoupParser.generate(wikiPage.getPageStructure(), false));
 			wikiPage.setPageStructure(sb.toString());
 			sb = null;
