@@ -2,6 +2,7 @@ package de.mannheim.ids.wiki.page;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,8 +13,8 @@ import org.xml.sax.SAXException;
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiXMLWriter;
 
 /**
  * This class implements methods for handling Wikipages including reading page
@@ -34,7 +35,7 @@ public abstract class WikiPageHandler implements Runnable {
 	protected WikiPage wikiPage;
 	protected WikiStatistics wikiStatistics;
 
-	protected WikiXMLWriter wikiXMLWriter;
+	private TagSoupParser tagSoupParser;
 	protected WikiErrorWriter errorWriter;
 
 	protected Configuration config;
@@ -58,11 +59,9 @@ public abstract class WikiPageHandler implements Runnable {
 		this.wikiPage = wikipage;
 		this.wikiStatistics = wikiStatistics;
 		this.errorWriter = errorWriter;
-
-		this.wikiXMLWriter = new WikiXMLWriter(config);
+		this.tagSoupParser = new TagSoupParser();
 	}
 
-	@SuppressWarnings("deprecation")
 	protected String parseToXML(String pageId, String pageTitle, String wikitext)
 			throws IOException {
 		if (wikitext == null) {
@@ -76,7 +75,6 @@ public abstract class WikiPageHandler implements Runnable {
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
-			TagSoupParser tagSoupParser = new TagSoupParser();
 			wikitext = tagSoupParser.generate(wikitext, true);
 		}
 		catch (SAXException e) {
@@ -86,8 +84,9 @@ public abstract class WikiPageHandler implements Runnable {
 
 		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
 				wikitext, config.getLanguageCode(), wikiStatistics, errorWriter);
-		Thread swebleThread = new Thread(swebleParser, pageTitle);
+		swebleParser.run();
 
+		/*Thread swebleThread = new Thread(swebleParser, pageTitle);
 		try {
 			swebleThread.start();
 			swebleThread.join(1000 * 60 * 5);
@@ -110,7 +109,7 @@ public abstract class WikiPageHandler implements Runnable {
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-		}
+		}*/
 		return swebleParser.getWikiXML();
 	}
 
@@ -153,21 +152,21 @@ public abstract class WikiPageHandler implements Runnable {
 			wikiStatistics.addEmptyParsedPages();
 		}
 		else if (validateDOM() && validatePageStructure()) {
-			wikiXMLWriter.write(wikiPage, wikiPage.getWikiXML(),
+			writeWikiXML(wikiPage, wikiPage.getWikiXML(),
 					config.getOutputFolder());
 			wikiStatistics.addTotalNonEmptyPages();
 		}
 	}
 
 	protected void writeWikitext() throws IOException {
-		wikiXMLWriter.write(wikiPage, wikiPage.getWikitext(),
+		writeWikiXML(wikiPage, wikiPage.getWikitext(),
 				config.getWikitextFolder());
 		wikiPage.setWikitext(null);
 	}
 
 	private boolean validateDOM() {
+		String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 		try {
-			String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 			// test XML validity
 			DOMParser domParser = new DOMParser();
 			domParser.parseXML(new ByteArrayInputStream(wikiXML
@@ -188,10 +187,8 @@ public abstract class WikiPageHandler implements Runnable {
 			StringBuilder sb = new StringBuilder();
 			sb.append(wikiPage.getPageIndent());
 			
-			TagSoupParser tagSoupParser = new TagSoupParser();
 			sb.append(tagSoupParser.generate(wikiPage.getPageStructure(), false));
 			wikiPage.setPageStructure(sb.toString());
-			sb = null;
 		}
 		catch (Exception e) {
 			wikiStatistics.addPageStructureErrors();
@@ -200,5 +197,41 @@ public abstract class WikiPageHandler implements Runnable {
 			return false;
 		}
 		return true;
+	}
+
+	private void writeWikiXML(WikiPage wikiPage, String content,
+			String outputFolder) throws IOException {
+
+		if (wikiPage == null) {
+			throw new IllegalArgumentException("WikiPage cannot be null.");
+		}
+		if (outputFolder == null || outputFolder.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Output folder cannot be null or empty.");
+		}
+
+		if (content != null && !content.isEmpty()) {
+
+			String path = outputFolder + "/" + wikiPage.getPageIndex() + "/";
+			System.out.println(path + wikiPage.getPageId() + ".xml");
+
+			OutputStreamWriter writer = Utilities.createWriter(path,
+					wikiPage.getPageId() + ".xml", config.getOutputEncoding());
+
+			writer.append("<?xml version=\"1.0\" encoding=\"");
+			writer.append(config.getOutputEncoding());
+			writer.append("\"?>\n");
+
+			String[] arr = wikiPage.getPageStructure().split("<text></text>");
+			writer.append(arr[0]);
+			writer.append("<text lang=\"" + config.getLanguageCode() + "\">\n");
+			writer.append(content);
+			if (!config.isDiscussion()) {
+				writer.append("\n");
+			}
+			writer.append("      </text>");
+			writer.append(arr[1]);
+			writer.close();
+		}
 	}
 }

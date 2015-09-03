@@ -33,15 +33,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	private static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 
-	/*private static final Pattern timePattern = Pattern
-			.compile("([^0-9]*)([0-9]{1,2}:.+[0-9]{4})(.*)");
-	private static final Pattern timeZone = Pattern
-			.compile("(.*\\(\\w+\\b\\))(.*)");*/
-
 	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
-	private Pattern signaturePattern, userContribution,
+	private static Pattern signaturePattern, userContribution,
 			unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -98,6 +93,8 @@ public class WikiPostHandler extends WikiPageHandler {
 			}
 			wikiPage.setWikiXML(wikiXMLBuilder.toString());
 			writeWikiXML();
+			wikiPage = null;
+			post = null;
 		}
 		catch (Exception e) {
 			wikiStatistics.addUnknownErrors();
@@ -342,10 +339,10 @@ public class WikiPostHandler extends WikiPageHandler {
 			String text = WikiPageReader.cleanTextStart(matcher.group(1));
 			String wikiXML = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), text.trim());
-			if (!Thread.interrupted()) {
+			// if (!Thread.interrupted()) {
 				wikiXMLBuilder.append(wikiXML);
 				wikiXMLBuilder.append("\n");
-			}
+			// }
 			matcher.reset();
 			return true;
 		}
@@ -419,7 +416,7 @@ public class WikiPostHandler extends WikiPageHandler {
 			String ps = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), postscript);
 
-			if (!Thread.interrupted()) {
+			// if (!Thread.interrupted()) {
 				if (postscript.toLowerCase().startsWith("ps")
 						|| postscript.toLowerCase().startsWith("p.s")) {
 					sb.append("<seg type=\"postscript\">");
@@ -429,35 +426,10 @@ public class WikiPostHandler extends WikiPageHandler {
 					sb.append(ps);
 					sb.append("\n");
 				}
-			}
+			// }
 		}
 		sb.append("        </posting>\n");
-		return sb.toString();
-		/*String element = "        <posting indentLevel=\"" + level + "\"";
-		if (username != null && !username.isEmpty()) {
-			postUser.createPostUser(username, userLink);
-			element += " who=\"" + postUser.getUserId(username) + "\"";
-		}
-		if (timestamp != null && !timestamp.isEmpty()) {
-			element += " synch=\"" + postTime.createTimestamp(timestamp) + "\"";
 
-		}
-		element += ">\n" + wikiXML + "\n";
-		
-		if (postscript != null && !postscript.isEmpty()) {
-			String ps = parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), postscript);
-
-			if (!Thread.interrupted()) {
-				if (postscript.toLowerCase().startsWith("ps")
-						|| postscript.toLowerCase().startsWith("p.s")) {
-					element += "<seg type=\"postscript\">" + ps + "</seg>\n";
-				} else {
-					element += ps + "\n";
-				}
-			}
-		}
-		element += "        </posting>\n";
-		return element;*/
+		return sb.toString();		
 	}
 }

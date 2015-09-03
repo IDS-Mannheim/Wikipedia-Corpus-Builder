@@ -235,15 +235,16 @@ public class WikiPageReader implements Runnable {
 	}
 
 	/* Strangely, using StringBuilder leads to memory leaks because its internal
-	   char[] is kept in memory.
+	   char[] is kept in memory. The real culprit is unknown?!
 	  */
 	@SuppressWarnings("unused")
 	private String buildWikitext(WikiPage wikiPage) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(2 * 1024);
 		for (String segment : wikiPage.textSegments) {
 			sb.append(segment);
 			sb.append("\n");
 		}
+
 		return sb.toString();
 
 	}

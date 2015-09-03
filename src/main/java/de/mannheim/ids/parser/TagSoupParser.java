@@ -22,6 +22,7 @@ import org.xml.sax.XMLReader;
 public class TagSoupParser {
 
 	private HTMLSchema theSchema = null;
+	private String encoding = "UTF-8";
 
 	/**
 	 * Generate a clean HTML from a given wikitext containing improper HTML tags
@@ -71,7 +72,7 @@ public class TagSoupParser {
 	private ContentHandler specifyContentHandler(Writer w) {
 		XMLWriter x = new XMLWriter(w);
 		x.setOutputProperty(XMLWriter.OMIT_XML_DECLARATION, "yes");
-		x.setOutputProperty(XMLWriter.ENCODING, "utf-8");
+		x.setOutputProperty(XMLWriter.ENCODING, encoding);
 		x.setPrefix(theSchema.getURI(), "");
 		return x;
 	}
