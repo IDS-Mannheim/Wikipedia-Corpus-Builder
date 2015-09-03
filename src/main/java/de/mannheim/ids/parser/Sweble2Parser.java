@@ -5,11 +5,9 @@ import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
 import org.sweble.wikitext.engine.WtEngineImpl;
-import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.EngProcessedPage;
 import org.sweble.wikitext.engine.output.HtmlRendererCallback;
 import org.sweble.wikitext.engine.output.MediaInfo;
-import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
 import org.sweble.wikitext.parser.nodes.WtUrl;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
@@ -77,47 +75,48 @@ public class Sweble2Parser implements Runnable {
 
 	@Override
 	public void run() {
-
-		WikiConfig config = DefaultConfigEnWp.generate();
-		WtEngine engine = new WtEngineImpl(config);
-
+		WtEngine engine = new WtEngineImpl(WikiXMLProcessor.wikiconfig);
 		PageTitle pageTitle = null;
 		EngProcessedPage cp = null;
 		try {
-			pageTitle = PageTitle.make(config, pagetitle);
+			pageTitle = PageTitle.make(WikiXMLProcessor.wikiconfig, pagetitle);
 			PageId pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
 			cp = engine.postprocess(pageId, wikitext, null);
 		}
 		catch (LinkTargetException | EngineException e) {
-			if (!Thread.interrupted()) {
+			// if (!Thread.interrupted()) {
 				wikiStatistics.addSwebleErrors();
 				errorWriter.logErrorPage("SWEBLE ", pagetitle, pageId,
 						e.getCause(), wikitext);
-			}
-			else {
-				System.err.println("In SWEBLE, Thread " + pagetitle
-						+ " was interrupted.");
-			}
+			// }
+			// else {
+			// System.err.println("In SWEBLE, Thread " + pagetitle
+			// + " was interrupted.");
+			// }
 			return;
 		}
 
 		try {
 			// Render AST to XML
-			wikiXML = XMLRenderer.print(new MyRendererCallback(), config,
+			wikiXML = XMLRenderer.print(new MyRendererCallback(),
+					WikiXMLProcessor.wikiconfig,
 					pageTitle, cp.getPage());
 		}
 		catch (Exception e) {
-			if (!Thread.interrupted()) {
+			// if (!Thread.interrupted()) {
 				wikiStatistics.addRendererErrors();
 				errorWriter.logErrorPage("RENDERER ", pagetitle, pageId,
 						e.getCause(), wikitext);
-			}
-			else {
-				System.err.println("In RENDERER, Thread " + pagetitle
-						+ " was interrupted.");
-			}
+
+			e.printStackTrace();
+			// }
+			// else {
+			// System.err.println("In RENDERER, Thread " + pagetitle
+			// + " was interrupted.");
+			// }
 		}
+		cp = null;
 	}
 
 	public String getWikiXML() {

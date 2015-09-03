@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
+import org.sweble.wikitext.engine.config.WikiConfig;
+import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 
 import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
@@ -37,6 +39,8 @@ public class WikiXMLProcessor {
 
 	public static final WikiPage endPage = new WikiPage();
 	public static String Wikipedia_URI;
+
+	public static final WikiConfig wikiconfig = DefaultConfigEnWp.generate();
 
 	public WikiXMLProcessor(Configuration config) throws IOException {
 		if (config == null) {
