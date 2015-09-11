@@ -1,5 +1,6 @@
 package de.mannheim.ids.db;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,7 +47,7 @@ public class DatabaseManager {
 	}
 
 	public LanguageLinks retrieveLanguageLinks(String ll_from)
-			throws SQLException {
+			throws SQLException, UnsupportedEncodingException {
 
 		if (ll_from == null || ll_from.isEmpty()) {
 			throw new IllegalArgumentException(
@@ -61,9 +62,10 @@ public class DatabaseManager {
 		PreparedStatement preparedStatement = conn.prepareStatement(langlink);
 		preparedStatement.setString(1, ll_from);
 		ResultSet rs = preparedStatement.executeQuery();
+		
 		while (rs.next()) {
 			languageCode = rs.getString("ll_lang");
-			pageTitle = rs.getString("ll_title");
+			pageTitle = new String(rs.getBytes("ll_title"),"UTF-8");
 			langlinks.getTitleMap().put(languageCode, pageTitle);
 		}
 		conn.close();
