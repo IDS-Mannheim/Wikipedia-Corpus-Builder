@@ -22,6 +22,9 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
 import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.I5ErrorHandler;
+import de.mannheim.ids.wiki.I5Exception;
+import de.mannheim.ids.wiki.Statistics;
 
 public class Transformer implements Callable<WikiI5Part> {
 
@@ -55,7 +58,7 @@ public class Transformer implements Callable<WikiI5Part> {
 			}
 
 			transformer.setParameter(new QName("type"), new XdmAtomicValue(
-					config.getPageType()));
+					config.getNamespaceKey()));
 			transformer.setParameter(new QName("origfilename"),
 					new XdmAtomicValue(config.getDumpFilename()));
 			transformer.setParameter(new QName("korpusSigle"),
@@ -63,16 +66,16 @@ public class Transformer implements Callable<WikiI5Part> {
 			transformer.setParameter(new QName("lang"), new XdmAtomicValue(
 					config.getLanguageCode()));
 			transformer.setParameter(new QName("pubDay"), new XdmAtomicValue(
-					config.getDumpFilename().substring(11, 13)));
-			transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(
 					config.getDumpFilename().substring(13, 15)));
+			transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(
+					config.getDumpFilename().substring(11, 13)));
 			transformer.setParameter(new QName("pubYear"), new XdmAtomicValue(
 					config.getYear()));
 			transformer.setParameter(new QName("inflectives"),
 					new XdmAtomicValue(config.getInflectives()));
 			transformer.setParameter(new QName("encoding"), new XdmAtomicValue(
-					config.getEncoding()));
-			// transformer.setErrorListener(errorHandler);
+					config.getOutputEncoding()));
+			transformer.setErrorListener(errorHandler);
 
 			return transformer;
 		}
@@ -85,13 +88,17 @@ public class Transformer implements Callable<WikiI5Part> {
 	private String pageId;
 
 	private static Configuration config;
+	private static I5ErrorHandler errorHandler;
+	private Statistics statistics;
 
-	public Transformer(Configuration config, File wikiXMLFile, String index,
+	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler errorHandler, File wikiXMLFile, String index,
 			String pageId) {
 		this.config = config;
 		this.wikiXML = wikiXMLFile;
 		this.index = index;
 		this.pageId = pageId;
+		this.errorHandler = errorHandler;
+		this.statistics = statistics;
 	}
 
 	public static XsltTransformer getTransfomer() {
@@ -111,14 +118,14 @@ public class Transformer implements Callable<WikiI5Part> {
 		}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}
+		}		
 		finally {
 			is.close();
 		}
 		return w;
 	}
 
-	private ByteArrayOutputStream doTransformation(Source source) {
+	private ByteArrayOutputStream doTransformation(Source source) throws I5Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
 		try {
 			XdmNode node = processor.newDocumentBuilder().build(source);
@@ -131,12 +138,12 @@ public class Transformer implements Callable<WikiI5Part> {
 			transformer.setDestination(destination);
 			transformer.transform();
 		}
-		catch (SaxonApiException e) {
-			e.printStackTrace();
-			// errorHandler.setValid(false);
-			// errorHandler.setErrorMessage(e.getMessage());
-		}
-
+		catch (SaxonApiException e) {	
+			statistics.addTransformationError();
+			errorHandler.write(wikiXML.getPath(), "Tranformation error. ", e);
+			bos=null;
+		}		
+		
 		return bos;
 	}
 
@@ -144,7 +151,7 @@ public class Transformer implements Callable<WikiI5Part> {
 		Serializer d = new Serializer(os);
 		d.setOutputProperty(Serializer.Property.METHOD, "xml");
 		d.setOutputProperty(Serializer.Property.INDENT, "yes");
-		d.setOutputProperty(Serializer.Property.ENCODING, config.getEncoding());
+		d.setOutputProperty(Serializer.Property.ENCODING, config.getOutputEncoding());
 		return d;
 	}
 }

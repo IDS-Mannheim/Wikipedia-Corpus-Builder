@@ -55,9 +55,9 @@ public class BaseBuilder {
 
 		writer.writeStartElement("biblStruct");
 		writer.writeAttribute("Default", "n");
-		writer.writeEndElement(); // biblStruct
 
 		createMonogr();
+		writer.writeEndElement(); // biblStruct
 		writer.writeEndElement();
 	}
 

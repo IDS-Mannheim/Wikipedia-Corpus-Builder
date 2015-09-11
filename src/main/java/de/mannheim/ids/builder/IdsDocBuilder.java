@@ -16,6 +16,7 @@ public class IdsDocBuilder extends BaseBuilder {
 		writer.writeAttribute("version", "1.0");
 		writer.writeAttribute("TEIform", "TEI.2");
 		writer.writeAttribute("id", docId);
+		writer.flush();
 	}
 
 	public void createIdsHeader(String docSigle, String docTitle)
@@ -29,6 +30,7 @@ public class IdsDocBuilder extends BaseBuilder {
 
 		createFileDesc(docSigle, docTitle);
 		writer.writeEndElement();
+		writer.flush();
 	}
 
 	private void createFileDesc(String docSigle, String docTitle)

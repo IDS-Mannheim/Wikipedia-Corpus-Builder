@@ -1,6 +1,8 @@
 package de.mannheim.ids.builder;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import de.mannheim.ids.wiki.Configuration;
 
 public class IdsCorpusBuilder extends BaseBuilder {
 	private Configuration config;
+	private boolean setInitialRev = true;
 
 	public static final Map<Integer, String> textTypes;
 	static {
@@ -45,9 +48,27 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		createFileDesc();
 		createEncodingDesc();
 		createProfileDesc();
-
+		if (setInitialRev){
+			createRevisionDesc();
+		}
 		writer.writeEndElement(); // idsHeader
 	}
+	
+	private void createRevisionDesc() throws XMLStreamException{
+		writer.writeStartElement("revisionDesc");
+		writer.writeStartElement("listChange");
+		
+		writer.writeStartElement("change");
+		SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd");		
+		writer.writeAttribute("when", df.format(new Date()));
+		writer.writeAttribute("who", "#EM");
+		writer.writeCharacters("initial public release");
+		writer.writeEndElement(); // change
+		
+		writer.writeEndElement(); // listChange
+		writer.writeEndElement(); // revisionDesc
+	}
+	
 
 	private void createProfileDesc() throws XMLStreamException {
 		writer.writeStartElement("profileDesc");
@@ -87,12 +108,15 @@ public class IdsCorpusBuilder extends BaseBuilder {
 						+ "by the WikiXMLConverter tool and in the second stage, WikiXML is converted into "
 						+ "I5 by the WikiI5Converter tool. The converters are available at "
 						+ "http://corpora.ids-mannheim.de/pub/tools/. Reference: "
-						+ "Building Linguistic Corpora from Wikipedia Articles and Discussions. "
-						+ "In: Beißwenger, Michael/Oostdijk, Nelleke/Storrer, Angelika/van "
-						+ "den Heuvel, Henk (Hrsg.): Building and Annotating Corpora of "
-						+ "Computer-mediated Communication: Issues and Challenges at the "
-						+ "Interface between Computational and Corpus Linguistics. "
-						+ "S. 59-82 - Regensburg: GSCL, 2014.");
+						+ "Eliza Margaretha and Harald Lüngen (2014): Building Linguistic Corpora"
+						+ "from Wikipedia Articles and Discussions. In: Journal of Language"
+						+ "Technology and Computational Linguistics (JLCL) 29 (2). Special Issue on"
+						+ "Building and Annotating Corpora of Computer-mediated Communication:"
+						+ "Issues and Challenges at the Interface between Computational and Corpus"
+						+ "Linguistics, edited by Michael Beißwenger, Nelleke Oostdijk, Angelika"
+						+ "Storrer and Henk van den Heuvel. URL:"
+						+ "http://www.jlcl.org/2014_Heft2/Heft2-2014.pdf");
+						
 
 		writer.writeEndElement(); // editorialDecl
 		writer.writeEndElement(); // encodingDesc

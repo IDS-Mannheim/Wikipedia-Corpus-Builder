@@ -1,9 +1,11 @@
 package de.mannheim.ids.builder;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
@@ -25,7 +27,9 @@ public class IdsTextBuilder extends DefaultHandler {
 	private IndentingXMLStreamWriter writer;
 
 	private DatabaseManager dbManager;
-
+	
+	private static Pattern space = Pattern.compile("\\s+");
+	
 	private String pageId;
 	private static List<String> addedAttributes = new ArrayList<String>();
 	static {
@@ -55,8 +59,8 @@ public class IdsTextBuilder extends DefaultHandler {
 						config.getDatabaseUsername(),
 						config.getDatabasePassword());
 			}
-			catch (SQLException e1) {
-				e1.printStackTrace();
+			catch (SQLException e) {
+				throw new I5Exception("Failed configuring the database manager.", e);
 			}
 		}
 	}
@@ -75,7 +79,7 @@ public class IdsTextBuilder extends DefaultHandler {
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
-			e.printStackTrace();
+			throw new SAXException("Failed creating start element "+localName,e);
 		}
 	}
 
@@ -90,51 +94,63 @@ public class IdsTextBuilder extends DefaultHandler {
 					createLangLinks(dbManager.retrieveLanguageLinks(pageId));
 				}
 				catch (SQLException e) {
-					e.printStackTrace();
+					throw new SAXException("Failed retreving language links.",e);
+				}
+				catch (UnsupportedEncodingException e) {
+					throw new SAXException("Failed converting ll_title to UTF-8",e);
 				}
 			}
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
-			e.printStackTrace();
+			throw new SAXException("Failed creating end element "+localName,e);
 		}
 	}
 
-	private void createLangLinks(LanguageLinks ll) throws XMLStreamException {
+	private void createLangLinks(LanguageLinks ll) throws SAXException {
 		Map<String, String> map = ll.getTitleMap();
-		for (String key : map.keySet()) {
-			writer.writeStartElement("relatedItem");
-			writer.writeAttribute("type", "langlink");
-
-			writer.writeStartElement("ref");
-
-			StringBuilder sb = new StringBuilder();
-			sb.append("https://");
-			sb.append(key);
-			sb.append(".wikipedia.org/wiki/");
-			sb.append(map.get(key).replace(" ", "_"));
-			writer.writeAttribute("target", sb.toString());
-
-			writer.writeAttribute("xml:lang", key);
-			writer.writeCharacters(map.get(key));
-
-			writer.writeEndElement(); // ref
-			writer.writeEndElement(); // relatedItem
+		try{
+			for (String key : map.keySet()) {
+				writer.writeStartElement("relatedItem");
+				writer.writeAttribute("type", "langlink");
+	
+				writer.writeStartElement("ref");
+	
+				StringBuilder sb = new StringBuilder();
+				sb.append("https://");
+				sb.append(key);
+				sb.append(".wikipedia.org/wiki/");
+				sb.append(map.get(key).replace(" ", "_"));
+				writer.writeAttribute("target", sb.toString());
+	
+				writer.writeAttribute("xml:lang", key);
+				writer.writeCharacters(map.get(key));
+	
+				writer.writeEndElement(); // ref
+				writer.writeEndElement(); // relatedItem
+				writer.flush();
+			}		
+		}
+		catch (XMLStreamException e) {
+			throw new SAXException("Failed creating language links.", e);
 		}
 	}
 
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
-		try {
-			String text = new String(ch, start, length).trim();
+		try {			
+			String text = new String(ch, start, length);
 			if (!text.isEmpty()) {
-				writer.writeCharacters(StringEscapeUtils.escapeXml(text));
+				//writer.writeCharacters(StringEscapeUtils.escapeXml(text));
+				text = space.matcher(text).replaceAll(" ");
+				writer.writeCharacters(text);
 				writer.flush();
 			}
+			ch = null;
 		}
 		catch (XMLStreamException e) {
-			e.printStackTrace();
+			throw new SAXException("Failed writing text.", e);
 		}
 	}
 
