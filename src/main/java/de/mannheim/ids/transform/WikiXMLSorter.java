@@ -21,12 +21,12 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.xpath.XPathEvaluator;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.I5ErrorHandler;
 import de.mannheim.ids.wiki.I5Exception;
+import de.mannheim.ids.wiki.Statistics;
 import de.mannheim.ids.wiki.WikiI5Processor;
 
 public class WikiXMLSorter extends Thread {
@@ -34,13 +34,14 @@ public class WikiXMLSorter extends Thread {
 	private XPathFactory xPathFactory;
 	private final XPath xPath;
 	private final Configuration config;
-	//private final Document wikiPageIndexes;
-	NodeInfo wikiPageIndexes;
+	private NodeInfo wikiPageIndexes;
 	private ExecutorService pool;
 	private Future<WikiI5Part> endFuture;
+	private I5ErrorHandler errorHandler;
+	private Statistics statistics;
 
 	public WikiXMLSorter(Configuration config, Future<WikiI5Part> endFuture,
-			ExecutorService pool) {
+			ExecutorService pool, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {
 		this.config = config;
 		
 		System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
@@ -50,14 +51,13 @@ public class WikiXMLSorter extends Thread {
 			this.xPathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
 		}
 		catch (XPathFactoryConfigurationException e) {
-			e.printStackTrace();
+			throw new I5Exception("Failed creating a new instance of XPathFactory", e);
 		}
 		this.xPath = xPathFactory.newXPath();
 		this.endFuture = endFuture;
 		this.pool = pool;
-
-		//WikiXMLIndex xmlIndex = new WikiXMLIndex(config.getWikiXMLIndex());
-		//wikiPageIndexes = xmlIndex.getIndexDoc();
+		this.errorHandler = errorHandler;
+		this.statistics = statistics;
 		
 		InputSource is = new InputSource(new File(config.getWikiXMLIndex()).toURI().toString());        
 		SAXSource ss = new SAXSource(is);
@@ -65,13 +65,14 @@ public class WikiXMLSorter extends Thread {
 			wikiPageIndexes = ((XPathEvaluator) xPath).setSource(ss);
 		}
 		catch (XPathException e) {
-			e.printStackTrace();
+			throw new I5Exception("Failed setting wikipage index node.", e);
 		}
+		
+		
 	}
 
 	@Override
 	public void run() {
-
 		int n = 0;
 		XPathExpression lastId;
 		// group pages by index
@@ -101,21 +102,34 @@ public class WikiXMLSorter extends Thread {
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			System.err
-					.println("Failed putting endFuture to the blocking queue.");
+			throw new RuntimeException("Failed putting endFuture to the blocking queue.",e);
 		}
+		
+		// count number of pages with unsorted chars (excluded / not to be transformed)
+		try {
+			XPathExpression chars;
+			chars = xPath.compile("count("+config.getPageType() + "/index[@value='Char']/id)");
+			int m = (int) (double) chars.evaluate(wikiPageIndexes,
+					XPathConstants.NUMBER);
+			statistics.setNumOfChar(m);
+		}
+		catch (XPathExpressionException e) {
+			throw new RuntimeException(
+					"Failed counting number of pages with unsorted chars.");
+		}
+		
 	}
 
 	// Group per 100000 pages into a doc
 	private void groupPagesbyDoc(String idx, int n) throws I5Exception {
 		XPathExpression group;
-		String docSigle;
+		String docId;
 		int docNr;
 
 		for (int i = 0; i < n / 100000 + 1; i++) {
 			docNr = i;
-			docSigle = idx + String.format("%02d", docNr);
-			System.out.println("DocId " + docSigle);
+			docId = idx + String.format("%02d", docNr);
+			System.out.println("DocId " + docId);
 
 			List pagegroup = null;
 			try {
@@ -127,8 +141,8 @@ public class WikiXMLSorter extends Thread {
 			}
 			catch (XPathExpressionException e) {
 				throw new I5Exception(
-						"Failed acquiring the pagegroup for doc sigle "
-								+ docSigle, e);
+						"Failed acquiring the pagegroup for doc id "
+								+ docId, e);
 			}
 			if (pagegroup.size() < 1) {
 				continue;
@@ -206,15 +220,14 @@ public class WikiXMLSorter extends Thread {
 			String xmlPath = idx + "/" + pageId + ".xml";
 			System.out.println(xmlPath);
 
-			Transformer t = new Transformer(config, new File(xmlPath), idx,
+			Transformer t = new Transformer(config, statistics, errorHandler, new File(xmlPath), idx,
 					pageId);
 			try {
 				WikiI5Processor.wikiI5Queue.put(pool.submit(t));
 			}
 			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
 				System.err
-						.println("Thread was interrupted while putting "
+						.println("Thread "+xmlPath+"was interrupted while putting "
 								+ "a transformation future result to the blocking queue. ");
 			}
 		}

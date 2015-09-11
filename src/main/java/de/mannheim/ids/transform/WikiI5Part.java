@@ -13,7 +13,7 @@ public class WikiI5Part {
 
 	private String index;
 	private String pageId;
-	private int docNr;
+	private int docId;
 
 	public WikiI5Part(ByteArrayOutputStream bos, File wikiXML, String pageId) {
 		setBos(bos);
@@ -39,10 +39,10 @@ public class WikiI5Part {
 	}
 
 	public void setBos(ByteArrayOutputStream bos) {
-		if (bos == null) {
-			throw new IllegalArgumentException(
-					"ByteArrayOutputStream cannot be null.");
-		}
+		//if (bos == null) {
+		//	throw new IllegalArgumentException(
+		//			"ByteArrayOutputStream cannot be null.");
+		//}
 		this.bos = bos;
 	}
 
@@ -78,11 +78,11 @@ public class WikiI5Part {
 	}
 
 	public int getDocNr() {
-		return docNr;
+		return docId;
 	}
 
 	public void setDocNr(int docNr) {
-		this.docNr = docNr;
+		this.docId = docNr;
 	}
 
 	public boolean isStartDoc() {

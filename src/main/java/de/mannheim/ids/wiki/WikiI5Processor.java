@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
+
 import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.transform.WikiXMLSorter;
 
@@ -16,9 +18,13 @@ public class WikiI5Processor {
 
 	private final Configuration config;
 
-	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
+	private Statistics statistics;
+	private I5ErrorHandler errorHandler;
 
-	public WikiI5Processor(Configuration config) {
+	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
+	
+
+	public WikiI5Processor(Configuration config) throws I5Exception {
 
 		if (config == null) {
 			throw new IllegalArgumentException("Config cannot be null.");
@@ -27,29 +33,39 @@ public class WikiI5Processor {
 		this.config = config;
 		wikiI5Queue = new ArrayBlockingQueue<Future<WikiI5Part>>(
 				config.getMaxThreads());
-
+		errorHandler = new I5ErrorHandler(config);
+		statistics = new Statistics();
 	}
 
 	public void run() throws I5Exception {
 
-		I5Writer wikiI5Writer = new I5Writer(config);
+		long start = System.currentTimeMillis();
+		
+		I5Writer wikiI5Writer = new I5Writer(config,errorHandler,statistics);
 		wikiI5Writer.writeStartDocument();
 
 		Future<WikiI5Part> endFuture = createEndFuture();
 		ExecutorService pool = Executors.newFixedThreadPool(config
 				.getMaxThreads());
-		WikiXMLSorter sorter = new WikiXMLSorter(config, endFuture, pool);
+		WikiXMLSorter sorter = new WikiXMLSorter(config,endFuture, pool, 
+				errorHandler,statistics);
 		pool.execute(sorter);
 
 		try {
 			for (Future<WikiI5Part> future = wikiI5Queue.take(); !future
 					.equals(endFuture); future = wikiI5Queue.take()) {
-				wikiI5Writer.write(future.get());
+				try {
+					WikiI5Part w = future.get();
+					wikiI5Writer.write(w);
+				}
+				catch (ExecutionException e) {
+					System.err.println("Future execution throws an exception: "+e.getCause());
+				}				
 			}
 			pool.shutdown();
 		}
-		catch (InterruptedException | ExecutionException e) {
-			System.out.println(e.getCause());
+		catch (InterruptedException e) {
+			System.err.println("Blocking queue was interrupted, cause: "+e.getCause());
 			Thread.currentThread().interrupt();
 			pool.shutdownNow();
 		}
@@ -68,7 +84,17 @@ public class WikiI5Processor {
 			Thread.currentThread().interrupt();
 		}
 
+		statistics.printStats();		
 		wikiI5Writer.close();
+		errorHandler.close();
+		
+		long end = System.currentTimeMillis();
+		String duration = DurationFormatUtils.formatDuration(
+				(end - start), "H:mm:ss");
+		System.out.println("WikiI5Converter execution time "
+		// + (endTime - startTime));
+				+ duration);
+		
 	}
 
 	private Future<WikiI5Part> createEndFuture() {

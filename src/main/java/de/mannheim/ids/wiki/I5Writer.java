@@ -20,6 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.cocoon.xml.SaxBuffer;
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -36,18 +37,17 @@ public class I5Writer {
 	private XMLReader reader;
 	private IndentingXMLStreamWriter writer;
 	private I5ErrorHandler errorHandler;
-	private SaxBuffer saxBuffer;
+
 	private Configuration config;
+	private Statistics stats;
 
-	public I5Writer(Configuration config) throws I5Exception {
-		setWriter(config);
-		idsTextHandler = new IdsTextBuilder(config, writer);
-
-		errorHandler = new I5ErrorHandler(config);
-		saxBuffer = new SaxBuffer();
-		setXMLReader();
-
+	public I5Writer(Configuration config, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {		
+		this.errorHandler = errorHandler;
 		this.config = config;
+		setXMLReader();
+		setWriter(config);
+		idsTextHandler = new IdsTextBuilder(config, writer);	
+		stats = statistics;
 	}
 
 	private void setWriter(Configuration config) throws I5Exception {
@@ -65,18 +65,18 @@ public class I5Writer {
 		XMLStreamWriter w = null;
 		try {
 			w = f.createXMLStreamWriter(new OutputStreamWriter(fos, config
-					.getEncoding()));
+					.getOutputEncoding()));
 		}
 		catch (UnsupportedEncodingException e) {
 			throw new I5Exception(
 					"Failed creating an OutputStreamWriter. Encoding"
-							+ config.getEncoding() + " is not supported.", e);
+							+ config.getOutputEncoding() + " is not supported.", e);
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
 		}
 		writer = new IndentingXMLStreamWriter(w);
-		writer.setIndent("  ");
+		writer.setIndent(" ");
 	}
 
 	private void setXMLReader() throws I5Exception {
@@ -109,8 +109,6 @@ public class I5Writer {
 			throw new I5Exception(
 					"Failed getting the XML Reader from a SAX parser.", e);
 		}
-
-		reader.setContentHandler(saxBuffer);
 		reader.setErrorHandler(errorHandler);
 	}
 
@@ -120,9 +118,11 @@ public class I5Writer {
 		}
 
 		if (w.isIDSText()) {
-			validateDTD(w);
+			if (w.getBos() != null){
+				validateDTD(w);			
+			}			
 		}
-		else if (w.isStartDoc()) {
+		else if (w.isStartDoc()) {			
 			writeStartIdsCorpus(w);
 		}
 		else {
@@ -133,7 +133,7 @@ public class I5Writer {
 			catch (XMLStreamException e) {
 				throw new I5Exception(
 						"Failed writing end idsCorpus end element.", e);
-			} // idsCorpus
+			} // idsCorpus	
 		}
 	}
 
@@ -141,7 +141,7 @@ public class I5Writer {
 
 		try {
 			synchronized (writer) {
-				writer.writeStartDocument("iso-8859-1", "1.0");
+				writer.writeStartDocument(config.getOutputEncoding(), "1.0");
 
 				writer.writeDTD("<!DOCTYPE idsCorpus PUBLIC \"-//IDS//DTD IDS-I5 1.0//EN\" "
 						+ "\"http://corpora.ids-mannheim.de/I5/DTD/i5.dtd\">");
@@ -161,47 +161,53 @@ public class I5Writer {
 		IdsDocBuilder db = new IdsDocBuilder(writer);
 		String docTitle = db.createIdsDocTitle(config.getNamespaceKey(),
 				w.getIndex(), w.getDocNr());
-		String docId = w.getIndex() + String.format("%02d", w.getDocNr());
-		String docSigle = config.getKorpusSigle() + "/" + docId;
+		
+		String index = w.getIndex();		
+		String docNr = String.format("%02d", w.getDocNr());
+		String docSigle = config.getKorpusSigle() + "/" + index + docNr;
 		try {
-			db.createStartElement(docId);
+			if (StringUtils.isNumeric(w.getIndex())){
+				index = "_"+index;
+			}	
+			db.createStartElement(index + docNr);
 			db.createIdsHeader(docSigle, docTitle);
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
-			Thread.currentThread().interrupt();
 			throw new I5Exception("Failed writing idsCorpus start element.", e);
 		}
 	}
 
 	public void validateDTD(WikiI5Part w) throws I5Exception {
-
+		SaxBuffer saxBuffer = new SaxBuffer();
+		reader.setContentHandler(saxBuffer);
+		
 		try {
 			InputStream is = new ByteArrayInputStream(w.getBos().toByteArray());
 			reader.parse(new InputSource(is));
 		}
 		catch (SAXException | IOException e) {
-			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
-			// throw new I5Exception("Failed parsing: " + w.getWikiPath(), e);
+			stats.addDtdValidationError();
+			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);		
+			return;
 		}
 
 		try {
 			idsTextHandler.setPageId(w.getPageId());
 			saxBuffer.toSAX(idsTextHandler);
+			stats.addTransformedPages();
 		}
 		catch (SAXException e) {
+			stats.addSaxParserError();
 			errorHandler.write(w.getWikiPath(),
-					"Failed transferring SAXBuffer to SAX.", e);
-			// throw new I5Exception("Failed transferring SAXBuffer to SAX for "
-			// + w.getWikiPath(), e);
+					e.getMessage(), e);			
 		}
 	}
 
 	public void close() throws I5Exception {
 		try {
 			writer.writeEndDocument();
-			writer.close();
-			errorHandler.close();
+			writer.close();			
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed closing document.", e);

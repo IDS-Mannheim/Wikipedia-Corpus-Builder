@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.TransformerException;
+
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -18,7 +21,7 @@ import org.xml.sax.SAXParseException;
  * 
  */
 
-public class I5ErrorHandler implements ErrorHandler {
+public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 
 	private OutputStreamWriter errorWriter;
 	private int numOfInvalidText = 0;
@@ -52,7 +55,7 @@ public class I5ErrorHandler implements ErrorHandler {
 		sb.append("logs/wikiI5-");
 		sb.append(config.getDumpFilename().substring(0, 16));
 		sb.append(config.getPageType());
-		sb.append("-error.txt");
+		sb.append("-error.log");
 		return sb.toString();
 	}
 
@@ -90,18 +93,38 @@ public class I5ErrorHandler implements ErrorHandler {
 			errorWriter.flush();
 		}
 		catch (IOException e) {
-			throw new I5Exception("Failed writing DVD validation error.", e);
+			throw new I5Exception("Failed writing error.", e);
 		}
 	}
 
-	void close() throws I5Exception {
-		System.out.println("Number Of invalid text: " + numOfInvalidText);
+	public void close() throws I5Exception {		
 		try {
 			errorWriter.close();
 		}
 		catch (IOException e) {
 			throw new I5Exception("Failed closing the error writer.", e);
 		}
+	}
+
+	@Override
+	public void warning(TransformerException exception)
+			throws TransformerException {
+		System.err.println("Transformer warning: "+exception.getCause());
+		throw exception;		
+	}
+
+	@Override
+	public void error(TransformerException exception)
+			throws TransformerException {
+		System.err.println("Transformer error: "+exception.getCause());
+		throw exception;
+	}
+
+	@Override
+	public void fatalError(TransformerException exception)
+			throws TransformerException {
+		System.err.println("Transformer fatal error: "+exception.getCause());
+		throw exception;		
 	}
 
 }
