@@ -137,8 +137,12 @@
                             </item>
                         </xsl:when>
                         <xsl:when test="descendant::node()/name()=('li','dd','dt')">
-                            <xsl:apply-templates
-                                select="descendant::node()[name()=('li','dd','dt')]"/>
+                            <!--<xsl:message>@<xsl:copy-of select="."/>@</xsl:message>-->
+                            <xsl:for-each select="descendant::node()[name()=('li','dd','dt')]">
+                                <item>
+                                    <xsl:apply-templates select="."/>
+                                </item>
+                            </xsl:for-each>                          
                         </xsl:when>
                         <xsl:otherwise/>
                         <!-- Other elements are skipped -->
@@ -149,6 +153,7 @@
     </xsl:template>
 
     <xsl:template match="li | dd | dt">
+        
         <xsl:choose>
             <xsl:when test="child::node()/name()=$headerNames/*">
                 <xsl:apply-templates select="."/>
@@ -160,14 +165,15 @@
                     </xsl:for-each>
                 </item>
             </xsl:when>
-            <xsl:when test="../../child::node()/name()=('ul','ol','dl')">
+            <xsl:when test="../../child::node()/name()=('ul','ol','dl')">                                
                 <item>
-                    <xsl:for-each select="child::node()">
+                    <xsl:for-each select="child::node()">                                                
                         <xsl:apply-templates select="."/>
+                        
                     </xsl:for-each>
                 </item>
             </xsl:when>
-            <xsl:when test="../../child::node()/name()=('dd','dt')">
+            <xsl:when test="../../child::node()/name()=('dd','dt')">                
                 <xsl:for-each select="child::node()">
                     <xsl:apply-templates select="."/>
                 </xsl:for-each>
@@ -638,10 +644,6 @@
     </xsl:template>
 
     <xsl:template match="node()[name()=$inflectiveNames/*]">
-        <xsl:message>
-            <xsl:copy-of select="."/>
-        </xsl:message>
-
         <saxon:assign name="inflectiveCounter" select="$inflectiveCounter+1"/>
         <xsl:variable name="openNum" select="$inflectiveCounter"/>
         <xsl:variable name="openId" select="concat($sigle,'-',$openNum,'-iaw',$openNum)"/>
@@ -656,7 +658,7 @@
                 <xsl:attribute name="n" select="$openNum"/>
                 <xsl:attribute name="next" select="$closeId"/>
                 <xsl:attribute name="topology">openingTag</xsl:attribute>
-                <xsl:value-of select="name()"/>
+                <xsl:value-of select="concat('&lt;',name(),'&gt;')"/>
             </xsl:element>
         </xsl:element>
         <xsl:call-template name="esc">
@@ -668,7 +670,7 @@
                 <xsl:attribute name="n" select="$closeNum"/>
                 <xsl:attribute name="prev" select="$openId"/>
                 <xsl:attribute name="topology">closingTag</xsl:attribute>
-                <xsl:value-of select="name()"/>
+                <xsl:value-of select="concat('&lt;',name(),'&gt;')"/>
             </xsl:element>
         </xsl:element>
     </xsl:template>

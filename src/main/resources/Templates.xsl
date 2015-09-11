@@ -3,7 +3,7 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
     xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com" version="3.0"
     extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
-<!--       xmlns:err="http://www.w3.org/2005/xqt-errors" >-->
+    <!--       xmlns:err="http://www.w3.org/2005/xqt-errors" >-->
 
     <xd:doc scope="stylesheet">
         <xd:desc>
@@ -18,7 +18,7 @@
     </xd:doc>
     <xsl:include href="Templates2.xsl"/>
 
-	<xsl:param name="type" required="yes"/>
+    <xsl:param name="type" required="yes"/>
     <xsl:param name="korpusSigle" required="yes"/>
     <xsl:param name="lang" required="yes"/>
     <xsl:param name="origfilename" required="yes"/>
@@ -27,12 +27,12 @@
     <xsl:param name="pubYear" required="yes"/>
     <xsl:param name="letter" required="yes"/>
     <xsl:param name="encoding" required="yes"/>
-    
+
     <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.new.dtd"
         method="xml" encoding="{$encoding}" indent="yes"/>
     <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
     <xsl:variable name="sigle" saxon:assignable="yes"/>
-    
+
     <xsl:param name="headerNames">
         <name>h1</name>
         <name>h2</name>
@@ -69,11 +69,11 @@
                 />
             </xsl:variable>
             <xsl:sequence
-                select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"/>            
+                select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"/>
         </xsl:variable>
-                
+
         <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
-        
+
         <!--Current index-->
         <xsl:variable name="t.title">
             <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
@@ -93,7 +93,7 @@
             <xsl:attribute name="n"
                 select="concat(revision/text/@lang,concat('.',translate(title,' ','_')))"/>
             <xsl:attribute name="version" select="1.0"/>
-            
+
             <!-- * idsHeader * -->
             <idsHeader type="text" pattern="text" status="new" version="1.0" TEIform="teiHeader">
                 <fileDesc>
@@ -162,8 +162,10 @@
                         <reference type="short" assemblage="regular">
                             <xsl:value-of select="$textSigle"/> Wikipedia; <xsl:value-of
                                 select="title"/>, (Letzte Änderung <xsl:value-of
-                                select="format-dateTime(revision/timestamp,'[D01].[M01].[Y0001]')"/>                            
-                            <xsl:value-of select="concat('), ',$pubDay,'.',$pubMonth,'.',$pubYear)"/>
+                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"/> )
+                                <xsl:variable name="pubDate"
+                                select="xs:date(concat($pubYear,'-',$pubMonth,'-',$pubDay))"/>
+                            <xsl:value-of select="format-date($pubDate,'[D1].[M1].[Y0001]')"/>
                         </reference>
                     </sourceDesc>
                 </fileDesc>
@@ -177,21 +179,26 @@
                     <creation>
                         <creatDate>
                             <xsl:sequence
-                                select="format-dateTime(revision/timestamp, '[D01].[M01].[Y0001]')"
+                                select="format-dateTime(revision/timestamp, '[Y0001].[M01].[D01]')"
                             />
                         </creatDate>
                         <creatRef>(Letzte Änderung <xsl:value-of
-                            select="format-dateTime(revision/timestamp,'[D01].[M01].[Y0001]')"/>)</creatRef>
+                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+                            />)</creatRef>
                         <creatRefShort>(Letzte Änderung <xsl:value-of
-                            select="format-dateTime(revision/timestamp,'[D01].[M01].[Y0001]')"/>)</creatRefShort>
+                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+                            />)</creatRefShort>
                     </creation>
                     <textDesc>
                         <xsl:choose>
-                            <xsl:when test="$type eq 'articles'">
+                            <xsl:when test="$type eq 0">
                                 <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
                             </xsl:when>
-                            <xsl:otherwise>
+                            <xsl:when test="$type eq 1">
                                 <textTypeArt>Diskussion</textTypeArt>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <textTypeArt>Benutzerdiskussion</textTypeArt>
                             </xsl:otherwise>
                         </xsl:choose>
                         <textDomain/>
@@ -217,12 +224,13 @@
             <xsl:catch>
                 <saxon:assign name="errorCounter" select="$errorCounter+1"/>
                 <xsl:message terminate="yes">
-                    <xsl:text>Title: </xsl:text><xsl:value-of select="../title"/>
+                    <xsl:text>Title: </xsl:text>
+                    <xsl:value-of select="../title"/>
                     <!--
 Error code: <xsl:value-of select="$err:code"/>
-Reason: <xsl:value-of select="$err:description"/-->                                        
-                </xsl:message>                
-                
+Reason: <xsl:value-of select="$err:description"/-->
+                </xsl:message>
+
             </xsl:catch>
         </xsl:try>
     </xsl:template>
@@ -367,7 +375,7 @@ Reason: <xsl:value-of select="$err:description"/-->
 
     <xsl:variable name="headingType">
         <xsl:choose>
-            <xsl:when test="$type eq 'articles'">section</xsl:when>
+            <xsl:when test="$type eq 0">section</xsl:when>
             <xsl:otherwise>thread</xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
