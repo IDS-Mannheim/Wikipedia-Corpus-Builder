@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-
 public class Configuration {
 
 	private String wikiXMLFolder;
@@ -54,27 +52,6 @@ public class Configuration {
 		namespaceMap.put(15, "category-talk");
 	}
 
-	public static final Map<Integer, String> typeAbbr;
-	static {
-		typeAbbr = new HashMap<Integer, String>();
-		typeAbbr.put(0, "WP");
-		typeAbbr.put(1, "WD");
-		typeAbbr.put(2, "WB");
-		typeAbbr.put(3, "WBD");
-		typeAbbr.put(4, "WPR");
-		typeAbbr.put(5, "WPRD");
-		typeAbbr.put(6, "WDA");
-		typeAbbr.put(7, "WDAD");
-		typeAbbr.put(8, "WM");
-		typeAbbr.put(9, "WMD");
-		typeAbbr.put(10, "WV");
-		typeAbbr.put(11, "WVD");
-		typeAbbr.put(12, "WH");
-		typeAbbr.put(13, "WHD");
-		typeAbbr.put(14, "WK");
-		typeAbbr.put(15, "WKD");
-	}
-
 	public static final String[] indexes = { "A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
@@ -86,16 +63,20 @@ public class Configuration {
 		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
 	}
 
-	public Configuration(String xmlFolder, String type, String dumpFilename,
+	// FIX ME
+	public Configuration(String xmlFolder, int namespaceKey, String dumpFilename,
 			String inflectives, String encoding, String outputFile,
 			String index, String url, String username, String password) {
 		this();
 		setDumpFilename(dumpFilename);
-		setPageType(type);
+				
+		setNamespaceKey(namespaceKey);
+		setPageType(namespaceMap.get(namespaceKey));
+		
 		setWikiXMLFolder(xmlFolder);
 		setWikiXMLIndex(index);
 		setOutputFile(outputFile);
-		setEncoding(encoding);
+		setOutputEncoding(encoding);
 		setInflectives(inflectives);
 		setDatabaseUrl(url);
 		setDatabaseUsername(username);
@@ -105,6 +86,7 @@ public class Configuration {
 	public Configuration(String propertiesFilename) throws IOException {
 		InputStream is = Configuration.class.getClassLoader()
 				.getResourceAsStream(propertiesFilename);
+		
 		Properties config = new Properties();
 		config.load(is);
 
@@ -118,12 +100,12 @@ public class Configuration {
 		setLanguage(config.getProperty("language"));
 		setLanguageCode();
 		setYear();
-		setKorpusSigle();
+		setKorpusSigle(config.getProperty("korpusSigle"));
 
 		setWikiXMLFolder(config.getProperty("wikixml_folder"));
 		setWikiXMLIndex(config.getProperty("wikixml_index"));
 		setOutputFile(config.getProperty("output_file"));
-		setEncoding(config.getProperty("output_encoding"));
+		setOutputEncoding(config.getProperty("output_encoding"));
 		setInflectives(config.getProperty("inflective_file"));
 		setDatabaseUrl(config.getProperty("db_url"));
 		setDatabaseUsername(config.getProperty("db_username"));
@@ -132,19 +114,6 @@ public class Configuration {
 		setMaxThreads(Integer.parseInt(config.getProperty("max_threads", "2")));
 
 		is.close();
-	}
-
-	public Configuration(CommandLine cmd) {
-		setWikiXMLFolder(cmd.getOptionValue("x"));
-		setPageType(cmd.getOptionValue("t"));
-		setDumpFilename(cmd.getOptionValue("w"));
-		setOutputFile(cmd.getOptionValue("o"));
-		setEncoding(cmd.getOptionValue("e"));
-		setInflectives(cmd.getOptionValue("inf"));
-		setWikiXMLIndex(cmd.getOptionValue("i"));
-		setDatabaseUrl(cmd.getOptionValue("d"));
-		setDatabaseUsername(cmd.getOptionValue("u"));
-		setDatabasePassword(cmd.getOptionValue("p"));
 	}
 
 	public String getWikiXMLFolder() {
@@ -192,11 +161,11 @@ public class Configuration {
 		this.outputFile = outputFile;
 	}
 
-	public String getEncoding() {
+	public String getOutputEncoding() {
 		return encoding;
 	}
 
-	public void setEncoding(String encoding) {
+	public void setOutputEncoding(String encoding) {
 		if (encoding == null || encoding.isEmpty()) {
 			encoding = "UTF-8"; // default encoding
 		}
@@ -312,12 +281,12 @@ public class Configuration {
 		return korpusSigle;
 	}
 
-	public void setKorpusSigle() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(typeAbbr.get(namespaceKey));
-		sb.append(new String(languageCode.substring(0, 1).toUpperCase()));
-		sb.append(new String(year.substring(2, 4)));
-		this.korpusSigle = sb.toString();
+	public void setKorpusSigle(String korpusSigle) {
+		if (korpusSigle == null || korpusSigle.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Please specify the korpusSigle.");
+		}
+		this.korpusSigle = korpusSigle;
 	}
 
 	public int getMaxThreads() {
