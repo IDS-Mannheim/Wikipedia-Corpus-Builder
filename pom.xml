@@ -14,6 +14,7 @@
       <groupId>net.sf.saxon</groupId>
       <artifactId>saxon9ee</artifactId>
       <version>9.4.0.3J</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
@@ -55,53 +56,37 @@
 		<artifactId>excalibur-xmlutil</artifactId>
 		<version>2.1</version>
 	</dependency>
+	<dependency>
+		<groupId>commons-lang</groupId>
+		<artifactId>commons-lang</artifactId>
+		<version>2.5</version>
+	</dependency>
   </dependencies>
+  
+  
+  
   <build>
-  <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>        
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.3</version>
         <configuration>
           <source>${version.java}</source>
           <target>${version.java}</target>
         </configuration>
       </plugin>
-      
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.1</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <mainClass>de.mannheim.ids.wiki.WikiI5Converter</mainClass>
-              <classpathPrefix>../lib/</classpathPrefix>
-              <addClasspath>true</addClasspath>
-            </manifest>
-             <manifestEntries>
-            	<Class-Path>../</Class-Path>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
  	<plugin>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.5</version>
         <configuration>
           <archive>
+          	  <index>false</index>
 		      <manifest>
-		        <mainClass>de.mannheim.ids.wiki.WikiI5Converter</mainClass>
+		        <mainClass>de.mannheim.ids.wiki.WikiI5Converter</mainClass>		                		        
 		      </manifest>
 		      <manifestEntries>
-            	<Class-Path>../ ../lib/</Class-Path>
-            </manifestEntries>
+            	<Class-Path>../ ../lib/ ../lib/saxon9ee-9.4.0.3J.jar</Class-Path>            	
+            </manifestEntries>            
 		    </archive>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -117,6 +102,7 @@
           </execution>
         </executions>
       </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -144,10 +130,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        </plugin>
     </plugins>
   </build>
 </project>
