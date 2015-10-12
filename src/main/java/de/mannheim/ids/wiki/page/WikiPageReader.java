@@ -128,7 +128,6 @@ public class WikiPageReader implements Runnable {
 					if (matcher.find()) {
 						int ns = Integer.parseInt(matcher.group(1));
 						if (config.getNamespaceKey() == ns) {
-							pageStructureBuilder.append(strLine);
 							pageStructureBuilder.append(trimmedStrLine);
 							pageStructureBuilder.append("\n");
 						}
@@ -163,7 +162,7 @@ public class WikiPageReader implements Runnable {
 				}
 			}
 		}
-		wikipages.add(endPage); // end of wikipages queue
+		wikipages.put(endPage); // end of wikipages queue
 		br.close();
 	}
 
