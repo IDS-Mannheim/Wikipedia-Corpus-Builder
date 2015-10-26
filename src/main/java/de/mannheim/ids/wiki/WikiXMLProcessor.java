@@ -72,7 +72,7 @@ public class WikiXMLProcessor {
 		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
 		ExecutorService pool = Executors.newFixedThreadPool(config
 				.getMaxThreads());
-
+		
 		try {
 			wikiReaderThread.start();
 			for (WikiPage wikiPage = wikipages.take(); !wikiPage
@@ -86,7 +86,14 @@ public class WikiXMLProcessor {
 					ph = new WikiArticleHandler(config, wikiPage,
 							wikiStatistics, errorWriter);
 				}
-				pool.execute(ph);
+				// pool.execute(ph);
+				Thread t = new Thread(ph, wikiPage.getPageTitle());
+				t.start();
+				t.join(1000 * 60 * 3);
+				if (t.isAlive()) {
+					System.err.println("ALIVE: #" + wikiPage.getPageId() + " "
+							+ wikiPage.getPageTitle());
+				}
 			}
 			pool.shutdown();
 		}

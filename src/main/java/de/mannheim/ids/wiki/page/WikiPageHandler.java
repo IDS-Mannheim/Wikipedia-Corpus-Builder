@@ -216,7 +216,7 @@ public abstract class WikiPageHandler implements Runnable {
 			System.out.println(path + wikiPage.getPageId() + ".xml");
 
 			OutputStreamWriter writer = Utilities.createWriter(path,
-					wikiPage.getPageId() + ".xml", config.getOutputEncoding());
+					wikiPage.getPageId() + ".xml", "utf-8");// config.getOutputEncoding());
 
 			writer.append("<?xml version=\"1.0\" encoding=\"");
 			writer.append(config.getOutputEncoding());

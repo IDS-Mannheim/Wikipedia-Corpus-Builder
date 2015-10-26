@@ -416,9 +416,10 @@ public class WikiPostHandler extends WikiPageHandler {
 			String ps = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), postscript);
 
+			String trimmedPostscript = postscript.toLowerCase().trim();
 			// if (!Thread.interrupted()) {
-				if (postscript.toLowerCase().startsWith("ps")
-						|| postscript.toLowerCase().startsWith("p.s")) {
+			if (trimmedPostscript.startsWith("ps")
+					|| trimmedPostscript.startsWith("p.s")) {
 					sb.append("<seg type=\"postscript\">");
 					sb.append(ps);
 					sb.append("</seg>\n");

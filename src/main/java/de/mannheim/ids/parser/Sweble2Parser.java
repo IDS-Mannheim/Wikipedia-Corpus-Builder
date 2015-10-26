@@ -87,7 +87,7 @@ public class Sweble2Parser implements Runnable {
 		catch (LinkTargetException | EngineException e) {
 			// if (!Thread.interrupted()) {
 				wikiStatistics.addSwebleErrors();
-				errorWriter.logErrorPage("SWEBLE ", pagetitle, pageId,
+			errorWriter.logErrorPage("SWEBLE", pagetitle, pageId,
 						e.getCause(), wikitext);
 			// }
 			// else {
@@ -106,7 +106,7 @@ public class Sweble2Parser implements Runnable {
 		catch (Exception e) {
 			// if (!Thread.interrupted()) {
 				wikiStatistics.addRendererErrors();
-				errorWriter.logErrorPage("RENDERER ", pagetitle, pageId,
+			errorWriter.logErrorPage("RENDERER", pagetitle, pageId,
 						e.getCause(), wikitext);
 
 			e.printStackTrace();

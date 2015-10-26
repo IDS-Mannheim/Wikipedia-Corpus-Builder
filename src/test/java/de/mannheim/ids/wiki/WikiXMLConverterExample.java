@@ -19,7 +19,7 @@ public class WikiXMLConverterExample {
 		// the output encoding
 		String encoding = "iso-8859-1";
 		// The namespace of the Wikipages to convert
-		int namespaceKey = 1; // talk page
+		int namespaceKey = 0; // talk page
 		// Set maximum number of threads running concurrently, e.g. as many as
 		// the number of CPUs
 		int maxThreads = 4;
