@@ -25,8 +25,9 @@ public class Statistics {
 		System.out.println("Number of DTD validation errors: "+dtdValidationError);
 		System.out.println("Number of non well-formed XML: "+saxParserError);
 		
-		System.out.println("Total number valid pages: " + (transformedPages - 
-				transformationError - dtdValidationError - saxParserError));
+		int valid = (transformedPages - 
+				transformationError - dtdValidationError - saxParserError);
+		System.out.println("Total number valid pages: " + Math.max(valid, 0));
 	}
 	
 	public int getNumOfChar() {

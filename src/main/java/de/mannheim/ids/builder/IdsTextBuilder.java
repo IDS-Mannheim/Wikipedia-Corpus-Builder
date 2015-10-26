@@ -57,7 +57,8 @@ public class IdsTextBuilder extends DefaultHandler {
 			try {
 				dbManager = new DatabaseManager(config.getDatabaseUrl(),
 						config.getDatabaseUsername(),
-						config.getDatabasePassword());
+						config.getDatabasePassword(),
+						config.getLanguageCode());
 			}
 			catch (SQLException e) {
 				throw new I5Exception("Failed configuring the database manager.", e);

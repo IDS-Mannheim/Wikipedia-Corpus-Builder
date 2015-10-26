@@ -18,13 +18,15 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 
 public class DatabaseManager {
 
-	private static final String langlink = "SELECT ll_lang, ll_title FROM langlinks WHERE ll_from = ?";
+	//private static final String langlink = "SELECT ll_lang, ll_title FROM langlinks WHERE ll_from = ?";
 	public DataSource poolingDataSource;
 	public Connection conn;
+	private static String langlink;
 
-	public DatabaseManager(String dbUrl, String username, String password)
+	public DatabaseManager(String dbUrl, String username, String password, String langCode)
 			throws SQLException {
 		setDataSource(dbUrl, username, password);
+		langlink = "SELECT ll_lang, ll_title FROM "+langCode+"_langlinks WHERE ll_from = ?";
 	}
 
 	public void setDataSource(String url, String username, String password) {

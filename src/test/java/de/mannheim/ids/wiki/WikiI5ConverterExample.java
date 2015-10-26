@@ -31,7 +31,7 @@ public class WikiI5ConverterExample {
 	public static void main(String[] args) throws I5Exception {
 
 		String xmlFolder = "xml-de/articles";
-		String type = "articles";
+		int namespacekey = 0;
 		String index = "xml-de/articleIndex.xml";
 
 		// The dumpFilename should be in the following format:
@@ -47,7 +47,7 @@ public class WikiI5ConverterExample {
 		String username = "username";
 		String password = "password";
 
-		Configuration config = new Configuration(xmlFolder, type, dumpFilename,
+		Configuration config = new Configuration(xmlFolder, namespacekey, dumpFilename,
 				inflectives, encoding, outputFile, index, url, username,
 				password);
 

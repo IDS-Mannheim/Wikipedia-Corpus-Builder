@@ -123,6 +123,7 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	@Override
 	public void fatalError(TransformerException exception)
 			throws TransformerException {
+		//exception.printStackTrace();
 		System.err.println("Transformer fatal error: "+exception.getCause());
 		throw exception;		
 	}
