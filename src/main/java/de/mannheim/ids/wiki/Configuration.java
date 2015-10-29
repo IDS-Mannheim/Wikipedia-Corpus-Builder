@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-
+/**
+ * Setting all the configurations for the convertion process.
+ * 
+ * @author margaretha
+ * 
+ */
 public class Configuration {
 
 	private String wikidump;
@@ -26,6 +30,7 @@ public class Configuration {
 	private boolean isDiscussion;
 	private boolean wikitextToGenerate = false;
 
+	// Wikipedia namespaces
 	public static final Map<Integer, String> namespaceMap;
 	static {
 		namespaceMap = new HashMap<Integer, String>();
@@ -47,6 +52,32 @@ public class Configuration {
 		namespaceMap.put(15, "category-talk");
 	}
 
+	/**
+	 * Constructs the conversion configuration from all the given variables.
+	 * 
+	 * @param wikidump the wikidump filename
+	 * @param language the 2-letter language code of the wikidump
+	 * @param userPage the user page prefix in the Wikidump language, e.g. User
+	 *            in English, Benutzer in German
+	 * @param userContribution the user contribution page prefix in the Wikidump
+	 *            language, e.g. Special:Contributions in English,
+	 *            Spezial:Beiträge in German
+	 * @param helpSignature the signature page title in the Wikidump
+	 *            language, e.g. Wikipedia:Signatures in English, Hilfe:Signatur
+	 *            in
+	 *            German.
+	 *            See: https://en.wikipedia.org/wiki/Wikipedia:Signatures
+	 * @param unsigned the unsigned template keyword in the Wikidump language,
+	 *            e.g. unsigned in English, unsigniert in German, non signé in
+	 *            French
+	 * @param namespaceKey the namespace key of the Wikipedia pages to convert,
+	 *            e.g 0 for articles, 1 for talk pages, 3 for user talk pages
+	 * @param encoding the output encoding, by default is utf-8
+	 * @param maxThread the number of maximal threads allowed to run
+	 *            concurrently
+	 * @param generateWikitext a boolean signifies whether a wikitext file
+	 *            should be generated for each wikipage
+	 */
 	public Configuration(String wikidump, String language, String userPage,
 			String userContribution, String helpSignature, String unsigned,
 			int namespaceKey, String encoding, int maxThread,
@@ -62,35 +93,18 @@ public class Configuration {
 		setSignature(helpSignature);
 		setPageType(namespaceMap.get(namespaceKey));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
-		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
 		setOutputEncoding(encoding);
 		setMaxThreads(maxThread);
+		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
 		setWikitextToGenerate(generateWikitext);
 	}
 
-	public Configuration(CommandLine cmd) {
-		int namespaceKey = Integer.parseInt(cmd.getOptionValue("k"));
-		int maxThread = Integer.parseInt(cmd.getOptionValue("x"));
-
-		setNamespaceKey(namespaceKey);
-		setDiscussion(namespaceKey);
-
-		setWikidump(cmd.getOptionValue("w"));
-		setLanguageCode(cmd.getOptionValue("l"));
-		setUserPage(cmd.getOptionValue("u"));
-		setUserContribution(cmd.getOptionValue("c"));
-		setUnsigned(cmd.getOptionValue("us"));
-		setSignature(cmd.getOptionValue("s"));
-
-		setPageType(namespaceMap.get(namespaceKey));
-		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
-		setOutputEncoding(cmd.getOptionValue("e"));
-		setMaxThreads(maxThread);
-
-		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
-		setWikitextToGenerate(Boolean.valueOf(cmd.getOptionValue("g", "false")));
-	}
-
+	/**
+	 * Constructs the conversion configuration from a properties file.
+	 * 
+	 * @param properties the location of the properties file
+	 * @throws IOException
+	 */
 	public Configuration(String properties) throws IOException {
 		InputStream is = Configuration.class.getClassLoader()
 				.getResourceAsStream(properties);
@@ -122,10 +136,20 @@ public class Configuration {
 		is.close();
 	}
 
+	/**
+	 * Gets the language code of the wikidump.
+	 * 
+	 * @return the wikidump language code
+	 */
 	public String getLanguageCode() {
 		return languageCode;
 	}
 
+	/**
+	 * Sets the 2-letter language code of the wikidump.
+	 * 
+	 * @param languageCode
+	 */
 	public void setLanguageCode(String languageCode) {
 		if (languageCode == null || languageCode.isEmpty()) {
 			throw new IllegalArgumentException("Please specify the 2-letter "
@@ -134,10 +158,20 @@ public class Configuration {
 		this.languageCode = languageCode;
 	}
 
+	/**
+	 * Gets the wikidump filename.
+	 * 
+	 * @return the wikidump filename
+	 */
 	public String getWikidump() {
 		return wikidump;
 	}
 
+	/**
+	 * Sets the wikidump filename.
+	 * 
+	 * @param wikidump
+	 */
 	public void setWikidump(String wikidump) {
 		if (wikidump == null || wikidump.isEmpty()) {
 			throw new IllegalArgumentException(
@@ -146,10 +180,20 @@ public class Configuration {
 		this.wikidump = wikidump;
 	}
 
+	/**
+	 * Gets the output file encoding.
+	 * 
+	 * @return the output file encoding
+	 */
 	public String getOutputEncoding() {
 		return outputEncoding;
 	}
 
+	/**
+	 * Sets the output file encoding, by default is utf-8.
+	 * 
+	 * @param encoding
+	 */
 	public void setOutputEncoding(String encoding) {
 		if (encoding == null || encoding.isEmpty()) {
 			encoding = "utf-8";
@@ -157,10 +201,20 @@ public class Configuration {
 		this.outputEncoding = encoding;
 	}
 
+	/**
+	 * Gets the user page prefix.
+	 * 
+	 * @return the user page prefix
+	 */
 	public String getUserPage() {
 		return userPage;
 	}
 
+	/**
+	 * Sets the user page prefix.
+	 * 
+	 * @param userPage
+	 */
 	public void setUserPage(String userPage) {
 		if (isDiscussion && (userPage == null || userPage.isEmpty())) {
 			throw new IllegalArgumentException("Please specify the user page "
@@ -169,10 +223,20 @@ public class Configuration {
 		this.userPage = userPage;
 	}
 
+	/**
+	 * Gets the user contribution prefix.
+	 * 
+	 * @return the user contribution prefix
+	 */
 	public String getUserContribution() {
 		return userContribution;
 	}
 
+	/**
+	 * Sets the user contribution prefix.
+	 * 
+	 * @param userContribution
+	 */
 	public void setUserContribution(String userContribution) {
 		if (isDiscussion
 				&& (userContribution == null || userContribution.isEmpty())) {
@@ -184,10 +248,20 @@ public class Configuration {
 		this.userContribution = userContribution;
 	}
 
+	/**
+	 * Gets the signature page title (link keyword in wiki markup).
+	 * 
+	 * @return the signature page
+	 */
 	public String getSignature() {
 		return signature;
 	}
 
+	/**
+	 * Sets the signature page title (link keyword in wiki markup).
+	 * 
+	 * @param signature
+	 */
 	public void setSignature(String signature) {
 		if (isDiscussion && (signature == null || signature.isEmpty())) {
 			throw new IllegalArgumentException(
@@ -196,66 +270,150 @@ public class Configuration {
 		this.signature = signature;
 	}
 
+	/**
+	 * Gets the namespacekey (nummer) of the wikipages to convert.
+	 * 
+	 * @return the namespacekey
+	 */
 	public int getNamespaceKey() {
 		return namespaceKey;
 	}
 
+	/**
+	 * Sets the namespacekey (nummer) of the wikipages to convert.
+	 * 
+	 * @param namespaceKey
+	 */
 	public void setNamespaceKey(int namespaceKey) {
 		this.namespaceKey = namespaceKey;
 	}
 
+	/**
+	 * Gets the root output folder path where the wikiXML files should be
+	 * placed.
+	 * 
+	 * @return the output folder
+	 */
 	public String getOutputFolder() {
 		return outputFolder;
 	}
 
+	/**
+	 * Sets the root output folder path where the wikiXML files should be
+	 * placed.
+	 * 
+	 * @param outputFolder
+	 */
 	public void setOutputFolder(String outputFolder) {
 		this.outputFolder = outputFolder;
 	}
 
+	/**
+	 * Determines if the wikipages to convert is of a discussion type or not.
+	 * 
+	 * @return true or false
+	 */
 	public boolean isDiscussion() {
 		return isDiscussion;
 	}
 
+	/**
+	 * Sets if wikipages to convert is of a discussion type or not.
+	 * 
+	 * @param namespaceKey
+	 */
 	public void setDiscussion(int namespaceKey) {
 		this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
 	}
 
+	/**
+	 * Gets the number of maximum threads allowed to run concurrently.
+	 * 
+	 * @return the number of maximum threads
+	 */
 	public int getMaxThreads() {
 		return maxThreads;
 	}
 
+	/**
+	 * Sets the number of maximum threads allowed to run concurrently.
+	 * 
+	 * @param maxThreads
+	 */
 	public void setMaxThreads(int maxThreads) {
 		this.maxThreads = maxThreads;
 	}
 
+	/**
+	 * Gets the page type
+	 * 
+	 * @return
+	 */
 	public String getPageType() {
 		return pageType;
 	}
 
+	/**
+	 * Sets the page type
+	 * 
+	 * @param pageType
+	 */
 	public void setPageType(String pageType) {
 		this.pageType = pageType;
 	}
 
+	/**
+	 * Gets the wikitext folder where the generated wikitext files are to be
+	 * placed.
+	 * 
+	 * @return
+	 */
 	public String getWikitextFolder() {
 		return wikitextFolder;
 	}
 
+	/**
+	 * Sets the wikitext folder where the generated wikitext files are to be
+	 * placed.
+	 * 
+	 * @param wikitextFolder
+	 */
 	public void setWikitextFolder(String wikitextFolder) {
 		this.wikitextFolder = wikitextFolder;
 	}
 
+	/**
+	 * Determines if the wikitext files are to be generated.
+	 * 
+	 * @return
+	 */
 	public boolean isWikitextToGenerate() {
 		return wikitextToGenerate;
 	}
 
+	/**
+	 * Sets if the wikitext files are to be generated.
+	 * 
+	 * @param wikitextToGenerate
+	 */
 	public void setWikitextToGenerate(boolean wikitextToGenerate) {
 		this.wikitextToGenerate = wikitextToGenerate;
 	}
 
+	/**
+	 * Gets the keyword for the unsigned template
+	 * 
+	 * @return the keyword for the unsigned template
+	 */
 	public String getUnsigned() {
 		return unsigned;
 	}
 
+	/**
+	 * Sets the keyword for the unsigned template.
+	 * 
+	 * @param unsigned
+	 */
 	public void setUnsigned(String unsigned) {
 		if (isDiscussion && (unsigned == null || unsigned.isEmpty())) {
 			throw new IllegalArgumentException(

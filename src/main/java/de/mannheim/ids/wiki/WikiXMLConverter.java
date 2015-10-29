@@ -11,27 +11,9 @@ import org.apache.commons.cli.ParseException;
 /**
  * Main class for Wikitext to WikiXML conversion
  * 
- * WikiXMLConverter takes 5 compulsory arguments for article type:
- * -w Wikidump filename
- * -l 2-letter language code of the Wikipedia, e.g. en, de, fr, hu, it
- * -k Namespace key of the Wikipedia pages to convert
- * -x Number of maximal threads allowed to run concurrently
- * -e The output encoding, e.g. utf-8 or iso-8859-1
+ * WikiXMLConverter reads a properties file and set the conversion configuration
+ * based on the file.
  * 
- * For converting talk pages, the following arguments are also required:
- * -u User page in the Wikipedia language, e.g. Benutzer in German Wikipedia
- * -c User contribution page in the Wikipedia language, e.g.
- * Spezial:Beiträge in German Wikipedia
- * -us Unsigned = unsigned template in the Wikidump language, e.g. unsigned in
- * English, unsigniert in German, non signé in French
- * -s Signature page in the Wikidump language, e.g.
- * Wikipedia:Signature in English, Hilfe:Signature in German
- * 
- * Example:
- * -l de -w data/dewiki-20130728-signature-sample.xml -u Benutzer
- * -c Spezial:Beiträge -s Hilfe:Signatur -k 1 -x 3 -e utf-8
- * 
- * Alternatively, WikiXMLConverter can read a properties file.
  * Run with arguments: -prop config.properties
  * 
  * @author margaretha
@@ -44,24 +26,6 @@ public class WikiXMLConverter {
 
 	public WikiXMLConverter() {
 		options = new Options();
-		options.addOption("w", true, "Wikidump filename");
-		options.addOption("l", true, "2-letter language code of the Wikipedia");
-		options.addOption("k", true,
-				"Namespace key of the Wikipedia pages to convert");
-		options.addOption("x", true,
-				"Number of maximal threads allowed to run " + "concurrently");
-		options.addOption("e", true, "Encoding: utf-8 or iso-8859-1");
-
-		options.addOption("u", true,
-				"User page in the Wikipedia language, e.g. "
-						+ "\"Benutzer\" in German Wikipedia");
-		options.addOption("c", true, "User contribution page in the Wikipedia "
-				+ "language, e.g. \"Spezial:Beiträge\" in German Wikipedia");
-		options.addOption("us", true,
-				"Unsigned template in the Wikipedia language, e.g. "
-						+ "\"unsigniert\" in German Wikipedia");
-		options.addOption("s", true,
-				"Signature page in the Wikipedia dump language.");
 		options.addOption("prop", true, "Properties file");
 	}
 
@@ -82,7 +46,8 @@ public class WikiXMLConverter {
 			return new Configuration(propertiesFile);
 		}
 		else {
-			return new Configuration(cmd);
+			throw new IllegalArgumentException(
+					"Please specify the location of the .properties file.");
 		}
 	}
 }
