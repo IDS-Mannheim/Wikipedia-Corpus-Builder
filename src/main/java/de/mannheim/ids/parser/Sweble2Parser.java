@@ -17,7 +17,7 @@ import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
- * Convert wikitext to XML using Sweble parser
+ * Convert wikitext to wikiXML using Sweble parser
  * 
  * @author margaretha
  * 
@@ -34,9 +34,12 @@ public class Sweble2Parser implements Runnable {
 	 * given wikitext using the Sweble Parser 2.0.0 version, and eventually
 	 * generates an XML representation using a visitor class.
 	 * 
-	 * @param wikitext
+	 * @param pageId
 	 * @param pagetitle
+	 * @param wikitext
 	 * @param language
+	 * @param wikiStatistics
+	 * @param errorWriter
 	 */
 	public Sweble2Parser(String pageId, String pagetitle, String wikitext,
 			String language, WikiStatistics wikiStatistics,
@@ -85,15 +88,9 @@ public class Sweble2Parser implements Runnable {
 			cp = engine.postprocess(pageId, wikitext, null);
 		}
 		catch (LinkTargetException | EngineException e) {
-			// if (!Thread.interrupted()) {
 				wikiStatistics.addSwebleErrors();
 			errorWriter.logErrorPage("SWEBLE", pagetitle, pageId,
 						e.getCause(), wikitext);
-			// }
-			// else {
-			// System.err.println("In SWEBLE, Thread " + pagetitle
-			// + " was interrupted.");
-			// }
 			return;
 		}
 
@@ -104,17 +101,11 @@ public class Sweble2Parser implements Runnable {
 					pageTitle, cp.getPage());
 		}
 		catch (Exception e) {
-			// if (!Thread.interrupted()) {
 				wikiStatistics.addRendererErrors();
 			errorWriter.logErrorPage("RENDERER", pagetitle, pageId,
 						e.getCause(), wikitext);
 
 			e.printStackTrace();
-			// }
-			// else {
-			// System.err.println("In RENDERER, Thread " + pagetitle
-			// + " was interrupted.");
-			// }
 		}
 		cp = null;
 	}

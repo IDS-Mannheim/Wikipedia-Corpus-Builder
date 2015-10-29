@@ -3,6 +3,12 @@ package de.mannheim.ids.wiki.page;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Handles timestamp mark up, also for different languages.
+ * 
+ * @author margaretha
+ * 
+ */
 public class WikiTimestamp {
 
 	// german, italian, croatian, polish, spanish

@@ -13,9 +13,9 @@ import org.apache.commons.lang.StringUtils;
 import de.mannheim.ids.wiki.Configuration;
 
 /**
- * This class reads a Wiki page, identify some page metadata, such as title,
- * namespace and id, and pass the page content to a corresponding handler
- * depends on the type of the Wiki page: article or talk page.
+ * This class reads the wikidump and generates WikiPage objects from the page
+ * metadata, such as title, namespace and id. It also collects wikitext per page
+ * as the wikipage content.
  * 
  * @author margaretha
  * 
@@ -39,6 +39,15 @@ public class WikiPageReader implements Runnable {
 
 	private StringBuilder pageStructureBuilder;
 
+	/**
+	 * Constructs WikiPageReader by adopting the given variable to initialize
+	 * its corresponding fields.
+	 * 
+	 * @param config
+	 * @param wikipages
+	 * @param endwikipage
+	 * @param wikiStatistics
+	 */
 	public WikiPageReader(Configuration config,
 			BlockingQueue<WikiPage> wikipages, WikiPage endwikipage,
 			WikiStatistics wikiStatistics) {

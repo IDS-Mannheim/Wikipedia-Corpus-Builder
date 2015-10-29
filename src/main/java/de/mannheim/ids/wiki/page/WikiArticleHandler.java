@@ -4,8 +4,7 @@ import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
- * This class implements methods for handling Wikipages including reading page
- * content, cleaning wikitext (pre-processing), parsing, and XML validation.
+ * An extension of WikiPageHandler for article pages
  * 
  * @author margaretha
  * 
@@ -27,9 +26,6 @@ public class WikiArticleHandler extends WikiPageHandler {
 
 			String wikiXML = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), wikiPage.getWikitext());
-			// if (Thread.interrupted()) {
-			// return;
-			// }
 
 			wikiPage.setWikiXML(wikiXML);
 			writeWikiXML();

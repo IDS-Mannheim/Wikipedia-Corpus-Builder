@@ -7,7 +7,7 @@ import java.util.List;
 import de.mannheim.ids.wiki.Utilities;
 
 /**
- * Wikipage Class
+ * Wikipage class
  * 
  * @author margaretha
  * 

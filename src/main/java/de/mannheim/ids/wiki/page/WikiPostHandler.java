@@ -11,7 +11,8 @@ import de.mannheim.ids.writer.WikiPostUser;
 
 /**
  * This class implements methods for handling a talk page content, including
- * posting segmentation, parsing and posting generation.
+ * segmenting wikitext into postings, parsing the wikitext and generating
+ * posting structures in XML.
  * 
  * @author margaretha
  * 
@@ -46,6 +47,18 @@ public class WikiPostHandler extends WikiPageHandler {
 	private String post;
 	private StringBuilder wikiXMLBuilder;
 
+	/**
+	 * Constructs WikiPostHandler and compiles some regex patterns used in
+	 * posting segmentation.
+	 * 
+	 * @param config
+	 * @param wikipage
+	 * @param wikiStatistics
+	 * @param errorWriter
+	 * @param postUser
+	 * @param postTime
+	 * @throws IOException
+	 */
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
 			WikiPostUser postUser, WikiPostTime postTime) throws IOException {
@@ -82,6 +95,8 @@ public class WikiPostHandler extends WikiPageHandler {
 				writeWikitext();
 			}
 
+			// creating postings by gradually checking small portions of
+			// wikitext (segments of wikitext)
 			wikiXMLBuilder = new StringBuilder();
 			for (String text : wikiPage.textSegments) {
 				segmentPosting(text);
@@ -98,13 +113,19 @@ public class WikiPostHandler extends WikiPageHandler {
 		}
 		catch (Exception e) {
 			wikiStatistics.addUnknownErrors();
-			e.printStackTrace();
+			// e.printStackTrace();
 
 			errorWriter.logErrorPage("HANDLER", wikiPage.getPageTitle(),
 					wikiPage.getPageId(), e, "");
 		}
 	}
 
+	/**
+	 * Adding a signature element to the current post.
+	 * 
+	 * @param sigType
+	 * @param timestamp
+	 */
 	private void addSignature(SignatureType sigType, String timestamp) {
 		post += "<autoSignature @type=";
 		post += sigType.toString();
@@ -117,6 +138,13 @@ public class WikiPostHandler extends WikiPageHandler {
 		post += "</autoSignature>";
 	}
 
+	/**
+	 * Heuristically filters out the given wikitext to determine posting
+	 * boundaries and eventually creates posting elements.
+	 * 
+	 * @param text wikitext
+	 * @throws Exception
+	 */
 	private void segmentPosting(String text) throws Exception {
 
 		if (text == null) {
@@ -186,6 +214,14 @@ public class WikiPostHandler extends WikiPageHandler {
 		post += trimmedText + "\n";
 	}
 
+	/**
+	 * Recognizes timestamp markup in a user signature markup that appears
+	 * without a user link.
+	 * 
+	 * @param trimmedText
+	 * @return true if a timestamp is recognized, false otherwise.
+	 * @throws IOException
+	 */
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
 
 		WikiTimestamp t = new WikiTimestamp(trimmedText);
@@ -203,6 +239,15 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
+	/**
+	 * Identifies a signature markup, extracts signature information from it,
+	 * and creates an XML signature structure for it.
+	 * 
+	 * @param trimmedText trimmed wikitext
+	 * @return true if the given wikitext contains a signature markup, false
+	 *         otherwise.
+	 * @throws Exception
+	 */
 	private boolean handleSignature(String trimmedText) throws Exception {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
@@ -242,6 +287,13 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
+	/**
+	 * Re-checks and determines the signature type.
+	 * 
+	 * @param type the initial possible signature type
+	 * @param rest tailing text after a signature markup
+	 * @return
+	 */
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
 		if (baselineMode) {
 			return SignatureType.SIGNED;
@@ -256,6 +308,16 @@ public class WikiPostHandler extends WikiPageHandler {
 		return type;
 	}
 
+	/**
+	 * Identifies user contribution markup in the given trimmed wikitext,
+	 * creates a corresponding XML signature structure, and eventually a
+	 * posting for the collected post text until now.
+	 * 
+	 * @param trimmedText trimmed wikitext
+	 * @return true if the trimmed wikitext contains a user contribution markup,
+	 *         false otherwise.
+	 * @throws IOException
+	 */
 	private boolean handleUserContribution(String trimmedText)
 			throws IOException {
 		if (trimmedText == null) {

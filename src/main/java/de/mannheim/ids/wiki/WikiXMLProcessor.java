@@ -23,7 +23,10 @@ import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 
 /**
- * 
+ * WikiXMLProcessor manages the overall conversion process. The conversion
+ * configuration is set in the constructor method. The conversion starts with
+ * reading the wikidump file, recognizing wikipages, parsing the wikitext in the
+ * wikipages, and creates a WikiXML file for each wikipage.
  * 
  * @author margaretha
  * 
@@ -42,6 +45,12 @@ public class WikiXMLProcessor {
 
 	public static final WikiConfig wikiconfig = DefaultConfigEnWp.generate();
 
+	/**
+	 * Constructs WikiXMLProcessor and sets the conversion configuration.
+	 * 
+	 * @param config
+	 * @throws IOException
+	 */
 	public WikiXMLProcessor(Configuration config) throws IOException {
 		if (config == null) {
 			throw new IllegalArgumentException("Configuration cannot be null.");
@@ -86,14 +95,14 @@ public class WikiXMLProcessor {
 					ph = new WikiArticleHandler(config, wikiPage,
 							wikiStatistics, errorWriter);
 				}
-				// pool.execute(ph);
-				Thread t = new Thread(ph, wikiPage.getPageTitle());
-				t.start();
-				t.join(1000 * 60 * 3);
-				if (t.isAlive()) {
-					System.err.println("ALIVE: #" + wikiPage.getPageId() + " "
-							+ wikiPage.getPageTitle());
-				}
+				pool.execute(ph);
+				// Thread t = new Thread(ph, wikiPage.getPageTitle());
+				// t.start();
+				// t.join(1000 * 60 * 3);
+				// if (t.isAlive()) {
+				// System.err.println("ALIVE: #" + wikiPage.getPageId() + " "
+				// + wikiPage.getPageTitle());
+				// }
 			}
 			pool.shutdown();
 		}

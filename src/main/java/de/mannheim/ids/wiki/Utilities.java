@@ -10,7 +10,7 @@ import java.text.Normalizer.Form;
 import java.util.Arrays;
 
 /**
- * Utilities contains utility methods used in some other classes.
+ * Class Utilities contains utility methods used in some other classes.
  * 
  * @author margaretha
  * 
@@ -79,9 +79,6 @@ public class Utilities {
 				.toUpperCase();
 		normalizedStr = normalizedStr.substring(0, 1);
 
-		// if (Character.isLetterOrDigit(normalizedStr.charAt(0))){
-		// return normalizedStr.substring(0,1);
-		// }
 		if (Arrays.asList(indexList).contains(normalizedStr)) {
 			return normalizedStr;
 		}

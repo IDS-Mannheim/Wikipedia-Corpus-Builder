@@ -11,7 +11,7 @@ import de.mannheim.ids.wiki.WikiXMLProcessor;
 
 /**
  * Class implementation for handling posting authors. <br/>
- * Generates a list of post authors / wikipedia users in XML.
+ * Generates a list of post authors (e.g. wikipedia users) in XML.
  * 
  * @author margaretha
  * 
