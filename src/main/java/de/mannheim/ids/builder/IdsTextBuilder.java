@@ -22,6 +22,11 @@ import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
 
+/**IdsTextBuilder is a SAX handler implementation creating idsText element.
+ *   
+ * @author margaretha
+ *
+ */
 public class IdsTextBuilder extends DefaultHandler {
 
 	private IndentingXMLStreamWriter writer;
@@ -42,6 +47,12 @@ public class IdsTextBuilder extends DefaultHandler {
 
 	private boolean noLangLinks = false;
 
+	/** Constructs IdsTextBuilder from the given variables
+	 * 
+	 * @param config
+	 * @param writer the I5 output writer
+	 * @throws I5Exception
+	 */
 	public IdsTextBuilder(Configuration config, IndentingXMLStreamWriter writer)
 			throws I5Exception {
 		if (config == null) {
@@ -108,6 +119,11 @@ public class IdsTextBuilder extends DefaultHandler {
 		}
 	}
 
+	/** Creates related item elements for the links of the wikipage's analogs in other languages (wikipedias). 
+	 * 
+	 * @param ll language links from wikipedia (database)
+	 * @throws SAXException
+	 */
 	private void createLangLinks(LanguageLinks ll) throws SAXException {
 		Map<String, String> map = ll.getTitleMap();
 		try{

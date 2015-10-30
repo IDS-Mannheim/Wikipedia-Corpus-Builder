@@ -14,8 +14,8 @@ import org.xml.sax.SAXParseException;
 
 /**
  * This class handles the validation error and writes the error messages to a
- * text file with name format: i5-[language]wiki-[published
- * date]-[pagetype]-error.txt.
+ * text file in logs/ folder with name format: wikii5-[language]wiki-[published
+ * date]-[pagetype]-error.log.
  * 
  * @author margaretha
  * 
@@ -26,6 +26,10 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	private OutputStreamWriter errorWriter;
 	private int numOfInvalidText = 0;
 
+	/** Constructs I5ErrorHandler.
+	 * @param config
+	 * @throws I5Exception
+	 */
 	public I5ErrorHandler(Configuration config) throws I5Exception {
 
 		if (config == null) {
@@ -50,6 +54,10 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 		}
 	}
 
+	/** Creates a log file for logging the errors.
+	 * @param config
+	 * @return
+	 */
 	private String createFileName(Configuration config) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("logs/wikiI5-");
@@ -74,6 +82,12 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 		throw new SAXException(exception);
 	}
 
+	/** Writes information about an error, such where it happens and what type of error has occurred.
+	 * @param xmlPath
+	 * @param message
+	 * @param t
+	 * @throws I5Exception
+	 */
 	public synchronized void write(String xmlPath, String message, Throwable t)
 			throws I5Exception {
 		numOfInvalidText++;

@@ -29,6 +29,11 @@ import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.Statistics;
 import de.mannheim.ids.wiki.WikiI5Processor;
 
+/** Creates idsDocs and sorts wikipages by the document ids to appear in the final corpus. 
+ *  
+ * @author margaretha
+ *
+ */
 public class WikiXMLSorter extends Thread {
 
 	private XPathFactory xPathFactory;

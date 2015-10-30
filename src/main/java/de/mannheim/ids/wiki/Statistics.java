@@ -1,5 +1,10 @@
 package de.mannheim.ids.wiki;
 
+/** Counts number of pages transformed and errors thrown through the conversion process. 
+ * 
+ * @author margaretha
+ *
+ */
 public class Statistics {
 	public int transformationError;
 	public int dtdValidationError;

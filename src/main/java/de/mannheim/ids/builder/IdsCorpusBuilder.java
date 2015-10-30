@@ -12,6 +12,11 @@ import javax.xml.stream.XMLStreamException;
 
 import de.mannheim.ids.wiki.Configuration;
 
+/** Creates idsCorpus element and idsHeader inside the idsCorpus element.
+ *  
+ * @author margaretha
+ *
+ */
 public class IdsCorpusBuilder extends BaseBuilder {
 	private Configuration config;
 	private boolean setInitialRev = true;

@@ -32,6 +32,11 @@ import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.transform.WikiI5Part;
 
+/** Creates the WikiI5Corpus output file and also validates the content.
+ * 
+ * @author margaretha
+ *
+ */
 public class I5Writer {
 	private IdsTextBuilder idsTextHandler;
 	private XMLReader reader;
@@ -41,6 +46,12 @@ public class I5Writer {
 	private Configuration config;
 	private Statistics stats;
 
+	/** Constructs I5Writer from the given variables.
+	 * @param config
+	 * @param errorHandler
+	 * @param statistics
+	 * @throws I5Exception
+	 */
 	public I5Writer(Configuration config, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {		
 		this.errorHandler = errorHandler;
 		this.config = config;
@@ -50,6 +61,12 @@ public class I5Writer {
 		stats = statistics;
 	}
 
+	/** Creates the output file and an IndentingXMLStreamWriter for writing (XML-based) 
+	 * I5 into the output file.
+	 * 
+	 * @param config
+	 * @throws I5Exception
+	 */
 	private void setWriter(Configuration config) throws I5Exception {
 		File file = new File(config.getOutputFile());
 		FileOutputStream fos = null;
@@ -79,6 +96,9 @@ public class I5Writer {
 		writer.setIndent(" ");
 	}
 
+	/** Creates a SAX parser and returns the XML reader inside the SAX parser. 
+	 * @throws I5Exception
+	 */
 	private void setXMLReader() throws I5Exception {
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();
 		saxfactory.setValidating(true);
@@ -112,6 +132,10 @@ public class I5Writer {
 		reader.setErrorHandler(errorHandler);
 	}
 
+	/** Writes the content of WikiI5Part based on its type (startDoc, idstext or endDoc)
+	 * @param w
+	 * @throws I5Exception
+	 */
 	public void write(WikiI5Part w) throws I5Exception {
 		if (w == null) {
 			throw new IllegalArgumentException("WikiI5Part cannot be null.");
@@ -137,6 +161,9 @@ public class I5Writer {
 		}
 	}
 
+	/** Writes the start document, the idsCorpus element and its corresponding idsHeader.
+	 * @throws I5Exception
+	 */
 	public synchronized void writeStartDocument() throws I5Exception {
 
 		try {
@@ -156,6 +183,10 @@ public class I5Writer {
 		}
 	}
 
+	/** Creates and writes an idsDoc start element and its idsHeader from the given wikiI5Part object.
+	 * @param w
+	 * @throws I5Exception
+	 */
 	private synchronized void writeStartIdsCorpus(WikiI5Part w)
 			throws I5Exception {
 		IdsDocBuilder db = new IdsDocBuilder(writer);
@@ -178,6 +209,11 @@ public class I5Writer {
 		}
 	}
 
+	/** Validates the transformation results against DTD by using the SAX parser. 
+	 * 
+	 * @param w idsText wikiI5Part
+	 * @throws I5Exception
+	 */
 	public void validateDTD(WikiI5Part w) throws I5Exception {
 		SaxBuffer saxBuffer = new SaxBuffer();
 		reader.setContentHandler(saxBuffer);
@@ -188,6 +224,7 @@ public class I5Writer {
 		}
 		catch (SAXException | IOException e) {
 			stats.addDtdValidationError();
+			//System.out.println(w.getBos());
 			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);		
 			return;
 		}

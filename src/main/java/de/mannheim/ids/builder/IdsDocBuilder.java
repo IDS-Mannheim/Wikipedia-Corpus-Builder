@@ -4,6 +4,10 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 
 import javax.xml.stream.XMLStreamException;
 
+/** Creates idsDoc element and its idsHeader
+ * @author margaretha
+ *
+ */
 public class IdsDocBuilder extends BaseBuilder {
 
 	public IdsDocBuilder(IndentingXMLStreamWriter writer) {

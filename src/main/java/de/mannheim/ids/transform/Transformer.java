@@ -26,6 +26,11 @@ import de.mannheim.ids.wiki.I5ErrorHandler;
 import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.Statistics;
 
+/** Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5 
+ * 	and returns the result as ByteArrayOutputStream. 
+ * @author margaretha
+ *
+ */
 public class Transformer implements Callable<WikiI5Part> {
 
 	private static final ThreadLocal<XsltTransformer> transformer = new ThreadLocal<XsltTransformer>() {

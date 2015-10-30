@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/** Sets a configuration for the whole conversion process.
+ * 
+ * @author margaretha
+ *
+ */
 public class Configuration {
 
 	private String wikiXMLFolder;

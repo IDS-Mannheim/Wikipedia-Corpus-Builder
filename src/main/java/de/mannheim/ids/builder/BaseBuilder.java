@@ -7,6 +7,11 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 
 import javax.xml.stream.XMLStreamException;
 
+/** Constructs basic I5 elements used in other builders.
+ *   
+ * @author margaretha
+ *
+ */
 public class BaseBuilder {
 
 	protected IndentingXMLStreamWriter writer;

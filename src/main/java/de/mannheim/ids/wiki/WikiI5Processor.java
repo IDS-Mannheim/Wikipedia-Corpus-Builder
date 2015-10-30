@@ -14,6 +14,10 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.transform.WikiXMLSorter;
 
+/** Manages the overall conversion process. 
+ * @author margaretha
+ *
+ */
 public class WikiI5Processor {
 
 	private final Configuration config;
@@ -24,6 +28,10 @@ public class WikiI5Processor {
 	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
 	
 
+	/** Constructs WikiI5Processor.
+	 * @param config
+	 * @throws I5Exception
+	 */
 	public WikiI5Processor(Configuration config) throws I5Exception {
 
 		if (config == null) {
@@ -37,6 +45,15 @@ public class WikiI5Processor {
 		statistics = new Statistics();
 	}
 
+	/** Starts the conversion process with creating I5Writing and writing the start document 
+	 * 	element. Then, sorts the WikiXML files by using WikiXMLSorter, runs the XSLT 
+	 * 	transformations for the sorted Wikipages and put the Future results in a Blockingqueue 
+	 * 	limiting the number of threads. Writes each future results and eventually builds 
+	 * 	the whole WikiI5 corpus.
+	 * 	 
+	 * 
+	 * @throws I5Exception
+	 */
 	public void run() throws I5Exception {
 
 		long start = System.currentTimeMillis();

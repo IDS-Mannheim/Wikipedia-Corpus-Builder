@@ -3,6 +3,13 @@ package de.mannheim.ids.transform;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+/** Represents a part of the complete WikiI5 corpus, i.e. a start document,  
+ * 	an end document, or an idsText. The objects of this class are used to create Future objects 
+ * 	as the results coming from threads. 
+ * 
+ * @author margaretha
+ *
+ */
 public class WikiI5Part {
 
 	private ByteArrayOutputStream bos;

@@ -16,6 +16,13 @@ import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
+/** Manages a database connection to the wikipedia database storing language links. 
+ * 	The database should be created from the language links dump corresponding 
+ * 	to the wikipedia dump. 
+ * 
+ * @author margaretha
+ *
+ */
 public class DatabaseManager {
 
 	//private static final String langlink = "SELECT ll_lang, ll_title FROM langlinks WHERE ll_from = ?";
@@ -23,6 +30,15 @@ public class DatabaseManager {
 	public Connection conn;
 	private static String langlink;
 
+	/** Constructs a DatabaseManager instance and connects to the database based 
+	 * 	on the credential information given as variables.
+	 * 
+	 * @param dbUrl
+	 * @param username
+	 * @param password
+	 * @param langCode
+	 * @throws SQLException
+	 */
 	public DatabaseManager(String dbUrl, String username, String password, String langCode)
 			throws SQLException {
 		setDataSource(dbUrl, username, password);
@@ -48,6 +64,13 @@ public class DatabaseManager {
 		poolingDataSource = new PoolingDataSource<>(connectionPool);
 	}
 
+	/** Select all the language links the given wikipage id.
+	 * 
+	 * @param ll_from the wikipage id
+	 * @return a LanguageLinks object 
+	 * @throws SQLException
+	 * @throws UnsupportedEncodingException
+	 */
 	public LanguageLinks retrieveLanguageLinks(String ll_from)
 			throws SQLException, UnsupportedEncodingException {
 
