@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 
+import de.mannheim.ids.executor.BlockingThreadPoolExecutor;
 import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;
@@ -79,8 +78,11 @@ public class WikiXMLProcessor {
 		WikiPageReader wikiReader = new WikiPageReader(config, wikipages,
 				endPage, wikiStatistics);
 		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
-		ExecutorService pool = Executors.newFixedThreadPool(config
-				.getMaxThreads());
+		
+		int queuelength = (int) Math.floor(config.getMaxThreads() * 1.5);
+
+		BlockingThreadPoolExecutor pool = new BlockingThreadPoolExecutor(0,
+				config.getMaxThreads(), 10, TimeUnit.SECONDS, queuelength);
 		
 		try {
 			wikiReaderThread.start();
@@ -95,14 +97,7 @@ public class WikiXMLProcessor {
 					ph = new WikiArticleHandler(config, wikiPage,
 							wikiStatistics, errorWriter);
 				}
-				pool.execute(ph);
-				// Thread t = new Thread(ph, wikiPage.getPageTitle());
-				// t.start();
-				// t.join(1000 * 60 * 3);
-				// if (t.isAlive()) {
-				// System.err.println("ALIVE: #" + wikiPage.getPageId() + " "
-				// + wikiPage.getPageTitle());
-				// }
+				pool.submit(ph);
 			}
 			pool.shutdown();
 		}
@@ -136,7 +131,6 @@ public class WikiXMLProcessor {
 		String duration = DurationFormatUtils.formatDuration(
 				(endTime - startTime), "H:mm:ss");
 		System.out.println("WikiXMLConverter execution time "
-		// + (endTime - startTime));
 				+ duration);
 	}
 
