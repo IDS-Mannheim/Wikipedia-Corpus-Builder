@@ -1,7 +1,7 @@
 package de.mannheim.ids.wiki.page;
 
 /**
- * Collect statistical information about Wikipages and the errors found in the
+ * Collects statistical information about Wikipages and the errors found in the
  * conversion process.
  * 
  * @author margaretha

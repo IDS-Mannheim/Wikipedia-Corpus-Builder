@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Setting all the configurations for the convertion process.
+ * Setting all the configurations for the conversion process.
  * 
  * @author margaretha
  * 
@@ -64,8 +64,7 @@ public class Configuration {
 	 *            Spezial:Beiträge in German
 	 * @param helpSignature the signature page title in the Wikidump
 	 *            language, e.g. Wikipedia:Signatures in English, Hilfe:Signatur
-	 *            in
-	 *            German.
+	 *            in German.
 	 *            See: https://en.wikipedia.org/wiki/Wikipedia:Signatures
 	 * @param unsigned the unsigned template keyword in the Wikidump language,
 	 *            e.g. unsigned in English, unsigniert in German, non signé in
@@ -148,7 +147,7 @@ public class Configuration {
 	/**
 	 * Sets the 2-letter language code of the wikidump.
 	 * 
-	 * @param languageCode
+	 * @param languageCode 2-letter language code of the wikidump
 	 */
 	public void setLanguageCode(String languageCode) {
 		if (languageCode == null || languageCode.isEmpty()) {
@@ -170,7 +169,7 @@ public class Configuration {
 	/**
 	 * Sets the wikidump filename.
 	 * 
-	 * @param wikidump
+	 * @param wikidump the wikidump filename.
 	 */
 	public void setWikidump(String wikidump) {
 		if (wikidump == null || wikidump.isEmpty()) {
@@ -192,7 +191,7 @@ public class Configuration {
 	/**
 	 * Sets the output file encoding, by default is utf-8.
 	 * 
-	 * @param encoding
+	 * @param encoding the output file encoding
 	 */
 	public void setOutputEncoding(String encoding) {
 		if (encoding == null || encoding.isEmpty()) {
@@ -213,7 +212,7 @@ public class Configuration {
 	/**
 	 * Sets the user page prefix.
 	 * 
-	 * @param userPage
+	 * @param userPage the user page prefix
 	 */
 	public void setUserPage(String userPage) {
 		if (isDiscussion && (userPage == null || userPage.isEmpty())) {
@@ -235,7 +234,7 @@ public class Configuration {
 	/**
 	 * Sets the user contribution prefix.
 	 * 
-	 * @param userContribution
+	 * @param userContribution the user contribution prefix
 	 */
 	public void setUserContribution(String userContribution) {
 		if (isDiscussion
@@ -260,7 +259,7 @@ public class Configuration {
 	/**
 	 * Sets the signature page title (link keyword in wiki markup).
 	 * 
-	 * @param signature
+	 * @param signature the signature page title
 	 */
 	public void setSignature(String signature) {
 		if (isDiscussion && (signature == null || signature.isEmpty())) {
@@ -280,9 +279,10 @@ public class Configuration {
 	}
 
 	/**
-	 * Sets the namespacekey (nummer) of the wikipages to convert.
+	 * Sets the namespace key (number) of the wikipages to convert.
 	 * 
-	 * @param namespaceKey
+	 * @param namespaceKey the namespace key (number) of the wikipages to
+	 *            convert.
 	 */
 	public void setNamespaceKey(int namespaceKey) {
 		this.namespaceKey = namespaceKey;
@@ -302,7 +302,9 @@ public class Configuration {
 	 * Sets the root output folder path where the wikiXML files should be
 	 * placed.
 	 * 
-	 * @param outputFolder
+	 * @param outputFolder the root output folder path where the wikiXML files
+	 *            should be
+	 *            placed
 	 */
 	public void setOutputFolder(String outputFolder) {
 		this.outputFolder = outputFolder;
@@ -320,7 +322,8 @@ public class Configuration {
 	/**
 	 * Sets if wikipages to convert is of a discussion type or not.
 	 * 
-	 * @param namespaceKey
+	 * @param namespaceKey the namespace key (number) of the wikipages to
+	 *            convert
 	 */
 	public void setDiscussion(int namespaceKey) {
 		this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
@@ -345,18 +348,18 @@ public class Configuration {
 	}
 
 	/**
-	 * Gets the page type
+	 * Gets the wikipage type
 	 * 
-	 * @return
+	 * @return the wikipage type
 	 */
 	public String getPageType() {
 		return pageType;
 	}
 
 	/**
-	 * Sets the page type
+	 * Sets the wikipage type
 	 * 
-	 * @param pageType
+	 * @param pageType the wikipage type
 	 */
 	public void setPageType(String pageType) {
 		this.pageType = pageType;
@@ -366,7 +369,7 @@ public class Configuration {
 	 * Gets the wikitext folder where the generated wikitext files are to be
 	 * placed.
 	 * 
-	 * @return
+	 * @return the output folder containing generated wikitext files
 	 */
 	public String getWikitextFolder() {
 		return wikitextFolder;
@@ -385,7 +388,7 @@ public class Configuration {
 	/**
 	 * Determines if the wikitext files are to be generated.
 	 * 
-	 * @return
+	 * @return true if the wikitext files are to be generated, false otherwise.
 	 */
 	public boolean isWikitextToGenerate() {
 		return wikitextToGenerate;
@@ -394,7 +397,8 @@ public class Configuration {
 	/**
 	 * Sets if the wikitext files are to be generated.
 	 * 
-	 * @param wikitextToGenerate
+	 * @param wikitextToGenerate true if the wikitext files are to be generated,
+	 *            false otherwise.
 	 */
 	public void setWikitextToGenerate(boolean wikitextToGenerate) {
 		this.wikitextToGenerate = wikitextToGenerate;
@@ -412,7 +416,7 @@ public class Configuration {
 	/**
 	 * Sets the keyword for the unsigned template.
 	 * 
-	 * @param unsigned
+	 * @param unsigned the keyword for the unsigned template
 	 */
 	public void setUnsigned(String unsigned) {
 		if (isDiscussion && (unsigned == null || unsigned.isEmpty())) {

@@ -47,7 +47,7 @@ public class WikiXMLProcessor {
 	/**
 	 * Constructs WikiXMLProcessor and sets the conversion configuration.
 	 * 
-	 * @param config
+	 * @param config the conversion configuration
 	 * @throws IOException
 	 */
 	public WikiXMLProcessor(Configuration config) throws IOException {
@@ -63,7 +63,7 @@ public class WikiXMLProcessor {
 		if (config.isDiscussion()) {
 			String prefix = Paths.get(config.getWikidump()).getFileName()
 					.toString().substring(0, 15);
-			postUser = new WikiPostUser(prefix, config);
+			postUser = new WikiPostUser(prefix, config.getPageType());
 			postTime = new WikiPostTime(prefix, config.getPageType());
 		}
 
@@ -80,7 +80,6 @@ public class WikiXMLProcessor {
 		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
 		
 		int queuelength = (int) Math.floor(config.getMaxThreads() * 1.5);
-
 		BlockingThreadPoolExecutor pool = new BlockingThreadPoolExecutor(0,
 				config.getMaxThreads(), 10, TimeUnit.SECONDS, queuelength);
 		

@@ -4,7 +4,7 @@ import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
- * An extension of WikiPageHandler for article pages
+ * An extension of WikiPageHandler for handling article pages
  * 
  * @author margaretha
  * 

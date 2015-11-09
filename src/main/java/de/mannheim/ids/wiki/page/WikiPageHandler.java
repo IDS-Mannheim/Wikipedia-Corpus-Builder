@@ -18,7 +18,8 @@ import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
  * This class implements methods for handling Wikipages including reading page
- * content, cleaning wikitext (pre-processing), parsing, and XML validation.
+ * content, cleaning wikitext (pre-processing), parsing, and validating the XML
+ * output.
  * 
  * @author margaretha
  * 
@@ -40,6 +41,15 @@ public abstract class WikiPageHandler implements Runnable {
 
 	protected Configuration config;
 
+	/**
+	 * Constructs a WikiPageHandler for the given wikipage using the other given
+	 * variables.
+	 * 
+	 * @param config the conversion configuration
+	 * @param wikipage a wikipage to be processed
+	 * @param wikiStatistics the wikistatistics counter
+	 * @param errorWriter the writer for logging errors
+	 */
 	public WikiPageHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
 		if (config == null) {
@@ -62,6 +72,17 @@ public abstract class WikiPageHandler implements Runnable {
 		this.tagSoupParser = new TagSoupParser();
 	}
 
+	/**
+	 * Parses the given wikitext into XML by first unescaping XML tags in the
+	 * wikitext, fixing improper tags using TagSoup Parser and finally generates
+	 * WikiXML by using Sweble Parser.
+	 * 
+	 * @param pageId the id of the wikipage
+	 * @param pageTitle the title of the wikipage
+	 * @param wikitext the content of the wikipage
+	 * @return WikiXML
+	 * @throws IOException
+	 */
 	protected String parseToXML(String pageId, String pageTitle, String wikitext)
 			throws IOException {
 		if (wikitext == null) {
@@ -113,6 +134,13 @@ public abstract class WikiPageHandler implements Runnable {
 		return swebleParser.getWikiXML();
 	}
 
+	/**
+	 * Normalizes some wiki mark ups, such as the table markup, angle brackets
+	 * and so on.
+	 * 
+	 * @param wikitext
+	 * @return normalized wikitext
+	 */
 	private String cleanPattern(String wikitext) {
 		// start table notation
 		wikitext = wikitext.replace(":{|", "{|");
@@ -147,23 +175,37 @@ public abstract class WikiPageHandler implements Runnable {
 		return wikitext;
 	}
 
+	/**
+	 * Validates the WikiXML structure and generates a WikiXML file for the
+	 * wikipage.
+	 * 
+	 * @throws IOException
+	 */
 	protected void writeWikiXML() throws IOException {
 		if (wikiPage.getWikiXML().isEmpty()) {
 			wikiStatistics.addEmptyParsedPages();
 		}
 		else if (validateDOM() && validatePageStructure()) {
-			writeWikiXML(wikiPage, wikiPage.getWikiXML(),
-					config.getOutputFolder());
+			writeWikiXML(wikiPage.getWikiXML(), config.getOutputFolder());
 			wikiStatistics.addTotalNonEmptyPages();
 		}
 	}
 
+	/**
+	 * Writes the current wikipage in wiki mark-ups in a file.
+	 * 
+	 * @throws IOException
+	 */
 	protected void writeWikitext() throws IOException {
-		writeWikiXML(wikiPage, wikiPage.getWikitext(),
-				config.getWikitextFolder());
+		writeWikiXML(wikiPage.getWikitext(), config.getWikitextFolder());
 		wikiPage.setWikitext(null);
 	}
 
+	/**
+	 * Validate the WikiXML of the current page by using a DOM parser.
+	 * 
+	 * @return true if the validation is valid, false otherwise.
+	 */
 	private boolean validateDOM() {
 		String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 		try {
@@ -181,6 +223,12 @@ public abstract class WikiPageHandler implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Validates the page structure / metadata of the current wikipage by using
+	 * the TagSoup parser.
+	 * 
+	 * @return true if the validation is valid, false otherwise.
+	 */
 	private boolean validatePageStructure() {
 		try {
 			// try fixing missing tags
@@ -199,8 +247,16 @@ public abstract class WikiPageHandler implements Runnable {
 		return true;
 	}
 
-	private void writeWikiXML(WikiPage wikiPage, String content,
-			String outputFolder) throws IOException {
+	/**
+	 * Writes the content (wikitext or wikiXML) of the wikipage into the given
+	 * output folder.
+	 * 
+	 * @param content the wikipage content to write
+	 * @param outputFolder the output folder
+	 * @throws IOException
+	 */
+	private void writeWikiXML(String content, String outputFolder)
+			throws IOException {
 
 		if (wikiPage == null) {
 			throw new IllegalArgumentException("WikiPage cannot be null.");
@@ -216,7 +272,7 @@ public abstract class WikiPageHandler implements Runnable {
 			System.out.println(path + wikiPage.getPageId() + ".xml");
 
 			OutputStreamWriter writer = Utilities.createWriter(path,
-					wikiPage.getPageId() + ".xml", "utf-8");// config.getOutputEncoding());
+					wikiPage.getPageId() + ".xml", config.getOutputEncoding());
 
 			writer.append("<?xml version=\"1.0\" encoding=\"");
 			writer.append(config.getOutputEncoding());

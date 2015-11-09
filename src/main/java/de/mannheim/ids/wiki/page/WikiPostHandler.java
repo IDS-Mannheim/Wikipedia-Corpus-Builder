@@ -10,7 +10,7 @@ import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 
 /**
- * This class implements methods for handling a talk page content, including
+ * This class implements methods for handling talk page content, including
  * segmenting wikitext into postings, parsing the wikitext and generating
  * posting structures in XML.
  * 
@@ -51,12 +51,12 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Constructs WikiPostHandler and compiles some regex patterns used in
 	 * posting segmentation.
 	 * 
-	 * @param config
-	 * @param wikipage
-	 * @param wikiStatistics
-	 * @param errorWriter
-	 * @param postUser
-	 * @param postTime
+	 * @param config the conversion configuration
+	 * @param wikipage a wikipage to be processed
+	 * @param wikiStatistics the wikistatistics counter
+	 * @param errorWriter the writer for logging errors
+	 * @param postUser a WikiPostUser listing the post users
+	 * @param postTime a WikiPostTime listing the post time
 	 * @throws IOException
 	 */
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
@@ -121,10 +121,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	}
 
 	/**
-	 * Adding a signature element to the current post.
+	 * Adds a signature element to the current post.
 	 * 
-	 * @param sigType
-	 * @param timestamp
+	 * @param sigType the signature type of the post
+	 * @param timestamp the post timestamp
 	 */
 	private void addSignature(SignatureType sigType, String timestamp) {
 		post += "<autoSignature @type=";
@@ -143,9 +143,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * boundaries and eventually creates posting elements.
 	 * 
 	 * @param text wikitext
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	private void segmentPosting(String text) throws Exception {
+	private void segmentPosting(String text) throws IOException {
 
 		if (text == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
@@ -215,8 +216,9 @@ public class WikiPostHandler extends WikiPageHandler {
 	}
 
 	/**
-	 * Recognizes timestamp markup in a user signature markup that appears
-	 * without a user link.
+	 * Recognizes timestamp mark-ups in user signature mark-ups that do not
+	 * appear together with user links.
+	 * 
 	 * 
 	 * @param trimmedText
 	 * @return true if a timestamp is recognized, false otherwise.
@@ -240,15 +242,16 @@ public class WikiPostHandler extends WikiPageHandler {
 	}
 
 	/**
-	 * Identifies a signature markup, extracts signature information from it,
-	 * and creates an XML signature structure for it.
+	 * Identifies signature mark-ups, extracts signature information from them,
+	 * and creates an XML signature structure for them.
 	 * 
 	 * @param trimmedText trimmed wikitext
 	 * @return true if the given wikitext contains a signature markup, false
 	 *         otherwise.
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	private boolean handleSignature(String trimmedText) throws Exception {
+	private boolean handleSignature(String trimmedText) throws IOException {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
@@ -292,7 +295,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * 
 	 * @param type the initial possible signature type
 	 * @param rest tailing text after a signature markup
-	 * @return
+	 * @return a signature type
 	 */
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
 		if (baselineMode) {
@@ -309,7 +312,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	}
 
 	/**
-	 * Identifies user contribution markup in the given trimmed wikitext,
+	 * Identifies user contribution mark-ups in the given trimmed wikitext,
 	 * creates a corresponding XML signature structure, and eventually a
 	 * posting for the collected post text until now.
 	 * 
@@ -340,6 +343,17 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
+	/**
+	 * Identifies unsigned templates in the given trimmed wikitext by using the
+	 * unsigned keywords. The keywords are generally varied for different
+	 * languages. Nevertheless, the english keyword are often used in wikipedias
+	 * of other languages.
+	 * 
+	 * @param trimmedText trimmed wikitext
+	 * @param unsigned unsigned template keywords
+	 * @return true if a unsigned template is found, false otherwise.
+	 * @throws IOException
+	 */
 	private boolean handleUnsigned(String trimmedText, String unsigned)
 			throws IOException {
 		if (trimmedText == null) {
@@ -387,6 +401,13 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
+	/**
+	 * Identifies headers as post boundaries.
+	 * 
+	 * @param matcher
+	 * @return
+	 * @throws IOException
+	 */
 	private boolean headerHandler(Matcher matcher) throws IOException {
 
 		if (matcher == null) {
@@ -401,16 +422,21 @@ public class WikiPostHandler extends WikiPageHandler {
 			String text = WikiPageReader.cleanTextStart(matcher.group(1));
 			String wikiXML = parseToXML(wikiPage.getPageId(),
 					wikiPage.getPageTitle(), text.trim());
-			// if (!Thread.interrupted()) {
-				wikiXMLBuilder.append(wikiXML);
-				wikiXMLBuilder.append("\n");
-			// }
+			wikiXMLBuilder.append(wikiXML);
+			wikiXMLBuilder.append("\n");
 			matcher.reset();
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Identifies level mark-ups in the given post. Levels indicates the depth
+	 * of a post in a thread. Posts without any depth have level 0.
+	 * 
+	 * @param post a post text
+	 * @return the level depth
+	 */
 	private int identifyLevel(String post) {
 
 		if (post == null) {
@@ -424,6 +450,15 @@ public class WikiPostHandler extends WikiPageHandler {
 		return 0;
 	}
 
+	/**
+	 * Creates a post by using the given variables.
+	 * 
+	 * @param username the post user name
+	 * @param userLink the post user link
+	 * @param timestamp the post timestamp
+	 * @param postscript the tailing text after a post user signature
+	 * @throws IOException
+	 */
 	private void writePost(String username, String userLink, String timestamp,
 			String postscript) throws IOException {
 
@@ -449,6 +484,18 @@ public class WikiPostHandler extends WikiPageHandler {
 		wikiXMLBuilder.append(postingElement);
 	}
 
+	/**
+	 * Creates a posting element based on the given variables.
+	 * 
+	 * @param level the depth of the post in a thread
+	 * @param username the post user name
+	 * @param userLink the post user link
+	 * @param timestamp the post timestamp
+	 * @param wikiXML the post content
+	 * @param postscript the tailing text after the signature
+	 * @return an XML post element
+	 * @throws IOException
+	 */
 	private String createPostingElement(int level, String username,
 			String userLink, String timestamp, String wikiXML, String postscript)
 			throws IOException {

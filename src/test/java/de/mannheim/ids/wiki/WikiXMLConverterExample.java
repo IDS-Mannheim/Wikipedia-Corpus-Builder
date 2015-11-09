@@ -17,7 +17,7 @@ public class WikiXMLConverterExample {
 		String userContribution = "Spezial:Beiträge";
 		String signature = "Hilfe:Signatur";
 		// the output encoding
-		String encoding = "iso-8859-1";
+		String encoding = "utf-8";
 		// The namespace of the Wikipages to convert
 		int namespaceKey = 0; // talk page
 		// Set maximum number of threads running concurrently, e.g. as many as

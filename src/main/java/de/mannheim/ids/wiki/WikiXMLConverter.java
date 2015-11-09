@@ -14,7 +14,9 @@ import org.apache.commons.cli.ParseException;
  * WikiXMLConverter reads a properties file and set the conversion configuration
  * based on the file.
  * 
- * Run with arguments: -prop config.properties
+ * Run with arguments: -prop article.properties
+ * 
+ * See the properties folder.
  * 
  * @author margaretha
  * 

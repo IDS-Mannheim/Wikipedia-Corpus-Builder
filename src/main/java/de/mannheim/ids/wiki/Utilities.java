@@ -10,7 +10,7 @@ import java.text.Normalizer.Form;
 import java.util.Arrays;
 
 /**
- * Class Utilities contains utility methods used in some other classes.
+ * Class Utilities contains utility methods used in other classes.
  * 
  * @author margaretha
  * 
@@ -18,8 +18,8 @@ import java.util.Arrays;
 public class Utilities {
 
 	/**
-	 * Creates the directory according to the given path including non-existent
-	 * parent directories.
+	 * Creates a directory (or some directories) according to the given path
+	 * including non-existent parent directories.
 	 * 
 	 * @param path
 	 */
@@ -37,11 +37,11 @@ public class Utilities {
 	}
 
 	/**
-	 * Creates an OutputStreamWriter according to the given outputFile and the
+	 * Creates an OutputStreamWriter according to the given output file and the
 	 * encoding parameters. This method also creates any necessary non-existent
-	 * directories where the outputFile should be written on.
+	 * directories where the output file should be written.
 	 * 
-	 * @param directory a directory path to the output file
+	 * @param directory a directory path for the output file
 	 * @param outputFile output filename
 	 * @param encoding encoding
 	 * @return an OutputStreamWriter
@@ -66,7 +66,7 @@ public class Utilities {
 	}
 
 	/**
-	 * Normalized the given input (a letter)
+	 * Normalizes the given input (a letter).
 	 * 
 	 * @param input a letter
 	 * @param indexList a list letters and numbers

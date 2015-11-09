@@ -43,10 +43,10 @@ public class WikiPageReader implements Runnable {
 	 * Constructs WikiPageReader by adopting the given variable to initialize
 	 * its corresponding fields.
 	 * 
-	 * @param config
-	 * @param wikipages
-	 * @param endwikipage
-	 * @param wikiStatistics
+	 * @param config the conversion configuration
+	 * @param wikipages a blocking queue containing wikipages
+	 * @param endwikipage a dummy wikipage signifying the last page
+	 * @param wikiStatistics the wiki statistics counter
 	 */
 	public WikiPageReader(Configuration config,
 			BlockingQueue<WikiPage> wikipages, WikiPage endwikipage,
@@ -76,6 +76,13 @@ public class WikiPageReader implements Runnable {
 		}
 	}
 
+	/**
+	 * Reads through the wikidump and generates a {@link WikiPage} object for
+	 * each wiki page.
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	private void read() throws IOException, InterruptedException {
 
 		String inputFile = config.getWikidump();
@@ -187,6 +194,14 @@ public class WikiPageReader implements Runnable {
 		else return trimmedStrLine.replace("<text xml:space=\"preserve\">", "");
 	}
 
+	/**
+	 * Collects the wikitext content of the given wikipage.
+	 * 
+	 * @param wikiPage a wikipage
+	 * @param strLine the current line
+	 * @param trimmedStrLine the trimmed version of the current line
+	 * @return true if wikitext has not finished, false otherwise.
+	 */
 	private boolean collectText(WikiPage wikiPage, String strLine,
 			String trimmedStrLine) {
 
