@@ -70,14 +70,20 @@ public class Configuration {
 
 	// FIX ME
 	public Configuration(String xmlFolder, int namespaceKey, String dumpFilename,
-			String inflectives, String encoding, String outputFile,
-			String index, String url, String username, String password) {
+			String language, String korpusSigle, String inflectives, String encoding, String outputFile,
+			String index, String url, String username, String password, int maxThreads) {
 		this();
-		setDumpFilename(dumpFilename);
-				
+						
 		setNamespaceKey(namespaceKey);
 		setPageType(namespaceMap.get(namespaceKey));
+		setDiscussion(namespaceKey);
 		
+		setDumpFilename(dumpFilename);
+		setLanguage(language);
+		setLanguageCode();
+		setYear();
+		setKorpusSigle(korpusSigle);
+
 		setWikiXMLFolder(xmlFolder);
 		setWikiXMLIndex(index);
 		setOutputFile(outputFile);
@@ -86,6 +92,8 @@ public class Configuration {
 		setDatabaseUrl(url);
 		setDatabaseUsername(username);
 		setDatabasePassword(password);
+		
+		setMaxThreads(maxThreads);
 	}
 
 	public Configuration(String propertiesFilename) throws IOException {
@@ -116,7 +124,7 @@ public class Configuration {
 		setDatabaseUsername(config.getProperty("db_username"));
 		setDatabasePassword(config.getProperty("db_password"));
 
-		setMaxThreads(Integer.parseInt(config.getProperty("max_threads", "2")));
+		setMaxThreads(Integer.parseInt(config.getProperty("max_threads", "1")));
 
 		is.close();
 	}

@@ -34,6 +34,9 @@ public class WikiI5ConverterExample {
 		int namespacekey = 0;
 		String index = "xml-de/articleIndex.xml";
 
+		String language = "Deutsch";
+		String korpusSigle = "WPD13";
+		
 		// The dumpFilename should be in the following format:
 		// [2 letter language code]wiki-[year][month][date]-[type]
 		String dumpFilename = "dewiki-20130728-sample.xml";
@@ -46,10 +49,11 @@ public class WikiI5ConverterExample {
 		String url = "jdbc:mysql://host:port/dbname";
 		String username = "username";
 		String password = "password";
-
-		Configuration config = new Configuration(xmlFolder, namespacekey, dumpFilename,
-				inflectives, encoding, outputFile, index, url, username,
-				password);
+		int maxThreads = 3;
+		
+		Configuration config = new Configuration(xmlFolder, namespacekey, dumpFilename, 
+				language, korpusSigle, inflectives, encoding, outputFile, index, url, 
+				username, password, maxThreads);
 
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();
