@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Repair improper HTML tags in wikitext
+ * Repairs improper HTML tags in wikitext
  * 
  * @author margaretha
  */
@@ -25,8 +25,8 @@ public class TagSoupParser {
 	private String encoding = "UTF-8";
 
 	/**
-	 * Generate a clean HTML from a given wikitext containing improper HTML tags
-	 * (e.g tags that do not opened or closed properly) using TagSoup.
+	 * Generates a clean HTML from a given wikitext containing improper HTML
+	 * tags (e.g tags that do not opened or closed properly) using TagSoup.
 	 * TagSoup parser removes a close tag without an open tag, and generates a
 	 * missing close tag for an open tag without a close tag. However, the part
 	 * of the text nested by the generated tags may not be correct.

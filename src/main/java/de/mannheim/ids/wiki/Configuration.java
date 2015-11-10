@@ -53,7 +53,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Constructs the conversion configuration from all the given variables.
+	 * Constructs a conversion configuration from all the given variables.
 	 * 
 	 * @param wikidump the wikidump filename
 	 * @param language the 2-letter language code of the wikidump
@@ -99,7 +99,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Constructs the conversion configuration from a properties file.
+	 * Constructs a conversion configuration from a properties file.
 	 * 
 	 * @param properties the location of the properties file
 	 * @throws IOException

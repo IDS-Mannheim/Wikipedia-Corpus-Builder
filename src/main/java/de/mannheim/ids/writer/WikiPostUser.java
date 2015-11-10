@@ -24,7 +24,7 @@ public class WikiPostUser {
 	private int counter;
 
 	/**
-	 * Constructs a WikiPostUser object and the output file in the post folder.
+	 * Constructs a WikiPostUser and creates the output file in the post folder.
 	 * 
 	 * @param prefixFileName prefixFileName file identifier (part of the
 	 *            wikidump file name)

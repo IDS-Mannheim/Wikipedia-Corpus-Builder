@@ -135,7 +135,7 @@ public abstract class WikiPageHandler implements Runnable {
 	}
 
 	/**
-	 * Normalizes some wiki mark ups, such as the table markup, angle brackets
+	 * Normalizes some wiki mark-ups, such as the table markup, angle brackets
 	 * and so on.
 	 * 
 	 * @param wikitext

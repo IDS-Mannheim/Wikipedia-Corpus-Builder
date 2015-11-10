@@ -40,7 +40,7 @@ public class WikiPageReader implements Runnable {
 	private StringBuilder pageStructureBuilder;
 
 	/**
-	 * Constructs WikiPageReader by adopting the given variable to initialize
+	 * Constructs a WikiPageReader by adopting the given variable to initialize
 	 * its corresponding fields.
 	 * 
 	 * @param config the conversion configuration

@@ -45,7 +45,7 @@ public class WikiXMLProcessor {
 	public static final WikiConfig wikiconfig = DefaultConfigEnWp.generate();
 
 	/**
-	 * Constructs WikiXMLProcessor and sets the conversion configuration.
+	 * Constructs a WikiXMLProcessor and sets the conversion configuration.
 	 * 
 	 * @param config the conversion configuration
 	 * @throws IOException

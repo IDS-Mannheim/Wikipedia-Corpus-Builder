@@ -20,7 +20,7 @@ public class WikiPostTime {
 	private int counter;
 
 	/**
-	 * Constructs a WikiPostTime object and the output file in the post folder.
+	 * Constructs a WikiPostTime and creates the output file in the post folder.
 	 * 
 	 * @param prefixFileName file identifier (part of the wikidump file name)
 	 * @param pageType the wikipage type

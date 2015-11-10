@@ -48,7 +48,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	private StringBuilder wikiXMLBuilder;
 
 	/**
-	 * Constructs WikiPostHandler and compiles some regex patterns used in
+	 * Constructs a WikiPostHandler and compiles some regex patterns used in
 	 * posting segmentation.
 	 * 
 	 * @param config the conversion configuration
