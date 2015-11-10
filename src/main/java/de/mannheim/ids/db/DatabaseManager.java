@@ -17,8 +17,8 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
 /** Manages a database connection to the wikipedia database storing language links. 
- * 	The database should be created from the language links dump corresponding 
- * 	to the wikipedia dump. 
+ * 	The database should be created from a language links dump corresponding 
+ * 	to the wikipedia dump used. 
  * 
  * @author margaretha
  *
@@ -45,7 +45,7 @@ public class DatabaseManager {
 		langlink = "SELECT ll_lang, ll_title FROM "+langCode+"_langlinks WHERE ll_from = ?";
 	}
 
-	public void setDataSource(String url, String username, String password) {
+	private void setDataSource(String url, String username, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		}
@@ -64,7 +64,7 @@ public class DatabaseManager {
 		poolingDataSource = new PoolingDataSource<>(connectionPool);
 	}
 
-	/** Select all the language links the given wikipage id.
+	/** Select all the language links of the given wikipage id.
 	 * 
 	 * @param ll_from the wikipage id
 	 * @return a LanguageLinks object 

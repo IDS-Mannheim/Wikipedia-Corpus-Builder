@@ -5,7 +5,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 
-/** Used to find the XLST templates files in the src/main/resources. 
+/** A URIResolver implementation used to find the XLST templates files in the src/main/resources. 
  * 
  * @author margaretha
  *

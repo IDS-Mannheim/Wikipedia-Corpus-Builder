@@ -14,7 +14,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.transform.WikiXMLSorter;
 
-/** Manages the overall conversion process. 
+/** Manages the overall WikiXML to I5 conversion process. 
  * @author margaretha
  *
  */
@@ -28,7 +28,8 @@ public class WikiI5Processor {
 	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
 	
 
-	/** Constructs WikiI5Processor.
+	/** Constructs a WikiI5Processor.
+	 * 
 	 * @param config
 	 * @throws I5Exception
 	 */
@@ -47,7 +48,7 @@ public class WikiI5Processor {
 
 	/** Starts the conversion process with creating I5Writing and writing the start document 
 	 * 	element. Then, sorts the WikiXML files by using WikiXMLSorter, runs the XSLT 
-	 * 	transformations for the sorted Wikipages and put the Future results in a Blockingqueue 
+	 * 	transformations for the sorted Wikipages and put the Future results in a BlockingQueue 
 	 * 	limiting the number of threads. Writes each future results and eventually builds 
 	 * 	the whole WikiI5 corpus.
 	 * 	 
@@ -114,6 +115,10 @@ public class WikiI5Processor {
 		
 	}
 
+	/** Creates an end Future as a sign (the last Future) to stop the writing process.  
+	 * 
+	 * @return the end Future
+	 */
 	private Future<WikiI5Part> createEndFuture() {
 		return new Future<WikiI5Part>() {
 			@Override

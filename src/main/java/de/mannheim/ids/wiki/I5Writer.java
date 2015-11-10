@@ -46,7 +46,7 @@ public class I5Writer {
 	private Configuration config;
 	private Statistics stats;
 
-	/** Constructs I5Writer from the given variables.
+	/** Constructs an I5Writer from the given variables.
 	 * @param config
 	 * @param errorHandler
 	 * @param statistics

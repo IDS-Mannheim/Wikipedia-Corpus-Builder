@@ -22,7 +22,8 @@ import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
 
-/**IdsTextBuilder is a SAX handler implementation creating idsText element.
+/** IdsTextBuilder is a SAX handler implementation creating idsText elements 
+ * 	from transformed wikitext in I5 per wikipage.
  *   
  * @author margaretha
  *
@@ -47,9 +48,9 @@ public class IdsTextBuilder extends DefaultHandler {
 
 	private boolean noLangLinks = false;
 
-	/** Constructs IdsTextBuilder from the given variables
+	/** Constructs an IdsTextBuilder from the given variables.
 	 * 
-	 * @param config
+	 * @param config the conversion configuration
 	 * @param writer the I5 output writer
 	 * @throws I5Exception
 	 */
@@ -119,7 +120,8 @@ public class IdsTextBuilder extends DefaultHandler {
 		}
 	}
 
-	/** Creates related item elements for the links of the wikipage's analogs in other languages (wikipedias). 
+	/** Creates related item elements for the links of the analogs of a wiki 
+	 * 	article page in other languages (wikipedias). 
 	 * 
 	 * @param ll language links from wikipedia (database)
 	 * @throws SAXException
@@ -186,10 +188,16 @@ public class IdsTextBuilder extends DefaultHandler {
 		throw e;
 	}
 
+	/** Gets the current wiki page id
+	 * @return wiki page id
+	 */
 	public String getPageId() {
 		return pageId;
 	}
 
+	/** Sets the current wiki page id
+	 * @param pageId
+	 */
 	public void setPageId(String pageId) {
 		this.pageId = pageId;
 	}

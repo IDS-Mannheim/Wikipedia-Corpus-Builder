@@ -96,8 +96,16 @@ public class Transformer implements Callable<WikiI5Part> {
 	private static I5ErrorHandler errorHandler;
 	private Statistics statistics;
 
-	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler errorHandler, File wikiXMLFile, String index,
-			String pageId) {
+	/** Constructs a Transformer from the given variables.
+	 * @param config
+	 * @param statistics
+	 * @param errorHandler
+	 * @param wikiXMLFile
+	 * @param index
+	 * @param pageId
+	 */
+	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler 
+			errorHandler, File wikiXMLFile, String index, String pageId) {
 		this.config = config;
 		this.wikiXML = wikiXMLFile;
 		this.index = index;
@@ -106,6 +114,9 @@ public class Transformer implements Callable<WikiI5Part> {
 		this.statistics = statistics;
 	}
 
+	/** Returns a copy of the threadlocal XsltTransformer. 
+	 * @return an XsltTransformer
+	 */
 	public static XsltTransformer getTransfomer() {
 		return transformer.get();
 	}
@@ -130,6 +141,11 @@ public class Transformer implements Callable<WikiI5Part> {
 		return w;
 	}
 
+	/** Performs the transformation and return the results in ByteArrayOutputStream. 
+	 * @param source
+	 * @return the transformation result in ByteArrayOutputStream
+	 * @throws I5Exception
+	 */
 	private ByteArrayOutputStream doTransformation(Source source) throws I5Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
 		try {
@@ -152,6 +168,12 @@ public class Transformer implements Callable<WikiI5Part> {
 		return bos;
 	}
 
+	/** Creates a Destination for the Transformer, that serializes the transformation 
+	 * 	result as XML into the given OutputStream.
+	 * 
+	 * @param os OutputStream
+	 * @return a Destination
+	 */
 	private Destination createDestination(OutputStream os) {
 		Serializer d = new Serializer(os);
 		d.setOutputProperty(Serializer.Property.METHOD, "xml");

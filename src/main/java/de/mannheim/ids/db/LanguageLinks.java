@@ -15,20 +15,39 @@ public class LanguageLinks {
 	private String pageId;
 	private Map<String, String> titleMap;
 	
+	/** Constructs LanguageLinks for the given wikipage id.
+	 * @param pageId
+	 */
 	public LanguageLinks(String pageId) {
 		this.pageId = pageId;
 		this.titleMap = (Map<String, String>) new HashMap<String, String>();
 	}
 	
+	/** Gets the wikipage id
+	 * @return wikipage id
+	 */
 	public String getPageId() {
 		return pageId;
 	}
+	
+	/** Sets the wikipage id
+	 * @param pageId
+	 */
 	public void setPageId(String pageId) {
 		this.pageId = pageId;
 	}
+	
+	/** Gets the language link map for this wikipage.
+	 * @return
+	 */
 	public Map<String, String> getTitleMap() {
 		return titleMap;
 	}
+	
+	/** Sets a map containing the titles and links of the wikipage analogs in different languages.
+	 *  
+	 * @param titleMap
+	 */
 	public void setTitleMap(Map<String, String> titleMap) {
 		this.titleMap = titleMap;
 	}

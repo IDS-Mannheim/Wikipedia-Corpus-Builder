@@ -37,6 +37,9 @@ public class BaseBuilder {
 		titleTypes.put(15, "Kategoriediskussionen");
 	}
 
+	/** Construct a BaseBuilder 
+	 * @param writer an IndentingXMLStreamWriter writing I5 to the output file
+	 */
 	public BaseBuilder(IndentingXMLStreamWriter writer) {
 		this.writer = writer;
 	}

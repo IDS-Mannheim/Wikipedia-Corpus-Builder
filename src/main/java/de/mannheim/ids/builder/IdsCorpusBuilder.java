@@ -12,7 +12,7 @@ import javax.xml.stream.XMLStreamException;
 
 import de.mannheim.ids.wiki.Configuration;
 
-/** Creates idsCorpus element and idsHeader inside the idsCorpus element.
+/** Creates an idsCorpus element and the idsHeader inside the idsCorpus element.
  *  
  * @author margaretha
  *
@@ -59,6 +59,10 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeEndElement(); // idsHeader
 	}
 	
+	/** FIX ME: Currently only generate an initial release by EM. The date/time does not 
+	 * 	signify when the corpus is finally made, but the start of the corpus building.  
+	 * 
+	 * */
 	private void createRevisionDesc() throws XMLStreamException{
 		writer.writeStartElement("revisionDesc");
 		writer.writeStartElement("listChange");

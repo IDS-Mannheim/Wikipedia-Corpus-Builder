@@ -13,6 +13,9 @@ public class Statistics {
 	public int transformedPages;
 	public int numOfChar;
 	
+	/** Constructs a {@link Statistics} and initializes all counters.
+	 * 
+	 */
 	public Statistics() {
 		transformationError=0;
 		dtdValidationError=0;

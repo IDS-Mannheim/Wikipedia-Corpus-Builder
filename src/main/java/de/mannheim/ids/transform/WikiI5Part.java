@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 /** Represents a part of the complete WikiI5 corpus, i.e. a start document,  
- * 	an end document, or an idsText. The objects of this class are used to create Future objects 
- * 	as the results coming from threads. 
+ * 	an end document, or an idsText. The objects of this class are used to 
+ * 	create Future objects as the results coming from the processing threads. 
  * 
  * @author margaretha
  *
@@ -22,6 +22,11 @@ public class WikiI5Part {
 	private String pageId;
 	private int docId;
 
+	/** Constructs a WikiI5Part containing idsText.
+	 * @param bos transformed wikitext in ByteArrayOutputStream
+	 * @param wikiXML the XML output file
+	 * @param pageId wikipage id
+	 */
 	public WikiI5Part(ByteArrayOutputStream bos, File wikiXML, String pageId) {
 		setBos(bos);
 		setWikiPath(wikiXML.getPath());
@@ -29,6 +34,12 @@ public class WikiI5Part {
 		setPageId(pageId);
 	}
 
+	/** Constructs a WikiI5Part as a startDoc.
+	 * 
+	 * @param index
+	 * @param docNr
+	 * @param isStartDoc
+	 */
 	public WikiI5Part(String index, int docNr, boolean isStartDoc) {
 		setIndex(index);
 		setDocNr(docNr);
@@ -36,9 +47,13 @@ public class WikiI5Part {
 		setIDSText(false);
 	}
 
-	public WikiI5Part(boolean isStartDoc) {
+	/** Constructs a WikiI5Part as an endDoc.
+	 *  
+	 * @param isStartDoc
+	 */
+	public WikiI5Part() {
 		setIDSText(false);
-		setStartDoc(isStartDoc);
+		setStartDoc(false);
 	}
 
 	public ByteArrayOutputStream getBos() {
@@ -53,10 +68,16 @@ public class WikiI5Part {
 		this.bos = bos;
 	}
 
+	/** Gets the XML outfile path
+	 * @return the XML outfile path
+	 */
 	public String getWikiPath() {
 		return wikiPath;
 	}
 
+	/** Sets the XML output file path
+	 * @param wikiPath
+	 */
 	public void setWikiPath(String wikiPath) {
 		if (wikiPath == null || wikiPath.isEmpty()) {
 			throw new IllegalArgumentException(
@@ -65,18 +86,31 @@ public class WikiI5Part {
 		this.wikiPath = wikiPath;
 	}
 
+	/** Tells if the WikiI5Part is an idsText element or not.
+	 * 
+	 * @return true if WikiI5Part is an idsText element, false otherwise.
+	 */
 	public boolean isIDSText() {
 		return idsText;
 	}
 
+	/** Sets the WikiI5Part of type idsText. 
+	 * @param isIDSText
+	 */
 	public void setIDSText(boolean isIDSText) {
 		this.idsText = isIDSText;
 	}
 
+	/** Returns the document index of the WikiI5Part
+	 * @return document index of the WikiI5Part
+	 */
 	public String getIndex() {
 		return index;
 	}
 
+	/** Sets the document index of the WikiI5Part
+	 * @param index
+	 */
 	public void setIndex(String index) {
 		if (index == null || index.isEmpty()) {
 			throw new IllegalArgumentException("Index cannot be null or empty.");
@@ -84,26 +118,44 @@ public class WikiI5Part {
 		this.index = index;
 	}
 
+	/** Gets the document number of the WikiI5Part
+	 * @return the document number of the WikiI5Part
+	 */
 	public int getDocNr() {
 		return docId;
 	}
 
+	/** Sets the document number of the WikiI5Part
+	 * @param docNr
+	 */
 	public void setDocNr(int docNr) {
 		this.docId = docNr;
 	}
 
+	/** Tells if the WikiI5Part is a start doc or not.
+	 * @return true if the WikiI5Part is a start doc, false otherwise.
+	 */
 	public boolean isStartDoc() {
 		return startDoc;
 	}
 
+	/** Sets the WikiI5Part as a startDoc
+	 * @param isStartDoc
+	 */
 	public void setStartDoc(boolean isStartDoc) {
 		this.startDoc = isStartDoc;
 	}
 
+	/** Returns the wikipage id of the WikiI5Part
+	 * @return the wikipage id of the WikiI5Part
+	 */
 	public String getPageId() {
 		return pageId;
 	}
 
+	/** Sets the wikipage id of the WikiI5Part
+	 * @param pageId
+	 */
 	public void setPageId(String pageId) {
 		if (pageId == null || pageId.isEmpty()) {
 			throw new IllegalArgumentException(

@@ -45,6 +45,14 @@ public class WikiXMLSorter extends Thread {
 	private I5ErrorHandler errorHandler;
 	private Statistics statistics;
 
+	/** Construct a WikiXMLSorter.
+	 * @param config the conversion configuration
+	 * @param endFuture a dummy Future serving as a sign to end the process.
+	 * @param pool an ExecutorService
+	 * @param errorHandler an I5ErrorHandler
+	 * @param statistics statistic counters
+	 * @throws I5Exception
+	 */
 	public WikiXMLSorter(Configuration config, Future<WikiI5Part> endFuture,
 			ExecutorService pool, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {
 		this.config = config;
@@ -124,8 +132,13 @@ public class WikiXMLSorter extends Thread {
 		}
 		
 	}
-
-	// Group per 100000 pages into a doc
+ 
+	/** Groups per 100000 pages into an ids document
+	 * 
+	 * @param idx document index
+	 * @param n the last id
+	 * @throws I5Exception
+	 */
 	private void groupPagesbyDoc(String idx, int n) throws I5Exception {
 		XPathExpression group;
 		String docId;
@@ -167,8 +180,8 @@ public class WikiXMLSorter extends Thread {
 
 			createFilesFromGroup(pagegroup, idx);
 
-			// End document
-			WikiI5Part endDoc = new WikiI5Part(false);
+			// End documents
+			WikiI5Part endDoc = new WikiI5Part();
 			try {
 				WikiI5Processor.wikiI5Queue
 						.put(createFutureFromWikiI5Part(endDoc));
@@ -182,6 +195,10 @@ public class WikiXMLSorter extends Thread {
 
 	}
 
+	/** Creates a Future object from the given WikiI5Part.
+	 * @param w a WikiI5Part
+	 * @return
+	 */
 	private Future<WikiI5Part> createFutureFromWikiI5Part(final WikiI5Part w) {
 		return new Future<WikiI5Part>() {
 
@@ -215,10 +232,19 @@ public class WikiXMLSorter extends Thread {
 		};
 	}
 
+	/** Performs transformation and validation for each page in the given pagegroup. 
+	 * 	The transformation results are Future objects collected in the wikiI5Queue 
+	 * 	belonging to the WikiI5Processor. 
+	 * 
+	 * @see WikiI5Processor
+	 * 
+	 * @param pagegroup a list of wikipages
+	 * @param idx the index of the wikipages
+	 * @throws I5Exception
+	 */
 	private void createFilesFromGroup(List pagegroup, String idx)
 			throws I5Exception {
 
-		// Do transformation and validation for each page in the group
 		for (int j = 0; j < pagegroup.size(); j++) {
 			NodeInfo pg = (NodeInfo) pagegroup.get(j);
 			String pageId = pg.getStringValue();
