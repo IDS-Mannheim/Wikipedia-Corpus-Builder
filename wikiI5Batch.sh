@@ -2,164 +2,79 @@
 # ------------------------------------------------------------------------------------------
 # WIKIPEDIA CONVERSION
 #
-# This script runs a set of programs that converts a wikipedia dump containing wiki mark-ups 
-# (wikitext) into a wikipedia corpus in I5 format.
+# This is an example batch script that configures the Wikipedia conversion pipeline. 
+# It runs a set of programs convering a wikipedia dump containing wiki mark-ups (wikitext) 
+# into a wikipedia corpus in I5 format.
 #
 # The conversion is done in two stages. In the first stage, each wikipage is converted into 
-# an XML file (WikiXML) by using WikiXMLConverter-0.0.1-jar-with-dependencies.jar. In the 
-# second stage, each WikiXML page is converted into I5 and collected into a single corpus file
-# by using WikiI5Converter-0.0.1.jar. The jars are available on http://corpora.ids-mannheim.de
-# /pub/tools/.
+# an XML file (WikiXML) by using the WikiXMLConverter-[version]-jar-with-dependencies.jar. 
+# In the second stage, each WikiXML page is converted into I5 and collected into a single 
+# corpus file by using the WikiI5Converter-1.0.1.jar. The jars are available at 
+# http://corpora.ids-mannheim.de /pub/tools/.
 #
-# The I5 corpus is subsequently validated against IDS I5 DTD (see http://corpora.ids-mannheim.
+# The I5 corpus is validated against IDS I5 DTD (see http://corpora.ids-mannheim.
 # de/I5/DTD/i5.dtd) by using XMLlint. It is also validated against SGML by ONSGML (e.g. using 
 # OpenSP-1.5.1). 
 #
-# This script takes input arguments sequentially as follows:
-#  1. The type of wikipedia pages [articles|discussions]. 
-#  2. 2-letter language code of the wikitext (e.g. de). 
-#  3. The location of the wikidumps.
+# This script takes input arguments sequentially as follows:   
+#  1. 2-letter language code of the wikitext (e.g. de).
+#  2. The type of wikipedia pages [article|talk|usertalk]. 
+#  3. The date of the wikidumps.
 #
-#     The filename of wikipedia dumps must be in the following format: 
-#       [lang]wiki-[date]-pages-meta-current.xml
+# The filename of the Wikidump is supposed to be in the following format
+#   [languageCode]wiki-[date]-[type]
 #
-#  4. The desired encoding output, e.g iso-8859-1 or utf-8 (default).
-#  5. The list inflectives (currently provided only for german).
+# The other configuration variables have to be set in the .properties file.
+# In this script, the properties files is named in the following format:
+#   xml-[lang]wiki-[type].properties
+#   i5-[lang]wiki-[type].properties
+# and are located in "code/properties/[type]"
 #
 # The outputs of the first stage conversion are grouped by letters and digits, and located on: 
-#  - xml/articles for article pages
-#  - xml/discussions for discussion pages
+#  - wikixml-[lang]/article for article pages
+#  - wikixml-[lang]/talk for talk pages
 #
-# The second stage convertion requires lists of all the article and discussion pages. The 
-# function createList does this job. The article pages are listed in xml/articleList.xml and  
-# the discussion pages in xml/discussionList.xml.
-#
+# The second stage convertion requires lists of the article and talk pages.
+# WikiXMLCorpusIndexer.sh does this job. It takes 3 parameters: wiki page type, wikixml folder,
+# the output file name. In this script, the output indexes are located at 
+#   wikixml-[lang]/[type]-index.xml
+#  
 # Logs of the conversion process are located in logs/ folder.
 #
 #
-# Eliza Margaretha, Mar 2013
+# Eliza Margaretha, Mar 2016
 # Institut für Deutsche Sprache
 # --------------------------------------------------------------------------------------------
 
-function createList {
-    echo "<"$1">" > $2
-    
-    for index in $(find $3/$1/ -type d | sed 's/.*\///' | sort);
-    do  
-        echo "  <index value=\""$index"\">" >> $2 
-        find $3/$1/$index/ -type f 2>/dev/null | sed 's/.*\/\(.*\)\.xml/\1/' | sort -n | sed 's/\(.*\)/    <id>\1<\/id>/' >> $2        
-        echo "  </index>" >> $2
-    done
 
-    echo "</"$1">" >> $2    
-}
+# Example command: ./WikiI5Batch.sh de article 20150501
 
-# Arguments
+wikixml="code/WikiXMLConverter-1.0.1-jar-with-dependencies.jar"
+ 
+lang=$1
+type=$2
+wiki=wiki
+date=$3
+filename=$lang$wiki-$date-$type
+properties=code/properties/$type/xml-$lang$wiki-$type.properties
 
-pageType=$1
-lang=$2
-wiki=$3
-encoding=$4
-inflec=$5
+echo "Converting wikitext to WikiXML" $filename
+#echo $properties
+nice -n 3 java -jar -Xmx4g $wikixml -prop $properties > logs/wikiXML-$filename.log 2>&1
 
-if [ -z "$1" ];
-then
-    echo "Please specify the Wikipage type [articles|discussions]:  "
-    read pageType
-fi
+./code/WikiXMLCorpusIndexer.sh $2 wikixml-$lang/$2/ wikixml-$lang/$2-index.xml
 
-if [ -z "$2" ];
-then
-    echo "Please specify the wikitext language (e.g. de) : "
-    read lang
-fi
+echo "Converting wikiXML to I5"
+main=de.mannheim.ids.wiki.WikiI5Converter
+prop=code/properties/$type/i5-$lang$wiki-$type.properties
+nice -n 3 java -Xmx4g -cp "code/WikiI5Converter-1.0.1-jar-with-dependencies.jar:lib/*:." $main -prop $prop > logs/wikiI5-$filename.log 2>&1 
 
-if [ -z "$3" ];
-then
-    echo "Please specify the wikipedia dump location : "
-    read wiki
-fi
+echo "Replacing invalid Chars"
+ #sed -i -e 's/&#xd[8-9a-f][0-9a-f][0-9a-f];/ /g' i5/$filename.i5.xml; 
+perl -wlnpe 's/\&#xd[89a-f]..;/\&#xf8ff;/g' < i5/$filename.i5.xml > i5/$lang/$filename.i5.xml
 
-if [ -z "$4" ];
-then     
-     encoding=UTF-8
-fi
-
-if [ ! -d "logs" ];
-then
-    mkdir logs
-fi 
-
-# Variables
-
-w=wiki
-filename=$(basename "$wiki")
-prefix=${filename%-pages*}
-xmlFolder=xml-$lang 
-wikiToXMLlog=xml-$prefix-$pageType.log
-dtd=dtd/i5.dtd
-
-if [ "$pageType" == "articles" ] 
-then
-    
-    echo "Converting $lang-wiki articles to XML ..." 
-    java -jar target/WikiXMLConverter-0.0.1-jar-with-dependencies.jar -l $lang -w $wiki -t articles -o $xmlFolder -e $encoding > logs/$wikiToXMLlog 2>&1 
-
-    articleList=$xmlFolder/articleList.xml
-    articleOutput=i5/$prefix-articles.i5
-    articleLog=i5-$prefix-articles.log 
-    
-    echo "Listing $lang-wiki articles by index ..."    
-    createList articles $articleList $xmlFolder
-
-    echo "Converting $lang WikiXML articles to I5 ..."  
-
-    if [ ! -d "i5" ];
-    then
-       mkdir i5
-    fi
-
-    if [ -z "$inflec" ]
-    then
-        java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/articles -t articles -i $articleList -w $filename -o $articleOutput -e $encoding > logs/$articleLog 2>&1
-    else
-        java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/articles -t articles -i $articleList -w $filename -o $articleOutput -inf ../$inflec -e $encoding > logs/$articleLog 2>&1
-    fi
-        
-    echo "Validating I5 Wiki articles with xmllint"
-    xmllint -valid -stream -dtdvalid $dtd $articleOutput > logs/i5-$prefix-articles-xmllint-validation.log 2>&1    
-    
-    echo "Validating I5 Wiki articles with onsgmls"
-    onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $articleOutput > logs/i5-$prefix-articles-onsgmls-validation.log 2>&1   
-	        
-else
-
-    echo "Converting $lang-wiki talk pages to XML ..." 
-    java -jar target/WikiXMLConverter-0.0.1-jar-with-dependencies.jar -l $lang -w $wiki -t discussions -o $xmlFolder > logs/$wikiToXMLlog 2>&1
-
-    discussionList=$xmlFolder/discussionList.xml
-    discussionOutput=i5/$prefix-discussions.i5
-    discussionLog=i5-$prefix-discussions.log
-        
-    echo "Listing discussions by index ..."    
-    createList discussions $discussionList $xmlFolder
-    
-    echo "Converting $lang XML discussions to XCES ..."    
-    
-    if [ -z "$inflec" ]
-    then
-	java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/discussions -t discussions -i $discussionList -w $filename -o $discussionOutput -e $encoding> logs/$discussionLog 2>&1
-    else
-	java -Xmx10g -jar target/WikiI5Converter-0.0.1.jar -x $xmlFolder/discussions -t discussions -i $discussionList -w $filename -o $discussionOutput -inf ../$inflec -e $encoding > logs/$discussionLog 2>&1
-    fi
-
-    echo "Validating I5 Wiki discussions with xmllint"
-    xmllint -valid -stream -dtdvalid $dtd $discussionOutput > logs/i5-$prefix-discussions-xmllint-validation.txt 2>&1
-    
-    echo "Validating I5 Wiki discussions with onsgml"
-    onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc $discussionOutput > logs/i5-$prefix-discussions-onsgmls-validation.log 2>&1
-    
-fi
-    
-echo "Done."
+echo "Validating against xmllint"
+xmllint -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint-$filename.i5.log 2>&1; 
+echo "Validating against onsgmls"
+onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc i5/$lang/$filename.i5.xml > logs/onsgmls-$filename.i5.log 2>&1
 

@@ -1,4 +1,4 @@
-/xml*
+/*xml*
 /logs
 /i5
 /target
@@ -6,3 +6,5 @@
 .project
 .settings
 *temp.i5
+/lib
+/properties

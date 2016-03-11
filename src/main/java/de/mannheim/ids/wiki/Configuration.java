@@ -190,7 +190,7 @@ public class Configuration {
 	}
 
 	public void setInflectives(String inflectives) {
-		if (inflectives.isEmpty()) {
+		if (inflectives == null || inflectives.isEmpty()) {
 			this.inflectives = null;
 		}
 		else {
