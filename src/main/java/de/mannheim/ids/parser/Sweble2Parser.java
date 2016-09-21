@@ -134,8 +134,9 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		public String makeUrl(PageTitle target) {
-			String page = UrlEncoding.WIKI.encode(target
-					.getNormalizedFullTitle());
+			// String page = UrlEncoding.WIKI.encode(target
+			// .getNormalizedFullTitle());
+			String page = target.getNormalizedFullTitle();
 			String f = target.getFragment();
 			String url = page;
 			if (f != null && !f.isEmpty())
