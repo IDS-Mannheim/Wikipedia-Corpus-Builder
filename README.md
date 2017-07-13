@@ -1,5 +1,11 @@
+
 # WikiXMLConverter
 
+WikiXMLConverter is part of the Wikipedia converter tool developed at the Institut für Deutsche Sprache (IDS, http://www1.ids-mannheim.de/). The purpose of the tool is build Wikipedia corpus in I5 format, that is the IDS text model currently used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/) and a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
+
+The conversion is done into two stages. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using Sweble Parser (http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, e.g. articles. In the second stage, WikiI5Converter converts the WikiXML files into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file (i.e. a requirement for DeReKo).
+
+## Instructions
 To run WikiXMLConverter, a wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including articles and discussions typically has the following format: 
 <pre>
   [languagecode]wiki-[latest or date]-pages-meta-current.xml
@@ -164,3 +170,10 @@ Hungarian timestamp format
 </pre>
 
 See ```/src/main/java/de/mannheim/ids/wiki/page/WikiTimestamp.java```
+
+## References
+
+Margaretha, E., and Lüngen,H. (2014). Building linguistic corpora from Wikipedia articles and discussions.  Journal for Language Technologie and Computational Linguistics (JLCL), 2/2014.
+
+Lüngen, H., and Sperberg-McQueen, C. M. (2012). A TEI P5 Document Grammar for the IDS Text Model. Journal of the Text Encoding Initiative [Online], 3. URL : http://jtei.revues.org/508 ; DOI : 10.4000/jtei.508
+
