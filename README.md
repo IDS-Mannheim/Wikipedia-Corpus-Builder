@@ -1,12 +1,12 @@
 
 # WikiXMLConverter
 
-WikiXMLConverter is part of the Wikipedia converter tool developed at the Institut für Deutsche Sprache (IDS, http://www1.ids-mannheim.de/). The purpose of the tool is build Wikipedia corpus in I5 format, that is the IDS text model currently used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/) and a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
+WikiXMLConverter converts wikitext to an XML format called WikiXML. It is part of the Wikipedia converter tool developed at the [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/). The purpose of the tool is to build Wikipedia corpus in I5 format, that is the IDS text model currently used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/) and a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
 
-The conversion is done into two stages. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using Sweble Parser (http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, e.g. articles. In the second stage, WikiI5Converter converts the WikiXML files into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file (i.e. a requirement for DeReKo).
+The conversion is done into two stages. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, e.g. articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts the WikiXML files into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file (i.e. a requirement for DeReKo).
 
 ## Instructions
-To run WikiXMLConverter, a wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including articles and discussions typically has the following format: 
+To run WikiXMLConverter, a wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including article and talk pages typically has the following format: 
 <pre>
   [languagecode]wiki-[latest or date]-pages-meta-current.xml
 </pre> 
