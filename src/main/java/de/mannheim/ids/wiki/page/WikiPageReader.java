@@ -130,7 +130,15 @@ public class WikiPageReader implements Runnable {
 				if (trimmedStrLine.startsWith("<title>")) {
 					matcher = titlePattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
-						wikiPage.setPageTitle(matcher.group(1));
+						String title = matcher.group(1);
+						if (!config.getTitlePrefix().isEmpty()){
+							if (!title.startsWith(config.getTitlePrefix())){
+								// skip page
+								isToRead = false;
+								continue;
+							}
+						}
+						wikiPage.setPageTitle(title);
 						pageStructureBuilder.append(strLine);
 						pageStructureBuilder.append("\n");
 					}
@@ -144,7 +152,7 @@ public class WikiPageReader implements Runnable {
 					if (matcher.find()) {
 						int ns = Integer.parseInt(matcher.group(1));
 						if (config.getNamespaceKey() == ns) {
-							pageStructureBuilder.append(trimmedStrLine);
+							pageStructureBuilder.append(strLine);
 							pageStructureBuilder.append("\n");
 						}
 						else { // Stop reading. Skip this page.

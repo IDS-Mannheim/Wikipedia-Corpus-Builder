@@ -1,5 +1,9 @@
 package de.mannheim.ids.parser;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
@@ -141,6 +145,12 @@ public class Sweble2Parser implements Runnable {
 			String url = page;
 			if (f != null && !f.isEmpty())
 				url = page + "#" + UrlEncoding.WIKI.encode(f);
+			try {
+				url = URLEncoder.encode(url, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			
 			return LOCAL_URL + url;
 		}
 

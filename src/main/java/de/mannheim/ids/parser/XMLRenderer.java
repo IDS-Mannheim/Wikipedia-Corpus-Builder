@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.config.WikiConfig;
@@ -490,7 +491,7 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		catch (LinkTargetException e) {
 			throw new VisitingException(e);
 		}
-
+		
 		// FIXME: I think these should be removed in the parser already?!
 		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
 			return;
@@ -528,6 +529,8 @@ public final class XMLRenderer extends HtmlRendererBase implements
 							callback.makeUrl(target), makeLinkTitle(n, target),
 							n.getPrefix(), makeTitleFromTarget(n, target),
 							n.getPostfix());
+					
+					
 				}
 			}
 			else {
@@ -1114,9 +1117,14 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	protected String makeImageTitle(WtImageLink n, PageTitle target) {
 		return esc(target.getDenormalizedFullTitle());
 	}
-
+	// EM: fix title containing &
 	private String makeTitleFromTarget(WtInternalLink n, PageTitle target) {
-		return esc(makeTitleFromTarget(target, n.getTarget()));
+		if (target.getTitle().contains("&")){
+			return makeTitleFromTarget(target, n.getTarget());
+		}
+		else{
+			return esc(makeTitleFromTarget(target, n.getTarget()));
+		}
 	}
 
 	private String makeTitleFromTarget(PageTitle target, WtPageName title) {
@@ -1124,7 +1132,13 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		if (target.hasInitialColon() && !targetStr.isEmpty()
 				&& targetStr.charAt(0) == ':')
 			targetStr = targetStr.substring(1);
-		return esc(targetStr);
+		
+		if (targetStr.contains("&amp;")){
+			return StringEscapeUtils.unescapeHtml(targetStr);
+		}
+		else{
+			return esc(targetStr);
+		}
 	}
 
 	// =====================================================================
