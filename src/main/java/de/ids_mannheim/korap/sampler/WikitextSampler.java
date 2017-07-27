@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,25 +21,39 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 /**
- * Creates a small sample of Wikipedia dump
+ * Creates a small sample of Wikipedia dump.
+ * 
+ * For German Wikipedia, the probability of sampling pages with titles starting
+ * with Wikipedia:Redundanz and Wikipedia:Löschkandidaten can be increased by
+ * specifying weights. The smaller the weights, the smaller the number of the
+ * pages included in the the sample.
  * 
  * @author margaretha
- *
+ * 
  */
 public class WikitextSampler {
 	private Options options;
 	private String filePath;
-	private double factor;
+	private static String outputPath;
 	private BufferedWriter writer;
+	private double factor = 0.00001;
+	// Recommended redundanzWeight = 0.05
+	private double redundanzWeight = 0;
+	// Recommended löschkandidatenWeight = 0.001
+	private double löschkandidatenWeight = 0;
 
-	public static Pattern redundanzPattern = Pattern.compile("^<title>Wikipedia:Redundanz");  
-	public static Pattern löschKandidatenPattern = Pattern.compile("^<title>Wikipedia:Löschkandidaten");
-	
 	public WikitextSampler() {
 		options = new Options();
-		options.addOption("f", true, "factor between 0 and 1");
+		options.addOption("f", true, "factor between 0 and 1."
+				+ "Smaller factor means less number of pages. ");
 		options.addOption("i", true, "wikipedia input file");
 		options.addOption("o", true, "output file");
+		options.addOption("rw", true,
+				"weight for sampling Wikipedia:Redundanz pages. "
+						+ "Smaller weight means less number of pages. ");
+		options.addOption("lw", true,
+				"weight for sampling Wikipedia:Löschkandidaten pages."
+						+ "Smaller weight means less number of pages. ");
 	}
 
 	public static void main(String[] args) throws ParseException, IOException {
@@ -46,10 +62,14 @@ public class WikitextSampler {
 		sampler.parseArguments(args);
 		sampler.createSample();
 		long end = System.currentTimeMillis();
-		System.out.println("Run time: "+(end-start) + "ms.");
+		System.out.println("Run time: " + (end - start) + " ms.");
+
+		File outputFile = new File(outputPath);
+		double kb = (outputFile.length() / 1024);
+		System.out.println("Output file size " + kb + "KB.");
 	}
 
-	private void parseArguments(String[] args)
+	public void parseArguments(String[] args)
 			throws ParseException, FileNotFoundException {
 		CommandLineParser parser = new BasicParser();
 		CommandLine cmd = parser.parse(options, args);
@@ -67,60 +87,69 @@ public class WikitextSampler {
 		if (factor != null) {
 			this.factor = Double.valueOf(factor);
 		}
-		else {
-			this.factor = 0.01;
+
+		String redundanzWeight = cmd.getOptionValue("rw");
+		if (redundanzWeight != null) {
+			this.redundanzWeight = Double.valueOf(redundanzWeight);
 		}
 
-		String outputPath = cmd.getOptionValue("o");
-		if (outputPath != null) {
-			writer = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File(outputPath))), 2048);
+		String löschkandidatenWeight = cmd.getOptionValue("lw");
+		if (löschkandidatenWeight != null) {
+			this.löschkandidatenWeight = Double.valueOf(löschkandidatenWeight);
 		}
-		else {
-			writer = new BufferedWriter(
-					new OutputStreamWriter(
-							new FileOutputStream(new File("output.xml"))),
-					2048);
+
+		outputPath = cmd.getOptionValue("o");
+		if (outputPath == null) {
+			outputPath = "output.xml";
 			System.out.println("Creating output file with name output.xml");
 		}
+
+		writer = new BufferedWriter(new OutputStreamWriter(
+				new FileOutputStream(new File(outputPath))), 2048);
 	}
 
-	private void createSample() throws IOException {
+	public void createSample() throws IOException {
 		File file = new File(filePath);
 		BufferedReader br = new BufferedReader(
 				new InputStreamReader(new FileInputStream(file)), 2048);
+
+		String normalizedLöschkandidaten = Normalizer.normalize(
+				"<title>Wikipedia:Löschkandidaten", Normalizer.Form.NFD);
 
 		String line;
 		String trimmedLine;
 		String page = null;
 		boolean read = false;
-		double weight = 0.3;
+
 		while ((line = br.readLine()) != null) {
 			trimmedLine = line.trim();
 			if (trimmedLine.startsWith("<mediawiki")) {
 				read = true;
 			}
 			else if (trimmedLine.startsWith("<title>")) {
-				if (trimmedLine
-						.startsWith("<title>Wikipedia:Löschdiskusionen")) {
-					if (Math.random() - weight < factor) {
-						writer.append(page );
+				String normalizedTitle = Normalizer.normalize(trimmedLine,
+						Form.NFD);
+				if (normalizedTitle.startsWith(normalizedLöschkandidaten)) {
+					if (Math.random() - löschkandidatenWeight < factor) {
+						writer.append(page);
 						writer.append("\n");
 						read = true;
+						System.out.println(trimmedLine);
 					}
-					continue;
 				}
 				else if (trimmedLine.startsWith("<title>Wikipedia:Redundanz")) {
-					if (Math.random() - weight < factor) {
-						writer.append(page );
+					if (Math.random() - redundanzWeight < factor) {
+						writer.append(page);
 						writer.append("\n");
 						read = true;
+						System.out.println(trimmedLine);
 					}
 				}
 				else if (Math.random() < factor) {
-					writer.append(page );
+					writer.append(page);
 					writer.append("\n");
 					read = true;
+					System.out.println(trimmedLine);
 				}
 			}
 			else if (trimmedLine.startsWith("<page")) {
@@ -136,10 +165,10 @@ public class WikitextSampler {
 		writer.close();
 		br.close();
 	}
-	
-	private boolean match(String string, Pattern pattern){
-		Matcher matcher = pattern.matcher(string);		
-		if (matcher.find()){
+
+	private boolean match(String string, Pattern pattern) {
+		Matcher matcher = pattern.matcher(string);
+		if (matcher.find()) {
 			System.out.println(matcher.group(1));
 			return true;
 		}
