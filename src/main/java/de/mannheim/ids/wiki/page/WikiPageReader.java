@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -131,6 +133,7 @@ public class WikiPageReader implements Runnable {
 					matcher = titlePattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
 						String title = matcher.group(1);
+						title = Normalizer.normalize(title, Form.NFKD);
 						if (!config.getTitlePrefix().isEmpty()){
 							if (!title.startsWith(config.getTitlePrefix())){
 								// skip page

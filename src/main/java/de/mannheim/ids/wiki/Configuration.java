@@ -2,6 +2,9 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -119,7 +122,7 @@ public class Configuration {
 				.getResourceAsStream(properties);
 
 		Properties config = new Properties();
-		config.load(is);
+		config.load(new InputStreamReader(is, "utf-8"));
 
 		int namespaceKey = Integer
 				.parseInt(config.getProperty("namespace_key"));
@@ -301,7 +304,7 @@ public class Configuration {
 	 *            the titlePrefix to set
 	 */
 	public void setTitlePrefix(String titlePrefix) {
-		this.titlePrefix = titlePrefix;
+		this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKD);
 	}
 
 	/**
