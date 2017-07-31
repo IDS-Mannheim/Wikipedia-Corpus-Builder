@@ -3,10 +3,9 @@ package de.mannheim.ids.wiki;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -122,7 +121,7 @@ public class Configuration {
 				.getResourceAsStream(properties);
 
 		Properties config = new Properties();
-		config.load(new InputStreamReader(is, "utf-8"));
+		config.load(new InputStreamReader(is, StandardCharsets.ISO_8859_1));
 
 		int namespaceKey = Integer
 				.parseInt(config.getProperty("namespace_key"));
