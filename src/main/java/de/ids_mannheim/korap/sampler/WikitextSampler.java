@@ -156,6 +156,9 @@ public class WikitextSampler {
 				page = line;
 				read = false;
 			}
+			else if (trimmedLine.startsWith("</mediawiki")) {
+				read = true;
+			}
 
 			if (read) {
 				writer.append(line);
@@ -166,12 +169,4 @@ public class WikitextSampler {
 		br.close();
 	}
 
-	private boolean match(String string, Pattern pattern) {
-		Matcher matcher = pattern.matcher(string);
-		if (matcher.find()) {
-			System.out.println(matcher.group(1));
-			return true;
-		}
-		return false;
-	}
 }
