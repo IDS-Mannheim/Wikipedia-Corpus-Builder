@@ -3,21 +3,28 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
     xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com" version="3.0"
     extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
-    <!--       xmlns:err="http://www.w3.org/2005/xqt-errors" >-->
+    <!--xmlns:err="http://www.w3.org/2005/xqt-errors"-->
 
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
-            <xd:p>Version 2.0</xd:p>
-            <xd:p><xd:b>Revision:</xd:b> Jun 2013</xd:p>
+            <xd:p>Version 3.0</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> July 2017</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
 
-            <xd:p><xd:b>Version 1.0 last modified:</xd:b> Jul 23, 2011</xd:p>
+            <xd:p>Version 2.0</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> June 2013</xd:p>
+            <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
+
+            <xd:p><xd:b>Version 1.0 last modified:</xd:b> July 23, 2011</xd:p>
             <xd:p><xd:b>Author:</xd:b> Stefanie Haupt</xd:p>
         </xd:desc>
     </xd:doc>
-    <xsl:include href="Templates2.xsl"/>
 
+    <xsl:include href="paragraph-level-templates.xsl"/>
+    <xsl:include href="phrase-level-templates.xsl"/>
+    <xsl:include href="escape-element-templates.xsl"/>
+    
     <xsl:param name="type" required="yes"/>
     <xsl:param name="korpusSigle" required="yes"/>
     <xsl:param name="lang" required="yes"/>
@@ -28,7 +35,7 @@
     <xsl:param name="letter" required="yes"/>
     <xsl:param name="encoding" required="yes"/>
 
-    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.new.dtd"
+    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.dtd"
         method="xml" encoding="{$encoding}" indent="yes"/>
     <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
     <xsl:variable name="sigle" saxon:assignable="yes"/>
@@ -88,9 +95,10 @@
                         />
                     </xsl:variable>
                     <xsl:sequence
-                        select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"/>
+                        select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"
+                    />
                 </xsl:otherwise>
-            </xsl:choose>            
+            </xsl:choose>
         </xsl:variable>
 
         <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
@@ -245,11 +253,12 @@
             <xsl:catch>
                 <saxon:assign name="errorCounter" select="$errorCounter+1"/>
                 <xsl:message terminate="yes">
-                    <xsl:text>Title: </xsl:text>
-                    <xsl:value-of select="../title"/>
-                    <!--
-Error code: <xsl:value-of select="$err:code"/>
-Reason: <xsl:value-of select="$err:description"/-->
+                    <xsl:text>Id: </xsl:text>
+                    <xsl:value-of select="../id"/>
+                    <xsl:text>&#10;Title: </xsl:text>
+                    <xsl:value-of select="../title"/><!--<xsl:text>&#10;Error code: </xsl:text>
+                    <xsl:value-of select="$err:code"/><xsl:text>&#10;Reason: </xsl:text>
+                    <xsl:value-of select="$err:description"/>-->
                 </xsl:message>
 
             </xsl:catch>

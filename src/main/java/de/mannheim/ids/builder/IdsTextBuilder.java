@@ -34,7 +34,7 @@ public class IdsTextBuilder extends DefaultHandler {
 
 	private DatabaseManager dbManager;
 	
-	private static Pattern space = Pattern.compile("\\s+");
+	private static Pattern spacePattern = Pattern.compile("\\s+");
 	
 	private String pageId;
 	private static List<String> addedAttributes = new ArrayList<String>();
@@ -82,6 +82,11 @@ public class IdsTextBuilder extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		try {
+			
+			if (localName.equals("back")){
+				// read dir
+			}
+			
 			writer.writeStartElement(localName);
 			for (int i = 0; i < attributes.getLength(); i++) {
 				if (!addedAttributes.contains(attributes.getLocalName(i))) {
@@ -162,7 +167,7 @@ public class IdsTextBuilder extends DefaultHandler {
 			String text = new String(ch, start, length);
 			if (!text.isEmpty()) {
 				//writer.writeCharacters(StringEscapeUtils.escapeXml(text));
-				text = space.matcher(text).replaceAll(" ");
+				text = spacePattern.matcher(text).replaceAll(" ");
 				writer.writeCharacters(text);
 				writer.flush();
 			}

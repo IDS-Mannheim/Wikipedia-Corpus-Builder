@@ -110,14 +110,22 @@ The WikiXML index is required by the WikiI5Converter to access the wiki pages an
 
 Most of wikipedia articles have analogs in the other wikipedias of other languages. The links to these analog pages are not explicitly written in the wikidumps, but stored separately in a form of a database table. A wikipedia langlinks table contains information of all the page titles in different languages. The analog page titles of a wiki page are connected to each other by means of its page id.
 
-To obtain this language link information, firstly download the corresponding language link sql dump of the wikipedia dump and restore it to a mysql database. The database will contain a table ```langlinks``` with 3 columns: 
+To obtain this language link information, firstly download the corresponding language link sql dump of the wikipedia dump and restore it to a database. 
+
+Create a MySQL database using the following command in a MySQL shell:
+```CREATE DATABASE [database_name];```
+
+In a unix shell, restore the language link dump:
+```mysql -u root -p [database_name] < [dump_file]```
+
+The database will contain a table ```langlinks``` with 3 columns: 
 * ```ll_from``` lists the wiki page ids
 * ```ll_lang``` lists the language of the wikipedias
 * ```ll_title``` lists the page title in different languages.
 
 Rename the table name ```langlinks``` to ```[2-letter languagecode]_langlinks``` to distinguish the tables of wikipedias of different languages. For instance, ```langlinks``` table from a german wikipedia dump should be renamed into ```de_langlinks``` by using the following MySQL command:
 
-```RENAME TABLE langlinks TO de_langlinks```
+```RENAME TABLE langlinks TO de_langlinks;```
 
 Using the langlinks table, wikipedia page titles across the wikipedias of different languages can be listed by wiki page ids. For instance, the following command:
 

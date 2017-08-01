@@ -44,7 +44,7 @@ public class Transformer implements Callable<WikiI5Part> {
 			XsltExecutable executable;
 			try {
 				InputStream is = this.getClass().getClassLoader()
-						.getResourceAsStream("Templates.xsl");
+						.getResourceAsStream("main-templates.xsl");
 				executable = compiler.compile(new StreamSource(is));
 			}
 			catch (SaxonApiException e) {
@@ -106,11 +106,12 @@ public class Transformer implements Callable<WikiI5Part> {
 	 */
 	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler 
 			errorHandler, File wikiXMLFile, String index, String pageId) {
-		this.config = config;
+		Transformer.config = config;
+		Transformer.errorHandler = errorHandler;
+
 		this.wikiXML = wikiXMLFile;
 		this.index = index;
 		this.pageId = pageId;
-		this.errorHandler = errorHandler;
 		this.statistics = statistics;
 	}
 
