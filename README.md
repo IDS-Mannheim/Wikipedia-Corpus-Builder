@@ -1,17 +1,17 @@
 
 # WikiXMLConverter
 
-WikiXMLConverter converts wikitext to an XML format called WikiXML. It is part of the Wikipedia converter tool developed at the [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/). The purpose of the tool is to build Wikipedia corpus in I5 format, that is the IDS text model currently used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/) and a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
+WikiXMLConverter converts wikitext to an XML format called WikiXML. It is part of the Wikipedia converter tool developed at the [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/). The purpose of the tool is to build Wikipedia corpora in I5 format, that is the IDS text model used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/). I5 a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
 
-The conversion is done into two stages. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, e.g. articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts the WikiXML files into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file (i.e. a requirement for DeReKo).
+Our Wikipedia corpora are build through a two-stage-conversion. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a Wikipedia namespace, e.g. articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts the WikiXML files into I5 using XSLT Stylesheets and assembles them altogether as a single corpus file (i.e. a requirement for DeReKo).
 
 ## Instructions
-To run WikiXMLConverter, a wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including article and talk pages typically has the following format: 
+To run WikiXMLConverter, a Wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including article and talk pages typically has the following format: 
 <pre>
   [languagecode]wiki-[latest or date]-pages-meta-current.xml
 </pre> 
 
-To convert a full wikipedia (not only a small sample), it is advised to increase and limit the java memory allocation pool by using -Xmx parameter. For instance, -Xmx4g means set maximum Java heap size to 4 Gigabytes.The following is an example command to run the WikiXMLConverter tool in a terminal.
+To convert a full Wikipedia (not only a small sample), it is advised to increase and limit the java memory allocation pool by using -Xmx parameter. For instance, -Xmx4g means set maximum Java heap size to 4 Gigabytes.The following is an example command to run the WikiXMLConverter tool in a terminal.
 
 <pre>
 java -jar -Xmx4g [jar-file-path] -prop [properties-file-path] > [log-file-path] 2>&1
@@ -26,11 +26,19 @@ For article pages, the properties files requires the following properties:
 
 * ```wikidump = data/dewiki-20130728-sample.xml```
 
-  The wikipedia dump file path.
-  
+  The Wikipedia dump file path.
+
+* ```page_type = article```
+
+  The type of the Wikipedia pages.
+
+* ```title_prefix = Wikipedia:Löschkandidaten```
+
+  The prefix of Wikipedia pages to convert.
+
 * ```language_code = de```
 
-  Two letter language code of the wikipedia.
+  Two letter language code of the Wikipedia.
     
 * ```output_encoding = utf-8```
   
@@ -38,7 +46,7 @@ For article pages, the properties files requires the following properties:
   
 * ```namespace_key = 0```
   
-  The namespace key of the wikipedia pages to convert, for instance  the namespace key for articles is 0, talk pages is 1, and user talk pages is 3. See https://en.wikipedia.org/wiki/Wikipedia:Namespace. 
+  The namespace key of the Wikipedia pages to convert, for instance  the namespace key for articles is 0, talk pages is 1, and user talk pages is 3. See https://en.wikipedia.org/wiki/Wikipedia:Namespace. 
   
 * ```max_threads = 4```
   
@@ -71,7 +79,7 @@ Unsigned template in the Wikidump language, for instance ```unsigned``` in Engli
 
 ## Outputs
 
-The output of this conversion is a WikiXML corpus, namely a collection of WikiXML files organized alphabetically and numerically by the page titles in folders. The WikiXML files are named based on the wiki page ids. Sometimes, a wikipedia page title starts with a character that cannot be normalized into an alphanumerical character. These pages are stored in Char/ folder and are ignored in the second stage conversion. The tree structure below illustrates how the WikiXML output files are organized.
+The output of this conversion is a WikiXML corpus, namely a collection of WikiXML files organized alphabetically and numerically by the page titles in folders. The WikiXML files are named based on the wiki page ids. Sometimes, a Wikipedia page title starts with a character that cannot be normalized into an alphanumerical character. These pages are stored in Char/ folder and are ignored in the second stage conversion. The tree structure below illustrates how the WikiXML output files are organized.
 
 <pre>
 WikiXML-de/
@@ -97,7 +105,7 @@ WikiXML-de/
 
 ## Logs
 
-The log file lists all the WikiXML files (and wikitext files) generated through the conversion. At the end of the file, the number of files and the exceptions/errors encountered during the conversion are summarized. Below is an example of a summary from the conversion of the articles of the German wikipedia.
+The log file lists all the WikiXML files (and wikitext files) generated through the conversion. At the end of the file, the number of files and the exceptions/errors encountered during the conversion are summarized. Below is an example of a summary from the conversion of the articles of the German Wikipedia.
 
 <pre>
 Total pages (without redirect pages) 1810405
@@ -122,9 +130,9 @@ The generated WikiXML data is not guaranteed to be well-formed. Thus, an XML wel
 
 ## Postings
 
-Wikipedia talk pages contain discussions among users about the related wikipedia articles. In a typical computer-mediated communication corpus, a posting is a contribution to a written dialogue, similar to an utterance in a spoken conversation. It is a piece of text sent/posted/submitted to a server at one point of time. A collection of sequential postings within the same subject forms a conversation thread.
+Wikipedia talk pages contain discussions among users about the related Wikipedia articles. In a typical computer-mediated communication corpus, a posting is a contribution to a written dialogue, similar to an utterance in a spoken conversation. It is a piece of text sent/posted/submitted to a server at one point of time. A collection of sequential postings within the same subject forms a conversation thread.
 
-In wikipedia, however, postings are not necessarily sequential. Since a wiki talk page is basically a text or document, any user may write his/her post anywhere in the text. He/she may also remove or edit parts of the existing text. Thus, the boundaries between postings may be unclear. WikiXMLConverter makes use of a heuristic approach to segment wikitext and at the same time create postings from the segments (Margaretha and Lüngen, 2014).
+In Wikipedia, however, postings are not necessarily sequential. Since a wiki talk page is basically a text or document, any user may write his/her post anywhere in the text. He/she may also remove or edit parts of the existing text. Thus, the boundaries between postings may be unclear. WikiXMLConverter makes use of a heuristic approach to segment wikitext and at the same time create postings from the segments (Margaretha and Lüngen, 2014).
 
 See ```/src/main/java/de/mannheim/ids/wiki/page/WikiPostHandler.java```
  
@@ -151,9 +159,9 @@ See ```/src/main/java/de/mannheim/ids/wiki/page/WikiPostHandler.java```
 
 ## Timestamps
 
-Posting signatures usually contain information about the posting date, time and timezone. These timestamp information is useful for linguists to discover language trends, for instance to find out when a new word has appeared and started to be used widely. The time information stored in attributes or in a timeline in the metadata section cannot be used by the current corpus research  software. Therefore, the timestamp is kept in the running text of the corpus, although an external XML list of timestamps are also generated.
+Posting signatures usually contain information about the posting date, time and timezone. These timestamp information is useful for linguists to discover language trends, for instance to find out when a new word has appeared and started to be used widely. The time information stored in attributes or in a timeline in the metadata section cannot be used by Cosmas II. Therefore, timestamps are kept in the running text of the corpus. Moreover, an external XML list of timestamps is also generated.
 
-Wiki markup for timestamps differs in wikipedias of different languages, although some languages have similar timestamp formats. In WikiXMLConverter, different regex patterns were created to handle different timestamp formats. The patterns allows minor differences of the formats enabling them to handle some variations in the timestamps.
+Wiki markup for timestamps differs in Wikipedias of different languages, although some languages have similar timestamp formats. In WikiXMLConverter, different regex patterns were created to handle different timestamp formats. The patterns allows minor differences of the formats enabling them to handle some variations in the timestamps.
 
 <pre>
 German timestamp format
