@@ -9,7 +9,11 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
+import org.sweble.wikitext.engine.EngineException;
+import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
+import org.sweble.wikitext.engine.WtEngine;
+import org.sweble.wikitext.engine.WtEngineImpl;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.CompleteEngineVisitorNoReturn;
 import org.sweble.wikitext.engine.nodes.EngNowiki;
@@ -23,6 +27,7 @@ import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.output.SafeLinkTitlePrinter;
 import org.sweble.wikitext.engine.utils.EngineAstTextUtils;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
+import org.sweble.wikitext.parser.nodes.WikitextNodeFactoryImpl;
 import org.sweble.wikitext.parser.nodes.WtBody;
 import org.sweble.wikitext.parser.nodes.WtBold;
 import org.sweble.wikitext.parser.nodes.WtDefinitionList;
@@ -93,11 +98,13 @@ import org.sweble.wikitext.parser.nodes.WtXmlEndTag;
 import org.sweble.wikitext.parser.nodes.WtXmlEntityRef;
 import org.sweble.wikitext.parser.nodes.WtXmlStartTag;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
+import org.sweble.wikitext.parser.utils.SimpleParserConfig;
 import org.sweble.wikitext.parser.utils.StringConversionException;
 import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 
 import de.fau.cs.osr.utils.StringUtils;
 import de.fau.cs.osr.utils.visitor.VisitingException;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 
 /**
  * Modified Class from the HTMLRenderer Class in the Sweble library
@@ -106,6 +113,7 @@ import de.fau.cs.osr.utils.visitor.VisitingException;
  */
 public final class XMLRenderer extends HtmlRendererBase implements
 		CompleteEngineVisitorNoReturn {
+	
 	@Override
 	public void visit(EngProcessedPage n) {
 		dispatch(n.getPage());
@@ -794,11 +802,22 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	}
 
 	public void visit(WtTagExtension n) {
-		// ref, nowiki, math
+		
 		if (n.getName().equals("ref")) {
-			pt("&lt;%s%!&gt;%=&lt;/%s&gt;", n.getName(), n.getXmlAttributes(),
-					n.getBody().getContent(), n.getName());
+			pt("<%s%!>", n.getName(), n.getXmlAttributes());
+			try {
+				EngProcessedPage cp = engine.postprocess(pageId,n.getBody().getContent(), null);
+				iterate(cp.getPage());
+			} catch (EngineException e) {
+				throw new RuntimeException(e);
+			}
+			p.print("</"+n.getName()+">");
+//			pt("<%s%!>%=</%s>", n.getName(), n.getXmlAttributes(),
+//					n.getBody().getContent(), n.getName());
+//			pt("&lt;%s%!&gt;%=&lt;/%s&gt;", n.getName(), n.getXmlAttributes(),
+//					n.getBody().getContent(), n.getName());
 		}
+		// nowiki, math
 		else {
 			p.print("<span id=\"" + n.getName()
 					+ "\" class=\"tag-extension\"/>");
@@ -1353,6 +1372,9 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	private final WikiConfig wikiConfig;
 
 	private final PageTitle pageTitle;
+	
+	private PageId pageId; 
+	public static WtEngine engine = new WtEngineImpl(WikiXMLProcessor.wikiconfig);
 
 	private final EngineNodeFactory nf;
 
@@ -1419,5 +1441,9 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		this.nf = wikiConfig.getNodeFactory();
 		this.tu = wikiConfig.getAstTextUtils();
 		p.incIndent();
+	}
+	
+	public void setPageId(PageId pageId) {
+		this.pageId = pageId;
 	}
 }

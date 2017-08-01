@@ -1,8 +1,9 @@
 package de.mannheim.ids.parser;
 
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
@@ -25,11 +26,11 @@ import de.mannheim.ids.writer.WikiErrorWriter;
  * 
  * @author margaretha
  * 
- * */
+ */
 public class Sweble2Parser implements Runnable {
 
 	private String wikitext, wikiXML;
-	private String pagetitle, pageId;
+	private String pagetitle, pageIdStr;
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
 
@@ -65,7 +66,8 @@ public class Sweble2Parser implements Runnable {
 					"Language cannot be null or empty.");
 		}
 		if (wikiStatistics == null) {
-			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+			throw new IllegalArgumentException(
+					"WikiStatistics cannot be null.");
 		}
 		if (errorWriter == null) {
 			throw new IllegalArgumentException(
@@ -73,7 +75,7 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		this.wikitext = wikitext;
-		this.pageId = pageId;
+		this.pageIdStr = pageId;
 		this.pagetitle = pagetitle;
 		this.wikiStatistics = wikiStatistics;
 		this.errorWriter = errorWriter;
@@ -85,29 +87,31 @@ public class Sweble2Parser implements Runnable {
 		WtEngine engine = new WtEngineImpl(WikiXMLProcessor.wikiconfig);
 		PageTitle pageTitle = null;
 		EngProcessedPage cp = null;
+		PageId pageId;
 		try {
 			pageTitle = PageTitle.make(WikiXMLProcessor.wikiconfig, pagetitle);
-			PageId pageId = new PageId(pageTitle, -1);
+			pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
-			cp = engine.postprocess(pageId, wikitext, null);
-		}
-		catch (LinkTargetException | EngineException e) {
-				wikiStatistics.addSwebleErrors();
-			errorWriter.logErrorPage("SWEBLE", pagetitle, pageId,
-						e.getCause(), wikitext);
+			 cp = engine.postprocess(pageId, wikitext, null);
+		} catch (LinkTargetException | EngineException e) {
+			wikiStatistics.addSwebleErrors();
+			errorWriter.logErrorPage("SWEBLE", pagetitle, pageIdStr,
+					e.getCause(), wikitext);
 			return;
 		}
 
 		try {
+			Writer w = new StringWriter();
 			// Render AST to XML
-			wikiXML = XMLRenderer.print(new MyRendererCallback(),
-					WikiXMLProcessor.wikiconfig,
-					pageTitle, cp.getPage());
-		}
-		catch (Exception e) {
-				wikiStatistics.addRendererErrors();
-			errorWriter.logErrorPage("RENDERER", pagetitle, pageId,
-						e.getCause(), wikitext);
+			XMLRenderer renderer = new XMLRenderer(new MyRendererCallback(),
+					WikiXMLProcessor.wikiconfig, pageTitle, w);
+			renderer.setPageId(pageId);
+			renderer.go(cp.getPage());
+			wikiXML = w.toString();
+		} catch (Exception e) {
+			wikiStatistics.addRendererErrors();
+			errorWriter.logErrorPage("RENDERER", pagetitle, pageIdStr,
+					e.getCause(), wikitext);
 
 			e.printStackTrace();
 		}
@@ -122,8 +126,9 @@ public class Sweble2Parser implements Runnable {
 		this.wikiXML = wikiXML;
 	}
 
-	private static final class MyRendererCallback implements
-			HtmlRendererCallback {
+	private static final class MyRendererCallback
+			implements
+				HtmlRendererCallback {
 		protected static final String LOCAL_URL = WikiXMLProcessor.Wikipedia_URI;
 
 		@Override
@@ -150,7 +155,7 @@ public class Sweble2Parser implements Runnable {
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-			
+
 			return LOCAL_URL + url;
 		}
 
@@ -171,7 +176,8 @@ public class Sweble2Parser implements Runnable {
 				path = path.replace("&gt", "&gt;");
 			}
 
-			if (target.getProtocol() == "") return path;
+			if (target.getProtocol() == "")
+				return path;
 			return target.getProtocol() + ":" + path;
 		}
 
