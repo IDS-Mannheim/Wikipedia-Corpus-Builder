@@ -76,13 +76,10 @@
     </xsl:template>
 
     <xsl:template match="ref|Ref|REF">
-        <ptr rend="name()" targType="note" targOrder="u" target="{$sigle}-{$refCounter}"/>
-        <!--<xsl:result-document href="ref/{$sigle}-{$refCounter}.xml" method="xml"-->
-            encoding="{$encoding}">
-            <note id="{$sigle}-{$refCounter}" place="foot">
-                <xsl:apply-templates/>
-            </note>
-        <!--</xsl:result-document>-->
+        <ptr rend="ref" targType="note" targOrder="u" target="{$sigle}-{$refCounter}"/>
+        <note id="{$sigle}-{$refCounter}" place="foot">
+            <xsl:apply-templates/>
+        </note>
         <saxon:assign name="refCounter" select="$refCounter+1"/>
     </xsl:template>
 

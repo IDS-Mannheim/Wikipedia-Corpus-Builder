@@ -237,11 +237,12 @@
 
             <!-- * text * -->
             <text>
-                <!-- front and back always empty -->
+                <!-- front always empty -->
                 <front/>
                 <body>
                     <xsl:apply-templates select="revision"/>
                 </body>
+                <!-- back contains foot note-->
                 <back/>
             </text>
         </idsText>
