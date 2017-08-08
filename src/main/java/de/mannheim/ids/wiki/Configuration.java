@@ -3,6 +3,7 @@ package de.mannheim.ids.wiki;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -121,7 +122,7 @@ public class Configuration {
 				.getResourceAsStream(properties);
 
 		Properties config = new Properties();
-		config.load(new InputStreamReader(is, StandardCharsets.ISO_8859_1));
+		config.load(new InputStreamReader(is, StandardCharsets.UTF_8));
 
 		int namespaceKey = Integer
 				.parseInt(config.getProperty("namespace_key"));
@@ -303,7 +304,7 @@ public class Configuration {
 	 *            the titlePrefix to set
 	 */
 	public void setTitlePrefix(String titlePrefix) {
-		this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKD);
+		this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKC);
 	}
 
 	/**

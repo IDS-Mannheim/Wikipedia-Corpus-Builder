@@ -133,7 +133,7 @@ public class WikiPageReader implements Runnable {
 					matcher = titlePattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
 						String title = matcher.group(1);
-						title = Normalizer.normalize(title, Form.NFKD);
+						title = Normalizer.normalize(title, Form.NFKC);
 						if (!config.getTitlePrefix().isEmpty()){
 							if (!title.startsWith(config.getTitlePrefix())){
 								// skip page
