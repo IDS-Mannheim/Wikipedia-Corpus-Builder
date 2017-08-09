@@ -33,8 +33,12 @@
 # The index is used in WikiI5Converter for structuring the Wikipedia 
 # pages in the resulting Wikipedia I5 corpus file.
 #
-# Eliza Margaretha, Juli 2015
+# Eliza Margaretha
 # Institut für Deutsche Sprache
+#
+# Created: Juli 2015
+# Last update: August 2017 
+#
 # This script is licensed under GPL v3.
 # -------------------------------------------------------------------
 
@@ -58,25 +62,17 @@ pageType=$1
 xmlFolder=$2
 output=$3
 
-if [ -z "$1" ];
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ];
 then
-    echo "Please specify the Wikipage type:  "
-    read pageType
+    echo "Specify the following input parameters (separated by a space):"
+    echo "1. pageType e.g. article, talk, user-talk"
+    echo "2. root path of a wikiXML folder, e.g: wikixml-de/article"
+    echo "3. output file path"
+    echo ""
+    echo "Example:"
+    echo "./WikiXMLCorpusIndexer.sh article wikixml-de/article article-index.xml"
+    exit
 fi
-
-if [ -z "$2" ];
-then
-    echo "Please specify the WikiXML folder: "
-    read xmlFolder
-fi
-
-if [ -z "$3" ];
-then
-    echo "Please specify the output file name: "
-    read output
-fi
-
-
 
 echo "Indexing WikiXML" $1 "pages"    
 createList $pageType $xmlFolder $output

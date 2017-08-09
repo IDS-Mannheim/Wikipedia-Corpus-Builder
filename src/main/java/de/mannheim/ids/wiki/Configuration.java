@@ -3,11 +3,10 @@ package de.mannheim.ids.wiki;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-/** Sets a configuration for the whole conversion process.
+/**
+ * Sets a configuration for the whole conversion process.
  * 
  * @author margaretha
  *
@@ -28,6 +27,7 @@ public class Configuration {
 	private String databaseUrl;
 	private String databaseUsername;
 	private String databasePassword;
+	private String creator;
 
 	private String korpusSigle;
 
@@ -36,48 +36,30 @@ public class Configuration {
 
 	private boolean isDiscussion;
 
-	public static final Map<Integer, String> namespaceMap;
-	static {
-		namespaceMap = new HashMap<Integer, String>();
-		namespaceMap.put(0, "article");
-		namespaceMap.put(1, "talk");
-		namespaceMap.put(2, "user");
-		namespaceMap.put(3, "user-talk");
-		namespaceMap.put(4, "wikipedia");
-		namespaceMap.put(5, "wikipedia-talk");
-		namespaceMap.put(6, "file");
-		namespaceMap.put(7, "file-talk");
-		namespaceMap.put(8, "mediawiki");
-		namespaceMap.put(9, "mediawiki-talk");
-		namespaceMap.put(10, "template");
-		namespaceMap.put(11, "template-talk");
-		namespaceMap.put(12, "help");
-		namespaceMap.put(13, "help-talk");
-		namespaceMap.put(14, "category");
-		namespaceMap.put(15, "category-talk");
-	}
-
-	public static final String[] indexes = { "A", "B", "C", "D", "E", "F", "G",
+	public static final String[] indexes = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
-			"7", "8", "9" };
+			"7", "8", "9"};
 
 	public Configuration() {
 		System.setProperty("entityExpansionLimit", "0");
 		System.setProperty("totalEntitySizeLimit", "0");
 		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
+		creator = "N/A";
 	}
 
-	// FIX ME
-	public Configuration(String xmlFolder, int namespaceKey, String dumpFilename,
-			String language, String korpusSigle, String inflectives, String encoding, String outputFile,
-			String index, String url, String username, String password, int maxThreads) {
+	public Configuration(String xmlFolder, int namespaceKey, String pageType,
+			String dumpFilename, String language, String korpusSigle,
+			String inflectives, String encoding, String outputFile,
+			String index, String url, String username, String password,
+			int maxThreads, String creator) {
 		this();
-						
+
+		setCreator(creator);
 		setNamespaceKey(namespaceKey);
-		setPageType(namespaceMap.get(namespaceKey));
+		setPageType(pageType);
 		setDiscussion(namespaceKey);
-		
+
 		setDumpFilename(dumpFilename);
 		setLanguage(language);
 		setLanguageCode();
@@ -92,23 +74,24 @@ public class Configuration {
 		setDatabaseUrl(url);
 		setDatabaseUsername(username);
 		setDatabasePassword(password);
-		
+
 		setMaxThreads(maxThreads);
 	}
 
 	public Configuration(String propertiesFilename) throws IOException {
 		InputStream is = Configuration.class.getClassLoader()
 				.getResourceAsStream(propertiesFilename);
-		
+
 		Properties config = new Properties();
 		config.load(is);
 
-		int namespaceKey = Integer.parseInt(config.getProperty("namespace_key",
-				"1"));
+		int namespaceKey = Integer
+				.parseInt(config.getProperty("namespace_key", "1"));
 		setNamespaceKey(namespaceKey);
-		setPageType(namespaceMap.get(namespaceKey));
 		setDiscussion(namespaceKey);
 
+		setCreator(config.getProperty("creator"));
+		setPageType(config.getProperty("page_type"));
 		setDumpFilename(config.getProperty("wikidump"));
 		setLanguage(config.getProperty("language"));
 		setLanguageCode();
@@ -263,7 +246,14 @@ public class Configuration {
 	}
 
 	public void setDiscussion(int namespaceKey) {
-		this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
+		// The pages in Wikipedia namespace e.g. with title prefixes
+		// Wikipedia:Redundanz and Wikipedia:Löschkandidaten are
+		// discussions.
+		if (namespaceKey == 4)
+			this.isDiscussion = true;
+		else {
+			this.isDiscussion = (namespaceKey % 2) == 0 ? false : true;
+		}
 	}
 
 	public String getLanguage() {
@@ -308,5 +298,13 @@ public class Configuration {
 
 	public void setMaxThreads(int maxThreads) {
 		this.maxThreads = maxThreads;
+	}
+
+	public String getCreator() {
+		return creator;
+	}
+
+	public void setCreator(String creator) {
+		this.creator = creator;
 	}
 }

@@ -70,8 +70,8 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeStartElement("change");
 		SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-dd");		
 		writer.writeAttribute("when", df.format(new Date()));
-		writer.writeAttribute("who", "#EM");
-		writer.writeCharacters("initial public release");
+		writer.writeAttribute("who", config.getCreator());
+		writer.writeCharacters("public release");
 		writer.writeEndElement(); // change
 		
 		writer.writeEndElement(); // listChange
