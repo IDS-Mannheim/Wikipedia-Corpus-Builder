@@ -61,7 +61,7 @@ public class IdsTextBuilder extends DefaultHandler {
 	 *            the conversion configuration
 	 * @param writer
 	 *            the I5 output writer
-	 * @throws I5Exception
+	 * @throws I5Exception an {@link I5Exception}
 	 */
 	public IdsTextBuilder(Configuration config, IndentingXMLStreamWriter writer)
 			throws I5Exception {
@@ -174,7 +174,7 @@ public class IdsTextBuilder extends DefaultHandler {
 	 * 
 	 * @param ll
 	 *            language links from wikipedia (database)
-	 * @throws SAXException
+	 * @throws SAXException a {@link SAXException}
 	 */
 	private void createLangLinks(LanguageLinks ll) throws SAXException {
 		Map<String, String> map = ll.getTitleMap();
@@ -255,7 +255,7 @@ public class IdsTextBuilder extends DefaultHandler {
 	/**
 	 * Sets the current wiki page id
 	 * 
-	 * @param pageId
+	 * @param pageId a wiki page id
 	 */
 	public void setPageId(String pageId) {
 		this.pageId = pageId;

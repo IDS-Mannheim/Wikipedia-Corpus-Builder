@@ -33,7 +33,6 @@ import org.apache.commons.cli.ParseException;
  * It takes a properties file to configure the parameters needed by the program.
  * </p>
  * 
- * @see {@link Configuration}
  * 
  * @author margaretha
  */

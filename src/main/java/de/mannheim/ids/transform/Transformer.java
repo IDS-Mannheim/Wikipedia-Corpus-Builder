@@ -97,12 +97,13 @@ public class Transformer implements Callable<WikiI5Part> {
 	private Statistics statistics;
 
 	/** Constructs a Transformer from the given variables.
-	 * @param config
-	 * @param statistics
-	 * @param errorHandler
-	 * @param wikiXMLFile
-	 * @param index
-	 * @param pageId
+	 * 
+	 * @param config the conversion configuration
+	 * @param statistics a statistic counter
+	 * @param errorHandler an an I5ErrorHandler
+	 * @param wikiXMLFile a wikiXML file
+	 * @param index the index file name of the wikipages
+	 * @param pageId the page id string
 	 */
 	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler 
 			errorHandler, File wikiXMLFile, String index, String pageId) {

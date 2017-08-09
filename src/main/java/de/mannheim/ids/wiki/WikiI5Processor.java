@@ -14,7 +14,9 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.transform.WikiXMLSorter;
 
-/** Manages the overall WikiXML to I5 conversion process. 
+/**
+ * Manages the overall WikiXML to I5 conversion process.
+ * 
  * @author margaretha
  *
  */
@@ -26,12 +28,14 @@ public class WikiI5Processor {
 	private I5ErrorHandler errorHandler;
 
 	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
-	
 
-	/** Constructs a WikiI5Processor.
+	/**
+	 * Constructs a WikiI5Processor.
 	 * 
 	 * @param config
+	 *            the conversion configuration
 	 * @throws I5Exception
+	 *             an {@link I5Exception}
 	 */
 	public WikiI5Processor(Configuration config) throws I5Exception {
 
@@ -46,27 +50,28 @@ public class WikiI5Processor {
 		statistics = new Statistics();
 	}
 
-	/** Starts the conversion process with creating I5Writing and writing the start document 
-	 * 	element. Then, sorts the WikiXML files by using WikiXMLSorter, runs the XSLT 
-	 * 	transformations for the sorted Wikipages and put the Future results in a BlockingQueue 
-	 * 	limiting the number of threads. Writes each future results and eventually builds 
-	 * 	the whole WikiI5 corpus.
-	 * 	 
+	/**
+	 * Starts the conversion process with creating I5Writing and writing the
+	 * start document element. Then, sorts the WikiXML files by using
+	 * WikiXMLSorter, runs the XSLT transformations for the sorted Wikipages and
+	 * put the Future results in a BlockingQueue limiting the number of threads.
+	 * Writes each future results and eventually builds the whole WikiI5 corpus.
 	 * 
-	 * @throws I5Exception
+	 * 
+	 * @throws I5Exception an {@link I5Exception}
 	 */
 	public void run() throws I5Exception {
 
 		long start = System.currentTimeMillis();
-		
-		I5Writer wikiI5Writer = new I5Writer(config,errorHandler,statistics);
+
+		I5Writer wikiI5Writer = new I5Writer(config, errorHandler, statistics);
 		wikiI5Writer.writeStartDocument();
 
 		Future<WikiI5Part> endFuture = createEndFuture();
-		ExecutorService pool = Executors.newFixedThreadPool(config
-				.getMaxThreads());
-		WikiXMLSorter sorter = new WikiXMLSorter(config,endFuture, pool, 
-				errorHandler,statistics);
+		ExecutorService pool = Executors
+				.newFixedThreadPool(config.getMaxThreads());
+		WikiXMLSorter sorter = new WikiXMLSorter(config, endFuture, pool,
+				errorHandler, statistics);
 		pool.execute(sorter);
 
 		try {
@@ -77,13 +82,15 @@ public class WikiI5Processor {
 					wikiI5Writer.write(w);
 				}
 				catch (ExecutionException e) {
-					System.err.println("Future execution throws an exception: "+e.getCause());
-				}				
+					System.err.println("Future execution throws an exception: "
+							+ e.getCause());
+				}
 			}
 			pool.shutdown();
 		}
 		catch (InterruptedException e) {
-			System.err.println("Blocking queue was interrupted, cause: "+e.getCause());
+			System.err.println(
+					"Blocking queue was interrupted, cause: " + e.getCause());
 			Thread.currentThread().interrupt();
 			pool.shutdownNow();
 		}
@@ -102,20 +109,22 @@ public class WikiI5Processor {
 			Thread.currentThread().interrupt();
 		}
 
-		statistics.printStats();		
+		statistics.printStats();
 		wikiI5Writer.close();
 		errorHandler.close();
-		
+
 		long end = System.currentTimeMillis();
-		String duration = DurationFormatUtils.formatDuration(
-				(end - start), "H:mm:ss");
+		String duration = DurationFormatUtils.formatDuration((end - start),
+				"H:mm:ss");
 		System.out.println("WikiI5Converter execution time "
-		// + (endTime - startTime));
+				// + (endTime - startTime));
 				+ duration);
-		
+
 	}
 
-	/** Creates an end Future as a sign (the last Future) to stop the writing process.  
+	/**
+	 * Creates an end Future as a sign (the last Future) to stop the writing
+	 * process.
 	 * 
 	 * @return the end Future
 	 */
@@ -139,8 +148,8 @@ public class WikiI5Processor {
 			}
 
 			@Override
-			public WikiI5Part get() throws InterruptedException,
-					ExecutionException {
+			public WikiI5Part get()
+					throws InterruptedException, ExecutionException {
 				return null;
 			}
 

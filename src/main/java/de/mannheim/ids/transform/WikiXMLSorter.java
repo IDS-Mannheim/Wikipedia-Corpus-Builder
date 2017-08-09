@@ -50,8 +50,8 @@ public class WikiXMLSorter extends Thread {
 	 * @param endFuture a dummy Future serving as a sign to end the process.
 	 * @param pool an ExecutorService
 	 * @param errorHandler an I5ErrorHandler
-	 * @param statistics statistic counters
-	 * @throws I5Exception
+	 * @param statistics a statistic counter
+	 * @throws I5Exception an I5Exception
 	 */
 	public WikiXMLSorter(Configuration config, Future<WikiI5Part> endFuture,
 			ExecutorService pool, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {
@@ -137,7 +137,7 @@ public class WikiXMLSorter extends Thread {
 	 * 
 	 * @param idx document index
 	 * @param n the last id
-	 * @throws I5Exception
+	 * @throws I5Exception an I5Exception
 	 */
 	private void groupPagesbyDoc(String idx, int n) throws I5Exception {
 		XPathExpression group;

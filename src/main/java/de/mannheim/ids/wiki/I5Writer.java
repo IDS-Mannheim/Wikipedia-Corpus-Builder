@@ -55,9 +55,13 @@ public class I5Writer {
 	 * Constructs an I5Writer from the given variables.
 	 * 
 	 * @param config
+	 *            the conversion configuration
 	 * @param errorHandler
+	 *            an an I5ErrorHandler
 	 * @param statistics
+	 *            a statistic counter
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	public I5Writer(Configuration config, I5ErrorHandler errorHandler,
 			Statistics statistics) throws I5Exception {
@@ -74,7 +78,9 @@ public class I5Writer {
 	 * (XML-based) I5 into the output file.
 	 * 
 	 * @param config
+	 *            the conversion configuration
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	private void setWriter(Configuration config) throws I5Exception {
 		File file = new File(config.getOutputFile());
@@ -110,6 +116,7 @@ public class I5Writer {
 	 * Creates a SAX parser and returns the XML reader inside the SAX parser.
 	 * 
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	private void setXMLReader() throws I5Exception {
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();
@@ -149,7 +156,9 @@ public class I5Writer {
 	 * endDoc)
 	 * 
 	 * @param w
+	 *            a WikiI5Part
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	public void write(WikiI5Part w) throws I5Exception {
 		if (w == null) {
@@ -188,6 +197,7 @@ public class I5Writer {
 	 * idsHeader.
 	 * 
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	public synchronized void writeStartDocument() throws I5Exception {
 
@@ -214,7 +224,9 @@ public class I5Writer {
 	 * given wikiI5Part object.
 	 * 
 	 * @param w
+	 *            a WikiI5Part
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	private synchronized void writeStartIdsCorpus(WikiI5Part w)
 			throws I5Exception {
@@ -244,6 +256,7 @@ public class I5Writer {
 	 * @param w
 	 *            idsText wikiI5Part
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	private void validateAgainstDTD(WikiI5Part w) throws I5Exception {
 
@@ -264,8 +277,11 @@ public class I5Writer {
 	 * and writes it to the final corpus file.
 	 * 
 	 * @param saxBuffer
+	 *            a SaxBuffer
 	 * @param w
+	 *            a WikiI5Part
 	 * @throws I5Exception
+	 *             an I5Exception
 	 */
 	private void writeIdsText(SaxBuffer saxBuffer, WikiI5Part w)
 			throws I5Exception {

@@ -27,8 +27,8 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	private int numOfInvalidText = 0;
 
 	/** Constructs I5ErrorHandler.
-	 * @param config
-	 * @throws I5Exception
+	 * @param config the conversion configuration
+	 * @throws I5Exception an {@link I5Exception}
 	 */
 	public I5ErrorHandler(Configuration config) throws I5Exception {
 
@@ -55,8 +55,8 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	}
 
 	/** Creates a log file for logging the errors.
-	 * @param config
-	 * @return
+	 * @param config the conversion configuration
+	 * @return a file name
 	 */
 	private String createFileName(Configuration config) {
 		StringBuilder sb = new StringBuilder();
@@ -83,10 +83,10 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	}
 
 	/** Writes information about an error, such where it happens and what type of error has occurred.
-	 * @param xmlPath
-	 * @param message
-	 * @param t
-	 * @throws I5Exception
+	 * @param xmlPath the wikixml file path where the error occurs
+	 * @param message an error message
+	 * @param t a Throwable
+	 * @throws I5Exception an {@link I5Exception}
 	 */
 	public synchronized void write(String xmlPath, String message, Throwable t)
 			throws I5Exception {
