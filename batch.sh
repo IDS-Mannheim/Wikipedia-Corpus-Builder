@@ -11,10 +11,10 @@ filename=$lang$wiki-$date-$type
 properties=code/properties/$lang/xml-$lang$wiki-$type.properties
 
 # create some directories if they don't not exists
-mkdir -p logs
+mkdir -p logs/wikiXML
 mkdir -p post
 
 echo "Converting Wikitext to WikiXML"
 echo $filename
 echo $properties
-nice -n 3 java -jar -Xmx4g $wikixml -prop $properties > logs/wikiXML-$filename.log 2>&1
+nice -n 3 java -jar -Xmx4g $wikixml -prop $properties > logs/wikiXML/wikiXML-$filename.log 2>&1

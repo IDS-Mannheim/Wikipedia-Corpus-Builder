@@ -37,6 +37,9 @@ public class WikiPostHandler extends WikiPageHandler {
 	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
+	private static final Pattern spanPattern = Pattern
+			.compile("(.*)(&lt;span style.*&gt;)(-{0,2})");
+
 	private static Pattern signaturePattern, userContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -277,7 +280,7 @@ public class WikiPostHandler extends WikiPageHandler {
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			post += matcher.group(1);
+			post += cleanSpanBeforeSignature(matcher.group(1));
 
 			String userLink, userLinkText;
 			String mg = matcher.group(2);
@@ -308,6 +311,14 @@ public class WikiPostHandler extends WikiPageHandler {
 		return false;
 	}
 
+	private String cleanSpanBeforeSignature(String text) {
+		Matcher spanMatcher = spanPattern.matcher(text);
+		if (spanMatcher.find()){
+			text = spanMatcher.group(1) + spanMatcher.group(3);
+		}	
+		return text;
+	}
+	
 	/**
 	 * Re-checks and determines the signature type.
 	 * 
