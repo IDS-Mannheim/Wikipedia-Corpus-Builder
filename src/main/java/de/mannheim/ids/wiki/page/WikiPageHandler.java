@@ -45,10 +45,14 @@ public abstract class WikiPageHandler implements Runnable {
 	 * Constructs a WikiPageHandler for the given wikipage using the other given
 	 * variables.
 	 * 
-	 * @param config the conversion configuration
-	 * @param wikipage a wikipage to be processed
-	 * @param wikiStatistics the wikistatistics counter
-	 * @param errorWriter the writer for logging errors
+	 * @param config
+	 *            the conversion configuration
+	 * @param wikipage
+	 *            a wikipage to be processed
+	 * @param wikiStatistics
+	 *            the wikistatistics counter
+	 * @param errorWriter
+	 *            the writer for logging errors
 	 */
 	public WikiPageHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter) {
@@ -59,7 +63,8 @@ public abstract class WikiPageHandler implements Runnable {
 			throw new IllegalArgumentException("Wikipage cannot be null.");
 		}
 		if (wikiStatistics == null) {
-			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+			throw new IllegalArgumentException(
+					"WikiStatistics cannot be null.");
 		}
 		if (errorWriter == null) {
 			throw new IllegalArgumentException("Error writer cannot be null.");
@@ -77,14 +82,19 @@ public abstract class WikiPageHandler implements Runnable {
 	 * wikitext, fixing improper tags using TagSoup Parser and finally generates
 	 * WikiXML by using Sweble Parser.
 	 * 
-	 * @param pageId the id of the wikipage
-	 * @param pageTitle the title of the wikipage
-	 * @param wikitext the content of the wikipage
+	 * @param pageId
+	 *            the id of the wikipage
+	 * @param pageTitle
+	 *            the title of the wikipage
+	 * @param wikitext
+	 *            the content of the wikipage
 	 * @return WikiXML
 	 * @throws IOException
+	 *             an IOException of failed parsing the given wikitext to
+	 *             wikiXML
 	 */
-	protected String parseToXML(String pageId, String pageTitle, String wikitext)
-			throws IOException {
+	protected String parseToXML(String pageId, String pageTitle,
+			String wikitext) throws IOException {
 		if (wikitext == null) {
 			throw new IllegalArgumentException("Wikitext cannot be null.");
 		}
@@ -99,12 +109,13 @@ public abstract class WikiPageHandler implements Runnable {
 			wikitext = tagSoupParser.generate(wikitext, true);
 		}
 		catch (SAXException e) {
-			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId,
-					e.getCause(), "");
+			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId, e.getCause(),
+					"");
 		}
 
 		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
-				wikitext, config.getLanguageCode(), wikiStatistics, errorWriter);
+				wikitext, config.getLanguageCode(), wikiStatistics,
+				errorWriter);
 		swebleParser.run();
 
 		/*Thread swebleThread = new Thread(swebleParser, pageTitle);
@@ -154,7 +165,7 @@ public abstract class WikiPageHandler implements Runnable {
 		matcher = nonTagPattern2.matcher(wikitext);
 		if (matcher.find()) {
 			if (matcher.group(1).contains("<")
-			// hack for page id #7420769
+					// hack for page id #7420769
 					|| matcher.group(1).contains("In:")) {
 				wikitext = matcher.replaceAll("&lt;$1");
 			}
@@ -180,6 +191,7 @@ public abstract class WikiPageHandler implements Runnable {
 	 * wikipage.
 	 * 
 	 * @throws IOException
+	 *             if failed writing the wikiXML
 	 */
 	protected void writeWikiXML() throws IOException {
 		if (wikiPage.getWikiXML().isEmpty()) {
@@ -195,6 +207,7 @@ public abstract class WikiPageHandler implements Runnable {
 	 * Writes the current wikipage in wiki mark-ups in a file.
 	 * 
 	 * @throws IOException
+	 *             an IOException if failed writing wikitext
 	 */
 	protected void writeWikitext() throws IOException {
 		writeWikiXML(wikiPage.getWikitext(), config.getWikitextFolder());
@@ -211,8 +224,8 @@ public abstract class WikiPageHandler implements Runnable {
 		try {
 			// test XML validity
 			DOMParser domParser = new DOMParser();
-			domParser.parseXML(new ByteArrayInputStream(wikiXML
-					.getBytes("utf-8")));
+			domParser.parseXML(
+					new ByteArrayInputStream(wikiXML.getBytes("utf-8")));
 		}
 		catch (Exception e) {
 			wikiStatistics.addDomErrors();
@@ -234,8 +247,9 @@ public abstract class WikiPageHandler implements Runnable {
 			// try fixing missing tags
 			StringBuilder sb = new StringBuilder();
 			sb.append(wikiPage.getPageIndent());
-			
-			sb.append(tagSoupParser.generate(wikiPage.getPageStructure(), false));
+
+			sb.append(
+					tagSoupParser.generate(wikiPage.getPageStructure(), false));
 			wikiPage.setPageStructure(sb.toString());
 		}
 		catch (Exception e) {
@@ -251,9 +265,11 @@ public abstract class WikiPageHandler implements Runnable {
 	 * Writes the content (wikitext or wikiXML) of the wikipage into the given
 	 * output folder.
 	 * 
-	 * @param content the wikipage content to write
-	 * @param outputFolder the output folder
-	 * @throws IOException
+	 * @param content
+	 *            the wikipage content to write
+	 * @param outputFolder
+	 *            the output folder
+	 * @throws IOException an IOException if failed writing wikiXML
 	 */
 	private void writeWikiXML(String content, String outputFolder)
 			throws IOException {

@@ -13,19 +13,19 @@ public class WikiTimestamp {
 
 	// german, italian, croatian, polish, spanish
 	private static final Pattern timePattern = Pattern.compile("([^0-9]*)"
-		+ "([0-9]{1,2}:[0-9]{2},? [0-9]{1,2}\\.? [^\\d]{3,10},?\\.? [0-9]{4}\\.?\\s?\\([A-Z]+\\))"
-		+ "(.*)");
+			+ "([0-9]{1,2}:[0-9]{2},? [0-9]{1,2}\\.? [^\\d]{3,10},?\\.? [0-9]{4}\\.?\\s?\\([A-Z]+\\))"
+			+ "(.*)");
 
 	// hungarian, norwegian
 	private static final Pattern timePattern2 = Pattern.compile("([^0-9]*)"
-		+ "([0-9]{1,4}\\.? [^\\d]{3,10}\\.? [0-9]{1,4}.{1,5}[0-9]{1,2}:[0-9]{2}\\s?\\([A-Z]+\\))"
-		+ "(.*)");
+			+ "([0-9]{1,4}\\.? [^\\d]{3,10}\\.? [0-9]{1,4}.{1,5}[0-9]{1,2}:[0-9]{2}\\s?\\([A-Z]+\\))"
+			+ "(.*)");
 
 	// french
 	private static final Pattern timePattern3 = Pattern.compile("([^0-9]*)"
 			+ "([0-9]{1,2}:[0-9]{2} [^\\d]{3,10}\\.? [0-9]{1,2}, [0-9]{4}\\s?\\([A-Z]+\\))"
 			+ "(.*)");
-	
+
 	private String pretext;
 	private String timestamp;
 	private String postscript;
@@ -42,7 +42,7 @@ public class WikiTimestamp {
 		}
 
 		matcher = timePattern2.matcher(text);
-		if (matcher.find()) {			
+		if (matcher.find()) {
 			createTimeStamp(matcher);
 			return;
 		}

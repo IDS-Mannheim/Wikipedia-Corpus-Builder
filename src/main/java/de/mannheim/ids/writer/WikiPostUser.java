@@ -8,9 +8,8 @@ import java.util.Map;
 import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 
-
 /**
- * Class implementation for handling posting authors. <br/>
+ * Class implementation for handling posting authors.
  * Generates a list of post authors (e.g. wikipedia users) in XML.
  * 
  * @author margaretha
@@ -26,10 +25,13 @@ public class WikiPostUser {
 	/**
 	 * Constructs a WikiPostUser and creates the output file in the post folder.
 	 * 
-	 * @param prefixFileName prefixFileName file identifier (part of the
+	 * @param prefixFileName
+	 *            prefixFileName file identifier (part of the
 	 *            wikidump file name)
-	 * @param pageType the wikipage type
+	 * @param pageType
+	 *            the wikipage type
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public WikiPostUser(String prefixFileName, String pageType)
 			throws IOException {
@@ -44,8 +46,8 @@ public class WikiPostUser {
 		}
 
 		userMap = new HashMap<String, String>();
-		userWriter = Utilities.createWriter("post", prefixFileName + "-post-"
-				+ pageType + "-user.xml", "utf-8");
+		userWriter = Utilities.createWriter("post",
+				prefixFileName + "-post-" + pageType + "-user.xml", "utf-8");
 		userWriter.append("<listPerson>\n");
 		counter = 1;
 	}
@@ -54,9 +56,12 @@ public class WikiPostUser {
 	 * Creates a post user element for the given variables and keep it in the
 	 * user map.
 	 * 
-	 * @param username the post user name
-	 * @param userLink the post user link
+	 * @param username
+	 *            the post user name
+	 * @param userLink
+	 *            the post user link
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public void createPostUser(String username, String userLink)
 			throws IOException {
@@ -76,8 +81,9 @@ public class WikiPostUser {
 	/**
 	 * Returns the user id of the given username
 	 * 
-	 * @param username the post user name
-	 * @return
+	 * @param username
+	 *            the post user name
+	 * @return the user id
 	 */
 	public String getUserId(String username) {
 		return userMap.get(username);
@@ -86,7 +92,7 @@ public class WikiPostUser {
 	/**
 	 * Generates an incremental user id.
 	 * 
-	 * @return
+	 * @return a user id
 	 */
 	private String generateUserId() {
 		String userId = "WU" + String.format("%08d", counter);
@@ -98,10 +104,14 @@ public class WikiPostUser {
 	 * Creates a post user element containing information about the user from
 	 * the given variables.
 	 * 
-	 * @param username the post user name
-	 * @param userId the post user id
-	 * @param userLink the post user link
+	 * @param username
+	 *            the post user name
+	 * @param userId
+	 *            the post user id
+	 * @param userLink
+	 *            the post user link
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private void createPerson(String username, String userId, String userLink)
 			throws IOException {

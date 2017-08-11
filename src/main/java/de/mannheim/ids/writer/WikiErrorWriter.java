@@ -13,7 +13,7 @@ import de.mannheim.ids.wiki.Utilities;
  * process.
  * 
  * @author margaretha
- * */
+ */
 public class WikiErrorWriter {
 
 	public OutputStreamWriter writer;
@@ -24,16 +24,16 @@ public class WikiErrorWriter {
 	 * Constructs a WikiErrorWriter. The errors are logged in the given input
 	 * file by using the given encoding.
 	 * 
-	 * @param inputFile
-	 * @param encoding
+	 * @param config
+	 *            the conversion configuration
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public WikiErrorWriter(Configuration config) throws IOException {
 		String filename = Paths.get(config.getWikidump()).getFileName()
 				.toString();
 
-		writer = Utilities.createWriter(
-				"logs",
+		writer = Utilities.createWriter("logs",
 				"wikiXML-" + filename.substring(0, 15) + "-"
 						+ config.getPageType() + "-errors.log",
 				config.getOutputEncoding());
@@ -44,9 +44,14 @@ public class WikiErrorWriter {
 	/**
 	 * Logs the error described with the given parameters
 	 * 
-	 * @param type the type of the error
-	 * @param pagetitle the wiki page title where the error has occurred
-	 * @param cause the cause of the error
+	 * @param type
+	 *            the type of the error
+	 * @param pagetitle
+	 *            the wiki page title where the error has occurred
+	 * @param cause
+	 *            the cause of the error
+	 * @param wikitext
+	 *            the problematic wikitext
 	 */
 	public synchronized void logErrorPage(String type, String pagetitle,
 			String pageId, Throwable cause, String wikitext) {
@@ -80,6 +85,7 @@ public class WikiErrorWriter {
 	 * Closes the error writer.
 	 * 
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public void close() throws IOException {
 		try {

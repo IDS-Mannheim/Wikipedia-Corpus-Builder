@@ -111,9 +111,10 @@ import de.mannheim.ids.wiki.WikiXMLProcessor;
  * 
  * @author margaretha
  */
-public final class XMLRenderer extends HtmlRendererBase implements
-		CompleteEngineVisitorNoReturn {
-	
+public final class XMLRenderer extends HtmlRendererBase
+		implements
+			CompleteEngineVisitorNoReturn {
+
 	@Override
 	public void visit(EngProcessedPage n) {
 		dispatch(n.getPage());
@@ -225,11 +226,11 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		int imgHeight = n.getHeight();
 
 		switch (n.getFormat()) {
-		case THUMBNAIL: // FALL THROUGH
-		case FRAMELESS:
-			if (imgWidth <= 0)
-				imgWidth = 180;
-			break;
+			case THUMBNAIL : // FALL THROUGH
+			case FRAMELESS :
+				if (imgWidth <= 0)
+					imgWidth = 180;
+				break;
 		}
 
 		if (n.getUpright()) {
@@ -278,11 +279,11 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		String imgClasses = "";
 
 		switch (n.getFormat()) {
-		case THUMBNAIL:
-			imgClasses += " thumbimage";
-			break;
-		default:
-			break;
+			case THUMBNAIL :
+				imgClasses += " thumbimage";
+				break;
+			default :
+				break;
 		}
 
 		if (n.getBorder())
@@ -293,32 +294,32 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		WtUrl linkUrl = null;
 		PageTitle linkTarget = target;
 		switch (n.getLink().getTargetType()) {
-		case NO_LINK:
-			linkTarget = null;
-			break;
-		case PAGE:
-			WtPageName pageName = (WtPageName) n.getLink().getTarget();
-			if (pageName.isResolved()) {
-				try {
-					linkTarget = PageTitle.make(wikiConfig,
-							pageName.getAsString());
-				}
-				catch (LinkTargetException e) {
-					throw new VisitingException(e);
-				}
-			}
-			else {
+			case NO_LINK :
 				linkTarget = null;
-			}
-			break;
-		case URL:
-			linkTarget = null;
-			linkUrl = (WtUrl) n.getLink().getTarget();
-			break;
-		case DEFAULT:
-			if (exists && isImage)
-				aClasses += " image";
-			break;
+				break;
+			case PAGE :
+				WtPageName pageName = (WtPageName) n.getLink().getTarget();
+				if (pageName.isResolved()) {
+					try {
+						linkTarget = PageTitle.make(wikiConfig,
+								pageName.getAsString());
+					}
+					catch (LinkTargetException e) {
+						throw new VisitingException(e);
+					}
+				}
+				else {
+					linkTarget = null;
+				}
+				break;
+			case URL :
+				linkTarget = null;
+				linkUrl = (WtUrl) n.getLink().getTarget();
+				break;
+			case DEFAULT :
+				if (exists && isImage)
+					aClasses += " image";
+				break;
 		}
 
 		// -- string caption --
@@ -378,17 +379,17 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		if (hasThumbFrame) {
 			String align = "";
 			switch (n.getHAlign()) {
-			case CENTER:
-				align = " center";
-				break;
-			case LEFT:
-				align = " tleft";
-				break;
-			case RIGHT: // FALL THROUGH
-			case NONE: // FALL THROUGH
-			default:
-				align = " tright";
-				break;
+				case CENTER :
+					align = " center";
+					break;
+				case LEFT :
+					align = " tleft";
+					break;
+				case RIGHT : // FALL THROUGH
+				case NONE : // FALL THROUGH
+				default :
+					align = " tright";
+					break;
 			}
 
 			String thumb = "";
@@ -423,9 +424,9 @@ public final class XMLRenderer extends HtmlRendererBase implements
 
 		p.indentAtBol();
 		if (linkTarget != null || linkUrl != null) {
-			pf("<a href=\"%s\"%s%s>",
-					linkTarget != null ? callback.makeUrl(linkTarget)
-							: callback.makeUrl(linkUrl), aClasses, aTitle);
+			pf("<a href=\"%s\"%s%s>", linkTarget != null
+					? callback.makeUrl(linkTarget)
+					: callback.makeUrl(linkUrl), aClasses, aTitle);
 		}
 
 		if (!imgClasses.isEmpty())
@@ -499,7 +500,7 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		catch (LinkTargetException e) {
 			throw new VisitingException(e);
 		}
-		
+
 		// FIXME: I think these should be removed in the parser already?!
 		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
 			return;
@@ -508,8 +509,8 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		if (!callback.resourceExists(target)) {
 			String title = target.getDenormalizedFullTitle();
 
-			String path = UrlEncoding.WIKI.encode(target
-					.getNormalizedFullTitle());
+			String path = UrlEncoding.WIKI
+					.encode(target.getNormalizedFullTitle());
 
 			if (n.hasTitle()) {
 				pt("<a href=\"%s\" class=\"new\" title=\"%s (page does not exist)\">%=%!%=</a>",
@@ -537,8 +538,7 @@ public final class XMLRenderer extends HtmlRendererBase implements
 							callback.makeUrl(target), makeLinkTitle(n, target),
 							n.getPrefix(), makeTitleFromTarget(n, target),
 							n.getPostfix());
-					
-					
+
 				}
 			}
 			else {
@@ -660,23 +660,23 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		}
 
 		/*
-		 if (!n.isEmpty()){			
-			
-			if (n.get(0).getNodeType() == WtNode.NT_XML_ELEMENT 
-					&& blockElements.contains(
-						((WtXmlElement) n.get(0)).getName())
-				){
-				iterate(n);
-				
-			}
-			else{
-				p.indent("<p>");
-				iterate(n);
-				p.print("</p>");
-			}
-		}
-		  
-		 * */
+		 * if (!n.isEmpty()){
+		 * 
+		 * if (n.get(0).getNodeType() == WtNode.NT_XML_ELEMENT
+		 * && blockElements.contains(
+		 * ((WtXmlElement) n.get(0)).getName())
+		 * ){
+		 * iterate(n);
+		 * 
+		 * }
+		 * else{
+		 * p.indent("<p>");
+		 * iterate(n);
+		 * p.print("</p>");
+		 * }
+		 * }
+		 * 
+		 */
 	}
 
 	@Override
@@ -698,9 +698,9 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		p.indent();
 		// pt("<h%d><span class=\"mw-headline\" id=\"%s\">%!</span></h%d>",
 		pt("<h%d>%!</h%d>", n.getLevel(),
-		// TESTING
-		// makeSectionTitle(n.getHeading()),
-		// END TESTING
+				// TESTING
+				// makeSectionTitle(n.getHeading()),
+				// END TESTING
 				n.getHeading(), n.getLevel());
 
 		// p.println();
@@ -775,10 +775,10 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		boolean cellsDefined = false;
 		for (WtNode cell : n.getBody()) {
 			switch (cell.getNodeType()) {
-			case WtNode.NT_TABLE_CELL:
-			case WtNode.NT_TABLE_HEADER:
-				cellsDefined = true;
-				break;
+				case WtNode.NT_TABLE_CELL :
+				case WtNode.NT_TABLE_HEADER :
+					cellsDefined = true;
+					break;
 			}
 		}
 
@@ -802,20 +802,24 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	}
 
 	public void visit(WtTagExtension n) {
-		
+		// EM: TagExtension parse tree for ref within a template might be
+		// incorrect.
 		if (n.getName().equals("ref")) {
 			pt("<%s%!>", n.getName(), n.getXmlAttributes());
 			try {
-				EngProcessedPage cp = engine.postprocess(pageId,n.getBody().getContent(), null);
+				EngProcessedPage cp = engine.postprocess(pageId,
+						n.getBody().getContent(), null);
 				iterate(cp.getPage());
-			} catch (EngineException e) {
+			}
+			catch (EngineException e) {
 				throw new RuntimeException(e);
 			}
-			p.print("</"+n.getName()+">");
-//			pt("<%s%!>%=</%s>", n.getName(), n.getXmlAttributes(),
-//					n.getBody().getContent(), n.getName());
-//			pt("&lt;%s%!&gt;%=&lt;/%s&gt;", n.getName(), n.getXmlAttributes(),
-//					n.getBody().getContent(), n.getName());
+			p.print("</" + n.getName() + ">");
+			// pt("<%s%!>%=</%s>", n.getName(), n.getXmlAttributes(),
+			// n.getBody().getContent(), n.getName());
+			// pt("&lt;%s%!&gt;%=&lt;/%s&gt;", n.getName(),
+			// n.getXmlAttributes(),
+			// n.getBody().getContent(), n.getName());
 		}
 		// nowiki, math
 		else {
@@ -898,8 +902,8 @@ public final class XMLRenderer extends HtmlRendererBase implements
 
 	public void visit(WtXmlAttribute n) {
 		if (!n.getName().isResolved()) {
-			logger.warn("Unresolved attribute name: "
-					+ WtRtDataPrinter.print(n));
+			logger.warn(
+					"Unresolved attribute name: " + WtRtDataPrinter.print(n));
 		}
 		else {
 			if (n.hasValue()) {
@@ -920,14 +924,14 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	public void visit(WtXmlAttributes n) {
 		for (WtNode n1 : n) {
 			switch (n1.getNodeType()) {
-			case WtNode.NT_XML_ATTRIBUTE:
-			case WtNode.NT_XML_ATTRIBUTE_GARBAGE:
-				dispatch(n1);
-				break;
-			default:
-				logger.warn("Non-attribute node in attributes collection: "
-						+ WtRtDataPrinter.print(n));
-				break;
+				case WtNode.NT_XML_ATTRIBUTE :
+				case WtNode.NT_XML_ATTRIBUTE_GARBAGE :
+					dispatch(n1);
+					break;
+				default :
+					logger.warn("Non-attribute node in attributes collection: "
+							+ WtRtDataPrinter.print(n));
+					break;
 			}
 		}
 	}
@@ -1012,63 +1016,63 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	}
 
 	/*
-	private void wrapText(String text)
-	{
-		if (inPre > 0)
-		{
-			p.print(esc(text));
-		}
-		else
-		{
-			
-			int i = 0;
-			int len = text.length();
-			
-			while (i < len)
-			{
-				char ch;
-				
-				// If at beginning of line skip whitespace
-				if (p.atBol())
-				{
-					while (i < len)
-					{
-						ch = text.charAt(i);
-						if (!Character.isWhitespace(ch))
-							break;
-						++i;
-					}
-				}
-				
-				if (i >= len)
-					break;
-				
-				p.flush();
-				int col = p.getColumn();
-				int border = 80 + p.getIndent() * 4;
-				
-				int j = i;
-				while (j < len)
-				{
-					ch = text.charAt(j++);
-					if (col >= border && Character.isWhitespace(ch))
-						break;
-					if (ch == '\n')
-						break;
-				}
-				
-				String substr = text.substring(i, j);
-				if (!substr.isEmpty())
-					p.indentAtBol(esc(StringUtils.collapseWhitespace(substr)));
-				
-				if (i < len)
-					p.println();
-				
-				i = j;
-			}
-		}
-	}
-	*/
+	 * private void wrapText(String text)
+	 * {
+	 * if (inPre > 0)
+	 * {
+	 * p.print(esc(text));
+	 * }
+	 * else
+	 * {
+	 * 
+	 * int i = 0;
+	 * int len = text.length();
+	 * 
+	 * while (i < len)
+	 * {
+	 * char ch;
+	 * 
+	 * // If at beginning of line skip whitespace
+	 * if (p.atBol())
+	 * {
+	 * while (i < len)
+	 * {
+	 * ch = text.charAt(i);
+	 * if (!Character.isWhitespace(ch))
+	 * break;
+	 * ++i;
+	 * }
+	 * }
+	 * 
+	 * if (i >= len)
+	 * break;
+	 * 
+	 * p.flush();
+	 * int col = p.getColumn();
+	 * int border = 80 + p.getIndent() * 4;
+	 * 
+	 * int j = i;
+	 * while (j < len)
+	 * {
+	 * ch = text.charAt(j++);
+	 * if (col >= border && Character.isWhitespace(ch))
+	 * break;
+	 * if (ch == '\n')
+	 * break;
+	 * }
+	 * 
+	 * String substr = text.substring(i, j);
+	 * if (!substr.isEmpty())
+	 * p.indentAtBol(esc(StringUtils.collapseWhitespace(substr)));
+	 * 
+	 * if (i < len)
+	 * p.println();
+	 * 
+	 * i = j;
+	 * }
+	 * }
+	 * }
+	 */
 
 	private void printAsWikitext(WtNode n) {
 		// TODO: Implement/
@@ -1138,10 +1142,10 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	}
 	// EM: fix title containing &
 	private String makeTitleFromTarget(WtInternalLink n, PageTitle target) {
-		if (target.getTitle().contains("&")){
+		if (target.getTitle().contains("&")) {
 			return makeTitleFromTarget(target, n.getTarget());
 		}
-		else{
+		else {
 			return esc(makeTitleFromTarget(target, n.getTarget()));
 		}
 	}
@@ -1151,11 +1155,11 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		if (target.hasInitialColon() && !targetStr.isEmpty()
 				&& targetStr.charAt(0) == ':')
 			targetStr = targetStr.substring(1);
-		
-		if (targetStr.contains("&amp;")){
+
+		if (targetStr.contains("&amp;")) {
 			return StringEscapeUtils.unescapeHtml(targetStr);
 		}
-		else{
+		else {
 			return esc(targetStr);
 		}
 	}
@@ -1170,43 +1174,43 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		WtTableRow implicitRow = null;
 		for (WtNode c : body) {
 			switch (c.getNodeType()) {
-			case WtNode.NT_TABLE_HEADER: // fall through!
-			case WtNode.NT_TABLE_CELL: {
-				if (hadRow) {
-					dispatch(c);
+				case WtNode.NT_TABLE_HEADER : // fall through!
+				case WtNode.NT_TABLE_CELL : {
+					if (hadRow) {
+						dispatch(c);
+					}
+					else {
+						if (implicitRow == null)
+							implicitRow = nf.tr(nf.emptyAttrs(),
+									nf.body(nf.list()));
+						implicitRow.getBody().add(c);
+					}
+					break;
 				}
-				else {
-					if (implicitRow == null)
-						implicitRow = nf
-								.tr(nf.emptyAttrs(), nf.body(nf.list()));
-					implicitRow.getBody().add(c);
-				}
-				break;
-			}
 
-			case WtNode.NT_TABLE_CAPTION: {
-				if (!hadRow && implicitRow != null)
-					dispatch(implicitRow);
-				implicitRow = null;
-				dispatch(c);
-				break;
-			}
-
-			case WtNode.NT_TABLE_ROW: {
-				if (!hadRow && implicitRow != null)
-					dispatch(implicitRow);
-				hadRow = true;
-				dispatch(c);
-				break;
-			}
-
-			default: {
-				if (!hadRow && implicitRow != null)
-					implicitRow.getBody().add(c);
-				else
+				case WtNode.NT_TABLE_CAPTION : {
+					if (!hadRow && implicitRow != null)
+						dispatch(implicitRow);
+					implicitRow = null;
 					dispatch(c);
-				break;
-			}
+					break;
+				}
+
+				case WtNode.NT_TABLE_ROW : {
+					if (!hadRow && implicitRow != null)
+						dispatch(implicitRow);
+					hadRow = true;
+					dispatch(c);
+					break;
+				}
+
+				default : {
+					if (!hadRow && implicitRow != null)
+						implicitRow.getBody().add(c);
+					else
+						dispatch(c);
+					break;
+				}
 			}
 		}
 	}
@@ -1302,14 +1306,13 @@ public final class XMLRenderer extends HtmlRendererBase implements
 			String name = a.getName().getAsString().toLowerCase();
 			if (name.equals("align")) {
 				newStyle = String.format(
-				// "text-align: %s; ",
+						// "text-align: %s; ",
 						"align: %s; ", cleanAttribValue(a.getValue()))
 						+ newStyle;
 			}
 			else {
 				newStyle = String.format("%s: %s; ", name,
-						cleanAttribValue(a.getValue()))
-						+ newStyle;
+						cleanAttribValue(a.getValue())) + newStyle;
 			}
 		}
 
@@ -1348,16 +1351,14 @@ public final class XMLRenderer extends HtmlRendererBase implements
 
 	// =========================================================================
 
-	public static <T extends WtNode> String print(
-			HtmlRendererCallback callback, WikiConfig wikiConfig,
-			PageTitle pageTitle, T node) {
+	public static <T extends WtNode> String print(HtmlRendererCallback callback,
+			WikiConfig wikiConfig, PageTitle pageTitle, T node) {
 		return print(callback, wikiConfig, new StringWriter(), pageTitle, node)
 				.toString();
 	}
 
-	public static <T extends WtNode> Writer print(
-			HtmlRendererCallback callback, WikiConfig wikiConfig,
-			Writer writer, PageTitle pageTitle, T node) {
+	public static <T extends WtNode> Writer print(HtmlRendererCallback callback,
+			WikiConfig wikiConfig, Writer writer, PageTitle pageTitle, T node) {
 		new XMLRenderer(callback, wikiConfig, pageTitle, writer).go(node);
 		return writer;
 	}
@@ -1372,9 +1373,10 @@ public final class XMLRenderer extends HtmlRendererBase implements
 	private final WikiConfig wikiConfig;
 
 	private final PageTitle pageTitle;
-	
-	private PageId pageId; 
-	public static WtEngine engine = new WtEngineImpl(WikiXMLProcessor.wikiconfig);
+
+	private PageId pageId;
+	public static WtEngine engine = new WtEngineImpl(
+			WikiXMLProcessor.wikiconfig);
 
 	private final EngineNodeFactory nf;
 
@@ -1442,7 +1444,7 @@ public final class XMLRenderer extends HtmlRendererBase implements
 		this.tu = wikiConfig.getAstTextUtils();
 		p.incIndent();
 	}
-	
+
 	public void setPageId(PageId pageId) {
 		this.pageId = pageId;
 	}

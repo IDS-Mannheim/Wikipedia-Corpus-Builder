@@ -1,6 +1,7 @@
 package de.mannheim.ids.wiki.page;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,10 +46,14 @@ public class WikiPageReader implements Runnable {
 	 * Constructs a WikiPageReader by adopting the given variable to initialize
 	 * its corresponding fields.
 	 * 
-	 * @param config the conversion configuration
-	 * @param wikipages a blocking queue containing wikipages
-	 * @param endwikipage a dummy wikipage signifying the last page
-	 * @param wikiStatistics the wiki statistics counter
+	 * @param config
+	 *            the conversion configuration
+	 * @param wikipages
+	 *            a blocking queue containing wikipages
+	 * @param endwikipage
+	 *            a dummy wikipage signifying the last page
+	 * @param wikiStatistics
+	 *            the wiki statistics counter
 	 */
 	public WikiPageReader(Configuration config,
 			BlockingQueue<WikiPage> wikipages, WikiPage endwikipage,
@@ -58,7 +63,8 @@ public class WikiPageReader implements Runnable {
 			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		if (wikiStatistics == null) {
-			throw new IllegalArgumentException("WikiStatistics cannot be null.");
+			throw new IllegalArgumentException(
+					"WikiStatistics cannot be null.");
 		}
 
 		this.config = config;
@@ -88,7 +94,7 @@ public class WikiPageReader implements Runnable {
 	private void read() throws IOException, InterruptedException {
 
 		String inputFile = config.getWikidump();
-		FileInputStream fs = new FileInputStream(inputFile);
+		FileInputStream fs = new FileInputStream(new File(inputFile));
 		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
 
 		Matcher matcher;
@@ -134,8 +140,8 @@ public class WikiPageReader implements Runnable {
 					if (matcher.find()) {
 						String title = matcher.group(1);
 						title = Normalizer.normalize(title, Form.NFKC);
-						if (!config.getTitlePrefix().isEmpty()){
-							if (!title.startsWith(config.getTitlePrefix())){
+						if (!config.getTitlePrefix().isEmpty()) {
+							if (!title.startsWith(config.getTitlePrefix())) {
 								// skip page
 								isToRead = false;
 								continue;
@@ -202,15 +208,19 @@ public class WikiPageReader implements Runnable {
 		if (matcher.find()) {
 			return matcher.group(1) + "\n";
 		}
-		else return trimmedStrLine.replace("<text xml:space=\"preserve\">", "");
+		else
+			return trimmedStrLine.replace("<text xml:space=\"preserve\">", "");
 	}
 
 	/**
 	 * Collects the wikitext content of the given wikipage.
 	 * 
-	 * @param wikiPage a wikipage
-	 * @param strLine the current line
-	 * @param trimmedStrLine the trimmed version of the current line
+	 * @param wikiPage
+	 *            a wikipage
+	 * @param strLine
+	 *            the current line
+	 * @param trimmedStrLine
+	 *            the trimmed version of the current line
 	 * @return true if wikitext has not finished, false otherwise.
 	 */
 	private boolean collectText(WikiPage wikiPage, String strLine,
@@ -245,8 +255,8 @@ public class WikiPageReader implements Runnable {
 		}
 		else if (trimmedStrLine.startsWith("<text")) {
 			// empty text
-			if (trimmedStrLine.endsWith("<text/>")
-					|| trimmedStrLine.equals("<text xml:space=\"preserve\" />")) {
+			if (trimmedStrLine.endsWith("<text/>") || trimmedStrLine
+					.equals("<text xml:space=\"preserve\" />")) {
 				return false;
 			}
 			// start collecting text
@@ -268,9 +278,10 @@ public class WikiPageReader implements Runnable {
 		return true;
 	}
 
-	/* Strangely, using StringBuilder leads to memory leaks because its internal
-	   char[] is kept in memory. The real culprit is unknown?!
-	  */
+	/*
+	 * Strangely, using StringBuilder leads to memory leaks because its internal
+	 * char[] is kept in memory. The real culprit is unknown?!
+	 */
 	@SuppressWarnings("unused")
 	private String buildWikitext(WikiPage wikiPage) {
 		StringBuilder sb = new StringBuilder(2 * 1024);

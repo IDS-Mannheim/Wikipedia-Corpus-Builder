@@ -5,9 +5,8 @@ import java.io.OutputStreamWriter;
 
 import de.mannheim.ids.wiki.Utilities;
 
-
 /**
- * Time information of postings. <br/>
+ * Time information of postings.
  * Generates a list of timestamps in XML.
  * 
  * @author margaretha
@@ -22,9 +21,12 @@ public class WikiPostTime {
 	/**
 	 * Constructs a WikiPostTime and creates the output file in the post folder.
 	 * 
-	 * @param prefixFileName file identifier (part of the wikidump file name)
-	 * @param pageType the wikipage type
+	 * @param prefixFileName
+	 *            file identifier (part of the wikidump file name)
+	 * @param pageType
+	 *            the wikipage type
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public WikiPostTime(String prefixFileName, String pageType)
 			throws IOException {
@@ -38,8 +40,9 @@ public class WikiPostTime {
 					"pageType cannot be null or empty.");
 		}
 
-		timeWriter = Utilities.createWriter("post", prefixFileName + "-post-"
-				+ pageType + "-timeline.xml", "utf-8");
+		timeWriter = Utilities.createWriter("post",
+				prefixFileName + "-post-" + pageType + "-timeline.xml",
+				"utf-8");
 		counter = 0;
 
 		timeWriter.append("<timeline>\n");

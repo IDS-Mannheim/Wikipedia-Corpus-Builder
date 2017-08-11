@@ -22,6 +22,7 @@ public class Utilities {
 	 * including non-existent parent directories.
 	 * 
 	 * @param path
+	 *            a directory path
 	 */
 	public static void createDirectory(String path) {
 
@@ -41,11 +42,15 @@ public class Utilities {
 	 * encoding parameters. This method also creates any necessary non-existent
 	 * directories where the output file should be written.
 	 * 
-	 * @param directory a directory path for the output file
-	 * @param outputFile output filename
-	 * @param encoding encoding
+	 * @param directory
+	 *            a directory path for the output file
+	 * @param outputFile
+	 *            output filename
+	 * @param encoding
+	 *            encoding
 	 * @return an OutputStreamWriter
 	 * @throws IOException
+	 *             an IOException if failed creating a writer.
 	 */
 	public static OutputStreamWriter createWriter(String directory,
 			String outputFile, String encoding) throws IOException {
@@ -61,20 +66,20 @@ public class Utilities {
 		if (!file.exists()) {
 			file.createNewFile();
 		}
-		return new OutputStreamWriter(new BufferedOutputStream(
-				new FileOutputStream(file)), encoding);
+		return new OutputStreamWriter(
+				new BufferedOutputStream(new FileOutputStream(file)), encoding);
 	}
 
 	/**
 	 * Normalizes the given input (a letter).
 	 * 
-	 * @param input a letter
-	 * @param indexList a list letters and numbers
+	 * @param input
+	 *            a letter
+	 * @param indexList
+	 *            a list letters and numbers
 	 * @return a normalized String
-	 * @throws IOException
 	 */
-	public static String normalizeIndex(String input, String[] indexList)
-			throws IOException {
+	public static String normalizeIndex(String input, String[] indexList) {
 		String normalizedStr = Normalizer.normalize(input, Form.NFKD)
 				.toUpperCase();
 		normalizedStr = normalizedStr.substring(0, 1);

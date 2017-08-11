@@ -31,12 +31,12 @@ public class TagSoupParser {
 	 * missing close tag for an open tag without a close tag. However, the part
 	 * of the text nested by the generated tags may not be correct.
 	 * 
-	 * @param wikitext
+	 * @param wikitext wikitext
 	 * @param segment a boolean determines if the wikitext is to be segmented
 	 *            per paragraph or not.
 	 * @return cleanWikitext
-	 * @throws IOException
-	 * @throws SAXException
+	 * @throws IOException an IOException
+	 * @throws SAXException a SAXException
 	 */
 	public String generate(String wikitext, boolean segment)
 			throws IOException, SAXException {

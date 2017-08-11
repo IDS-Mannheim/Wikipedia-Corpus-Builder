@@ -29,7 +29,7 @@ import de.mannheim.ids.writer.WikiPostUser;
  * 
  * @author margaretha
  * 
- * */
+ */
 public class WikiXMLProcessor {
 
 	private Configuration config;
@@ -47,8 +47,11 @@ public class WikiXMLProcessor {
 	/**
 	 * Constructs a WikiXMLProcessor and sets the conversion configuration.
 	 * 
-	 * @param config the conversion configuration
+	 * @param config
+	 *            the conversion configuration
 	 * @throws IOException
+	 *             an IOException of failed instantiating a WikiXMLProcessor
+	 *             object
 	 */
 	public WikiXMLProcessor(Configuration config) throws IOException {
 		if (config == null) {
@@ -78,11 +81,11 @@ public class WikiXMLProcessor {
 		WikiPageReader wikiReader = new WikiPageReader(config, wikipages,
 				endPage, wikiStatistics);
 		Thread wikiReaderThread = new Thread(wikiReader, "wikiReader");
-		
+
 		int queuelength = (int) Math.floor(config.getMaxThreads() * 1.5);
 		BlockingThreadPoolExecutor pool = new BlockingThreadPoolExecutor(0,
 				config.getMaxThreads(), 10, TimeUnit.SECONDS, queuelength);
-		
+
 		try {
 			wikiReaderThread.start();
 			for (WikiPage wikiPage = wikipages.take(); !wikiPage
@@ -127,10 +130,9 @@ public class WikiXMLProcessor {
 		wikiStatistics.print();
 
 		long endTime = System.currentTimeMillis();
-		String duration = DurationFormatUtils.formatDuration(
-				(endTime - startTime), "H:mm:ss");
-		System.out.println("WikiXMLConverter execution time "
-				+ duration);
+		String duration = DurationFormatUtils
+				.formatDuration((endTime - startTime), "H:mm:ss");
+		System.out.println("WikiXMLConverter execution time " + duration);
 	}
 
 	@Deprecated

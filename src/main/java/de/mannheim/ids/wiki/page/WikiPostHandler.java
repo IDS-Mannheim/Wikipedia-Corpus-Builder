@@ -37,8 +37,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	private static final Pattern unsignedPattern = Pattern
 			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
-	private static Pattern signaturePattern, userContribution,
-			unsignedPattern2;
+	private static Pattern signaturePattern, userContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
@@ -51,13 +50,20 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Constructs a WikiPostHandler and compiles some regex patterns used in
 	 * posting segmentation.
 	 * 
-	 * @param config the conversion configuration
-	 * @param wikipage a wikipage to be processed
-	 * @param wikiStatistics the wikistatistics counter
-	 * @param errorWriter the writer for logging errors
-	 * @param postUser a WikiPostUser listing the post users
-	 * @param postTime a WikiPostTime listing the post time
+	 * @param config
+	 *            the conversion configuration
+	 * @param wikipage
+	 *            a wikipage to be processed
+	 * @param wikiStatistics
+	 *            the wikistatistics counter
+	 * @param errorWriter
+	 *            the writer for logging errors
+	 * @param postUser
+	 *            a WikiPostUser listing the post users
+	 * @param postTime
+	 *            a WikiPostTime listing the post time
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public WikiPostHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
@@ -80,9 +86,9 @@ public class WikiPostHandler extends WikiPageHandler {
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
 				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
 
-		userContribution = Pattern.compile("(.*)\\[\\[("
-				+ config.getUserContribution()
-				+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
+		userContribution = Pattern
+				.compile("(.*)\\[\\[(" + config.getUserContribution()
+						+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 
 		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + config.getUnsigned()
 				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
@@ -123,8 +129,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	/**
 	 * Adds a signature element to the current post.
 	 * 
-	 * @param sigType the signature type of the post
-	 * @param timestamp the post timestamp
+	 * @param sigType
+	 *            the signature type of the post
+	 * @param timestamp
+	 *            the post timestamp
 	 */
 	private void addSignature(SignatureType sigType, String timestamp) {
 		post += "<autoSignature @type=";
@@ -142,9 +150,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Heuristically filters out the given wikitext to determine posting
 	 * boundaries and eventually creates posting elements.
 	 * 
-	 * @param text wikitext
+	 * @param text
+	 *            wikitext
 	 * @throws IOException
-	 * @throws Exception
+	 *             an IOException
 	 */
 	private void segmentPosting(String text) throws IOException {
 
@@ -162,27 +171,32 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		// User signature
 		if (trimmedText.contains(config.getUserPage() + ":")) {
-			if (handleSignature(trimmedText)) return;
+			if (handleSignature(trimmedText))
+				return;
 		}
 
 		if (!baselineMode) {
 
 			// Special contribution
 			if (trimmedText.contains(config.getUserContribution())) {
-				if (handleUserContribution(trimmedText)) return;
+				if (handleUserContribution(trimmedText))
+					return;
 			}
 
 			// Unsigned
 			if (trimmedText.contains("unsigned")) {
-				if (handleUnsigned(trimmedText, "unsigned")) return;
+				if (handleUnsigned(trimmedText, "unsigned"))
+					return;
 			}
 			if (trimmedText.contains(config.getUnsigned())) {
-				if (handleUnsigned(trimmedText, config.getUnsigned())) return;
+				if (handleUnsigned(trimmedText, config.getUnsigned()))
+					return;
 			}
 
 			// Timestamp only
 			if (trimmedText.endsWith(")")) {
-				if (handleTimestampOnly(trimmedText)) return;
+				if (handleTimestampOnly(trimmedText))
+					return;
 			}
 
 			// Level Marker
@@ -203,12 +217,14 @@ public class WikiPostHandler extends WikiPageHandler {
 			// Heading
 			if (trimmedText.contains("==")) {
 				Matcher matcher = headingPattern.matcher(trimmedText);
-				if (headerHandler(matcher)) return;
+				if (headerHandler(matcher))
+					return;
 			}
 
 			if (trimmedText.contains("&lt;h")) {
 				Matcher matcher = headingPattern2.matcher(trimmedText);
-				if (headerHandler(matcher)) return;
+				if (headerHandler(matcher))
+					return;
 			}
 		}
 
@@ -223,6 +239,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * @param trimmedText
 	 * @return true if a timestamp is recognized, false otherwise.
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
 
@@ -245,11 +262,12 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Identifies signature mark-ups, extracts signature information from them,
 	 * and creates an XML signature structure for them.
 	 * 
-	 * @param trimmedText trimmed wikitext
+	 * @param trimmedText
+	 *            trimmed wikitext
 	 * @return true if the given wikitext contains a signature markup, false
 	 *         otherwise.
 	 * @throws IOException
-	 * @throws Exception
+	 *             an IOException
 	 */
 	private boolean handleSignature(String trimmedText) throws IOException {
 		if (trimmedText == null) {
@@ -293,8 +311,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	/**
 	 * Re-checks and determines the signature type.
 	 * 
-	 * @param type the initial possible signature type
-	 * @param rest tailing text after a signature markup
+	 * @param type
+	 *            the initial possible signature type
+	 * @param rest
+	 *            tailing text after a signature markup
 	 * @return a signature type
 	 */
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
@@ -313,13 +333,15 @@ public class WikiPostHandler extends WikiPageHandler {
 
 	/**
 	 * Identifies user contribution mark-ups in the given trimmed wikitext,
-	 * creates a corresponding XML signature structure, and eventually a
-	 * posting for the collected post text until now.
+	 * creates a corresponding XML signature structure, and eventually a posting
+	 * for the collected post text until now.
 	 * 
-	 * @param trimmedText trimmed wikitext
+	 * @param trimmedText
+	 *            trimmed wikitext
 	 * @return true if the trimmed wikitext contains a user contribution markup,
 	 *         false otherwise.
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private boolean handleUserContribution(String trimmedText)
 			throws IOException {
@@ -331,10 +353,8 @@ public class WikiPostHandler extends WikiPageHandler {
 		if (matcher.find()) {
 			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
 			post += matcher.group(1);
-			addSignature(
-					chooseSignatureType(SignatureType.USER_CONTRIBUTION,
-							t.getPostscript()),
-					t.getTimestamp());
+			addSignature(chooseSignatureType(SignatureType.USER_CONTRIBUTION,
+					t.getPostscript()), t.getTimestamp());
 			writePost(matcher.group(3), matcher.group(2), t.getTimestamp(),
 					t.getPostscript());
 			matcher.reset();
@@ -349,10 +369,13 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * languages. Nevertheless, the english keyword are often used in wikipedias
 	 * of other languages.
 	 * 
-	 * @param trimmedText trimmed wikitext
-	 * @param unsigned unsigned template keywords
+	 * @param trimmedText
+	 *            trimmed wikitext
+	 * @param unsigned
+	 *            unsigned template keywords
 	 * @return true if a unsigned template is found, false otherwise.
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private boolean handleUnsigned(String trimmedText, String unsigned)
 			throws IOException {
@@ -365,7 +388,8 @@ public class WikiPostHandler extends WikiPageHandler {
 			String[] a = trimmedText.split("\\{\\{" + unsigned + "\\}\\}");
 			if (a.length > 0) {
 				post += a[0];
-				if (a.length > 1) rest = a[1];
+				if (a.length > 1)
+					rest = a[1];
 			}
 
 			addSignature(SignatureType.UNSIGNED, "");
@@ -405,8 +429,10 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Identifies headers as post boundaries.
 	 * 
 	 * @param matcher
+	 *            a Matcher
 	 * @return
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private boolean headerHandler(Matcher matcher) throws IOException {
 
@@ -434,7 +460,8 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * Identifies level mark-ups in the given post. Levels indicates the depth
 	 * of a post in a thread. Posts without any depth have level 0.
 	 * 
-	 * @param post a post text
+	 * @param post
+	 *            a post text
 	 * @return the level depth
 	 */
 	private int identifyLevel(String post) {
@@ -453,11 +480,16 @@ public class WikiPostHandler extends WikiPageHandler {
 	/**
 	 * Creates a post by using the given variables.
 	 * 
-	 * @param username the post user name
-	 * @param userLink the post user link
-	 * @param timestamp the post timestamp
-	 * @param postscript the tailing text after a post user signature
+	 * @param username
+	 *            the post user name
+	 * @param userLink
+	 *            the post user link
+	 * @param timestamp
+	 *            the post timestamp
+	 * @param postscript
+	 *            the tailing text after a post user signature
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private void writePost(String username, String userLink, String timestamp,
 			String postscript) throws IOException {
@@ -465,7 +497,8 @@ public class WikiPostHandler extends WikiPageHandler {
 		String post = this.post.trim();
 		this.post = ""; // reset post
 
-		if (post.isEmpty()) return;
+		if (post.isEmpty())
+			return;
 		int level = identifyLevel(post);
 
 		if (level > 0) {
@@ -475,7 +508,8 @@ public class WikiPostHandler extends WikiPageHandler {
 
 		String wikiXML = parseToXML(wikiPage.getPageId(),
 				wikiPage.getPageTitle(), post);
-		if (wikiXML.isEmpty()) return;
+		if (wikiXML.isEmpty())
+			return;
 
 		wikiStatistics.addTotalPostings();
 
@@ -487,18 +521,25 @@ public class WikiPostHandler extends WikiPageHandler {
 	/**
 	 * Creates a posting element based on the given variables.
 	 * 
-	 * @param level the depth of the post in a thread
-	 * @param username the post user name
-	 * @param userLink the post user link
-	 * @param timestamp the post timestamp
-	 * @param wikiXML the post content
-	 * @param postscript the tailing text after the signature
+	 * @param level
+	 *            the depth of the post in a thread
+	 * @param username
+	 *            the post user name
+	 * @param userLink
+	 *            the post user link
+	 * @param timestamp
+	 *            the post timestamp
+	 * @param wikiXML
+	 *            the post content
+	 * @param postscript
+	 *            the tailing text after the signature
 	 * @return an XML post element
 	 * @throws IOException
+	 *             an IOException
 	 */
 	private String createPostingElement(int level, String username,
-			String userLink, String timestamp, String wikiXML, String postscript)
-			throws IOException {
+			String userLink, String timestamp, String wikiXML,
+			String postscript) throws IOException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"");
@@ -529,17 +570,18 @@ public class WikiPostHandler extends WikiPageHandler {
 			// if (!Thread.interrupted()) {
 			if (trimmedPostscript.startsWith("ps")
 					|| trimmedPostscript.startsWith("p.s")) {
-					sb.append("<seg type=\"postscript\">");
-					sb.append(ps);
-					sb.append("</seg>\n");
-				} else {
-					sb.append(ps);
-					sb.append("\n");
-				}
+				sb.append("<seg type=\"postscript\">");
+				sb.append(ps);
+				sb.append("</seg>\n");
+			}
+			else {
+				sb.append(ps);
+				sb.append("\n");
+			}
 			// }
 		}
 		sb.append("        </posting>\n");
 
-		return sb.toString();		
+		return sb.toString();
 	}
 }

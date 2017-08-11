@@ -1,9 +1,10 @@
 package de.mannheim.ids.wiki;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -80,6 +81,11 @@ public class Configuration {
 	 * @param namespaceKey
 	 *            the namespace key of the Wikipedia pages to convert, e.g 0 for
 	 *            articles, 1 for talk pages, 3 for user talk pages
+	 * @param pageType 
+	 * 			the type of the wiki pages, e.g. article
+	 * 
+	 * @param titlePrefix 
+	 * 			the prefix that the page titles start with
 	 * @param encoding
 	 *            the output encoding, by default is utf-8
 	 * @param maxThread
@@ -116,11 +122,17 @@ public class Configuration {
 	 * @param properties
 	 *            the location of the properties file
 	 * @throws IOException
+	 *             an IOException
 	 */
 	public Configuration(String properties) throws IOException {
+
 		InputStream is = Configuration.class.getClassLoader()
 				.getResourceAsStream(properties);
 
+		if (is == null){
+			is = new FileInputStream(new File(properties));
+		}
+			
 		Properties config = new Properties();
 		config.load(new InputStreamReader(is, StandardCharsets.UTF_8));
 
@@ -386,7 +398,7 @@ public class Configuration {
 	/**
 	 * Sets the number of maximum threads allowed to run concurrently.
 	 * 
-	 * @param maxThreads
+	 * @param maxThreads the number of maximum threads allowed to run concurrently.
 	 */
 	public void setMaxThreads(int maxThreads) {
 		this.maxThreads = maxThreads;
@@ -426,6 +438,8 @@ public class Configuration {
 	 * placed.
 	 * 
 	 * @param wikitextFolder
+	 *            the wikitext folder where the generated wikitext files are to
+	 *            be placed.
 	 */
 	public void setWikitextFolder(String wikitextFolder) {
 		this.wikitextFolder = wikitextFolder;

@@ -59,7 +59,6 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 			this.callable = callable;
 		}
 
-
 		@Override
 		public void run() {
 			synchronized (runningTasks) {

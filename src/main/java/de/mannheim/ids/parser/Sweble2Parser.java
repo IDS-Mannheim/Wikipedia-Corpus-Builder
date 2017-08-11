@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 
+import org.apache.log4j.Logger;
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
@@ -33,6 +34,7 @@ public class Sweble2Parser implements Runnable {
 	private String pagetitle, pageIdStr;
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
+	private Logger log = Logger.getLogger(Sweble2Parser.class);
 
 	/**
 	 * Generate an Abstract Syntax Tree representation (AST) representation of a
@@ -40,11 +42,17 @@ public class Sweble2Parser implements Runnable {
 	 * generates an XML representation using a visitor class.
 	 * 
 	 * @param pageId
+	 *            the wiki page id
 	 * @param pagetitle
+	 *            the wiki page title
 	 * @param wikitext
+	 *            the wikitext content of the page
 	 * @param language
+	 *            the language of the page
 	 * @param wikiStatistics
+	 *            a statistic counter
 	 * @param errorWriter
+	 *            a WikiErrorWriter
 	 */
 	public Sweble2Parser(String pageId, String pagetitle, String wikitext,
 			String language, WikiStatistics wikiStatistics,
@@ -92,8 +100,10 @@ public class Sweble2Parser implements Runnable {
 			pageTitle = PageTitle.make(WikiXMLProcessor.wikiconfig, pagetitle);
 			pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
-			 cp = engine.postprocess(pageId, wikitext, null);
-		} catch (LinkTargetException | EngineException e) {
+			cp = engine.postprocess(pageId, wikitext, null);
+			log.debug(cp);
+		}
+		catch (LinkTargetException | EngineException e) {
 			wikiStatistics.addSwebleErrors();
 			errorWriter.logErrorPage("SWEBLE", pagetitle, pageIdStr,
 					e.getCause(), wikitext);
@@ -108,7 +118,8 @@ public class Sweble2Parser implements Runnable {
 			renderer.setPageId(pageId);
 			renderer.go(cp.getPage());
 			wikiXML = w.toString();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			wikiStatistics.addRendererErrors();
 			errorWriter.logErrorPage("RENDERER", pagetitle, pageIdStr,
 					e.getCause(), wikitext);
@@ -152,7 +163,8 @@ public class Sweble2Parser implements Runnable {
 				url = page + "#" + UrlEncoding.WIKI.encode(f);
 			try {
 				url = URLEncoder.encode(url, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
+			}
+			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 
