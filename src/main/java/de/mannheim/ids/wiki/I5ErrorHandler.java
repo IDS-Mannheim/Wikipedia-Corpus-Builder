@@ -25,6 +25,7 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 
 	private OutputStreamWriter errorWriter;
 	private int numOfInvalidText = 0;
+	private static String ERROR_FOLDER = "logs/wikiI5/errors/";
 
 	/** Constructs I5ErrorHandler.
 	 * @param config the conversion configuration
@@ -37,7 +38,7 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 		}
 
 		try {
-			File dir = new File("logs");
+			File dir = new File(ERROR_FOLDER);
 			if (!dir.exists()) {
 				dir.mkdirs();
 			}
@@ -60,7 +61,7 @@ public class I5ErrorHandler implements ErrorHandler, ErrorListener {
 	 */
 	private String createFileName(Configuration config) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("logs/wikiI5-");
+		sb.append(ERROR_FOLDER+"wikiI5-");
 		sb.append(config.getDumpFilename().substring(0, 16));
 		sb.append(config.getPageType());
 		sb.append("-error.log");

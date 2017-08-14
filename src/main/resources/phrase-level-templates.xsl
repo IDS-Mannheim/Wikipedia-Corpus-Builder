@@ -11,7 +11,7 @@
         </xd:desc>
     </xd:doc>
 
-    <xsl:variable name="refCounter" select="1" saxon:assignable="yes"/>
+    <xsl:variable name="refCounter" select="0" saxon:assignable="yes"/>
 
     <!-- Posting Template -->
     <xsl:template match="posting">
@@ -76,13 +76,29 @@
     </xsl:template>
 
     <xsl:template match="ref|Ref|REF">
-        <ptr rend="ref" targType="note" targOrder="u" target="{$sigle}-{$refCounter}"/>
-        <note id="{$sigle}-{$refCounter}" place="foot">
-            <xsl:apply-templates/>
-        </note>
-        <saxon:assign name="refCounter" select="$refCounter+1"/>
+        <xsl:choose>
+            <xsl:when test="ancestor::node()[name()='ref']"> &lt;ref <xsl:value-of select="."/>&gt; </xsl:when>
+            <xsl:when test="@name">
+                <saxon:assign name="refCounter" select="$refCounter+1"/>
+                <ptr cRef="{@name}" rend="ref" targType="note" targOrder="u"
+                    target="{$sigle}-f1"/>
+                <xsl:if test="*">
+                    <note target="{@name}" id="{$sigle}-f{$refCounter}" place="foot">
+                        <xsl:apply-templates/>
+                    </note>
+                </xsl:if>
+            </xsl:when>
+            <xsl:otherwise>
+                <saxon:assign name="refCounter" select="$refCounter+1"/>
+                <ptr rend="ref" targType="note" targOrder="u" target="{$sigle}-f{$refCounter}"/>
+                <xsl:if test="*">
+                    <note id="{$sigle}-f{$refCounter}" place="foot">
+                        <xsl:apply-templates/>
+                    </note>
+                </xsl:if>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
-
 
     <xsl:template match="table">
         <gap desc="table" reason="omitted"/>

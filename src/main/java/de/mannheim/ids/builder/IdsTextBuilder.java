@@ -3,6 +3,7 @@ package de.mannheim.ids.builder;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -13,10 +14,14 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.axis.message.SAX2EventRecorder;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.mysql.cj.api.log.Log;
 
 import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.db.LanguageLinks;
@@ -50,9 +55,16 @@ public class IdsTextBuilder extends DefaultHandler {
 		addedAttributes.add("sample");
 	}
 
+	private Map<String, String> refNames;
+	private List<String> noteIds;
+
 	private boolean noLangLinks = false;
 
 	private boolean isFootNote = false;
+	private String idsTextId = "";
+	private int noteCounter;
+
+	private Logger log = Logger.getLogger(IdsTextBuilder.class);
 
 	/**
 	 * Constructs an IdsTextBuilder from the given variables.
@@ -61,7 +73,8 @@ public class IdsTextBuilder extends DefaultHandler {
 	 *            the conversion configuration
 	 * @param writer
 	 *            the I5 output writer
-	 * @throws I5Exception an {@link I5Exception}
+	 * @throws I5Exception
+	 *             an {@link I5Exception}
 	 */
 	public IdsTextBuilder(Configuration config, IndentingXMLStreamWriter writer)
 			throws I5Exception {
@@ -87,18 +100,49 @@ public class IdsTextBuilder extends DefaultHandler {
 		}
 
 		eventRecorder = new SAX2EventRecorder();
+		refNames = new HashMap<>();
+		noteIds = new ArrayList<String>();
+		noteCounter=1;
+	}
+
+	public void clearReferences() {
+		this.refNames.clear();
+	}
+
+	public void clearNoteIds() {
+		this.noteIds.clear();
+	}
+	
+	public void resetNoteCounter(){
+		this.noteCounter = 1;
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 
-		try {
-			if (localName.equals("note") || isFootNote) {
-				eventRecorder.startElement(uri, localName, qName, attributes);
-				isFootNote = true;
+		if (localName.equals("idsText")){
+			this.idsTextId = attributes.getValue("id");
+		}
+		
+		if (localName.equals("ptr")) {
+			ptrStartElement(uri, localName, qName, attributes);
+		}
+		else if (localName.equals("note") || isFootNote) {
+			String id = idsTextId+"-f"+noteCounter;
+			// if there is a target (ptr cRef)
+			if (attributes.getValue("target") != null) {
+				id = refNames.get(attributes.getValue("target"));
+				
+				attributes = replaceAttributes("id", id, "target",
+						attributes);
 			}
-			else if (localName.equals("back") && eventRecorder.getLength() > 0) {
+			eventRecorder.startElement(uri, localName, qName, attributes);
+			isFootNote = true;
+		}
+		else if (localName.equals("back")
+				&& eventRecorder.getLength() > 0) {
+			try {
 				writer.writeStartElement(localName);
 				writer.writeStartElement("div");
 				writer.writeAttribute("n", "1");
@@ -108,22 +152,86 @@ public class IdsTextBuilder extends DefaultHandler {
 				writer.writeEndElement();
 				writer.flush();
 			}
-			else {
-				writer.writeStartElement(localName);
-				for (int i = 0; i < attributes.getLength(); i++) {
-					if (!addedAttributes.contains(attributes.getLocalName(i))) {
-						writer.writeAttribute(attributes.getLocalName(i),
-								StringEscapeUtils
-										.escapeXml(attributes.getValue(i)));
-					}
-				}
-				writer.flush();
+			catch (XMLStreamException e) {
+				throw new SAXException(
+						"Failed creating start element " + localName,
+						e);
 			}
 		}
+		else {
+			writeStartElement(uri, localName, qName, attributes);
+		}
+
+	}
+
+	private void writeStartElement(String uri, String localName, String qName,
+			Attributes attributes) throws SAXException {
+		try {
+			writer.writeStartElement(localName);
+
+			for (int i = 0; i < attributes.getLength(); i++) {
+				if (!addedAttributes.contains(attributes.getLocalName(i))) {
+					writer.writeAttribute(attributes.getLocalName(i),
+							StringEscapeUtils
+									.escapeXml(attributes.getValue(i)));
+				}
+			}
+			writer.flush();
+		}
 		catch (XMLStreamException e) {
-			throw new SAXException("Failed creating start element " + localName,
+			throw new SAXException("Failed writing start element " + localName,
 					e);
 		}
+	}
+
+	private Attributes replaceAttributes(String replaceAtt, String replacement,
+			String removeAtt, Attributes attributes) throws SAXException {
+		AttributesImpl newAttributes = new AttributesImpl();
+
+		for (int i = 0; i < attributes.getLength(); i++) {
+			if (replaceAtt.equals(attributes.getLocalName(i))) {
+				newAttributes.addAttribute(attributes.getURI(i),
+						attributes.getLocalName(i),
+						attributes.getQName(i),
+						attributes.getType(i),
+						replacement);
+			}
+			else if (i != attributes.getIndex(removeAtt)) {
+				newAttributes.addAttribute(attributes.getURI(i),
+						attributes.getLocalName(i),
+						attributes.getQName(i),
+						attributes.getType(i),
+						attributes.getValue(i));
+			}
+		}
+		return newAttributes;
+	}
+
+	private void ptrStartElement(String uri, String localName, String qName,
+			Attributes attributes) throws SAXException {
+
+		String targetId;
+		if (attributes.getValue("cRef") != null) {
+			if (refNames.containsKey(attributes.getValue("cRef"))) {
+				targetId = refNames.get(attributes.getValue("cRef"));
+				log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+			}
+			else {
+				targetId = idsTextId+"-f"+noteCounter++;
+				refNames.put(attributes.getValue("cRef"), targetId);
+				
+				log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+			}
+		}
+		else{
+			targetId = idsTextId+"-f"+noteCounter++;
+			log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+		}
+		
+		attributes = replaceAttributes("target", targetId, "cRef",
+				attributes);
+		
+		writeStartElement(uri, localName, qName, attributes);
 	}
 
 	@Override
@@ -174,7 +282,8 @@ public class IdsTextBuilder extends DefaultHandler {
 	 * 
 	 * @param ll
 	 *            language links from wikipedia (database)
-	 * @throws SAXException a {@link SAXException}
+	 * @throws SAXException
+	 *             a {@link SAXException}
 	 */
 	private void createLangLinks(LanguageLinks ll) throws SAXException {
 		Map<String, String> map = ll.getTitleMap();
@@ -255,9 +364,11 @@ public class IdsTextBuilder extends DefaultHandler {
 	/**
 	 * Sets the current wiki page id
 	 * 
-	 * @param pageId a wiki page id
+	 * @param pageId
+	 *            a wiki page id
 	 */
 	public void setPageId(String pageId) {
 		this.pageId = pageId;
 	}
+	
 }

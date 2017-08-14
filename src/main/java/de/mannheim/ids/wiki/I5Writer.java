@@ -165,30 +165,33 @@ public class I5Writer {
 			throw new IllegalArgumentException("WikiI5Part cannot be null.");
 		}
 
-		if (w.isIDSText()) {
-			if (w.getBos() != null) {
-				logger.debug(w.getBos());
+		synchronized (writer) {
+			if (w.isIDSText()) {
+				if (w.getBos() != null) {
+//					logger.debug(w.getBos());
 
-				SaxBuffer saxBuffer = new SaxBuffer();
-				reader.setContentHandler(saxBuffer);
+					SaxBuffer saxBuffer = new SaxBuffer();
+					reader.setContentHandler(saxBuffer);
 
-				validateAgainstDTD(w);
-				writeIdsText(saxBuffer, w);
+					if (validateAgainstDTD(w)) {
+						writeIdsText(saxBuffer, w);
+					}
+				}
 			}
-		}
-		else if (w.isStartDoc()) {
-			writeStartIdsCorpus(w);
-		}
-		else {
-			try {
-				writer.writeEndElement();
-				writer.flush();
+			else if (w.isStartDoc()) {
+				writeStartIdsCorpus(w);
 			}
-			catch (XMLStreamException e) {
-				throw new I5Exception(
-						"Failed writing end idsDoc or idsCorpus end element.",
-						e);
-			} // idsCorpus
+			else {
+				try {
+					writer.writeEndElement();
+					writer.flush();
+				}
+				catch (XMLStreamException e) {
+					throw new I5Exception(
+							"Failed writing end idsDoc or idsCorpus end element.",
+							e);
+				} // idsCorpus
+			}
 		}
 	}
 
@@ -199,7 +202,7 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	public synchronized void writeStartDocument() throws I5Exception {
+	public void writeStartDocument() throws I5Exception {
 
 		try {
 			synchronized (writer) {
@@ -228,8 +231,7 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private synchronized void writeStartIdsCorpus(WikiI5Part w)
-			throws I5Exception {
+	private void writeStartIdsCorpus(WikiI5Part w) throws I5Exception {
 		IdsDocBuilder db = new IdsDocBuilder(writer);
 		String docTitle = db.createIdsDocTitle(config.getNamespaceKey(),
 				w.getIndex(), w.getDocNr());
@@ -237,10 +239,10 @@ public class I5Writer {
 		String index = w.getIndex();
 		String docNr = String.format("%02d", w.getDocNr());
 		String docSigle = config.getKorpusSigle() + "/" + index + docNr;
+		if (StringUtils.isNumeric(w.getIndex())) {
+			index = "_" + index;
+		}
 		try {
-			if (StringUtils.isNumeric(w.getIndex())) {
-				index = "_" + index;
-			}
 			db.createStartElement(index + docNr);
 			db.createIdsHeader(docSigle, docTitle);
 			writer.flush();
@@ -258,7 +260,7 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private void validateAgainstDTD(WikiI5Part w) throws I5Exception {
+	private boolean validateAgainstDTD(WikiI5Part w) throws I5Exception {
 
 		try {
 			InputStream is = new ByteArrayInputStream(w.getBos().toByteArray());
@@ -268,8 +270,9 @@ public class I5Writer {
 			stats.addDtdValidationError();
 			logger.debug(e);
 			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
-			return;
+			return false;
 		}
+		return true;
 	}
 
 	/**
@@ -288,13 +291,16 @@ public class I5Writer {
 		try {
 			idsTextHandler.setPageId(w.getPageId());
 			saxBuffer.toSAX(idsTextHandler);
+			idsTextHandler.clearReferences();
+			idsTextHandler.clearNoteIds();
+			idsTextHandler.resetNoteCounter();
+			
 			stats.addTransformedPages();
 		}
 		catch (SAXException e) {
 			stats.addSaxParserError();
 			errorHandler.write(w.getWikiPath(), e.getMessage(), e);
 		}
-
 	}
 
 	public void close() throws I5Exception {

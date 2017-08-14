@@ -29,6 +29,8 @@
         <name>syntaxhighlight</name>
         <name>code</name>
         <name>source</name>
+        <name>span</name>
+        <name>ref</name>
     </xsl:param>
 
     <xsl:param name="divClasses">

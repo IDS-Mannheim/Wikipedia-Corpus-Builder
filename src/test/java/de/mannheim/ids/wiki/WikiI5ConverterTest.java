@@ -38,22 +38,9 @@ public class WikiI5ConverterTest {
 
 	@Test
 	@Ignore
-	public void testIndexingWikiXML() throws IOException, InterruptedException {
-		String xmlFolder = "/home/elma/git/WikiXMLConverter/wikixml-de/article";
-		String index = "index/dewiki-article-index.xml";
-
-		Process p = Runtime.getRuntime().exec(
-				"./WikiXMLCorpusIndexer.sh article " + xmlFolder + " " + index);
-		p.waitFor();
-
-		File f = new File(index);
-		assertNotNull(f);
-	}
-
-	@Test
 	public void testCreateConfig() {
 		String xmlFolder = "/home/elma/git/WikiXMLConverter/wikixml-de/article";
-		String index = "articleIndex.xml";
+		String index = "index/dewiki-article-index.xml";
 
 		int namespacekey = 0;
 		String language = "Deutsch";
@@ -95,19 +82,36 @@ public class WikiI5ConverterTest {
 	}
 
 	@Test
+	@Ignore
+	public void testIndexingWikiXML() throws IOException, InterruptedException {
+		String type = "article";
+		String xmlFolder = "/home/elma/git/WikiXMLConverter/wikixml-de/"+type;
+		String index = "index/dewiki-"+type+"-index.xml";
+
+		Process p = Runtime.getRuntime().exec(
+				"./WikiXMLCorpusIndexer.sh "+type+" " + xmlFolder + " " + index);
+		p.waitFor();
+
+		File f = new File(index);
+		assertNotNull(f);
+	}
+	
+	@Test
+//	@Ignore
 	public void testWikiI5Processor() throws I5Exception, IOException {
-		String propertiesFilename = "i5-dewiki-article.properties";
+		String propertiesFilename = "dewiki-article.properties";
 		Configuration config = new Configuration(propertiesFilename);
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();
 	}
 
 	@Test
+	@Ignore
 	public void testWikiI5Converter()
 			throws I5Exception, IOException, ParseException, SQLException {
 		WikiI5Converter converter = new WikiI5Converter();
 		converter.main(
-				new String[]{"-prop", "i5-dewiki-loeschkandidaten.properties"});
+				new String[]{"-prop", "dewiki-loeschkandidaten.properties"});
 	}
 
 }

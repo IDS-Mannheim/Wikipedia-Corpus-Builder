@@ -7,8 +7,9 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 
 import javax.xml.stream.XMLStreamException;
 
-/** Constructs basic I5 elements used in other builders.
- *   
+/**
+ * Constructs basic I5 elements used in other builders.
+ * 
  * @author margaretha
  *
  */
@@ -37,8 +38,11 @@ public class BaseBuilder {
 		titleTypes.put(15, "Kategoriediskussionen");
 	}
 
-	/** Construct a BaseBuilder 
-	 * @param writer an IndentingXMLStreamWriter writing I5 to the output file
+	/**
+	 * Construct a BaseBuilder
+	 * 
+	 * @param writer
+	 *            an IndentingXMLStreamWriter writing I5 to the output file
 	 */
 	public BaseBuilder(IndentingXMLStreamWriter writer) {
 		this.writer = writer;

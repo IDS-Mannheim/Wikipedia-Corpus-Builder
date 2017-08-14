@@ -56,7 +56,9 @@ public class DatabaseManager {
 
 	private void setDataSource(String url, String username, String password) {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
+			if (url.contains("mariadb")){
+				Class.forName("com.mariadb.jdbc.Driver");
+			}
 		}
 		catch (ClassNotFoundException e) {
 			e.printStackTrace();
