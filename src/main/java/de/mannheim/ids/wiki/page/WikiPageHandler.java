@@ -29,6 +29,8 @@ public abstract class WikiPageHandler implements Runnable {
 	private static final Pattern nonTagPattern = Pattern
 			.compile("<([^!!/a-zA-Z\\s])");
 	private static final Pattern nonTagPattern2 = Pattern.compile("<([^>]*)");
+	
+	private static final Pattern endTagPattern = Pattern.compile("([^\\s])/>");
 
 	private static final Pattern stylePattern = Pattern
 			.compile("(\\[\\[.+>\\]\\])");
@@ -157,8 +159,13 @@ public abstract class WikiPageHandler implements Runnable {
 		wikitext = wikitext.replace(":{|", "{|");
 		wikitext = wikitext.replace("<Fn", "&lt;Fn");
 		wikitext = wikitext.replace("Fn>", "Fn&gt;");
+		
+		// space before />
+		Matcher matcher = endTagPattern.matcher(wikitext);
+		wikitext = matcher.replaceAll("$1 />");
+				
 		// space for non-tag
-		Matcher matcher = nonTagPattern.matcher(wikitext);
+		matcher = nonTagPattern.matcher(wikitext);
 		wikitext = matcher.replaceAll("&lt; $1");
 		matcher.reset();
 		// < without >

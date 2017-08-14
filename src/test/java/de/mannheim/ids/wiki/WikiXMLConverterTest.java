@@ -11,7 +11,7 @@ public class WikiXMLConverterTest {
 		// Set the language of the Wikipedia
 		String language = "de";
 		// Set wikidump filepath
-		String wikidump = "data/dewiki-20130728-sample.xml";
+		String wikidump = "data/dewiki-20170701-sample.xml";
 		// the output encoding
 		String encoding = "utf-8";
 		// The namespace of the Wikipages to convert
