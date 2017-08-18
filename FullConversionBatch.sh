@@ -18,7 +18,7 @@
 #
 # This script takes input arguments sequentially as follows:   
 #  1. 2-letter language code of the wikitext (e.g. de).
-#  2. The type of wikipedia pages [article|talk|usertalk]. 
+#  2. The type of wikipedia pages [article|talk|user-talk]. 
 #  3. The date of the wikidumps.
 #
 # The filename of the Wikidump is supposed to be in the following format
@@ -47,7 +47,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# Example command: ./WikiI5Batch.sh de article 20150501
+# Example command: ./FullConversionBatch.sh de article 20150501
 
 wikixml="code/WikiXMLConverter-1.0.1-jar-with-dependencies.jar"
  

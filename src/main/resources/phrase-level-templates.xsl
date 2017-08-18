@@ -78,10 +78,27 @@
     <xsl:template match="ref|Ref|REF">
         <xsl:choose>
             <xsl:when test="ancestor::node()[name()='ref']"> &lt;ref <xsl:value-of select="."/>&gt; </xsl:when>
+            <xsl:when test="parent::node()[name()=('references','References')]">
+                <xsl:if test="*">
+                    <saxon:assign name="refCounter" select="$refCounter+1"/>
+                    <xsl:choose>
+                        <xsl:when test="@name">
+                            <note target="{@name}" id="{$sigle}-f{$refCounter}" place="foot">
+                                <xsl:apply-templates/>
+                            </note>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <note id="{$sigle}-f{$refCounter}" place="foot">
+                                <xsl:apply-templates/>
+                            </note>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:if>
+            </xsl:when>
             <xsl:when test="@name">
                 <saxon:assign name="refCounter" select="$refCounter+1"/>
                 <ptr cRef="{@name}" rend="ref" targType="note" targOrder="u"
-                    target="{$sigle}-f1"/>
+                    target="{$sigle}-f{$refCounter}"/>
                 <xsl:if test="*">
                     <note target="{@name}" id="{$sigle}-f{$refCounter}" place="foot">
                         <xsl:apply-templates/>
@@ -106,10 +123,17 @@
 
     <xsl:template match="tr|td|th"/>
 
-    <xsl:template match="timeline | references | References | gallery | Gallery">
+    <xsl:template match="timeline | gallery | Gallery">
         <xsl:call-template name="gap">
             <xsl:with-param name="name" select="lower-case(name())"/>
         </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="references | References">
+        <xsl:call-template name="gap">
+            <xsl:with-param name="name" select="lower-case(name())"/>
+        </xsl:call-template>
+        <xsl:apply-templates/>
     </xsl:template>
 
     <xsl:template name="gap">

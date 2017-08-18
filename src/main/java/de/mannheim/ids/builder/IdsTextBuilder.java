@@ -1,5 +1,7 @@
 package de.mannheim.ids.builder;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,7 +12,9 @@ import java.util.regex.Pattern;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.axis.message.SAX2EventRecorder;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -18,10 +22,8 @@ import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.helpers.AttributesImpl;
-import org.xml.sax.helpers.DefaultHandler;
-
-import com.mysql.cj.api.log.Log;
 
 import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.db.LanguageLinks;
@@ -35,7 +37,7 @@ import de.mannheim.ids.wiki.I5Exception;
  * @author margaretha
  *
  */
-public class IdsTextBuilder extends DefaultHandler {
+public class IdsTextBuilder extends DefaultHandler2 {
 
 	private IndentingXMLStreamWriter writer;
 
@@ -65,6 +67,55 @@ public class IdsTextBuilder extends DefaultHandler {
 	private int noteCounter;
 
 	private Logger log = Logger.getLogger(IdsTextBuilder.class);
+
+	public IdsTextBuilder(Configuration config, OutputStream os)
+			throws I5Exception {
+		if (config == null) {
+			throw new IllegalArgumentException("Config cannot be null.");
+		}
+		
+		if (config.isDiscussion()) {
+			noLangLinks = true;
+		}
+		else {
+			try {
+				dbManager = new DatabaseManager(config.getDatabaseUrl(),
+						config.getDatabaseUsername(),
+						config.getDatabasePassword(), config.getLanguageCode());
+			}
+			catch (SQLException e) {
+				throw new I5Exception(
+						"Failed configuring the database manager.", e);
+			}
+		}
+
+		setWriter(config, os);
+		eventRecorder = new SAX2EventRecorder();
+		refNames = new HashMap<>();
+		noteIds = new ArrayList<String>();
+		noteCounter = 0;
+	}
+
+	private void setWriter(Configuration config, OutputStream os)
+			throws I5Exception {
+		XMLOutputFactory f = XMLOutputFactory.newInstance();
+		XMLStreamWriter w = null;
+		try {
+			w = f.createXMLStreamWriter(
+					new OutputStreamWriter(os, config.getOutputEncoding()));
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new I5Exception(
+					"Failed creating an OutputStreamWriter. Encoding"
+							+ config.getOutputEncoding() + " is not supported.",
+					e);
+		}
+		catch (XMLStreamException e) {
+			throw new I5Exception("Failed creating an XMLStreamWriter", e);
+		}
+		writer = new IndentingXMLStreamWriter(w);
+		writer.setIndent(" ");
+	}
 
 	/**
 	 * Constructs an IdsTextBuilder from the given variables.
@@ -102,7 +153,7 @@ public class IdsTextBuilder extends DefaultHandler {
 		eventRecorder = new SAX2EventRecorder();
 		refNames = new HashMap<>();
 		noteIds = new ArrayList<String>();
-		noteCounter=1;
+		noteCounter = 0;
 	}
 
 	public void clearReferences() {
@@ -112,33 +163,51 @@ public class IdsTextBuilder extends DefaultHandler {
 	public void clearNoteIds() {
 		this.noteIds.clear();
 	}
-	
-	public void resetNoteCounter(){
+
+	public void resetNoteCounter() {
 		this.noteCounter = 1;
+	}
+
+	@Override
+	public void startDTD(String name, String publicId, String systemId)
+			throws SAXException {
+		try {
+			writer.writeDTD("<!DOCTYPE "+name+" PUBLIC '"+publicId+"' '"+systemId+"'>");
+		}
+		catch (XMLStreamException e) {
+			throw new SAXException(
+					"Failed writing DTD " + name, e);
+		}
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 
-		if (localName.equals("idsText")){
+		if (localName.equals("idsText")) {
 			this.idsTextId = attributes.getValue("id");
 		}
-		
+
 		if (localName.equals("ptr")) {
+			log.debug("ptr " + attributes.getValue("target"));
 			ptrStartElement(uri, localName, qName, attributes);
 		}
-		else if (localName.equals("note") || isFootNote) {
-			String id = idsTextId+"-f"+noteCounter;
+		else if (localName.equals("note")) {
+			String id = idsTextId + "-f" + noteCounter;
 			// if there is a target (ptr cRef)
 			if (attributes.getValue("target") != null) {
+				log.debug("note target: " + attributes.getValue("target"));
 				id = refNames.get(attributes.getValue("target"));
-				
-				attributes = replaceAttributes("id", id, "target",
-						attributes);
 			}
+			attributes = replaceAttributes("id", id, "target",
+					attributes);
+
 			eventRecorder.startElement(uri, localName, qName, attributes);
 			isFootNote = true;
+			log.debug("note " + id);
+		}
+		else if (isFootNote) {
+			eventRecorder.startElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("back")
 				&& eventRecorder.getLength() > 0) {
@@ -214,23 +283,28 @@ public class IdsTextBuilder extends DefaultHandler {
 		if (attributes.getValue("cRef") != null) {
 			if (refNames.containsKey(attributes.getValue("cRef"))) {
 				targetId = refNames.get(attributes.getValue("cRef"));
-				log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+				log.debug("targetId: " + targetId + " cRef:"
+						+ attributes.getValue("cRef"));
 			}
 			else {
-				targetId = idsTextId+"-f"+noteCounter++;
+				// EM: add targetId to the attributes?
+				targetId = idsTextId + "-f" + (noteCounter + 1);
 				refNames.put(attributes.getValue("cRef"), targetId);
-				
-				log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+				log.debug("targetId: " + targetId + " cRef:"
+						+ attributes.getValue("cRef"));
+				noteCounter++;
 			}
 		}
-		else{
-			targetId = idsTextId+"-f"+noteCounter++;
-			log.debug("targetId: "+targetId+" cRef:"+attributes.getValue("cRef"));
+		else {
+			targetId = idsTextId + "-f" + (noteCounter + 1);
+			log.debug("targetId: " + targetId + " cRef:"
+					+ attributes.getValue("cRef"));
+			noteCounter++;
 		}
-		
+
 		attributes = replaceAttributes("target", targetId, "cRef",
 				attributes);
-		
+
 		writeStartElement(uri, localName, qName, attributes);
 	}
 
@@ -370,5 +444,5 @@ public class IdsTextBuilder extends DefaultHandler {
 	public void setPageId(String pageId) {
 		this.pageId = pageId;
 	}
-	
+
 }

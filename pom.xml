@@ -25,11 +25,11 @@
 			<artifactId>commons-cli</artifactId>
 			<version>1.2</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 		    <groupId>org.mariadb.jdbc</groupId>
 		    <artifactId>mariadb-java-client</artifactId>
 		    <version>2.1.0</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -110,6 +110,7 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<driver>com.mysql.cj.jdbc.Driver</driver>
 				</configuration>
 				<executions>
 					<execution>

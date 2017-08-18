@@ -1,6 +1,7 @@
 package de.mannheim.ids.wiki;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,6 +32,7 @@ import org.xml.sax.XMLReader;
 import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
+import de.mannheim.ids.builder.IdsTextHandler;
 import de.mannheim.ids.transform.WikiI5Part;
 
 /**
@@ -43,13 +45,18 @@ public class I5Writer {
 
 	public static Logger logger = Logger.getLogger(I5Writer.class);
 
-	private IdsTextBuilder idsTextHandler;
+	private IdsTextBuilder idsTextBuilder;
 	private XMLReader reader;
+	private XMLReader validatingReader;
 	private IndentingXMLStreamWriter writer;
 	private I5ErrorHandler errorHandler;
 
 	private Configuration config;
 	private Statistics stats;
+
+	private ByteArrayOutputStream os;
+
+	private IdsTextHandler idsTextHandler;
 
 	/**
 	 * Constructs an I5Writer from the given variables.
@@ -67,9 +74,12 @@ public class I5Writer {
 			Statistics statistics) throws I5Exception {
 		this.errorHandler = errorHandler;
 		this.config = config;
-		setXMLReader();
+		configureSAXParser();
 		setWriter(config);
-		idsTextHandler = new IdsTextBuilder(config, writer);
+		//idsTextHandler = new IdsTextBuilder(config, writer);
+		os = new ByteArrayOutputStream();
+		idsTextBuilder = new IdsTextBuilder(config, os);
+		idsTextHandler = new IdsTextHandler(config, writer);
 		stats = statistics;
 	}
 
@@ -118,11 +128,11 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private void setXMLReader() throws I5Exception {
+	private void configureSAXParser() throws I5Exception {
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();
-		saxfactory.setValidating(true);
+		saxfactory.setValidating(false);
 		saxfactory.setNamespaceAware(true);
-
+		
 		try {
 			saxfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
 					false);
@@ -133,7 +143,15 @@ public class I5Writer {
 					+ "feature to a sax factory.", e);
 		}
 
+		reader = createXMLReader(saxfactory);
+		saxfactory.setValidating(true);
+		validatingReader = createXMLReader(saxfactory);
+		
+	}
+	
+	private XMLReader createXMLReader(SAXParserFactory saxfactory) throws I5Exception {
 		SAXParser parser = null;
+		XMLReader reader;
 		try {
 			parser = saxfactory.newSAXParser();
 		}
@@ -149,6 +167,7 @@ public class I5Writer {
 					"Failed getting the XML Reader from a SAX parser.", e);
 		}
 		reader.setErrorHandler(errorHandler);
+		return reader;
 	}
 
 	/**
@@ -170,11 +189,10 @@ public class I5Writer {
 				if (w.getBos() != null) {
 //					logger.debug(w.getBos());
 
-					SaxBuffer saxBuffer = new SaxBuffer();
-					reader.setContentHandler(saxBuffer);
-
-					if (validateAgainstDTD(w)) {
-						writeIdsText(saxBuffer, w);
+					if (parseIdsText(w)) {
+						logger.debug(os);
+						validateAgainstDTD(os,w);
+						os.reset();
 					}
 				}
 			}
@@ -252,6 +270,34 @@ public class I5Writer {
 		}
 	}
 
+	private boolean validateAgainstDTD(ByteArrayOutputStream os, WikiI5Part w) throws I5Exception {
+
+		SaxBuffer saxBuffer = new SaxBuffer();
+		validatingReader.setContentHandler(saxBuffer);
+		try {
+			InputStream is = new ByteArrayInputStream(os.toByteArray());
+			InputSource inputSource = new InputSource(is);
+			inputSource.setEncoding(config.getOutputEncoding());
+			validatingReader.parse(inputSource);
+		}
+		catch (SAXException | IOException e) {
+			stats.addDtdValidationError();
+			logger.debug(e);
+			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
+			return false;
+		}
+		
+		
+		try {
+			saxBuffer.toSAX(idsTextHandler);
+		}
+		catch (SAXException e) {
+			stats.addSaxParserError();
+			errorHandler.write(w.getWikiPath(), e.getMessage(), e);
+		}
+		return true;
+	}
+	
 	/**
 	 * Validates the transformation results against DTD by using the SAX parser.
 	 * 
@@ -260,18 +306,23 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private boolean validateAgainstDTD(WikiI5Part w) throws I5Exception {
-
+	private boolean parseIdsText(WikiI5Part w) throws I5Exception {
+		SaxBuffer saxBuffer = new SaxBuffer();
+		reader.setContentHandler(saxBuffer);
 		try {
+			reader.setProperty("http://xml.org/sax/properties/lexical-handler",idsTextBuilder);
 			InputStream is = new ByteArrayInputStream(w.getBos().toByteArray());
-			reader.parse(new InputSource(is));
+			InputSource inputSource = new InputSource(is);
+			inputSource.setEncoding(config.getOutputEncoding());
+			reader.parse(inputSource);
 		}
 		catch (SAXException | IOException e) {
-			stats.addDtdValidationError();
 			logger.debug(e);
-			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
+			errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
 			return false;
 		}
+		
+		writeIdsText(saxBuffer, w);
 		return true;
 	}
 
@@ -289,12 +340,11 @@ public class I5Writer {
 	private void writeIdsText(SaxBuffer saxBuffer, WikiI5Part w)
 			throws I5Exception {
 		try {
-			idsTextHandler.setPageId(w.getPageId());
-			saxBuffer.toSAX(idsTextHandler);
-			idsTextHandler.clearReferences();
-			idsTextHandler.clearNoteIds();
-			idsTextHandler.resetNoteCounter();
-			
+			idsTextBuilder.setPageId(w.getPageId());
+			saxBuffer.toSAX(idsTextBuilder);
+			idsTextBuilder.clearReferences();
+			idsTextBuilder.clearNoteIds();
+			idsTextBuilder.resetNoteCounter();
 			stats.addTransformedPages();
 		}
 		catch (SAXException e) {

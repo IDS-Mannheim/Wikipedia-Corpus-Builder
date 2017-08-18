@@ -10,14 +10,13 @@ date=$3
 filename=$lang$wiki-$date-$type
 
 mkdir -p logs/wikiI5;
-mkdir -p logs/onsgml;
+mkdir -p logs/onsgmls;
 mkdir -p logs/xmllint;
-
-mkdir -p i5;
 
 mkdir -p index;
 
 mkdir -p i5/$1
+mkdir -p i5/ori
 
 if [ -z $1 ]||[ -z $2 ]||[ -z $3 ];
 then
