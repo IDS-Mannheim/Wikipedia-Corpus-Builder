@@ -343,7 +343,6 @@ public class I5Writer {
 			idsTextBuilder.setPageId(w.getPageId());
 			saxBuffer.toSAX(idsTextBuilder);
 			idsTextBuilder.clearReferences();
-			idsTextBuilder.clearPtrIds();
 			idsTextBuilder.resetNoteCounter();
 		}
 		catch (SAXException e) {
