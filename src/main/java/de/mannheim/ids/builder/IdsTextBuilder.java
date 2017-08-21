@@ -6,8 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
@@ -58,8 +60,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	}
 
 	private Map<String, String> refNames;
-	private List<String> noteIds;
-
+	private Set<String> ptrIds;
+	
 	private boolean noLangLinks = false;
 
 	private boolean isFootNote = false;
@@ -92,7 +94,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		setWriter(config, os);
 		eventRecorder = new SAX2EventRecorder();
 		refNames = new HashMap<>();
-		noteIds = new ArrayList<String>();
+		ptrIds = new HashSet<>();
 		noteCounter = 0;
 	}
 
@@ -127,6 +129,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	 * @throws I5Exception
 	 *             an {@link I5Exception}
 	 */
+	@Deprecated
 	public IdsTextBuilder(Configuration config, IndentingXMLStreamWriter writer)
 			throws I5Exception {
 		if (config == null) {
@@ -152,7 +155,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 		eventRecorder = new SAX2EventRecorder();
 		refNames = new HashMap<>();
-		noteIds = new ArrayList<String>();
 		noteCounter = 0;
 	}
 
@@ -160,8 +162,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		this.refNames.clear();
 	}
 
-	public void clearNoteIds() {
-		this.noteIds.clear();
+	public void clearPtrIds() {
+		this.ptrIds.clear();
 	}
 
 	public void resetNoteCounter() {
@@ -217,7 +219,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeAttribute("n", "1");
 				writer.writeAttribute("complete", "y");
 				writer.writeAttribute("type", "footnotes");
-				eventRecorder.replay(new FootnoteBuilder(writer));
+				eventRecorder.endElement("", "end", "end");
+				eventRecorder.replay(new FootnoteBuilder(writer,ptrIds));
 				writer.writeEndElement();
 				writer.flush();
 			}
@@ -302,9 +305,9 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			noteCounter++;
 		}
 
+		ptrIds.add(targetId);
 		attributes = replaceAttributes("target", targetId, "cRef",
 				attributes);
-
 		writeStartElement(uri, localName, qName, attributes);
 	}
 

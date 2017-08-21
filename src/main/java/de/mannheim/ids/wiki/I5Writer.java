@@ -279,6 +279,7 @@ public class I5Writer {
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
 			validatingReader.parse(inputSource);
+			stats.addTransformedPages();
 		}
 		catch (SAXException | IOException e) {
 			stats.addDtdValidationError();
@@ -343,9 +344,8 @@ public class I5Writer {
 			idsTextBuilder.setPageId(w.getPageId());
 			saxBuffer.toSAX(idsTextBuilder);
 			idsTextBuilder.clearReferences();
-			idsTextBuilder.clearNoteIds();
+			idsTextBuilder.clearPtrIds();
 			idsTextBuilder.resetNoteCounter();
-			stats.addTransformedPages();
 		}
 		catch (SAXException e) {
 			stats.addSaxParserError();

@@ -53,6 +53,14 @@ public class DatabaseManager {
 	}
 
 	private void setDataSource(String url, String username, String password) {
+		try {
+			if (url.contains("mariadb")){
+				Class.forName("com.mariadb.jdbc.Driver");
+			}
+		}
+		catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 		ConnectionFactory cf = new DriverManagerConnectionFactory(url, username,
 				password);
 		PoolableConnectionFactory pcf = new PoolableConnectionFactory(cf, null);
