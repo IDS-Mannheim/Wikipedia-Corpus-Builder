@@ -32,7 +32,7 @@ import org.xml.sax.XMLReader;
 import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
-import de.mannheim.ids.builder.IdsTextHandler;
+import de.mannheim.ids.builder.IdsTextValidator;
 import de.mannheim.ids.transform.WikiI5Part;
 
 /**
@@ -56,7 +56,7 @@ public class I5Writer {
 
 	private ByteArrayOutputStream os;
 
-	private IdsTextHandler idsTextHandler;
+	private IdsTextValidator idsTextHandler;
 
 	/**
 	 * Constructs an I5Writer from the given variables.
@@ -79,7 +79,7 @@ public class I5Writer {
 		//idsTextHandler = new IdsTextBuilder(config, writer);
 		os = new ByteArrayOutputStream();
 		idsTextBuilder = new IdsTextBuilder(config, os);
-		idsTextHandler = new IdsTextHandler(config, writer);
+		idsTextHandler = new IdsTextValidator(config, writer);
 		stats = statistics;
 	}
 
@@ -287,7 +287,6 @@ public class I5Writer {
 			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
 			return false;
 		}
-		
 		
 		try {
 			saxBuffer.toSAX(idsTextHandler);

@@ -11,8 +11,6 @@
         </xd:desc>
     </xd:doc>
 
-    <xsl:variable name="refCounter" select="0" saxon:assignable="yes"/>
-
     <!-- Posting Template -->
     <xsl:template match="posting">
         <xsl:if test="text()[normalize-space(.)] | *">
@@ -80,15 +78,14 @@
             <xsl:when test="ancestor::node()[name()='ref']"> &lt;ref <xsl:value-of select="."/>&gt; </xsl:when>
             <xsl:when test="parent::node()[name()=('references','References')]">
                 <xsl:if test="*">
-                    <saxon:assign name="refCounter" select="$refCounter+1"/>
                     <xsl:choose>
                         <xsl:when test="@name">
-                            <note target="{@name}" id="{$sigle}-f{$refCounter}" place="foot">
+                            <note name="{@name}" place="foot">
                                 <xsl:apply-templates/>
                             </note>
                         </xsl:when>
                         <xsl:otherwise>
-                            <note id="{$sigle}-f{$refCounter}" place="foot">
+                            <note place="foot">
                                 <xsl:apply-templates/>
                             </note>
                         </xsl:otherwise>
@@ -96,20 +93,17 @@
                 </xsl:if>
             </xsl:when>
             <xsl:when test="@name">
-                <saxon:assign name="refCounter" select="$refCounter+1"/>
-                <ptr cRef="{@name}" rend="ref" targType="note" targOrder="u"
-                    target="{$sigle}-f{$refCounter}"/>
+                <ptr name="{@name}" rend="ref" targType="note" targOrder="u"/>
                 <xsl:if test="*">
-                    <note target="{@name}" id="{$sigle}-f{$refCounter}" place="foot">
+                    <note name="{@name}" place="foot">
                         <xsl:apply-templates/>
                     </note>
                 </xsl:if>
             </xsl:when>
             <xsl:otherwise>
-                <saxon:assign name="refCounter" select="$refCounter+1"/>
-                <ptr rend="ref" targType="note" targOrder="u" target="{$sigle}-f{$refCounter}"/>
+                <ptr rend="ref" targType="note" targOrder="u"/>
                 <xsl:if test="*">
-                    <note id="{$sigle}-f{$refCounter}" place="foot">
+                    <note place="foot">
                         <xsl:apply-templates/>
                     </note>
                 </xsl:if>

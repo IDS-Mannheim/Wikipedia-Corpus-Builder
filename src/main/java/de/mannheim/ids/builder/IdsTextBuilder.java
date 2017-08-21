@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import org.apache.axis.message.SAX2EventRecorder;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
@@ -45,7 +47,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 	private DatabaseManager dbManager;
 
-	private SAX2EventRecorder eventRecorder;
+	private SAX2EventRecorder currentEventRecorder;
+	private LinkedHashMap<String, SAX2EventRecorder> noteEvents;
 
 	public static Pattern spacePattern = Pattern.compile("\\s+");
 
@@ -61,12 +64,13 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 	private Map<String, String> refNames;
 	private Set<String> ptrIds;
-	
+
 	private boolean noLangLinks = false;
 
 	private boolean isFootNote = false;
 	private String idsTextId = "";
-	private int noteCounter;
+	private String noteId;
+	private int refCounter;
 
 	private Logger log = Logger.getLogger(IdsTextBuilder.class);
 
@@ -75,7 +79,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		if (config == null) {
 			throw new IllegalArgumentException("Config cannot be null.");
 		}
-		
+
 		if (config.isDiscussion()) {
 			noLangLinks = true;
 		}
@@ -92,10 +96,10 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		}
 
 		setWriter(config, os);
-		eventRecorder = new SAX2EventRecorder();
+		noteEvents = new LinkedHashMap<>();
 		refNames = new HashMap<>();
 		ptrIds = new HashSet<>();
-		noteCounter = 0;
+		refCounter = 0;
 	}
 
 	private void setWriter(Configuration config, OutputStream os)
@@ -153,9 +157,9 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			}
 		}
 
-		eventRecorder = new SAX2EventRecorder();
+		currentEventRecorder = new SAX2EventRecorder();
 		refNames = new HashMap<>();
-		noteCounter = 0;
+		refCounter = 0;
 	}
 
 	public void clearReferences() {
@@ -167,14 +171,15 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	}
 
 	public void resetNoteCounter() {
-		this.noteCounter = 1;
+		this.refCounter = 1;
 	}
 
 	@Override
 	public void startDTD(String name, String publicId, String systemId)
 			throws SAXException {
 		try {
-			writer.writeDTD("<!DOCTYPE "+name+" PUBLIC '"+publicId+"' '"+systemId+"'>");
+			writer.writeDTD("<!DOCTYPE " + name + " PUBLIC '" + publicId + "' '"
+					+ systemId + "'>");
 		}
 		catch (XMLStreamException e) {
 			throw new SAXException(
@@ -191,36 +196,54 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		}
 
 		if (localName.equals("ptr")) {
-			log.debug("ptr " + attributes.getValue("target"));
 			ptrStartElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("note")) {
-			String id = idsTextId + "-f" + noteCounter;
+			String noteId = idsTextId + "-f" + refCounter;
 			// if there is a target (ptr cRef)
-			if (attributes.getValue("target") != null) {
-				log.debug("note target: " + attributes.getValue("target"));
-				id = refNames.get(attributes.getValue("target"));
+			if (attributes.getValue("name") != null) {
+				log.debug("note name: " + attributes.getValue("name"));
+				noteId = refNames.get(attributes.getValue("name"));
 			}
-			attributes = replaceAttributes("id", id, "target",
+			attributes = replaceAttributes("id", noteId, "name",
 					attributes);
 
-			eventRecorder.startElement(uri, localName, qName, attributes);
+			currentEventRecorder.startElement(uri, localName, qName,
+					attributes);
 			isFootNote = true;
-			log.debug("note " + id);
+			log.debug("note " + noteId);
 		}
 		else if (isFootNote) {
-			eventRecorder.startElement(uri, localName, qName, attributes);
+			currentEventRecorder.startElement(uri, localName, qName,
+					attributes);
 		}
 		else if (localName.equals("back")
-				&& eventRecorder.getLength() > 0) {
+				&& noteEvents.size() > 0) {
 			try {
 				writer.writeStartElement(localName);
 				writer.writeStartElement("div");
 				writer.writeAttribute("n", "1");
 				writer.writeAttribute("complete", "y");
 				writer.writeAttribute("type", "footnotes");
-				eventRecorder.endElement("", "end", "end");
-				eventRecorder.replay(new FootnoteBuilder(writer,ptrIds));
+
+				ContentHandler footnoteBuilder = new FootnoteBuilder(writer);
+				SAX2EventRecorder eventRecorder;
+				for (String key : noteEvents.keySet()) {
+					eventRecorder = noteEvents.get(key);
+					if (eventRecorder.getLength() < 1) {
+						AttributesImpl att = new AttributesImpl();
+						att.addAttribute("", "id", "id", "ID", key);
+						eventRecorder.startElement("", "note", "note",
+								att);
+						String noteContent = "N/A";
+						eventRecorder.characters(
+								noteContent.toCharArray(), 0,
+								noteContent.length());
+						eventRecorder.endElement("", "note", "note");
+					}
+					eventRecorder.replay(footnoteBuilder);
+				}
+
 				writer.writeEndElement();
 				writer.flush();
 			}
@@ -256,19 +279,14 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		}
 	}
 
-	private Attributes replaceAttributes(String replaceAtt, String replacement,
+	private Attributes replaceAttributes(String newAtt, String newAttValue,
 			String removeAtt, Attributes attributes) throws SAXException {
 		AttributesImpl newAttributes = new AttributesImpl();
 
+		newAttributes.addAttribute("", newAtt, newAtt, "CDATA", newAttValue);
+
 		for (int i = 0; i < attributes.getLength(); i++) {
-			if (replaceAtt.equals(attributes.getLocalName(i))) {
-				newAttributes.addAttribute(attributes.getURI(i),
-						attributes.getLocalName(i),
-						attributes.getQName(i),
-						attributes.getType(i),
-						replacement);
-			}
-			else if (i != attributes.getIndex(removeAtt)) {
+			if (i != attributes.getIndex(removeAtt)) {
 				newAttributes.addAttribute(attributes.getURI(i),
 						attributes.getLocalName(i),
 						attributes.getQName(i),
@@ -282,31 +300,31 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private void ptrStartElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 
-		String targetId;
-		if (attributes.getValue("cRef") != null) {
-			if (refNames.containsKey(attributes.getValue("cRef"))) {
-				targetId = refNames.get(attributes.getValue("cRef"));
-				log.debug("targetId: " + targetId + " cRef:"
-						+ attributes.getValue("cRef"));
+		if (attributes.getValue("name") != null) {
+			if (refNames.containsKey(attributes.getValue("name"))) {
+				noteId = refNames.get(attributes.getValue("name"));
+				log.debug("targetId: " + noteId + " name:"
+						+ attributes.getValue("name"));
 			}
 			else {
 				// EM: add targetId to the attributes?
-				targetId = idsTextId + "-f" + (noteCounter + 1);
-				refNames.put(attributes.getValue("cRef"), targetId);
-				log.debug("targetId: " + targetId + " cRef:"
-						+ attributes.getValue("cRef"));
-				noteCounter++;
+				noteId = idsTextId + "-f" + (refCounter + 1);
+				refNames.put(attributes.getValue("name"), noteId);
+				log.debug("targetId: " + noteId + " name:"
+						+ attributes.getValue("name"));
+				refCounter++;
 			}
 		}
 		else {
-			targetId = idsTextId + "-f" + (noteCounter + 1);
-			log.debug("targetId: " + targetId + " cRef:"
-					+ attributes.getValue("cRef"));
-			noteCounter++;
+			noteId = idsTextId + "-f" + (refCounter + 1);
+			log.debug("targetId: " + noteId + " no name");
+			refCounter++;
 		}
 
-		ptrIds.add(targetId);
-		attributes = replaceAttributes("target", targetId, "cRef",
+		currentEventRecorder = new SAX2EventRecorder();
+
+		// ptrIds.add(targetId);
+		attributes = replaceAttributes("target", noteId, "name",
 				attributes);
 		writeStartElement(uri, localName, qName, attributes);
 	}
@@ -316,15 +334,28 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			throws SAXException {
 
 		if (isFootNote) {
-			eventRecorder.endElement(uri, localName, qName);
+			currentEventRecorder.endElement(uri, localName, qName);
 			if (localName.equals("note")) {
 				isFootNote = false;
 			}
 		}
 		else {
 			try {
-				if (localName.equals("back")) {
-					eventRecorder.clear();
+				if (localName.equals("ptr")) {
+					if (noteEvents.containsKey(noteId)) {
+						log.debug("reref " + noteId);
+						if (noteEvents.get(noteId).getLength() < 1
+								&& currentEventRecorder.getLength() > 0) {
+							noteEvents.remove(noteId);
+							noteEvents.put(noteId, currentEventRecorder);
+						}
+					}
+					else {
+						noteEvents.put(noteId, currentEventRecorder);
+					}
+					writer.writeEndElement();
+				}
+				else if (localName.equals("back")) {
 					writer.writeEndElement();
 				}
 				else {
@@ -395,7 +426,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
 		if (isFootNote) {
-			eventRecorder.characters(ch, start, length);
+			currentEventRecorder.characters(ch, start, length);
 		}
 		else {
 			try {

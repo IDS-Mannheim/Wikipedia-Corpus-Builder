@@ -1,7 +1,5 @@
 package de.mannheim.ids.builder;
 
-import java.util.Set;
-
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -15,21 +13,15 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 public class FootnoteBuilder extends DefaultHandler {
 
 	private IndentingXMLStreamWriter writer;
-	private Set<String> ptrIds;
 
-	public FootnoteBuilder(IndentingXMLStreamWriter writer,
-			Set<String> ptrIds) {
+	public FootnoteBuilder(IndentingXMLStreamWriter writer) {
 		this.writer = writer;
-		this.ptrIds = ptrIds;
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		try {
-			if (ptrIds.contains(attributes.getValue("id"))) {
-				ptrIds.remove(attributes.getValue("id"));
-			}
 
 			writer.writeStartElement(localName);
 			for (int i = 0; i < attributes.getLength(); i++) {
@@ -52,15 +44,8 @@ public class FootnoteBuilder extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		try {
-			if (localName.equals("end")) {
-				writer.writeStartElement("note");
-				writer.writeCharacters("Content was not available.");
-				writer.writeEndElement();
-			}
-			else {
 				writer.writeEndElement();
 				writer.flush();
-			}
 		}
 		catch (XMLStreamException e) {
 			throw new SAXException("Failed creating end element " + localName,
