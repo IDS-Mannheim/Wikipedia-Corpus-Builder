@@ -16,7 +16,6 @@ mkdir -p logs/xmllint;
 mkdir -p index;
 
 mkdir -p i5/$1
-mkdir -p i5/ori
 
 if [ -z $1 ]||[ -z $2 ]||[ -z $3 ];
 then
@@ -28,8 +27,8 @@ then
     exit
 fi
 
-echo "Indexing wikixml files"
-./code/WikiXMLCorpusIndexer.sh $type wikixml-$lang/$type/ index/$lang$wiki-$type-index.xml
+#echo "Indexing wikixml files"
+#./code/WikiXMLCorpusIndexer.sh $type wikixml-$lang/$type/ index/$lang$wiki-$type-index.xml
 
 echo "Converting wikiXML to I5"
 main=de.mannheim.ids.wiki.WikiI5Converter
@@ -48,4 +47,3 @@ xmllint -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint/xmllint-$filenam
 
 echo "Validating against onsgmls"
 onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc i5/$lang/$filename.i5.xml > logs/onsgmls/onsgmls-$filename.i5.log 2>&1
-

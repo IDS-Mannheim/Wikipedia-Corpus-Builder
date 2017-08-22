@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
@@ -46,8 +47,9 @@ public class Transformer implements Callable<WikiI5Part> {
 				InputStream is = this.getClass().getClassLoader()
 						.getResourceAsStream("main-templates.xsl");
 				executable = compiler.compile(new StreamSource(is));
+				is.close();
 			}
-			catch (SaxonApiException e) {
+			catch (SaxonApiException | IOException e) {
 				throw new RuntimeException(
 						"Failed compiling the XSLT Stylesheet.", e);
 			}

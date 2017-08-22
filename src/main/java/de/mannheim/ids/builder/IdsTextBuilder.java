@@ -1,19 +1,14 @@
 package de.mannheim.ids.builder;
 
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
-
-import javanet.staxutils.IndentingXMLStreamWriter;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -33,6 +28,7 @@ import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
+import javanet.staxutils.IndentingXMLStreamWriter;
 
 /**
  * IdsTextBuilder is a SAX handler implementation creating idsText elements from
@@ -50,7 +46,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private SAX2EventRecorder currentEventRecorder;
 	private LinkedHashMap<String, SAX2EventRecorder> noteEvents;
 
-	public static Pattern spacePattern = Pattern.compile("\\s+");
+	public static final Pattern spacePattern = Pattern.compile("\\s+");
 
 	private String pageId;
 	public static List<String> addedAttributes = new ArrayList<String>();
@@ -70,9 +66,9 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private String idsTextId = "";
 	private String noteId;
 	private int refCounter;
-
-	private Logger log = Logger.getLogger(IdsTextBuilder.class);
-
+	private String encoding;
+	private Logger log = Logger.getLogger(IdsTextBuilder.class);	
+	
 	public IdsTextBuilder(Configuration config, OutputStream os)
 			throws I5Exception {
 		if (config == null) {
@@ -93,27 +89,21 @@ public class IdsTextBuilder extends DefaultHandler2 {
 						"Failed configuring the database manager.", e);
 			}
 		}
-
+		encoding = config.getOutputEncoding();
 		setWriter(config, os);
+		writeStartDocument(encoding);
 		noteEvents = new LinkedHashMap<>();
 		refNames = new HashMap<>();
 		refCounter = 0;
 		currentEventRecorder = new SAX2EventRecorder();
 	}
-
+	
 	private void setWriter(Configuration config, OutputStream os)
 			throws I5Exception {
 		XMLOutputFactory f = XMLOutputFactory.newInstance();
 		XMLStreamWriter w = null;
 		try {
-			w = f.createXMLStreamWriter(
-					new OutputStreamWriter(os, config.getOutputEncoding()));
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new I5Exception(
-					"Failed creating an OutputStreamWriter. Encoding"
-							+ config.getOutputEncoding() + " is not supported.",
-					e);
+			w = f.createXMLStreamWriter(os, config.getOutputEncoding());
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
@@ -122,6 +112,10 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		writer.setIndent(" ");
 	}
 
+	public void close() throws XMLStreamException {
+		writer.close();
+	}
+	
 	/**
 	 * Constructs an IdsTextBuilder from the given variables.
 	 * 
@@ -170,6 +164,16 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		this.refCounter = 0;
 	}
 
+	public void writeStartDocument(String encoding) throws I5Exception {
+		try {
+			writer.writeStartDocument(encoding, "1.0");
+		}
+		catch (XMLStreamException e) {
+			throw new I5Exception(
+					"Failed writing IdsText start document.", e);
+		}
+	}
+	
 	@Override
 	public void startDTD(String name, String publicId, String systemId)
 			throws SAXException {
@@ -195,13 +199,13 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			ptrStartElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("note")) {
-			
+
 			if (attributes.getValue("name") != null) {
 				log.debug("note name: " + attributes.getValue("name"));
 				noteId = refNames.get(attributes.getValue("name"));
 			}
-			else{
-				noteId = idsTextId + "-f" + refCounter;	
+			else {
+				noteId = idsTextId + "-f" + refCounter;
 			}
 			attributes = replaceAttributes("id", noteId, "name",
 					attributes);
@@ -229,7 +233,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				for (String key : noteEvents.keySet()) {
 					eventRecorder = noteEvents.get(key);
 					if (eventRecorder.getLength() < 1) {
-						log.debug("empty note "+key);
+						log.debug("empty note " + key);
 						AttributesImpl att = new AttributesImpl();
 						att.addAttribute("", "id", "id", "ID", key);
 						eventRecorder.startElement("", "note", "note",
@@ -265,6 +269,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 			for (int i = 0; i < attributes.getLength(); i++) {
 				if (!addedAttributes.contains(attributes.getLocalName(i))) {
+					// EM: check invalid chars in att value?
 					writer.writeAttribute(attributes.getLocalName(i),
 							StringEscapeUtils
 									.escapeXml(attributes.getValue(i)));
@@ -333,9 +338,10 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			currentEventRecorder.endElement(uri, localName, qName);
 			if (localName.equals("note")) {
 				isFootNote = false;
-				
+
 				if (noteEvents.containsKey(noteId)) {
-					log.debug("note end "+noteId +" length " + noteEvents.get(noteId).getLength());
+					log.debug("note end " + noteId + " length "
+							+ noteEvents.get(noteId).getLength());
 					if (noteEvents.get(noteId).getLength() < 1
 							&& currentEventRecorder.getLength() > 0) {
 						log.debug("replace note " + noteId);
@@ -363,14 +369,14 @@ public class IdsTextBuilder extends DefaultHandler2 {
 						}
 					}
 					else {
-						log.debug("put ptr " + noteId + " "+currentEventRecorder.getLength());
+						log.debug("put ptr " + noteId + " "
+								+ currentEventRecorder.getLength());
 						noteEvents.put(noteId, currentEventRecorder);
 					}
 					currentEventRecorder = new SAX2EventRecorder();
 					writer.writeEndElement();
 				}
-				else 
-				if (localName.equals("back")) {
+				else if (localName.equals("back")) {
 					writer.writeEndElement();
 				}
 				else {
@@ -416,16 +422,17 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeAttribute("type", "langlink");
 
 				writer.writeStartElement("ref");
-
+				String keyword = map.get(key);
+				
 				StringBuilder sb = new StringBuilder();
 				sb.append("https://");
 				sb.append(key);
 				sb.append(".wikipedia.org/wiki/");
-				sb.append(map.get(key).replace(" ", "_"));
+				sb.append(keyword.replace(" ", "_"));
 				writer.writeAttribute("target", sb.toString());
 
 				writer.writeAttribute("xml:lang", key);
-				writer.writeCharacters(map.get(key));
+				writer.writeCharacters(keyword);
 
 				writer.writeEndElement(); // ref
 				writer.writeEndElement(); // relatedItem

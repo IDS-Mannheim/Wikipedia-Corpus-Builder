@@ -9,9 +9,9 @@ public class Statistics {
 	public int transformationError;
 	public int dtdValidationError;
 	public int saxParserError;
-	//public int emptyTransformationResult;
 	public int transformedPages;
 	public int numOfChar;
+	public int validPages;
 	
 	/** Constructs a {@link Statistics} and initializes all counters.
 	 * 
@@ -20,16 +20,15 @@ public class Statistics {
 		transformationError=0;
 		dtdValidationError=0;
 		saxParserError=0;
-		//emptyTransformationResult=0;
 		transformedPages=0;
 		numOfChar=0;
 	}
 	
 	public void printStats() {		
+		System.out.println("Number of valid pages: "+validPages);
 		System.out.println("Number of transformed pages: "+transformedPages);
 		System.out.println("Number of not-transformed pages (char index): "+numOfChar);
 		System.out.println("Number of transformation errors: "+transformationError);
-		//System.out.println("Number of empty transformation results: "+emptyTransformationResult);
 		System.out.println("Number of DTD validation errors: "+dtdValidationError);
 		System.out.println("Number of non well-formed XML: "+saxParserError);
 		
@@ -54,13 +53,13 @@ public class Statistics {
 		this.transformedPages++;
 	}
 	
-	/*public int getEmptyTransformationResult() {
-		return emptyTransformationResult;
+	public int getValidPages() {
+		return validPages;
 	}
 	
-	public void addEmptyTransformationResult() {
-		this.emptyTransformationResult++;
-	}*/
+	public void addValidPages() {
+		validPages++;
+	}
 	
 	public int getDtdValidationError() {
 		return dtdValidationError;

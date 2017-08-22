@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
@@ -58,6 +60,10 @@ public class I5Writer {
 
 	private IdsTextValidator idsTextHandler;
 
+	public static final Pattern invalidNativeCharPattern = Pattern
+			.compile("&#xd[89a-f]..;");
+	public static final String replacementChar = "&#xf8ff;";
+
 	/**
 	 * Constructs an I5Writer from the given variables.
 	 * 
@@ -76,7 +82,7 @@ public class I5Writer {
 		this.config = config;
 		configureSAXParser();
 		setWriter(config);
-		//idsTextHandler = new IdsTextBuilder(config, writer);
+
 		os = new ByteArrayOutputStream();
 		idsTextBuilder = new IdsTextBuilder(config, os);
 		idsTextHandler = new IdsTextValidator(config, writer);
@@ -132,7 +138,7 @@ public class I5Writer {
 		SAXParserFactory saxfactory = SAXParserFactory.newInstance();
 		saxfactory.setValidating(false);
 		saxfactory.setNamespaceAware(true);
-		
+
 		try {
 			saxfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,
 					false);
@@ -146,10 +152,11 @@ public class I5Writer {
 		reader = createXMLReader(saxfactory);
 		saxfactory.setValidating(true);
 		validatingReader = createXMLReader(saxfactory);
-		
+
 	}
-	
-	private XMLReader createXMLReader(SAXParserFactory saxfactory) throws I5Exception {
+
+	private XMLReader createXMLReader(SAXParserFactory saxfactory)
+			throws I5Exception {
 		SAXParser parser = null;
 		XMLReader reader;
 		try {
@@ -186,15 +193,15 @@ public class I5Writer {
 
 		synchronized (writer) {
 			if (w.isIDSText()) {
-				if (w.getBos() != null) {
-//					logger.debug(w.getBos());
-
-					if (parseIdsText(w)) {
-						logger.debug(os);
-						validateAgainstDTD(os,w);
-						os.reset();
-					}
+				// logger.debug(w.getBos());
+				if (w.getBos() != null && parseIdsText(w)) {
+					logger.debug(os);
+					String idsText = replaceInvalidCharacters(
+							os.toString());
+					validateAgainstDTD(idsText, w);
+					os.reset();
 				}
+				w.close();
 			}
 			else if (w.isStartDoc()) {
 				writeStartIdsCorpus(w);
@@ -270,24 +277,33 @@ public class I5Writer {
 		}
 	}
 
-	private boolean validateAgainstDTD(ByteArrayOutputStream os, WikiI5Part w) throws I5Exception {
+	private String replaceInvalidCharacters(String text) {
+		text = invalidNativeCharPattern.matcher(text)
+				.replaceAll(replacementChar);
+		return text;
+	}
+
+	private boolean validateAgainstDTD(String idsText, WikiI5Part w)
+			throws I5Exception {
 
 		SaxBuffer saxBuffer = new SaxBuffer();
 		validatingReader.setContentHandler(saxBuffer);
+
 		try {
-			InputStream is = new ByteArrayInputStream(os.toByteArray());
+			InputStream is = new ByteArrayInputStream(idsText
+					.getBytes(Charset.forName(config.getOutputEncoding())));
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
 			validatingReader.parse(inputSource);
-			stats.addTransformedPages();
+			is.close();
 		}
 		catch (SAXException | IOException e) {
 			stats.addDtdValidationError();
 			logger.debug(e);
-			errorHandler.write(w.getWikiPath(), "DVD validation failed.", e);
+			errorHandler.write(w.getWikiPath(), "DTD validation failed.", e);
 			return false;
 		}
-		
+
 		try {
 			saxBuffer.toSAX(idsTextHandler);
 		}
@@ -295,9 +311,11 @@ public class I5Writer {
 			stats.addSaxParserError();
 			errorHandler.write(w.getWikiPath(), e.getMessage(), e);
 		}
+
+		stats.addValidPages();
 		return true;
 	}
-	
+
 	/**
 	 * Validates the transformation results against DTD by using the SAX parser.
 	 * 
@@ -310,19 +328,21 @@ public class I5Writer {
 		SaxBuffer saxBuffer = new SaxBuffer();
 		reader.setContentHandler(saxBuffer);
 		try {
-			reader.setProperty("http://xml.org/sax/properties/lexical-handler",idsTextBuilder);
+			reader.setProperty("http://xml.org/sax/properties/lexical-handler",
+					idsTextBuilder);
 			InputStream is = new ByteArrayInputStream(w.getBos().toByteArray());
 			InputSource inputSource = new InputSource(is);
-			inputSource.setEncoding(config.getOutputEncoding());
 			reader.parse(inputSource);
+			is.close();
 		}
 		catch (SAXException | IOException e) {
 			logger.debug(e);
 			errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
 			return false;
 		}
-		
+
 		writeIdsText(saxBuffer, w);
+		stats.addTransformedPages();
 		return true;
 	}
 
@@ -353,10 +373,12 @@ public class I5Writer {
 
 	public void close() throws I5Exception {
 		try {
+			os.close();
+			idsTextBuilder.close();
 			writer.writeEndDocument();
 			writer.close();
 		}
-		catch (XMLStreamException e) {
+		catch (XMLStreamException | IOException e) {
 			throw new I5Exception("Failed closing document.", e);
 		}
 	}

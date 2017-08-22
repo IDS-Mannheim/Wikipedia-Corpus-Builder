@@ -2,6 +2,9 @@ package de.mannheim.ids.transform;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+
+import de.mannheim.ids.wiki.I5Exception;
 
 /**
  * Represents a part of the complete WikiI5 corpus, i.e. a start document, an
@@ -202,6 +205,15 @@ public class WikiI5Part {
 					"PageId cannot be null or empty.");
 		}
 		this.pageId = pageId;
+	}
+
+	public void close() throws I5Exception {
+		try {
+			bos.close();
+		}
+		catch (IOException e) {
+			throw new I5Exception("Failed closing outputstream.", e);
+		}
 	}
 
 }
