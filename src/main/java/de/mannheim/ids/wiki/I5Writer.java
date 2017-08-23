@@ -20,7 +20,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.apache.cocoon.xml.SaxBuffer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
@@ -42,11 +41,15 @@ import javanet.staxutils.IndentingXMLStreamWriter;
  * @author margaretha
  *
  */
+/**
+ * @author elma
+ *
+ */
 public class I5Writer {
 
 	public static Logger logger = Logger.getLogger(I5Writer.class);
 
-	private IdsTextBuilder idsTextBuilder;
+	private Charset charset;
 	private XMLReader reader;
 	private XMLReader validatingReader;
 	private IndentingXMLStreamWriter writer;
@@ -56,8 +59,10 @@ public class I5Writer {
 	private Statistics stats;
 
 	private ByteArrayOutputStream idsTextOutputStream;
+	private IdsTextBuilder idsTextBuilder;
+	private IdsTextValidator idsTextValidator;
 
-	private IdsTextValidator idsTextHandler;
+	private IdsDocBuilder idsDocBuilder;
 
 	public static final Pattern invalidNativeCharPattern = Pattern
 			.compile("&#xd[89a-f]..;");
@@ -79,12 +84,17 @@ public class I5Writer {
 			Statistics statistics) throws I5Exception {
 		this.errorHandler = errorHandler;
 		this.config = config;
+		this.charset = Charset.forName(config.getOutputEncoding());
+
 		configureSAXParser();
 		setWriter(config);
 
-		idsTextOutputStream = new ByteArrayOutputStream();
-		idsTextBuilder = new IdsTextBuilder(config, idsTextOutputStream);
-		idsTextHandler = new IdsTextValidator(config, writer);
+		idsDocBuilder = new IdsDocBuilder(writer);
+		
+		idsTextOutputStream = new ByteArrayOutputStream(1024 * 4);
+		idsTextBuilder = new IdsTextBuilder(config,
+				idsTextOutputStream);
+		idsTextValidator = new IdsTextValidator(config, writer);
 		stats = statistics;
 	}
 
@@ -115,6 +125,12 @@ public class I5Writer {
 					new OutputStreamWriter(fos, config.getOutputEncoding()));
 		}
 		catch (UnsupportedEncodingException e) {
+			try {
+				fos.close();
+			}
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			throw new I5Exception(
 					"Failed creating an OutputStreamWriter. Encoding"
 							+ config.getOutputEncoding() + " is not supported.",
@@ -151,9 +167,18 @@ public class I5Writer {
 		reader = createXMLReader(saxfactory);
 		saxfactory.setValidating(true);
 		validatingReader = createXMLReader(saxfactory);
-
 	}
 
+	/**
+	 * Creates a SAXParser from the given {@link SAXParserFactory} and return
+	 * the XMLReader of the parser.
+	 * 
+	 * @param saxfactory
+	 *            a {@link SAXParserFactory}
+	 * @return an XMLReader
+	 * @throws I5Exception
+	 *             I5Exception
+	 */
 	private XMLReader createXMLReader(SAXParserFactory saxfactory)
 			throws I5Exception {
 		SAXParser parser = null;
@@ -202,7 +227,7 @@ public class I5Writer {
 				w.close();
 			}
 			else if (w.isStartDoc()) {
-				writeStartIdsCorpus(w);
+				writeStartIdsDoc(w);
 			}
 			else {
 				try {
@@ -211,7 +236,7 @@ public class I5Writer {
 				}
 				catch (XMLStreamException e) {
 					throw new I5Exception(
-							"Failed writing end idsDoc or idsCorpus end element.",
+							"Failed writing idsDoc or idsCorpus end element.",
 							e);
 				} // idsCorpus
 			}
@@ -254,9 +279,8 @@ public class I5Writer {
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private void writeStartIdsCorpus(WikiI5Part w) throws I5Exception {
-		IdsDocBuilder db = new IdsDocBuilder(writer);
-		String docTitle = db.createIdsDocTitle(config.getNamespaceKey(),
+	private void writeStartIdsDoc(WikiI5Part w) throws I5Exception {
+		String docTitle = idsDocBuilder.createIdsDocTitle(config.getNamespaceKey(),
 				w.getIndex(), w.getDocNr());
 
 		String index = w.getIndex();
@@ -266,12 +290,12 @@ public class I5Writer {
 			index = "_" + index;
 		}
 		try {
-			db.createStartElement(index + docNr);
-			db.createIdsHeader(docSigle, docTitle);
+			idsDocBuilder.createStartElement(index + docNr);
+			idsDocBuilder.createIdsHeader(docSigle, docTitle);
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
-			throw new I5Exception("Failed writing idsCorpus start element.", e);
+			throw new I5Exception("Failed writing idsDoc start element.", e);
 		}
 	}
 
@@ -284,12 +308,11 @@ public class I5Writer {
 	private boolean validateAgainstDTD(String idsText, WikiI5Part w)
 			throws I5Exception {
 
-		SaxBuffer saxBuffer = new SaxBuffer();
-		validatingReader.setContentHandler(saxBuffer);
+		validatingReader.setContentHandler(idsTextValidator);
 
 		try {
-			InputStream is = new ByteArrayInputStream(idsText
-					.getBytes(Charset.forName(config.getOutputEncoding())));
+			InputStream is = new ByteArrayInputStream(
+					idsText.getBytes(charset));
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
 			validatingReader.parse(inputSource);
@@ -300,14 +323,6 @@ public class I5Writer {
 			logger.debug(e);
 			errorHandler.write(w.getWikiPath(), "DTD validation failed.", e);
 			return false;
-		}
-
-		try {
-			saxBuffer.toSAX(idsTextHandler);
-		}
-		catch (SAXException e) {
-			stats.addSaxParserError();
-			errorHandler.write(w.getWikiPath(), e.getMessage(), e);
 		}
 
 		stats.addValidPages();
@@ -323,8 +338,9 @@ public class I5Writer {
 	 *             an I5Exception
 	 */
 	private boolean parseIdsText(WikiI5Part w) throws I5Exception {
-		SaxBuffer saxBuffer = new SaxBuffer();
-		reader.setContentHandler(saxBuffer);
+
+		idsTextBuilder.setPageId(w.getPageId());
+		reader.setContentHandler(idsTextBuilder);
 		try {
 			reader.setProperty("http://xml.org/sax/properties/lexical-handler",
 					idsTextBuilder);
@@ -335,39 +351,16 @@ public class I5Writer {
 			is.close();
 		}
 		catch (SAXException | IOException e) {
+			stats.addSaxParserError();
 			logger.debug(e);
 			errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
 			return false;
 		}
+		idsTextBuilder.clearReferences();
+		idsTextBuilder.resetNoteCounter();
 
-		writeIdsText(saxBuffer, w);
 		stats.addTransformedPages();
 		return true;
-	}
-
-	/**
-	 * Handles the transformation output of idsText using {@link IdsTextBuilder}
-	 * and writes it to the final corpus file.
-	 * 
-	 * @param saxBuffer
-	 *            a SaxBuffer
-	 * @param w
-	 *            a WikiI5Part
-	 * @throws I5Exception
-	 *             an I5Exception
-	 */
-	private void writeIdsText(SaxBuffer saxBuffer, WikiI5Part w)
-			throws I5Exception {
-		try {
-			idsTextBuilder.setPageId(w.getPageId());
-			saxBuffer.toSAX(idsTextBuilder);
-			idsTextBuilder.clearReferences();
-			idsTextBuilder.resetNoteCounter();
-		}
-		catch (SAXException e) {
-			stats.addSaxParserError();
-			errorHandler.write(w.getWikiPath(), e.getMessage(), e);
-		}
 	}
 
 	public void close() throws I5Exception {

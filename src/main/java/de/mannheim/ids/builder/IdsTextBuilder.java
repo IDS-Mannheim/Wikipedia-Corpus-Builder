@@ -43,7 +43,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	
 	private IndentingXMLStreamWriter writer;
 
-	private DatabaseManager dbManager;
+	public static DatabaseManager dbManager;
 
 	private SAX2EventRecorder currentEventRecorder;
 	private LinkedHashMap<String, SAX2EventRecorder> noteEvents;
