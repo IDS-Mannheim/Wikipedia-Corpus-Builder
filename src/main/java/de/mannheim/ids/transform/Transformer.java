@@ -1,12 +1,12 @@
 package de.mannheim.ids.transform;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.concurrent.Callable;
 
 import javax.xml.transform.Source;
@@ -27,8 +27,10 @@ import de.mannheim.ids.wiki.I5ErrorHandler;
 import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.Statistics;
 
-/** Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5 
- * 	and returns the result as ByteArrayOutputStream. 
+/**
+ * Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5
+ * and returns the result as ByteArrayOutputStream.
+ * 
  * @author margaretha
  *
  */
@@ -61,27 +63,28 @@ public class Transformer implements Callable<WikiI5Part> {
 			catch (SaxonApiException e) {
 				throw new RuntimeException(
 						"Failed setting the initial template for "
-								+ "a transformer.", e);
+								+ "a transformer.",
+						e);
 			}
 
-			transformer.setParameter(new QName("type"), new XdmAtomicValue(
-					config.getNamespaceKey()));
+			transformer.setParameter(new QName("type"),
+					new XdmAtomicValue(config.getNamespaceKey()));
 			transformer.setParameter(new QName("origfilename"),
 					new XdmAtomicValue(config.getDumpFilename()));
 			transformer.setParameter(new QName("korpusSigle"),
 					new XdmAtomicValue(config.getKorpusSigle()));
-			transformer.setParameter(new QName("lang"), new XdmAtomicValue(
-					config.getLanguageCode()));
+			transformer.setParameter(new QName("lang"),
+					new XdmAtomicValue(config.getLanguageCode()));
 			transformer.setParameter(new QName("pubDay"), new XdmAtomicValue(
 					config.getDumpFilename().substring(13, 15)));
 			transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(
 					config.getDumpFilename().substring(11, 13)));
-			transformer.setParameter(new QName("pubYear"), new XdmAtomicValue(
-					config.getYear()));
+			transformer.setParameter(new QName("pubYear"),
+					new XdmAtomicValue(config.getYear()));
 			transformer.setParameter(new QName("inflectives"),
 					new XdmAtomicValue(config.getInflectives()));
-			transformer.setParameter(new QName("encoding"), new XdmAtomicValue(
-					config.getOutputEncoding()));
+			transformer.setParameter(new QName("encoding"),
+					new XdmAtomicValue(config.getOutputEncoding()));
 			transformer.setErrorListener(errorHandler);
 
 			return transformer;
@@ -90,6 +93,9 @@ public class Transformer implements Callable<WikiI5Part> {
 
 	private static final Processor processor = new Processor(true);
 
+	final PipedInputStream pis = new PipedInputStream(1024*4);
+	final PipedOutputStream pos = new PipedOutputStream();
+
 	private File wikiXML;
 	private String index;
 	private String pageId;
@@ -97,18 +103,26 @@ public class Transformer implements Callable<WikiI5Part> {
 	private static Configuration config;
 	private static I5ErrorHandler errorHandler;
 	private Statistics statistics;
-
-	/** Constructs a Transformer from the given variables.
+	
+	/**
+	 * Constructs a Transformer from the given variables.
 	 * 
-	 * @param config the conversion configuration
-	 * @param statistics a statistic counter
-	 * @param errorHandler an an I5ErrorHandler
-	 * @param wikiXMLFile a wikiXML file
-	 * @param index the index file name of the wikipages
-	 * @param pageId the page id string
+	 * @param config
+	 *            the conversion configuration
+	 * @param statistics
+	 *            a statistic counter
+	 * @param errorHandler
+	 *            an an I5ErrorHandler
+	 * @param wikiXMLFile
+	 *            a wikiXML file
+	 * @param index
+	 *            the index file name of the wikipages
+	 * @param pageId
+	 *            the page id string
 	 */
-	public Transformer(Configuration config, Statistics statistics, I5ErrorHandler 
-			errorHandler, File wikiXMLFile, String index, String pageId) {
+	public Transformer(Configuration config, Statistics statistics,
+			I5ErrorHandler errorHandler, File wikiXMLFile, String index,
+			String pageId) {
 		Transformer.config = config;
 		Transformer.errorHandler = errorHandler;
 
@@ -118,7 +132,9 @@ public class Transformer implements Callable<WikiI5Part> {
 		this.statistics = statistics;
 	}
 
-	/** Returns a copy of the threadlocal XsltTransformer. 
+	/**
+	 * Returns a copy of the threadlocal XsltTransformer.
+	 * 
 	 * @return an XsltTransformer
 	 */
 	public static XsltTransformer getTransfomer() {
@@ -127,62 +143,91 @@ public class Transformer implements Callable<WikiI5Part> {
 
 	@Override
 	public WikiI5Part call() throws Exception {
-		InputStream is = null;
 		WikiI5Part w = null;
-		ByteArrayOutputStream bos = null;
-		try {
-			is = new FileInputStream(config.getWikiXMLFolder() + "/" + wikiXML);
-			StreamSource source = new StreamSource(is);
-			bos = doTransformation(source);
-			w = new WikiI5Part(bos, wikiXML, pageId);
-		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}		
-		finally {
-			is.close();
-		}
+
+		this.pos.connect(pis);
+		new Thread(new TransformerWorker()).start();
+
+		w = new WikiI5Part(pis, wikiXML, pageId);
 		return w;
 	}
 
-	/** Performs the transformation and return the results in ByteArrayOutputStream. 
-	 * @param source
-	 * @return the transformation result in ByteArrayOutputStream
-	 * @throws I5Exception
-	 */
-	private ByteArrayOutputStream doTransformation(Source source) throws I5Exception {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
-		try {
-			XdmNode node = processor.newDocumentBuilder().build(source);
-			XsltTransformer transformer = getTransfomer();
-			transformer.setInitialContextNode(node);
-			transformer.setParameter(new QName("letter"), new XdmAtomicValue(
-					index));
-
-			Destination destination = createDestination(bos);
-			transformer.setDestination(destination);
-			transformer.transform();
-		}
-		catch (SaxonApiException e) {	
-			statistics.addTransformationError();
-			errorHandler.write(wikiXML.getPath(), "Tranformation error. ", e);
-			bos=null;
-		}		
-		
-		return bos;
-	}
-
-	/** Creates a Destination for the Transformer, that serializes the transformation 
-	 * 	result as XML into the given OutputStream.
+	/**
+	 * Creates a Destination for the Transformer, that serializes the
+	 * transformation
+	 * result as XML into the given OutputStream.
 	 * 
-	 * @param os OutputStream
+	 * @param os
+	 *            OutputStream
 	 * @return a Destination
 	 */
 	private Destination createDestination(OutputStream os) {
 		Serializer d = new Serializer(os);
 		d.setOutputProperty(Serializer.Property.METHOD, "xml");
 		d.setOutputProperty(Serializer.Property.INDENT, "yes");
-		d.setOutputProperty(Serializer.Property.ENCODING, config.getOutputEncoding());
+		d.setOutputProperty(Serializer.Property.ENCODING,
+				config.getOutputEncoding());
 		return d;
 	}
+
+	class TransformerWorker implements Runnable {
+
+		@Override
+		public void run() {
+
+			try {
+				InputStream is = new FileInputStream(
+						config.getWikiXMLFolder() + "/" + wikiXML);
+				final StreamSource source = new StreamSource(is);
+				doTransformation(source, pos);
+				is.close();
+			}
+			catch (I5Exception | IOException e) {
+				throw new RuntimeException(e);
+			}
+
+		}
+
+		/**
+		 * Performs the transformation and return the results in
+		 * ByteArrayOutputStream.
+		 * 
+		 * @param source
+		 * @return the transformation result in ByteArrayOutputStream
+		 * @throws I5Exception
+		 */
+		private void doTransformation(Source source, PipedOutputStream pos)
+				throws I5Exception {
+			try {
+
+				XdmNode node = processor.newDocumentBuilder().build(source);
+				final XsltTransformer transformer = getTransfomer();
+				transformer.setInitialContextNode(node);
+				transformer.setParameter(new QName("letter"),
+						new XdmAtomicValue(
+								index));
+
+				Destination destination = createDestination(pos);
+				transformer.setDestination(destination);
+				transformer.transform();
+			}
+			catch (SaxonApiException e) {
+				statistics.addTransformationError();
+				errorHandler.write(wikiXML.getPath(), "Tranformation error. ",
+						e);
+				pos = null;
+			}
+			finally {
+				try {
+					pos.close();
+				}
+				catch (IOException e) {
+					errorHandler.write(wikiXML.getPath(),
+							"Failed closing a PipedOutputStream", e);
+				}
+			}
+		}
+
+	}
+
 }

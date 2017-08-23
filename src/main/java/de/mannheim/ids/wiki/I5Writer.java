@@ -12,8 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
-import javanet.staxutils.IndentingXMLStreamWriter;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -36,6 +34,7 @@ import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.builder.IdsTextValidator;
 import de.mannheim.ids.transform.WikiI5Part;
+import javanet.staxutils.IndentingXMLStreamWriter;
 
 /**
  * Writes WikiI5Corpus output and validates its content against IDS I5 DTD.
@@ -56,7 +55,7 @@ public class I5Writer {
 	private Configuration config;
 	private Statistics stats;
 
-	private ByteArrayOutputStream os;
+	private ByteArrayOutputStream idsTextOutputStream;
 
 	private IdsTextValidator idsTextHandler;
 
@@ -83,8 +82,8 @@ public class I5Writer {
 		configureSAXParser();
 		setWriter(config);
 
-		os = new ByteArrayOutputStream();
-		idsTextBuilder = new IdsTextBuilder(config, os);
+		idsTextOutputStream = new ByteArrayOutputStream();
+		idsTextBuilder = new IdsTextBuilder(config, idsTextOutputStream);
 		idsTextHandler = new IdsTextValidator(config, writer);
 		stats = statistics;
 	}
@@ -193,13 +192,12 @@ public class I5Writer {
 
 		synchronized (writer) {
 			if (w.isIDSText()) {
-				// logger.debug(w.getBos());
-				if (w.getBos() != null && parseIdsText(w)) {
-					logger.debug(os);
+				if (w.getPipedInputStream() != null && parseIdsText(w)) {
+					logger.debug(idsTextOutputStream);
 					String idsText = replaceInvalidCharacters(
-							os.toString());
+							idsTextOutputStream.toString());
 					validateAgainstDTD(idsText, w);
-					os.reset();
+					idsTextOutputStream.reset();
 				}
 				w.close();
 			}
@@ -330,7 +328,8 @@ public class I5Writer {
 		try {
 			reader.setProperty("http://xml.org/sax/properties/lexical-handler",
 					idsTextBuilder);
-			InputStream is = new ByteArrayInputStream(w.getBos().toByteArray());
+
+			InputStream is = w.getPipedInputStream();
 			InputSource inputSource = new InputSource(is);
 			reader.parse(inputSource);
 			is.close();
@@ -373,7 +372,7 @@ public class I5Writer {
 
 	public void close() throws I5Exception {
 		try {
-			os.close();
+			idsTextOutputStream.close();
 			idsTextBuilder.close();
 			writer.writeEndDocument();
 			writer.close();

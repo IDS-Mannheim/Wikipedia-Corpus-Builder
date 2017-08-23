@@ -1,8 +1,8 @@
 package de.mannheim.ids.transform;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PipedInputStream;
 
 import de.mannheim.ids.wiki.I5Exception;
 
@@ -16,7 +16,7 @@ import de.mannheim.ids.wiki.I5Exception;
  */
 public class WikiI5Part {
 
-	private ByteArrayOutputStream bos;
+	private PipedInputStream pipedInputStream;
 	private String wikiPath;
 
 	private boolean idsText;
@@ -35,9 +35,11 @@ public class WikiI5Part {
 	 *            the XML output file
 	 * @param pageId
 	 *            wikipage id
+	 * @param pis
 	 */
-	public WikiI5Part(ByteArrayOutputStream bos, File wikiXML, String pageId) {
-		setBos(bos);
+	public WikiI5Part(PipedInputStream pis, File wikiXML,
+			String pageId) {
+		setPipedInputStream(pis);
 		setWikiPath(wikiXML.getPath());
 		setIDSText(true);
 		setPageId(pageId);
@@ -69,16 +71,12 @@ public class WikiI5Part {
 		setStartDoc(false);
 	}
 
-	public ByteArrayOutputStream getBos() {
-		return bos;
+	public PipedInputStream getPipedInputStream() {
+		return pipedInputStream;
 	}
 
-	public void setBos(ByteArrayOutputStream bos) {
-		// if (bos == null) {
-		// throw new IllegalArgumentException(
-		// "ByteArrayOutputStream cannot be null.");
-		// }
-		this.bos = bos;
+	public void setPipedInputStream(PipedInputStream pipedInputStream) {
+		this.pipedInputStream = pipedInputStream;
 	}
 
 	/**
@@ -209,7 +207,7 @@ public class WikiI5Part {
 
 	public void close() throws I5Exception {
 		try {
-			bos.close();
+			pipedInputStream.close();
 		}
 		catch (IOException e) {
 			throw new I5Exception("Failed closing outputstream.", e);

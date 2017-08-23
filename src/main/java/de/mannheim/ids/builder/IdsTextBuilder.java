@@ -39,6 +39,8 @@ import javanet.staxutils.IndentingXMLStreamWriter;
  */
 public class IdsTextBuilder extends DefaultHandler2 {
 
+	private Logger log = Logger.getLogger(IdsTextBuilder.class);
+	
 	private IndentingXMLStreamWriter writer;
 
 	private DatabaseManager dbManager;
@@ -63,12 +65,12 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private boolean noLangLinks = false;
 
 	private boolean isFootNote = false;
+	private boolean isInPtr = false;
 	private String idsTextId = "";
 	private String noteId;
 	private int refCounter;
 	private String encoding;
-	private Logger log = Logger.getLogger(IdsTextBuilder.class);	
-	
+
 	public IdsTextBuilder(Configuration config, OutputStream os)
 			throws I5Exception {
 		if (config == null) {
@@ -97,7 +99,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		refCounter = 0;
 		currentEventRecorder = new SAX2EventRecorder();
 	}
-	
+
 	private void setWriter(Configuration config, OutputStream os)
 			throws I5Exception {
 		XMLOutputFactory f = XMLOutputFactory.newInstance();
@@ -115,7 +117,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	public void close() throws XMLStreamException {
 		writer.close();
 	}
-	
+
 	/**
 	 * Constructs an IdsTextBuilder from the given variables.
 	 * 
@@ -173,7 +175,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					"Failed writing IdsText start document.", e);
 		}
 	}
-	
+
 	@Override
 	public void startDTD(String name, String publicId, String systemId)
 			throws SAXException {
@@ -203,6 +205,12 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			if (attributes.getValue("name") != null) {
 				log.debug("note name: " + attributes.getValue("name"));
 				noteId = refNames.get(attributes.getValue("name"));
+				if (noteId == null) {
+					if (!isInPtr) {
+						refCounter++;
+					}
+					noteId = idsTextId + "-f" + refCounter;
+				}
 			}
 			else {
 				noteId = idsTextId + "-f" + refCounter;
@@ -228,7 +236,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeAttribute("complete", "y");
 				writer.writeAttribute("type", "footnotes");
 
-				ContentHandler footnoteBuilder = new FootnoteBuilder(writer);
+				ContentHandler footnoteBuilder = new FootnoteBuilder(writer,
+						pageId);
 				SAX2EventRecorder eventRecorder;
 				for (String key : noteEvents.keySet()) {
 					eventRecorder = noteEvents.get(key);
@@ -328,6 +337,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		attributes = replaceAttributes("target", targetId, "name",
 				attributes);
 		writeStartElement(uri, localName, qName, attributes);
+
+		isInPtr = true;
 	}
 
 	@Override
@@ -352,6 +363,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				else {
 					log.debug("put note " + noteId);
 					noteEvents.put(noteId, currentEventRecorder);
+					refCounter++;
 				}
 				currentEventRecorder = new SAX2EventRecorder();
 			}
@@ -375,6 +387,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					}
 					currentEventRecorder = new SAX2EventRecorder();
 					writer.writeEndElement();
+					isInPtr = false;
 				}
 				else if (localName.equals("back")) {
 					writer.writeEndElement();
@@ -423,7 +436,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 				writer.writeStartElement("ref");
 				String keyword = map.get(key);
-				
+
 				StringBuilder sb = new StringBuilder();
 				sb.append("https://");
 				sb.append(key);

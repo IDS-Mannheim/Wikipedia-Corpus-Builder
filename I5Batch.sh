@@ -27,8 +27,8 @@ then
     exit
 fi
 
-#echo "Indexing wikixml files"
-#./code/WikiXMLCorpusIndexer.sh $type wikixml-$lang/$type/ index/$lang$wiki-$type-index.xml
+echo "Indexing wikixml files"
+./code/WikiXMLCorpusIndexer.sh $type wikixml-$lang/$type/ index/$lang$wiki-$type-index.xml
 
 echo "Converting wikiXML to I5"
 main=de.mannheim.ids.wiki.WikiI5Converter
@@ -38,9 +38,9 @@ echo $prop
 lib=:lib/*:.
 nice -n 3 java -Xmx4g -cp $wikiI5$lib $main -prop $prop > logs/wikiI5/wikiI5-$filename.log 2>&1 
 
-echo "Replacing invalid Chars"
+#echo "Replacing invalid Chars"
  #sed -i -e 's/&#xd[8-9a-f][0-9a-f][0-9a-f];/ /g' i5/$filename.i5.xml; 
-perl -wlnpe 's/\&#xd[89a-f]..;/\&#xf8ff;/g' < i5/ori/$filename.i5.xml > i5/$lang/$filename.i5.xml
+#perl -wlnpe 's/\&#xd[89a-f]..;/\&#xf8ff;/g' < i5/ori/$filename.i5.xml > i5/$lang/$filename.i5.xml
 
 echo "Validating against xmllint"
 xmllint -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint/xmllint-$filename.i5.log 2>&1; 

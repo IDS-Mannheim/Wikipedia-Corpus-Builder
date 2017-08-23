@@ -3,6 +3,7 @@ package de.mannheim.ids.builder;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -12,10 +13,15 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 
 public class FootnoteBuilder extends DefaultHandler {
 
+	private Logger log = Logger.getLogger(FootnoteBuilder.class);
+	
 	private IndentingXMLStreamWriter writer;
+	private String pageId;
+	
 
-	public FootnoteBuilder(IndentingXMLStreamWriter writer) {
+	public FootnoteBuilder(IndentingXMLStreamWriter writer, String pageId) {
 		this.writer = writer;
+		this.pageId = pageId;
 	}
 
 	@Override
@@ -27,9 +33,17 @@ public class FootnoteBuilder extends DefaultHandler {
 			for (int i = 0; i < attributes.getLength(); i++) {
 				if (!IdsTextBuilder.addedAttributes
 						.contains(attributes.getLocalName(i))) {
-					writer.writeAttribute(attributes.getLocalName(i),
-							StringEscapeUtils
-									.escapeXml(attributes.getValue(i)));
+					if (attributes.getLocalName(i) != null
+							&& attributes.getValue(i) != null) {
+						writer.writeAttribute(attributes.getLocalName(i),
+								StringEscapeUtils
+										.escapeXml(attributes.getValue(i)));
+					}
+					else {
+						log.debug("pageId "+ pageId+ " element " + localName + " att "
+								+ attributes.getLocalName(i)
+								+ " value " + attributes.getValue(i));
+					}
 				}
 			}
 			writer.flush();
@@ -44,8 +58,8 @@ public class FootnoteBuilder extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		try {
-				writer.writeEndElement();
-				writer.flush();
+			writer.writeEndElement();
+			writer.flush();
 		}
 		catch (XMLStreamException e) {
 			throw new SAXException("Failed creating end element " + localName,
