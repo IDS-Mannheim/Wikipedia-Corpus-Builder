@@ -117,9 +117,8 @@ public class WikiI5Processor {
 		String duration = DurationFormatUtils.formatDuration((end - start),
 				"H:mm:ss");
 		System.out.println("WikiI5Converter execution time "
-				// + (endTime - startTime));
+				// + (end - start));
 				+ duration);
-
 	}
 
 	/**

@@ -20,6 +20,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.cocoon.xml.SaxBuffer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
@@ -31,7 +32,7 @@ import org.xml.sax.XMLReader;
 import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
-import de.mannheim.ids.builder.IdsTextValidator;
+import de.mannheim.ids.builder.IdsTextHandler;
 import de.mannheim.ids.transform.WikiI5Part;
 import javanet.staxutils.IndentingXMLStreamWriter;
 
@@ -60,7 +61,7 @@ public class I5Writer {
 
 	private ByteArrayOutputStream idsTextOutputStream;
 	private IdsTextBuilder idsTextBuilder;
-	private IdsTextValidator idsTextValidator;
+	private IdsTextHandler idsTextHandler;
 
 	private IdsDocBuilder idsDocBuilder;
 
@@ -90,11 +91,11 @@ public class I5Writer {
 		setWriter(config);
 
 		idsDocBuilder = new IdsDocBuilder(writer);
-		
+
 		idsTextOutputStream = new ByteArrayOutputStream(1024 * 4);
 		idsTextBuilder = new IdsTextBuilder(config,
 				idsTextOutputStream);
-		idsTextValidator = new IdsTextValidator(config, writer);
+		idsTextHandler = new IdsTextHandler(config, writer);
 		stats = statistics;
 	}
 
@@ -217,11 +218,15 @@ public class I5Writer {
 
 		synchronized (writer) {
 			if (w.isIDSText()) {
-				if (w.getPipedInputStream() != null && parseIdsText(w)) {
+				logger.info(w.getWikiPath());
+				if (w.getInputStream() != null && parseIdsText(w)) {
 					logger.debug(idsTextOutputStream);
 					String idsText = replaceInvalidCharacters(
 							idsTextOutputStream.toString());
-					validateAgainstDTD(idsText, w);
+					SaxBuffer saxBuffer = new SaxBuffer();
+					if (validateAgainstDTD(saxBuffer, idsText, w.getWikiPath())) {
+						writeIdsText(saxBuffer, w.getWikiPath());
+					}
 					idsTextOutputStream.reset();
 				}
 				w.close();
@@ -280,7 +285,8 @@ public class I5Writer {
 	 *             an I5Exception
 	 */
 	private void writeStartIdsDoc(WikiI5Part w) throws I5Exception {
-		String docTitle = idsDocBuilder.createIdsDocTitle(config.getNamespaceKey(),
+		String docTitle = idsDocBuilder.createIdsDocTitle(
+				config.getNamespaceKey(),
 				w.getIndex(), w.getDocNr());
 
 		String index = w.getIndex();
@@ -305,32 +311,9 @@ public class I5Writer {
 		return text;
 	}
 
-	private boolean validateAgainstDTD(String idsText, WikiI5Part w)
-			throws I5Exception {
-
-		validatingReader.setContentHandler(idsTextValidator);
-
-		try {
-			InputStream is = new ByteArrayInputStream(
-					idsText.getBytes(charset));
-			InputSource inputSource = new InputSource(is);
-			inputSource.setEncoding(config.getOutputEncoding());
-			validatingReader.parse(inputSource);
-			is.close();
-		}
-		catch (SAXException | IOException e) {
-			stats.addDtdValidationError();
-			logger.debug(e);
-			errorHandler.write(w.getWikiPath(), "DTD validation failed.", e);
-			return false;
-		}
-
-		stats.addValidPages();
-		return true;
-	}
-
 	/**
-	 * Validates the transformation results against DTD by using the SAX parser.
+	 * Parses the transformation results, adds language links, parse refs and
+	 * adds footnotes.
 	 * 
 	 * @param w
 	 *            idsText wikiI5Part
@@ -345,7 +328,7 @@ public class I5Writer {
 			reader.setProperty("http://xml.org/sax/properties/lexical-handler",
 					idsTextBuilder);
 
-			InputStream is = w.getPipedInputStream();
+			InputStream is = w.getInputStream();
 			InputSource inputSource = new InputSource(is);
 			reader.parse(inputSource);
 			is.close();
@@ -361,6 +344,42 @@ public class I5Writer {
 
 		stats.addTransformedPages();
 		return true;
+	}
+
+	private boolean validateAgainstDTD(SaxBuffer saxBuffer, String idsText,
+			String wikiXMLPath)
+			throws I5Exception {
+
+		// validatingReader.setContentHandler(idsTextValidator);
+		validatingReader.setContentHandler(saxBuffer);
+		try {
+			InputStream is = new ByteArrayInputStream(
+					idsText.getBytes(charset));
+			InputSource inputSource = new InputSource(is);
+			inputSource.setEncoding(config.getOutputEncoding());
+			validatingReader.parse(inputSource);
+			is.close();
+		}
+		catch (SAXException | IOException e) {
+			stats.addDtdValidationError();
+			logger.debug(e);
+			errorHandler.write(wikiXMLPath, "DTD validation failed.", e);
+			return false;
+		}
+
+		stats.addValidPages();
+		return true;
+	}
+
+	private void writeIdsText(SaxBuffer saxBuffer, String wikiXMLPath) throws I5Exception {
+
+		try {
+			saxBuffer.toSAX(idsTextHandler);
+		}
+		catch (SAXException e) {
+			stats.addSaxParserError();
+			errorHandler.write(wikiXMLPath, "Failed writing idsText", e);
+		}
 	}
 
 	public void close() throws I5Exception {

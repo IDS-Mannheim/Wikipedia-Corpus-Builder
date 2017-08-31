@@ -1,15 +1,14 @@
 package de.mannheim.ids.transform;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.concurrent.Callable;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.s9api.Destination;
@@ -93,8 +92,8 @@ public class Transformer implements Callable<WikiI5Part> {
 
 	private static final Processor processor = new Processor(true);
 
-	final PipedInputStream pis = new PipedInputStream(1024*4);
-	final PipedOutputStream pos = new PipedOutputStream();
+	// final PipedInputStream pis = new PipedInputStream(1024 * 4);
+	// final PipedOutputStream pos = new PipedOutputStream();
 
 	private File wikiXML;
 	private String index;
@@ -103,7 +102,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	private static Configuration config;
 	private static I5ErrorHandler errorHandler;
 	private Statistics statistics;
-	
+
 	/**
 	 * Constructs a Transformer from the given variables.
 	 * 
@@ -143,12 +142,11 @@ public class Transformer implements Callable<WikiI5Part> {
 
 	@Override
 	public WikiI5Part call() throws Exception {
-		WikiI5Part w = null;
-
-		this.pos.connect(pis);
-		new Thread(new TransformerWorker()).start();
-
-		w = new WikiI5Part(pis, wikiXML, pageId);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
+		doTransformation(bos);
+		InputStream is = new ByteArrayInputStream(bos.toByteArray());
+		WikiI5Part w = new WikiI5Part(is, wikiXML, pageId);
+		bos.close();
 		return w;
 	}
 
@@ -170,64 +168,58 @@ public class Transformer implements Callable<WikiI5Part> {
 		return d;
 	}
 
-	class TransformerWorker implements Runnable {
+	/**
+	 * Performs the transformation and return the results in
+	 * an OutputStream.
+	 * 
+	 * @return the transformation result in an OutputStream
+	 * @throws I5Exception
+	 */
+	private void doTransformation(OutputStream os)
+			throws I5Exception {
+		InputStream is = null;
+		String filepath = config.getWikiXMLFolder() + "/" + wikiXML;
+		try {
 
-		@Override
-		public void run() {
+			is = new FileInputStream(filepath);
+			final StreamSource source = new StreamSource(is);
 
-			try {
-				InputStream is = new FileInputStream(
-						config.getWikiXMLFolder() + "/" + wikiXML);
-				final StreamSource source = new StreamSource(is);
-				doTransformation(source, pos);
-				is.close();
-			}
-			catch (I5Exception | IOException e) {
-				throw new RuntimeException(e);
-			}
+			XdmNode node = processor.newDocumentBuilder().build(source);
+			final XsltTransformer transformer = getTransfomer();
+			transformer.setInitialContextNode(node);
+			transformer.setParameter(new QName("letter"),
+					new XdmAtomicValue(
+							index));
 
+			Destination destination = createDestination(os);
+			transformer.setDestination(destination);
+			transformer.transform();
 		}
-
-		/**
-		 * Performs the transformation and return the results in
-		 * ByteArrayOutputStream.
-		 * 
-		 * @param source
-		 * @return the transformation result in ByteArrayOutputStream
-		 * @throws I5Exception
-		 */
-		private void doTransformation(Source source, PipedOutputStream pos)
-				throws I5Exception {
+		catch (SaxonApiException e) {
+			statistics.addTransformationError();
+			errorHandler.write(wikiXML.getPath(), "Tranformation error. ",
+					e);
+			os = null;
+		}
+		catch (IOException e) {
+			errorHandler.write(wikiXML.getPath(),
+					"Failed reading " + filepath, e);
+			throw new I5Exception("Failed reading a WikiXML file "
+					+ wikiXML.getAbsolutePath(), e);
+		}
+		finally {
 			try {
-
-				XdmNode node = processor.newDocumentBuilder().build(source);
-				final XsltTransformer transformer = getTransfomer();
-				transformer.setInitialContextNode(node);
-				transformer.setParameter(new QName("letter"),
-						new XdmAtomicValue(
-								index));
-
-				Destination destination = createDestination(pos);
-				transformer.setDestination(destination);
-				transformer.transform();
-			}
-			catch (SaxonApiException e) {
-				statistics.addTransformationError();
-				errorHandler.write(wikiXML.getPath(), "Tranformation error. ",
-						e);
-				pos = null;
-			}
-			finally {
-				try {
-					pos.close();
-				}
-				catch (IOException e) {
-					errorHandler.write(wikiXML.getPath(),
-							"Failed closing a PipedOutputStream", e);
+				if (is != null) {
+					is.close();
 				}
 			}
+			catch (IOException e) {
+				errorHandler.write(wikiXML.getPath(),
+						"Failed closing a WikiXML InputStream", e);
+			}
 		}
-
 	}
+
+	// }
 
 }

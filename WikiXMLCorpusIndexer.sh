@@ -45,10 +45,10 @@
 function createList {
     echo "<"$1">" > $3
     
-    for index in $(find $2 -type d | sed 's/.*\///' | sort);
+    for index in $(find -L $2 -type d | sed 's/.*\///' | sort);
     do  
         echo "  <index value=\""$index"\">" >> $3 
-        find $2/$index/ -type f 2>/dev/null | sed 's/.*\/\(.*\)\.xml/\1/' | sort -n | sed 's/\(.*\)/    <id>\1<\/id>/' >> $3        
+        find -L $2/$index/ -type f 2>/dev/null | sed 's/.*\/\(.*\)\.xml/\1/' | sort -n | sed 's/\(.*\)/    <id>\1<\/id>/' >> $3        
         echo "  </index>" >> $3
     done
 

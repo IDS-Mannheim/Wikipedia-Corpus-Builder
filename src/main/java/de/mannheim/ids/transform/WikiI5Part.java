@@ -2,7 +2,7 @@ package de.mannheim.ids.transform;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.InputStream;
 
 import de.mannheim.ids.wiki.I5Exception;
 
@@ -16,7 +16,7 @@ import de.mannheim.ids.wiki.I5Exception;
  */
 public class WikiI5Part {
 
-	private PipedInputStream pipedInputStream;
+	private InputStream inputStream;
 	private String wikiPath;
 
 	private boolean idsText;
@@ -29,17 +29,17 @@ public class WikiI5Part {
 	/**
 	 * Constructs a WikiI5Part containing idsText.
 	 * 
-	 * @param bos
-	 *            transformed wikitext in ByteArrayOutputStream
 	 * @param wikiXML
 	 *            the XML output file
 	 * @param pageId
 	 *            wikipage id
-	 * @param pis
+	 * @param is
+	 *            wikitext/IdsText InputStream (which was the output of XSLT
+	 *            transformation).
 	 */
-	public WikiI5Part(PipedInputStream pis, File wikiXML,
+	public WikiI5Part(InputStream is, File wikiXML,
 			String pageId) {
-		setPipedInputStream(pis);
+		setInputStream(is);
 		setWikiPath(wikiXML.getPath());
 		setIDSText(true);
 		setPageId(pageId);
@@ -71,12 +71,12 @@ public class WikiI5Part {
 		setStartDoc(false);
 	}
 
-	public PipedInputStream getPipedInputStream() {
-		return pipedInputStream;
+	public InputStream getInputStream() {
+		return inputStream;
 	}
 
-	public void setPipedInputStream(PipedInputStream pipedInputStream) {
-		this.pipedInputStream = pipedInputStream;
+	public void setInputStream(InputStream inputStream) {
+		this.inputStream = inputStream;
 	}
 
 	/**
@@ -207,7 +207,9 @@ public class WikiI5Part {
 
 	public void close() throws I5Exception {
 		try {
-			pipedInputStream.close();
+			if (inputStream != null) {
+				inputStream.close();
+			}
 		}
 		catch (IOException e) {
 			throw new I5Exception("Failed closing outputstream.", e);

@@ -43,7 +43,7 @@ nice -n 3 java -Xmx4g -cp $wikiI5$lib $main -prop $prop > logs/wikiI5/wikiI5-$fi
 #perl -wlnpe 's/\&#xd[89a-f]..;/\&#xf8ff;/g' < i5/ori/$filename.i5.xml > i5/$lang/$filename.i5.xml
 
 echo "Validating against xmllint"
-xmllint -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint/xmllint-$filename.i5.log 2>&1; 
+xmllint -huge -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint/xmllint-$filename.i5.log 2>&1; 
 
 echo "Validating against onsgmls"
 onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc i5/$lang/$filename.i5.xml > logs/onsgmls/onsgmls-$filename.i5.log 2>&1

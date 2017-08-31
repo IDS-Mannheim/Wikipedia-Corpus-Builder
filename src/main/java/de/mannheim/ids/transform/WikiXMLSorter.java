@@ -147,7 +147,7 @@ public class WikiXMLSorter extends Thread {
 		for (int i = 0; i < n / 100000 + 1; i++) {
 			docNr = i;
 			docId = idx + String.format("%02d", docNr);
-			System.out.println("DocId " + docId);
+//			System.out.println("DocId " + docId);
 
 			List pagegroup = null;
 			try {
@@ -249,7 +249,7 @@ public class WikiXMLSorter extends Thread {
 			NodeInfo pg = (NodeInfo) pagegroup.get(j);
 			String pageId = pg.getStringValue();
 			String xmlPath = idx + "/" + pageId + ".xml";
-			System.out.println(xmlPath);
+//			System.out.println(xmlPath);
 
 			Transformer t = new Transformer(config, statistics, errorHandler, new File(xmlPath), idx,
 					pageId);
