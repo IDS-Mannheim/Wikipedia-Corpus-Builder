@@ -10,11 +10,11 @@ import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
 import javanet.staxutils.IndentingXMLStreamWriter;
 
-public class IdsTextValidator extends DefaultHandler {
+public class IdsTextHandler extends DefaultHandler {
 
 	private IndentingXMLStreamWriter writer;
 
-	public IdsTextValidator(Configuration config, IndentingXMLStreamWriter writer)
+	public IdsTextHandler(Configuration config, IndentingXMLStreamWriter writer)
 			throws I5Exception {
 		if (config == null) {
 			throw new IllegalArgumentException("Config cannot be null.");
@@ -31,7 +31,7 @@ public class IdsTextValidator extends DefaultHandler {
 			writer.writeStartElement(localName);
 
 			for (int i = 0; i < attributes.getLength(); i++) {
-				writer.writeAttribute(attributes.getLocalName(i),
+				writer.writeAttribute(attributes.getQName(i),
 						attributes.getValue(i));
 			}
 			writer.flush();
