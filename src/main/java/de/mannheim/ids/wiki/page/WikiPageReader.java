@@ -101,6 +101,7 @@ public class WikiPageReader implements Runnable {
 		String strLine, trimmedStrLine;
 		boolean isToRead = false, searchId = true;
 		boolean isDiscussion = config.isDiscussion();
+		boolean hasPrefix = !config.getTitlePrefix().isEmpty();
 
 		WikiPage wikiPage = null;
 
@@ -109,7 +110,7 @@ public class WikiPageReader implements Runnable {
 
 			// Start reading a page
 			if (trimmedStrLine.startsWith("<page>")) {
-				wikiPage = new WikiPage();
+				wikiPage = new WikiPage(hasPrefix);
 				pageStructureBuilder = new StringBuilder();
 				pageStructureBuilder.append(strLine);
 				pageStructureBuilder.append("\n");

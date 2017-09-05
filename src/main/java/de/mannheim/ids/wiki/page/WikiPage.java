@@ -25,11 +25,17 @@ public class WikiPage {
 	private boolean isRedirect;
 
 	public List<String> textSegments;
+	private boolean hasTitlePrefix;
 
 	public static final String[] indexList = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
 			"7", "8", "9", "Char"};
+
+	public WikiPage(boolean hasTitlePrefix) {
+		this();
+		this.hasTitlePrefix = hasTitlePrefix;
+	}
 
 	public WikiPage() {
 		setWikitext("");
@@ -51,9 +57,15 @@ public class WikiPage {
 
 	public void setPageIndex(boolean isDiscussion) throws IOException {
 		String firstLetter = null;
+		String[] title = null;
 		if (isDiscussion) {
-			String[] a = pageTitle.split(":");
-			firstLetter = a[1].substring(0, 1);
+			if (hasTitlePrefix) {
+				 title = pageTitle.split("/");
+			}
+			else {
+				 title = pageTitle.split(":");
+			}
+			firstLetter = title[1].substring(0, 1);
 		}
 		else {
 			firstLetter = this.pageTitle.substring(0, 1);
