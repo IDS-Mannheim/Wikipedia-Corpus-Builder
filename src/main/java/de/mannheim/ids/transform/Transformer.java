@@ -67,7 +67,7 @@ public class Transformer implements Callable<WikiI5Part> {
 			}
 
 			transformer.setParameter(new QName("type"),
-					new XdmAtomicValue(config.getNamespaceKey()));
+					new XdmAtomicValue(config.getPageType()));
 			transformer.setParameter(new QName("origfilename"),
 					new XdmAtomicValue(config.getDumpFilename()));
 			transformer.setParameter(new QName("korpusSigle"),

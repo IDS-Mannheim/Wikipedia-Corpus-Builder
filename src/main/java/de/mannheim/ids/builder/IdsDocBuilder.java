@@ -56,11 +56,11 @@ public class IdsDocBuilder extends BaseBuilder {
 		writer.writeEndElement();
 	}
 
-	public String createIdsDocTitle(int namespaceKey, String index, int docNr) {
+	public String createIdsDocTitle(String pageType, String index, int docNr) {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Wikipedia, ");
-		sb.append(titleTypes.get(namespaceKey));
+		sb.append(titleTypes.get(pageType));
 		sb.append(" mit ");
 
 		if (isInteger(index)) {

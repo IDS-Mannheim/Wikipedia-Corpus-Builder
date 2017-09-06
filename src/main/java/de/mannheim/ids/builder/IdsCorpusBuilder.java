@@ -21,12 +21,14 @@ public class IdsCorpusBuilder extends BaseBuilder {
 	private Configuration config;
 	private boolean setInitialRev = true;
 
-	public static final Map<Integer, String> textTypes;
+	public static final Map<String, String> textTypes;
 	static {
-		textTypes = new HashMap<Integer, String>();
-		textTypes.put(0, "Enzyklopädie");
-		textTypes.put(1, "Diskussionen zu Enzyklopädie-Artikeln");
-		textTypes.put(3, "Benutzerdiskussionen");
+		textTypes = new HashMap<String, String>();
+		textTypes.put("article", "Enzyklopädie");
+		textTypes.put("talk", "Diskussionen zu Enzyklopädie-Artikeln");
+		textTypes.put("user-talk", "Benutzerdiskussionen");
+		textTypes.put("loeschkandidaten", "Löschdiskussionen");
+		textTypes.put("redundanz", "Redundanzdiskussionen");
 	}
 
 	public IdsCorpusBuilder(IndentingXMLStreamWriter writer,
@@ -98,7 +100,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 
 	private void createTextDesc() throws XMLStreamException {
 		writer.writeStartElement("textDesc");
-		createSimpleElement("textType", textTypes.get(config.getNamespaceKey()));
+		createSimpleElement("textType", textTypes.get(config.getPageType()));
 		writer.writeEmptyElement("textTypeRef");
 		writer.writeEndElement(); // textDesc
 	}
@@ -160,7 +162,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		sb.append(" ");
 		sb.append(config.getYear());
 		sb.append(" ");
-		sb.append(titleTypes.get(config.getNamespaceKey()));
+		sb.append(titleTypes.get(config.getPageType()));
 		return sb.toString();
 	}
 

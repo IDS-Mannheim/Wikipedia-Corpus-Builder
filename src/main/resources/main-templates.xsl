@@ -106,7 +106,7 @@
         <!--Current index-->
         <xsl:variable name="t.title">
             <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
-            <xsl:value-of select="concat($textSigle,': ')"/>
+            <xsl:value-of select="concat($textSigle,' ')"/>
             <xsl:value-of select="title"/>
             <xsl:sequence
                 select="concat(', In: Wikipedia - URL:http://', $lang ,'.wikipedia.org/wiki/')"/>
@@ -220,14 +220,23 @@
                     </creation>
                     <textDesc>
                         <xsl:choose>
-                            <xsl:when test="$type eq 0">
+                            <xsl:when test="$type eq 'article'">
                                 <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
                             </xsl:when>
-                            <xsl:when test="$type eq 1">
+                            <xsl:when test="$type eq 'talk'">
                                 <textTypeArt>Diskussion</textTypeArt>
                             </xsl:when>
-                            <xsl:otherwise>
+                            <xsl:when test="$type eq 'user-talk'">
                                 <textTypeArt>Benutzerdiskussion</textTypeArt>
+                            </xsl:when>
+                            <xsl:when test="$type eq 'loeschkandidaten'">
+                                <textTypeArt>Löschdiskussion</textTypeArt>
+                            </xsl:when>
+                            <xsl:when test="$type eq 'redundanz'">
+                                <textTypeArt>Redundanzdiskussion</textTypeArt>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <textTypeArt>Unerkannt</textTypeArt>
                             </xsl:otherwise>
                         </xsl:choose>
                         <textDomain/>
@@ -406,7 +415,7 @@
 
     <xsl:variable name="headingType">
         <xsl:choose>
-            <xsl:when test="$type eq 0">section</xsl:when>
+            <xsl:when test="$type eq 'article'">section</xsl:when>
             <xsl:otherwise>thread</xsl:otherwise>
         </xsl:choose>
     </xsl:variable>

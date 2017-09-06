@@ -224,7 +224,8 @@ public class I5Writer {
 					String idsText = replaceInvalidCharacters(
 							idsTextOutputStream.toString());
 					SaxBuffer saxBuffer = new SaxBuffer();
-					if (validateAgainstDTD(saxBuffer, idsText, w.getWikiPath())) {
+					if (validateAgainstDTD(saxBuffer, idsText,
+							w.getWikiPath())) {
 						writeIdsText(saxBuffer, w.getWikiPath());
 					}
 					idsTextOutputStream.reset();
@@ -286,7 +287,7 @@ public class I5Writer {
 	 */
 	private void writeStartIdsDoc(WikiI5Part w) throws I5Exception {
 		String docTitle = idsDocBuilder.createIdsDocTitle(
-				config.getNamespaceKey(),
+				config.getPageType(),
 				w.getIndex(), w.getDocNr());
 
 		String index = w.getIndex();
@@ -371,7 +372,8 @@ public class I5Writer {
 		return true;
 	}
 
-	private void writeIdsText(SaxBuffer saxBuffer, String wikiXMLPath) throws I5Exception {
+	private void writeIdsText(SaxBuffer saxBuffer, String wikiXMLPath)
+			throws I5Exception {
 
 		try {
 			saxBuffer.toSAX(idsTextHandler);
