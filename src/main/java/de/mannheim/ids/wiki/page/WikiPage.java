@@ -59,7 +59,7 @@ public class WikiPage {
 		String firstLetter = null;
 		String[] title = null;
 		if (isDiscussion) {
-			if (hasTitlePrefix) {
+			if (hasTitlePrefix && pageTitle.contains("/")) {
 				 title = pageTitle.split("/");
 			}
 			else {
