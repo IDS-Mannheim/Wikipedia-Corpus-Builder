@@ -11,6 +11,8 @@ import java.util.concurrent.Callable;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.Logger;
+
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
@@ -92,9 +94,6 @@ public class Transformer implements Callable<WikiI5Part> {
 
 	private static final Processor processor = new Processor(true);
 
-	// final PipedInputStream pis = new PipedInputStream(1024 * 4);
-	// final PipedOutputStream pos = new PipedOutputStream();
-
 	private File wikiXML;
 	private String index;
 	private String pageId;
@@ -102,6 +101,8 @@ public class Transformer implements Callable<WikiI5Part> {
 	private static Configuration config;
 	private static I5ErrorHandler errorHandler;
 	private Statistics statistics;
+
+	private Logger logger = Logger.getLogger(Transformer.class);
 
 	/**
 	 * Constructs a Transformer from the given variables.
@@ -144,6 +145,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	public WikiI5Part call() throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
 		doTransformation(bos);
+		logger.debug(bos);
 		InputStream is = new ByteArrayInputStream(bos.toByteArray());
 		WikiI5Part w = new WikiI5Part(is, wikiXML, pageId);
 		bos.close();
@@ -219,7 +221,5 @@ public class Transformer implements Callable<WikiI5Part> {
 			}
 		}
 	}
-
-	// }
 
 }

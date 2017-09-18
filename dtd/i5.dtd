@@ -1,6 +1,6 @@
 
 <!--
-DTD Generated 2015-07-10T13:52:55Z. This Odd file was produced for IDS by C. M. Sperberg-McQueen of Black Mesa Technologies, LLC. Copyright (c) 2010-2013 Institute für deutsche Sprache. All rights reserved. 
+DTD Generated 2017-09-08T09:43:37Z. This Odd file was produced for IDS by C. M. Sperberg-McQueen of Black Mesa Technologies, LLC. Copyright (c) 2010-2013 Institute für deutsche Sprache. All rights reserved. 
 Edition: 2.5.0. Last updated on
 	26th July 2013.
 Edition Location: http://www.tei-c.org/Vault/P5/2.5.0/
@@ -67,6 +67,16 @@ Edition Location: http://www.tei-c.org/Vault/P5/2.5.0/
 <!ENTITY % model.entryPart_sequenceOptional ""> 
 <!ENTITY % model.entryPart_sequenceOptionalRepeatable ""> 
 <!ENTITY % model.entryPart_sequenceRepeatable ""> 
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
+<!-- fix_roma.pl: deleted double model definition-->
 <!ENTITY % model.orgPart "listOrg |listPerson"> 
 <!ENTITY % model.orgPart_sequence "listOrg, listPerson"> 
 <!ENTITY % model.orgPart_sequenceOptional "listOrg?, listPerson?"> 
@@ -659,6 +669,16 @@ versionDate %data.temporal.w3c;  #IMPLIED'>
 <!ENTITY % model.personPart_sequenceOptional "%model.biblLike;?, %model.persStateLike;?, idno?"> 
 <!ENTITY % model.personPart_sequenceOptionalRepeatable "%model.biblLike;*, %model.persStateLike;*, idno*"> 
 <!ENTITY % model.personPart_sequenceRepeatable "%model.biblLike;+, %model.persStateLike;+, idno+"> 
+<!ENTITY % model.placeNamePart "placeName |country |region |geogName"> 
+<!ENTITY % model.placeNamePart_sequence "placeName, country, region, geogName"> 
+<!ENTITY % model.placeNamePart_sequenceOptional "placeName?, country?, region?, geogName?"> 
+<!ENTITY % model.placeNamePart_sequenceOptionalRepeatable "placeName*, country*, region*, geogName*"> 
+<!ENTITY % model.placeNamePart_sequenceRepeatable "placeName+, country+, region+, geogName+"> 
+<!ENTITY % model.placeStateLike "%model.placeNamePart;"> 
+<!ENTITY % model.placeStateLike_sequence "%model.placeNamePart;"> 
+<!ENTITY % model.placeStateLike_sequenceOptional "%model.placeNamePart;?"> 
+<!ENTITY % model.placeStateLike_sequenceOptionalRepeatable "%model.placeNamePart;*"> 
+<!ENTITY % model.placeStateLike_sequenceRepeatable "%model.placeNamePart;+"> 
 <!ENTITY % model.orgPart "listOrg |listPerson"> 
 <!ENTITY % model.orgPart_sequence "listOrg, listPerson"> 
 <!ENTITY % model.orgPart_sequenceOptional "listOrg?, listPerson?"> 
@@ -769,11 +789,11 @@ versionDate %data.temporal.w3c;  #IMPLIED'>
 <!ENTITY % model.addressLike_sequenceOptional "email?, address?"> 
 <!ENTITY % model.addressLike_sequenceOptionalRepeatable "email*, address*"> 
 <!ENTITY % model.addressLike_sequenceRepeatable "email+, address+"> 
-<!ENTITY % model.nameLike "%model.nameLike.agent; |idno |%model.persNamePart;"> 
-<!ENTITY % model.nameLike_sequence "%model.nameLike.agent;, idno, %model.persNamePart;"> 
-<!ENTITY % model.nameLike_sequenceOptional "%model.nameLike.agent;?, idno?, %model.persNamePart;?"> 
-<!ENTITY % model.nameLike_sequenceOptionalRepeatable "%model.nameLike.agent;*, idno*, %model.persNamePart;*"> 
-<!ENTITY % model.nameLike_sequenceRepeatable "%model.nameLike.agent;+, idno+, %model.persNamePart;+"> 
+<!ENTITY % model.nameLike "%model.nameLike.agent; |%model.placeStateLike; |idno |%model.persNamePart;"> 
+<!ENTITY % model.nameLike_sequence "%model.nameLike.agent;, %model.placeStateLike;, idno, %model.persNamePart;"> 
+<!ENTITY % model.nameLike_sequenceOptional "%model.nameLike.agent;?, %model.placeStateLike;?, idno?, %model.persNamePart;?"> 
+<!ENTITY % model.nameLike_sequenceOptionalRepeatable "%model.nameLike.agent;*, %model.placeStateLike;*, idno*, %model.persNamePart;*"> 
+<!ENTITY % model.nameLike_sequenceRepeatable "%model.nameLike.agent;+, %model.placeStateLike;+, idno+, %model.persNamePart;+"> 
 <!ENTITY % model.global "%model.global.meta; |%model.milestoneLike; |%model.noteLike; |%model.global.edit; |notatedMusic |figure"> 
 <!ENTITY % model.global_sequence "%model.global.meta;, %model.milestoneLike;, %model.noteLike;, %model.global.edit;, notatedMusic, figure"> 
 <!ENTITY % model.global_sequenceOptional "%model.global.meta;?, %model.milestoneLike;?, %model.noteLike;?, %model.global.edit;?, notatedMusic?, figure?"> 
@@ -1223,6 +1243,11 @@ value CDATA #IMPLIED >
 unit %data.enumerated;  #IMPLIED
 from %data.word;  #IMPLIED
 to %data.word;  #IMPLIED >
+<!--doc:(classification code) contains the classification code used for this text in some standard classification system. [2.4.3. ] -->
+<!ELEMENT classCode %macro.phraseSeq.limited;>
+<!ATTLIST classCode
+ %att.global.attributes;
+scheme %data.pointer;  #REQUIRED >
 <!--doc:(classification declarations) contains one or more taxonomies defining any classificatory codes used elsewhere in the text. [2.3.7.  2.3. ] -->
 <!ELEMENT classDecl (taxonomy)+>
 <!ATTLIST classDecl
@@ -1269,6 +1294,13 @@ method (silent|markup) "silent"  >
  %att.canonical.attributes;
  %att.global.attributes;
  %att.typed.attributes; >
+<!--doc:(country) contains the name of a geo-political unit, such as a nation, country, colony, or commonwealth, larger than or administratively superior to a region and smaller than a bloc. [13.2.3. ] -->
+<!ELEMENT country %macro.phraseSeq;>
+<!ATTLIST country
+ %att.global.attributes;
+ %att.naming.attributes;
+ %att.typed.attributes;
+ %att.datable.attributes; >
 <!--doc:child of creation (in profileDesc). #PCDATA only. [] -->
 <!ELEMENT creatDate  (#PCDATA)>
 <!ATTLIST creatDate
@@ -1469,6 +1501,14 @@ agent %data.enumerated;  #IMPLIED >
  %att.typed.attributes;
  %att.spanning.attributes;
  %att.breaking.attributes; >
+<!--doc:(geographical name) identifies a name associated with some geographical feature such as Windrush Valley or Mount Sinai. [13.2.3. ] -->
+<!ELEMENT geogName %macro.phraseSeq;>
+<!ATTLIST geogName
+ %att.datable.attributes;
+ %att.editLike.attributes;
+ %att.global.attributes;
+ %att.naming.attributes;
+ %att.typed.attributes; >
 <!--doc:identifies a phrase or word used to provide a gloss or definition for some other word or phrase. [3.3.4.  22.4.1. ] -->
 <!ELEMENT gloss %macro.phraseSeq;>
 <!ATTLIST gloss
@@ -1780,6 +1820,14 @@ TEIform CDATA  "pb"  >
 role NMTOKENS  #IMPLIED
 sex CDATA  #IMPLIED
 age %data.enumerated;  #IMPLIED >
+<!--doc:contains an absolute or relative place name.  [13.2.3. ] -->
+<!ELEMENT placeName %macro.phraseSeq;>
+<!ATTLIST placeName
+ %att.datable.attributes;
+ %att.editLike.attributes;
+ %att.global.attributes;
+ %att.personal.attributes;
+ %att.typed.attributes; >
 <!--doc:contains a poem appearing within or between paragraphs; an inter-level element. [] -->
 <!ELEMENT poem (head?,(lg|l|%model.ids.milestones;)+)>
 <!ATTLIST poem
@@ -1914,6 +1962,13 @@ origin NMTOKEN #IMPLIED >
  %att.editLike.attributes;
  %att.typed.attributes;
 orig CDATA  #IMPLIED >
+<!--doc:contains the name of an administrative unit such as a state, province, or county, larger than a settlement, but smaller than a country. [13.2.3. ] -->
+<!ELEMENT region %macro.phraseSeq;>
+<!ATTLIST region
+ %att.global.attributes;
+ %att.naming.attributes;
+ %att.typed.attributes;
+ %att.datable.attributes; >
 <!--doc:contains or references some other bibliographic item which is related to the present one in some specified manner, for example as a constituent or alternative version of it. [3.11.2.7. ] -->
 <!ELEMENT relatedItem (%model.biblLike;|%model.ptrLike;)?>
 <!ATTLIST relatedItem
@@ -2087,7 +2142,7 @@ type %data.enumerated;  "text"  >
  %att.declaring.attributes;
  %att.typed.attributes; >
 <!--doc:(text classification) groups information which describes the nature or topic of a text in terms of a standard classification scheme, thesaurus, etc. [2.4.3. ] -->
-<!ELEMENT textClass (catRef|h.keywords)*>
+<!ELEMENT textClass (catRef|classCode|h.keywords)*>
 <!ATTLIST textClass
  %att.global.attributes;
  %att.declarable.attributes; >

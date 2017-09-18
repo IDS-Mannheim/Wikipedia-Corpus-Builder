@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
+import de.mannheim.ids.builder.CategoryBuilder;
 import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuilder;
@@ -220,15 +222,24 @@ public class I5Writer {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
-					logger.debug(idsTextOutputStream);
+//					logger.debug(idsTextOutputStream);
 					String idsText = replaceInvalidCharacters(
 							idsTextOutputStream.toString());
+
+					idsTextOutputStream.reset();
+					if (idsTextBuilder.getCategoryEvents().getLength() > 0) {
+						idsText = addCategories(idsText, w);
+						idsTextBuilder.clearCategories();
+						idsTextOutputStream.reset();
+					}
+
+					logger.debug(idsText);
 					SaxBuffer saxBuffer = new SaxBuffer();
 					if (validateAgainstDTD(saxBuffer, idsText,
 							w.getWikiPath())) {
 						writeIdsText(saxBuffer, w.getWikiPath());
 					}
-					idsTextOutputStream.reset();
+
 				}
 				w.close();
 			}
@@ -341,10 +352,35 @@ public class I5Writer {
 			return false;
 		}
 		idsTextBuilder.clearReferences();
-		idsTextBuilder.resetNoteCounter();
 
 		stats.addTransformedPages();
 		return true;
+	}
+
+	private String addCategories(String idsText, WikiI5Part w)
+			throws I5Exception {
+		
+		CategoryBuilder categoryBuilder = new CategoryBuilder(config,
+				idsTextOutputStream, w.getPageId(),
+				idsTextBuilder.getCategoryEvents());
+
+		reader.setContentHandler(categoryBuilder);
+		try {
+			reader.setProperty("http://xml.org/sax/properties/lexical-handler",
+					categoryBuilder);
+
+			InputSource inputSource = new InputSource(
+					new StringReader(idsText));
+			reader.parse(inputSource);
+		}
+		catch (SAXException | IOException e) {
+			stats.addSaxParserError();
+			logger.debug(e);
+			errorHandler.write(w.getWikiPath(), "Failed adding categories.", e);
+			return idsText;
+		}
+
+		return idsTextOutputStream.toString();
 	}
 
 	private boolean validateAgainstDTD(SaxBuffer saxBuffer, String idsText,

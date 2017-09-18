@@ -11,15 +11,15 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
-public class FootnoteBuilder extends DefaultHandler {
+public class SAXEventHandler extends DefaultHandler {
 
-	private Logger log = Logger.getLogger(FootnoteBuilder.class);
+	private Logger log = Logger.getLogger(SAXEventHandler.class);
 	
 	private IndentingXMLStreamWriter writer;
 	private String pageId;
 	
 
-	public FootnoteBuilder(IndentingXMLStreamWriter writer, String pageId) {
+	public SAXEventHandler(IndentingXMLStreamWriter writer, String pageId) {
 		this.writer = writer;
 		this.pageId = pageId;
 	}
@@ -35,7 +35,7 @@ public class FootnoteBuilder extends DefaultHandler {
 						.contains(attributes.getLocalName(i))) {
 					if (attributes.getLocalName(i) != null
 							&& attributes.getValue(i) != null) {
-						writer.writeAttribute(attributes.getLocalName(i),
+						writer.writeAttribute(attributes.getQName(i),
 								StringEscapeUtils
 										.escapeXml(attributes.getValue(i)));
 					}
@@ -46,6 +46,7 @@ public class FootnoteBuilder extends DefaultHandler {
 					}
 				}
 			}
+			
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
