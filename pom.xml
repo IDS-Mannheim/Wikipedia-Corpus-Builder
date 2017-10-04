@@ -10,11 +10,6 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.axis</groupId>
-			<artifactId>axis</artifactId>
-			<version>1.4</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>saxon9ee</artifactId>
 			<version>9.4.0.3J</version>
@@ -26,9 +21,9 @@
 			<version>1.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.mariadb.jdbc</groupId>
-		    <artifactId>mariadb-java-client</artifactId>
-		    <version>2.1.0</version>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -51,9 +46,9 @@
 			<version>3.1</version>
 		</dependency>
 		<dependency>
-			<groupId>cocoon</groupId>
-			<artifactId>cocoon</artifactId>
-			<version>2.1.11</version>
+			<groupId>org.apache.cocoon.sax</groupId>
+			<artifactId>cocoon-sax</artifactId>
+			<version>3.0.0-alpha-3</version>
 		</dependency>
 		<dependency>
 			<groupId>excalibur-pool</groupId>

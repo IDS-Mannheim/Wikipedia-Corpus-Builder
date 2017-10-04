@@ -11,15 +11,15 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
-public class SAXEventHandler extends DefaultHandler {
+public class IdsEventHandler extends DefaultHandler {
 
-	private Logger log = Logger.getLogger(SAXEventHandler.class);
+	private Logger log = Logger.getLogger(IdsEventHandler.class);
 	
 	private IndentingXMLStreamWriter writer;
 	private String pageId;
 	
 
-	public SAXEventHandler(IndentingXMLStreamWriter writer, String pageId) {
+	public IdsEventHandler(IndentingXMLStreamWriter writer, String pageId) {
 		this.writer = writer;
 		this.pageId = pageId;
 	}
@@ -31,7 +31,7 @@ public class SAXEventHandler extends DefaultHandler {
 
 			writer.writeStartElement(localName);
 			for (int i = 0; i < attributes.getLength(); i++) {
-				if (!IdsTextBuilder.addedAttributes
+				if (!IdsTextBuffer.addedAttributes
 						.contains(attributes.getLocalName(i))) {
 					if (attributes.getLocalName(i) != null
 							&& attributes.getValue(i) != null) {
@@ -75,8 +75,9 @@ public class SAXEventHandler extends DefaultHandler {
 			String text = new String(ch, start, length);
 			text = text.trim();
 			if (!text.isEmpty()) {
-				text = IdsTextBuilder.spacePattern.matcher(text)
+				text = IdsTextBuffer.spacePattern.matcher(text)
 						.replaceAll(" ");
+				text = IdsTextBuilder.replaceInvalidCharacters(text);
 				writer.writeCharacters(text);
 				writer.flush();
 			}
