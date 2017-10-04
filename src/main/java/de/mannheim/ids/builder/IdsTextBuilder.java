@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -21,28 +20,23 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.helpers.AttributesImpl;
 
-import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
+import de.mannheim.ids.wiki.I5Writer;
 import javanet.staxutils.IndentingXMLStreamWriter;
 
 public class IdsTextBuilder extends DefaultHandler2 {
 
 	private Logger log = Logger.getLogger(IdsTextBuilder.class);
 
-	public static final Pattern invalidNativeCharPattern = Pattern
-			.compile("&#xd[89a-f]..;");
-	public static final String replacementChar = "&#xf8ff;";
-
 	private IndentingXMLStreamWriter writer;
 	private String pageId;
 
 	private SAXBuffer categoryEvents;
-	private LinkedHashMap<String,SAXBuffer> noteEvents;
+	private LinkedHashMap<String, SAXBuffer> noteEvents;
 
 	private boolean noLangLinks = false;
-	public static DatabaseManager dbManager;
 
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
 			String pageId, SAXBuffer categoryEvents,
@@ -55,17 +49,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 		if (config.isDiscussion()) {
 			noLangLinks = true;
-		}
-		else {
-			try {
-				dbManager = new DatabaseManager(config.getDatabaseUrl(),
-						config.getDatabaseUsername(),
-						config.getDatabasePassword(), config.getLanguageCode());
-			}
-			catch (SQLException e) {
-				throw new I5Exception(
-						"Failed configuring the database manager.", e);
-			}
 		}
 	}
 
@@ -115,9 +98,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 					String text = StringEscapeUtils
 							.escapeXml(attributes.getValue(i));
-					text = replaceInvalidCharacters(text);
-
-					// writer.writeAttribute(attributes.getLocalName(i),
 					writer.writeAttribute(attributes.getQName(i), text);
 				}
 				else {
@@ -199,7 +179,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			if (!noLangLinks && "monogr".equals(localName)) {
 				try {
 					createLangLinks(
-							dbManager.retrieveLanguageLinks(pageId));
+							I5Writer.dbManager.retrieveLanguageLinks(pageId));
 				}
 				catch (SQLException e) {
 					throw new SAXException(
@@ -228,7 +208,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			if (!text.isEmpty()) {
 				text = IdsTextBuffer.spacePattern.matcher(text)
 						.replaceAll(" ");
-				text = replaceInvalidCharacters(text);
 				writer.writeCharacters(text);
 				writer.flush();
 			}
@@ -237,12 +216,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		catch (XMLStreamException e) {
 			throw new SAXException("Failed writing foot note text.", e);
 		}
-	}
-
-	public static String replaceInvalidCharacters(String text) {
-		text = invalidNativeCharPattern.matcher(text)
-				.replaceAll(replacementChar);
-		return text;
 	}
 
 	/**
@@ -263,7 +236,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 				writer.writeStartElement("ref");
 				String keyword = map.get(key);
-				keyword = replaceInvalidCharacters(keyword);
+				// keyword = replaceInvalidCharacters(keyword);
 
 				StringBuilder sb = new StringBuilder();
 				sb.append("https://");

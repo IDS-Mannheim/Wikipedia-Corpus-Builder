@@ -14,10 +14,9 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 public class IdsEventHandler extends DefaultHandler {
 
 	private Logger log = Logger.getLogger(IdsEventHandler.class);
-	
+
 	private IndentingXMLStreamWriter writer;
 	private String pageId;
-	
 
 	public IdsEventHandler(IndentingXMLStreamWriter writer, String pageId) {
 		this.writer = writer;
@@ -35,18 +34,18 @@ public class IdsEventHandler extends DefaultHandler {
 						.contains(attributes.getLocalName(i))) {
 					if (attributes.getLocalName(i) != null
 							&& attributes.getValue(i) != null) {
-						writer.writeAttribute(attributes.getQName(i),
-								StringEscapeUtils
-										.escapeXml(attributes.getValue(i)));
+						String text = StringEscapeUtils
+								.escapeXml(attributes.getValue(i));
+						writer.writeAttribute(attributes.getQName(i), text);
 					}
 					else {
-						log.debug("pageId "+ pageId+ " element " + localName + " att "
-								+ attributes.getLocalName(i)
+						log.debug("pageId " + pageId + " element " + localName
+								+ " att " + attributes.getLocalName(i)
 								+ " value " + attributes.getValue(i));
 					}
 				}
 			}
-			
+
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
@@ -77,7 +76,6 @@ public class IdsEventHandler extends DefaultHandler {
 			if (!text.isEmpty()) {
 				text = IdsTextBuffer.spacePattern.matcher(text)
 						.replaceAll(" ");
-				text = IdsTextBuilder.replaceInvalidCharacters(text);
 				writer.writeCharacters(text);
 				writer.flush();
 			}

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,6 +34,7 @@ import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuffer;
 import de.mannheim.ids.builder.IdsTextHandler;
+import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.transform.WikiI5Part;
 import javanet.staxutils.IndentingXMLStreamWriter;
 
@@ -41,13 +44,13 @@ import javanet.staxutils.IndentingXMLStreamWriter;
  * @author margaretha
  *
  */
-/**
- * @author elma
- *
- */
 public class I5Writer {
 
 	public static Logger logger = Logger.getLogger(I5Writer.class);
+
+	public static final Pattern invalidNativeCharPattern = Pattern
+			.compile("&#xd[89a-f]..;");
+	public static final String replacementChar = "&#xf8ff;";
 
 	private XMLReader reader;
 	private XMLReader validatingReader;
@@ -61,6 +64,8 @@ public class I5Writer {
 	private IdsTextHandler idsTextHandler;
 
 	private IdsDocBuilder idsDocBuilder;
+
+	public static DatabaseManager dbManager;
 
 	/**
 	 * Constructs an I5Writer from the given variables.
@@ -87,6 +92,18 @@ public class I5Writer {
 		idsTextBuffer = new IdsTextBuffer(config);
 		idsTextHandler = new IdsTextHandler(config, writer);
 		stats = statistics;
+
+		if (!config.isDiscussion()) {
+			try {
+				dbManager = new DatabaseManager(config.getDatabaseUrl(),
+						config.getDatabaseUsername(),
+						config.getDatabasePassword(), config.getLanguageCode());
+			}
+			catch (SQLException e) {
+				throw new I5Exception(
+						"Failed configuring the database manager.", e);
+			}
+		}
 	}
 
 	/**
@@ -210,15 +227,17 @@ public class I5Writer {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
-					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
-					logger.debug(idsTextOutputStream.toString());
+					String idsText = addEvents(w);
+					idsText = invalidNativeCharPattern
+							.matcher(idsText)
+							.replaceAll(replacementChar);
 
 					SAXBuffer validationBuffer = new SAXBuffer();
-					if (validateAgainstDTD(idsTextOutputStream,
+					if (validateAgainstDTD(idsText,
 							validationBuffer, w.getWikiPath())) {
 						writeIdsText(validationBuffer, w.getWikiPath());
 					}
-					
+
 					idsTextBuffer.recycle();
 				}
 				w.close();
@@ -329,7 +348,7 @@ public class I5Writer {
 		return true;
 	}
 
-	private ByteArrayOutputStream addEvents(WikiI5Part w)
+	private String addEvents(WikiI5Part w)
 			throws I5Exception {
 		ByteArrayOutputStream idsTextOutputStream = new ByteArrayOutputStream(
 				1024 * 4);
@@ -349,17 +368,25 @@ public class I5Writer {
 
 		idsTextBuffer.clearReferences();
 		idsTextBuffer.clearCategories();
-		return idsTextOutputStream;
+
+		try {
+			idsTextOutputStream.close();
+		}
+		catch (IOException e) {
+			logger.debug(e);
+			errorHandler.write(w.getWikiPath(),
+					"Failed closing idsTextOutputStream", e);
+		}
+		return idsTextOutputStream.toString();
 	}
 
 	private boolean validateAgainstDTD(
-			ByteArrayOutputStream idsTextOutputStream, SAXBuffer saxBuffer,
+			String idsText, SAXBuffer saxBuffer,
 			String wikiXMLPath) throws I5Exception {
 
 		validatingReader.setContentHandler(saxBuffer);
 		try {
-			InputStream is = new ByteArrayInputStream(
-					idsTextOutputStream.toByteArray());
+			InputStream is = new ByteArrayInputStream(idsText.getBytes());
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
 			validatingReader.parse(inputSource);
@@ -373,17 +400,6 @@ public class I5Writer {
 		}
 
 		stats.addValidPages();
-
-		try {
-			idsTextOutputStream.close();
-		}
-		catch (IOException e) {
-			logger.debug(e);
-			errorHandler.write(wikiXMLPath,
-					"Failed closing idsTextOutputStream", e);
-
-		}
-
 		return true;
 	}
 
@@ -401,12 +417,15 @@ public class I5Writer {
 
 	public void close() throws I5Exception {
 		try {
-			idsTextBuffer.close();
 			writer.writeEndDocument();
 			writer.close();
+			dbManager.conn.close();
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed closing document.", e);
+		}
+		catch (SQLException e) {
+			throw new I5Exception("Failed closing database connection.", e);
 		}
 	}
 }

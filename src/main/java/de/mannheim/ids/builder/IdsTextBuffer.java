@@ -1,6 +1,5 @@
 package de.mannheim.ids.builder;
 
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -10,10 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.cocoon.xml.sax.SAXBuffer;
 import org.apache.log4j.Logger;
@@ -39,8 +34,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	private static final long serialVersionUID = -8276104769505424958L;
 
 	private Logger log = Logger.getLogger(IdsTextBuffer.class);
-
-	// private IndentingXMLStreamWriter writer;
 
 	private SAXBuffer currentNoteRecorder;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;
@@ -88,34 +81,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-//		categoryEvents = new SAX2EventRecorder();
 		categoryEvents = new SAXBuffer();
-	}
-
-	@Deprecated
-	public IdsTextBuffer(Configuration config, OutputStream os)
-			throws I5Exception {
-		this(config);
-		setWriter(config, os);
-		// writeStartDocument(encoding);
-	}
-
-	private void setWriter(Configuration config, OutputStream os)
-			throws I5Exception {
-		XMLOutputFactory f = XMLOutputFactory.newInstance();
-		XMLStreamWriter w = null;
-		try {
-			w = f.createXMLStreamWriter(os, config.getOutputEncoding());
-		}
-		catch (XMLStreamException e) {
-			throw new I5Exception("Failed creating an XMLStreamWriter", e);
-		}
-		// writer = new IndentingXMLStreamWriter(w);
-		// writer.setIndent(" ");
-	}
-
-	public void close() throws XMLStreamException {
-		// writer.close();
 	}
 
 	public void clearReferences() {
@@ -127,29 +93,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	public void clearCategories() {
 		categoryEvents.recycle();
 	}
-
-	// public void writeStartDocument(String encoding) throws I5Exception {
-	// try {
-	// writer.writeStartDocument(encoding, "1.0");
-	// }
-	// catch (XMLStreamException e) {
-	// throw new I5Exception(
-	// "Failed writing IdsText start document.", e);
-	// }
-	// }
-
-	// @Override
-	// public void startDTD(String name, String publicId, String systemId)
-	// throws SAXException {
-	// try {
-	// writer.writeDTD("<!DOCTYPE " + name + " PUBLIC '" + publicId + "' '"
-	// + systemId + "'>");
-	// }
-	// catch (XMLStreamException e) {
-	// throw new SAXException(
-	// "Failed writing DTD " + name, e);
-	// }
-	// }
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
@@ -175,9 +118,6 @@ public class IdsTextBuffer extends SAXBuffer {
 			if (categoryURL != null && !categoryURL.isEmpty()
 					&& categoryURL.contains(category)) {
 
-//				AttributesImpl attributesImpl = new AttributesImpl(attributes);
-//				categoryEvents.startElement(uri, localName, qName,
-//						attributesImpl);
 				categoryEvents.startElement(uri, localName, qName, attributes);
 				isCategoryFound = true;
 			}
@@ -185,10 +125,6 @@ public class IdsTextBuffer extends SAXBuffer {
 				writeStartElement(uri, localName, qName, attributes);
 			}
 		}
-		// else if (localName.equals("back")
-		// && noteEvents.size() > 0) {
-		// backStartElement(uri, localName, qName, attributes);
-		// }
 		else {
 			writeStartElement(uri, localName, qName, attributes);
 		}
@@ -198,23 +134,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	private void writeStartElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		super.startElement(uri, localName, qName, attributes);
-//		try {
-//			writer.writeStartElement(localName);
-//
-//			for (int i = 0; i < attributes.getLength(); i++) {
-//				if (!addedAttributes.contains(attributes.getLocalName(i))) {
-//					// EM: check invalid chars in att value?
-//					writer.writeAttribute(attributes.getLocalName(i),
-//							StringEscapeUtils
-//									.escapeXml(attributes.getValue(i)));
-//				}
-//			}
-//			writer.flush();
-//		}
-//		catch (XMLStreamException e) {
-//			throw new SAXException("Failed writing start element " + localName,
-//					e);
-//		}
 	}
 
 	private void noteStartElement(String uri, String localName, String qName,
@@ -289,6 +208,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		}
 		return newAttributes;
 	}
+	
 	@Override
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
@@ -315,47 +235,35 @@ public class IdsTextBuffer extends SAXBuffer {
 			}
 		}
 		else {
-//			try {
-				if (localName.equals("ptr")) {
-					log.debug("ptr end");
-					if (noteEvents.containsKey(noteId)) {
-						if (noteEvents.get(noteId).isEmpty()
-								&& !currentNoteRecorder.isEmpty()) {
-							log.debug("replace ptr " + noteId);
-							noteEvents.remove(noteId);
-							noteEvents.put(noteId, currentNoteRecorder);
-						}
-					}
-					else {
+			if (localName.equals("ptr")) {
+				log.debug("ptr end");
+				if (noteEvents.containsKey(noteId)) {
+					if (noteEvents.get(noteId).isEmpty()
+							&& !currentNoteRecorder.isEmpty()) {
+						log.debug("replace ptr " + noteId);
+						noteEvents.remove(noteId);
 						noteEvents.put(noteId, currentNoteRecorder);
 					}
-					currentNoteRecorder = new SAXBuffer();
-					// writer.writeEndElement();
-					super.endElement("", localName, qName);
-					isInPtr = false;
-				}
-				else if (localName.equals("back")) {
-					// writer.writeEndElement();
-					super.endElement(uri, localName, qName);
-				}
-				else if (isCategoryFound) {
-					categoryEvents.endElement(uri, localName, qName);
-					isCategoryFound = false;
 				}
 				else {
-					// writer.writeEndElement();
-					super.endElement(uri, localName, qName);
+					noteEvents.put(noteId, currentNoteRecorder);
 				}
-//				writer.flush();
-//			}
-//			catch (XMLStreamException e) {
-//				throw new SAXException(
-//						"Failed creating end element " + localName, e);
-//			}
+				currentNoteRecorder = new SAXBuffer();
+				super.endElement("", localName, qName);
+				isInPtr = false;
+			}
+			else if (localName.equals("back")) {
+				super.endElement(uri, localName, qName);
+			}
+			else if (isCategoryFound) {
+				categoryEvents.endElement(uri, localName, qName);
+				isCategoryFound = false;
+			}
+			else {
+				super.endElement(uri, localName, qName);
+			}
 		}
 	}
-
-
 
 	@Override
 	public void characters(char[] ch, int start, int length)
@@ -368,19 +276,6 @@ public class IdsTextBuffer extends SAXBuffer {
 		}
 		else {
 			super.characters(ch, start, length);
-//			try {
-//				String text = new String(ch, start, length);
-//				if (!text.isEmpty()) {
-//					// writer.writeCharacters(StringEscapeUtils.escapeXml(text));
-//					text = spacePattern.matcher(text).replaceAll(" ");
-//					writer.writeCharacters(text);
-//					writer.flush();
-//				}
-//				ch = null;
-//			}
-//			catch (XMLStreamException e) {
-//				throw new SAXException("Failed writing text.", e);
-//			}
 		}
 	}
 
