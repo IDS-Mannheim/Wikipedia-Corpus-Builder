@@ -35,7 +35,7 @@ public class IdsEventHandler extends DefaultHandler {
 					if (attributes.getLocalName(i) != null
 							&& attributes.getValue(i) != null) {
 						String text = StringEscapeUtils
-								.escapeXml(attributes.getValue(i));
+								.escapeXml10(attributes.getValue(i));
 						writer.writeAttribute(attributes.getQName(i), text);
 					}
 					else {

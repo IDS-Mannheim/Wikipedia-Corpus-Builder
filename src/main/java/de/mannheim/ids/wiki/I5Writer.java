@@ -21,7 +21,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.cocoon.xml.sax.SAXBuffer;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -228,10 +228,15 @@ public class I5Writer {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
 					String idsText = addEvents(w);
+					// Depends on the java version, xmlstreamwriter 
+					// may produce invalid xml characters.
+					// Tested with:
+					// jdk1.8.0_51 (invalid)
+					// jdk1.8.0_131 (valid)
 					idsText = invalidNativeCharPattern
 							.matcher(idsText)
 							.replaceAll(replacementChar);
-
+					logger.debug(idsText);
 					SAXBuffer validationBuffer = new SAXBuffer();
 					if (validateAgainstDTD(idsText,
 							validationBuffer, w.getWikiPath())) {
@@ -369,6 +374,7 @@ public class I5Writer {
 		idsTextBuffer.clearReferences();
 		idsTextBuffer.clearCategories();
 
+		String idsText = idsTextOutputStream.toString();
 		try {
 			idsTextOutputStream.close();
 		}
@@ -377,7 +383,7 @@ public class I5Writer {
 			errorHandler.write(w.getWikiPath(),
 					"Failed closing idsTextOutputStream", e);
 		}
-		return idsTextOutputStream.toString();
+		return idsText;
 	}
 
 	private boolean validateAgainstDTD(
@@ -395,7 +401,7 @@ public class I5Writer {
 		catch (SAXException | IOException e) {
 			stats.addDtdValidationError();
 			logger.debug(e);
-			errorHandler.write(wikiXMLPath, "DTD validation failed.", e);
+			errorHandler.write(wikiXMLPath, "DTD validation failed. \n"+idsText, e);
 			return false;
 		}
 
@@ -419,13 +425,9 @@ public class I5Writer {
 		try {
 			writer.writeEndDocument();
 			writer.close();
-			dbManager.conn.close();
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed closing document.", e);
-		}
-		catch (SQLException e) {
-			throw new I5Exception("Failed closing database connection.", e);
 		}
 	}
 }

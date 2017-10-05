@@ -42,8 +42,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.1</version>
+			<artifactId>commons-text</artifactId>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cocoon.sax</groupId>
@@ -59,11 +59,6 @@
 			<groupId>org.dspace.xmlui.excalibur</groupId>
 			<artifactId>excalibur-xmlutil</artifactId>
 			<version>2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

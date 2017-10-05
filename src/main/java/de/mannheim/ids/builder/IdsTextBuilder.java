@@ -97,14 +97,14 @@ public class IdsTextBuilder extends DefaultHandler2 {
 						&& attributes.getValue(i) != null) {
 
 					String text = StringEscapeUtils
-							.escapeXml(attributes.getValue(i));
+							.escapeXml10(attributes.getValue(i));
 					writer.writeAttribute(attributes.getQName(i), text);
 				}
-				else {
-					log.debug("pageId " + pageId + " element " + localName
-							+ " att " + attributes.getLocalName(i)
-							+ " value " + attributes.getValue(i));
-				}
+//				else {
+//					log.debug("pageId " + pageId + " element " + localName
+//							+ " att " + attributes.getLocalName(i)
+//							+ " value " + attributes.getValue(i));
+//				}
 			}
 			writer.flush();
 		}
@@ -146,7 +146,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			for (String key : noteEvents.keySet()) {
 				event = noteEvents.get(key);
 				if (event.isEmpty()) {
-					log.debug("empty note " + key);
+//					log.debug("empty note " + key);
 					AttributesImpl att = new AttributesImpl();
 					att.addAttribute("", "id", "id", "ID", key);
 					event.startElement("", "note", "note",
@@ -236,8 +236,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 				writer.writeStartElement("ref");
 				String keyword = map.get(key);
-				// keyword = replaceInvalidCharacters(keyword);
-
+				
 				StringBuilder sb = new StringBuilder();
 				sb.append("https://");
 				sb.append(key);

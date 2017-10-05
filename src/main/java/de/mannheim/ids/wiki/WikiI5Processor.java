@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import de.mannheim.ids.transform.WikiI5Part;
 import de.mannheim.ids.transform.WikiXMLSorter;
@@ -114,7 +114,7 @@ public class WikiI5Processor {
 		errorHandler.close();
 
 		long end = System.currentTimeMillis();
-		String duration = DurationFormatUtils.formatDuration((end - start),
+		String duration = DateFormatUtils.format((end - start),
 				"H:mm:ss");
 		System.out.println("WikiI5Converter execution time "
 				// + (end - start));
