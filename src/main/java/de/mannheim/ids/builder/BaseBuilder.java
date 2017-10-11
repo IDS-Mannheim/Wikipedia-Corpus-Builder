@@ -23,7 +23,7 @@ public class BaseBuilder {
 		titleTypes.put("article", "Artikel");
 		titleTypes.put("talk", "Diskussionen zu Artikeln");
 		titleTypes.put("user-talk", "Benutzerdiskussionen");
-		titleTypes.put("loeschkandidaten", "Löschdiskussionen");
+		titleTypes.put("loeschkandidaten", "Löschkandidaten");
 		titleTypes.put("redundanz", "Redundanzdiskussionen");
 	}
 

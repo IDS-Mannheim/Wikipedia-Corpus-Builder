@@ -27,7 +27,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		textTypes.put("article", "Enzyklopädie");
 		textTypes.put("talk", "Diskussionen zu Enzyklopädie-Artikeln");
 		textTypes.put("user-talk", "Benutzerdiskussionen");
-		textTypes.put("loeschkandidaten", "Löschdiskussionen");
+		textTypes.put("loeschkandidaten", "Löschkandidaten");
 		textTypes.put("redundanz", "Redundanzdiskussionen");
 	}
 

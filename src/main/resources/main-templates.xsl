@@ -230,7 +230,7 @@
                                 <textTypeArt>Benutzerdiskussion</textTypeArt>
                             </xsl:when>
                             <xsl:when test="$type eq 'loeschkandidaten'">
-                                <textTypeArt>Löschdiskussion</textTypeArt>
+                                <textTypeArt>Löschkandidaten</textTypeArt>
                             </xsl:when>
                             <xsl:when test="$type eq 'redundanz'">
                                 <textTypeArt>Redundanzdiskussion</textTypeArt>

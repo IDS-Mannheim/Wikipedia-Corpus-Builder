@@ -227,18 +227,9 @@ public class I5Writer {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
-					String idsText = addEvents(w);
-					// Depends on the java version, xmlstreamwriter 
-					// may produce invalid xml characters.
-					// Tested with:
-					// jdk1.8.0_51 (invalid)
-					// jdk1.8.0_131 (valid)
-					idsText = invalidNativeCharPattern
-							.matcher(idsText)
-							.replaceAll(replacementChar);
-					logger.debug(idsText);
+					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
 					SAXBuffer validationBuffer = new SAXBuffer();
-					if (validateAgainstDTD(idsText,
+					if (validateAgainstDTD(idsTextOutputStream,
 							validationBuffer, w.getWikiPath())) {
 						writeIdsText(validationBuffer, w.getWikiPath());
 					}
@@ -353,7 +344,7 @@ public class I5Writer {
 		return true;
 	}
 
-	private String addEvents(WikiI5Part w)
+	private ByteArrayOutputStream addEvents(WikiI5Part w)
 			throws I5Exception {
 		ByteArrayOutputStream idsTextOutputStream = new ByteArrayOutputStream(
 				1024 * 4);
@@ -374,25 +365,17 @@ public class I5Writer {
 		idsTextBuffer.clearReferences();
 		idsTextBuffer.clearCategories();
 
-		String idsText = idsTextOutputStream.toString();
-		try {
-			idsTextOutputStream.close();
-		}
-		catch (IOException e) {
-			logger.debug(e);
-			errorHandler.write(w.getWikiPath(),
-					"Failed closing idsTextOutputStream", e);
-		}
-		return idsText;
+		return idsTextOutputStream;
 	}
 
 	private boolean validateAgainstDTD(
-			String idsText, SAXBuffer saxBuffer,
+			ByteArrayOutputStream idsTextOutputStream, SAXBuffer saxBuffer,
 			String wikiXMLPath) throws I5Exception {
 
 		validatingReader.setContentHandler(saxBuffer);
 		try {
-			InputStream is = new ByteArrayInputStream(idsText.getBytes());
+			InputStream is = new ByteArrayInputStream(
+					idsTextOutputStream.toByteArray());
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
 			validatingReader.parse(inputSource);
@@ -401,8 +384,18 @@ public class I5Writer {
 		catch (SAXException | IOException e) {
 			stats.addDtdValidationError();
 			logger.debug(e);
-			errorHandler.write(wikiXMLPath, "DTD validation failed. \n"+idsText, e);
+			errorHandler.write(wikiXMLPath, "DTD validation failed. \n"
+					+ idsTextOutputStream.toString(), e);
 			return false;
+		}
+		
+		try {
+			idsTextOutputStream.close();
+		}
+		catch (IOException e) {
+			logger.debug(e);
+			errorHandler.write(wikiXMLPath,
+					"Failed closing idsTextOutputStream", e);
 		}
 
 		stats.addValidPages();
