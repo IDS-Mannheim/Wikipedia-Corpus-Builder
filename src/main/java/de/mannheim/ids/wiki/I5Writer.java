@@ -233,9 +233,8 @@ public class I5Writer {
 							validationBuffer, w.getWikiPath())) {
 						writeIdsText(validationBuffer, w.getWikiPath());
 					}
-
-					idsTextBuffer.recycle();
 				}
+				idsTextBuffer.recycle();
 				w.close();
 			}
 			else if (w.isStartDoc()) {
@@ -340,7 +339,12 @@ public class I5Writer {
 			errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
 			return false;
 		}
+		
 		stats.addTransformedPages();
+		if (idsTextBuffer.isTextEmpty()){
+			stats.addEmptyPages();
+			return false;
+		}
 		return true;
 	}
 

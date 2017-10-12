@@ -12,6 +12,7 @@ public class Statistics {
 	public int transformedPages;
 	public int numOfChar;
 	public int validPages;
+	public int emptyPages;
 	
 	/** Constructs a {@link Statistics} and initializes all counters.
 	 * 
@@ -22,11 +23,13 @@ public class Statistics {
 		saxParserError=0;
 		transformedPages=0;
 		numOfChar=0;
+		emptyPages=0;
 	}
 	
 	public void printStats() {		
 		System.out.println("Number of valid pages: "+validPages);
 		System.out.println("Number of transformed pages: "+transformedPages);
+		System.out.println("Number of empty pages: "+emptyPages);
 		System.out.println("Number of not-transformed pages (char index): "+numOfChar);
 		System.out.println("Number of transformation errors: "+transformationError);
 		System.out.println("Number of DTD validation errors: "+dtdValidationError);
@@ -35,6 +38,10 @@ public class Statistics {
 		int valid = (transformedPages - 
 				transformationError - dtdValidationError - saxParserError);
 		System.out.println("Total number valid pages: " + Math.max(valid, 0));
+	}
+	
+	public void addEmptyPages() {
+		this.emptyPages++;
 	}
 	
 	public int getNumOfChar() {

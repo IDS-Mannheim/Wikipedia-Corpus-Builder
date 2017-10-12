@@ -62,6 +62,9 @@ public class IdsTextBuffer extends SAXBuffer {
 	private int refCounter;
 
 	private boolean isCategoryFound;
+	private boolean isTextEmpty = true;
+
+	private boolean isText = false;
 
 	public IdsTextBuffer(Configuration config) throws I5Exception {
 		if (config == null) {
@@ -100,6 +103,10 @@ public class IdsTextBuffer extends SAXBuffer {
 
 		if (localName.equals("idsText")) {
 			this.idsTextId = attributes.getValue("id");
+			writeStartElement(uri, localName, qName, attributes);
+		}
+		else if(localName.equals("text")){
+			isText=true;
 			writeStartElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("ptr")) {
@@ -252,12 +259,13 @@ public class IdsTextBuffer extends SAXBuffer {
 				super.endElement("", localName, qName);
 				isInPtr = false;
 			}
-			else if (localName.equals("back")) {
-				super.endElement(uri, localName, qName);
-			}
 			else if (isCategoryFound) {
 				categoryEvents.endElement(uri, localName, qName);
 				isCategoryFound = false;
+			}
+			else if (localName.equals("text")) {
+				isText=false;
+				super.endElement(uri, localName, qName);
 			}
 			else {
 				super.endElement(uri, localName, qName);
@@ -274,11 +282,22 @@ public class IdsTextBuffer extends SAXBuffer {
 		else if (isCategoryFound) {
 			categoryEvents.characters(ch, start, length);
 		}
+		else if (isText){
+			super.characters(ch, start, length);
+			String text = new String(ch, start, length);
+			if (text.trim().length()>1){
+				isTextEmpty=false;
+			}
+		}
 		else {
 			super.characters(ch, start, length);
 		}
 	}
 
+	public boolean isTextEmpty() {
+		return isTextEmpty;
+	}
+	
 	/**
 	 * Gets the current wiki page id
 	 * 
