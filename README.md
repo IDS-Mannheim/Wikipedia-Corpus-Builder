@@ -1,11 +1,7 @@
 
 # WikiXMLConverter
 
-The [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/) develops a corpus builder for Wikipedia. The purpose of the tool is to convert Wikipedia pages from its native text format, wikitext, into our target corpus format, I5.
-
-I5 is the IDS text model used in [Das Deutsche Referenzkorpus (DeReKo)](http://www1.ids-mannheim.de/kl/projekte/korpora/). It is a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012). 
-
-As part of DeReKo, Wikipedia corpora built using this tool, are accessible through [Corpus Search, Management and Analysis System II (COSMAS II)](http://www.ids-mannheim.de/cosmas2/) and [Corpus Analysis Platform (KorAP)](https://korap.ids-mannheim.de/kalamar).
+The [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/) develops a corpus builder for Wikipedia. The purpose of the tool is to convert Wikipedia pages from its native text format, wikitext, into our target corpus format, I5. I5 is the IDS text model used in [Das Deutsche Referenzkorpus (DeReKo)](http://www1.ids-mannheim.de/kl/projekte/korpora/). It is a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012). As part of DeReKo, Wikipedia corpora built using this tool, are accessible through [Corpus Search, Management and Analysis System II (COSMAS II)](http://www.ids-mannheim.de/cosmas2/) and [Corpus Analysis Platform (KorAP)](https://korap.ids-mannheim.de/kalamar).
 
 The corpus builder operates in two stage conversion (Margaretha and Lüngen, 2014). In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, for instance articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts each WikiXML file into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file as required for DeReKo.
 
@@ -20,7 +16,7 @@ To run WikiXMLConverter, a Wikipedia dump and a properties file is required. Wik
   [languagecode]wiki-[latest or date]-pages-meta-current.xml
 </pre> 
 
-To convert a full Wikipedia (not only a small sample), it is advised to increase and limit the java memory allocation pool by using -Xmx parameter. For instance, -Xmx4g means set maximum Java heap size to 4 Gigabytes.The following is an example command to run the WikiXMLConverter tool in a terminal.
+To convert a full Wikipedia (not only a small sample), it is advised to increase and limit the java memory allocation pool by using -Xmx parameter. For instance, -Xmx4g means set maximum Java heap size to 4 Gigabytes.The following is an example command to run WikiXMLConverter in a terminal.
 
 <pre>
 java -jar -Xmx4g [jar-file-path] -prop [properties-file-path] > [log-file-path] 2>&1
