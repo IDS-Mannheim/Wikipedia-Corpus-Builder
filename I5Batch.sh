@@ -9,9 +9,7 @@ wiki=wiki
 date=$3
 filename=$lang$wiki-$date-$type
 
-mkdir -p logs/wikiI5;
-mkdir -p logs/onsgmls;
-mkdir -p logs/xmllint;
+mkdir -p logs/wikiI5/$lang;
 
 mkdir -p index;
 
@@ -36,14 +34,21 @@ prop=code/properties/$lang/i5-$lang$wiki-$type.properties
 #prop=src/test/resources/i5-$lang$wiki-$type.properties
 echo $prop
 lib=:lib/*:.
-nice -n 3 java -Xmx4g -cp $wikiI5$lib $main -prop $prop > logs/wikiI5/wikiI5-$filename.log 2>&1 
+nice -n 3 java -Xmx4g -cp $wikiI5$lib $main -prop $prop > logs/wikiI5/$lang/wikiI5-$filename.log 2>&1 
 
 #echo "Replacing invalid Chars"
  #sed -i -e 's/&#xd[8-9a-f][0-9a-f][0-9a-f];/ /g' i5/$filename.i5.xml; 
 #perl -wlnpe 's/\&#xd[89a-f]..;/\&#xf8ff;/g' < i5/ori/$filename.i5.xml > i5/$lang/$filename.i5.xml
 
-echo "Validating against xmllint"
+echo "Validating using saxon"
+mkdir -p logs/saxon/$lang;
+saxon-validate i5/$lang/$filename.i5.xml > logs/saxon/$lang/saxon-$filename.i5.log 2>&1;
+
+echo "Validating using xmllint"
+mkdir -p logs/xmllint/$lang;
 xmllint -huge -valid -stream i5/$lang/$filename.i5.xml > logs/xmllint/xmllint-$filename.i5.log 2>&1; 
 
-echo "Validating against onsgmls"
+echo "Validating using onsgmls"
+mkdir -p logs/onsgmls/$lang;
 onsgmls -E0 -wxml -s -c /usr/share/sgml/xml.soc i5/$lang/$filename.i5.xml > logs/onsgmls/onsgmls-$filename.i5.log 2>&1
+

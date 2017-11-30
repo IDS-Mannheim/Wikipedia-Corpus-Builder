@@ -57,13 +57,13 @@
     <!-- Phrase Level Templates -->
 
 
-    <xsl:template match="text()" priority="2">
+    <!-- <xsl:template match="text()" priority="2">
         <xsl:value-of select="normalize-space(.)"/>
         <xsl:if
             test="substring(., string-length(.)) = ' ' and substring(., string-length(.) - 1, string-length(.)) != '  '">
             <xsl:text> </xsl:text>
         </xsl:if>
-    </xsl:template>
+    </xsl:template> -->
 
     <xsl:template match="autoSignature">
         <xsl:copy-of select="."/>

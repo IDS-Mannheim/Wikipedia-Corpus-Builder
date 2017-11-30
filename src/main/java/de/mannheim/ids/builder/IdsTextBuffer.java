@@ -285,7 +285,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		else if (isText){
 			super.characters(ch, start, length);
 			String text = new String(ch, start, length);
-			if (text.trim().length()>1){
+			if (isTextEmpty & text.trim().length()>1){
 				isTextEmpty=false;
 			}
 		}

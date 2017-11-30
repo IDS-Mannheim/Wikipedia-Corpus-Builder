@@ -204,7 +204,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			throws SAXException {
 		try {
 			String text = new String(ch, start, length);
-			text = text.trim();
 			if (!text.isEmpty()) {
 				text = IdsTextBuffer.spacePattern.matcher(text)
 						.replaceAll(" ");
