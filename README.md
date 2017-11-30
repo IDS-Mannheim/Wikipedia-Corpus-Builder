@@ -1,12 +1,21 @@
 
 # WikiXMLConverter
 
-WikiXMLConverter converts wikitext to an XML format called WikiXML. It is part of the Wikipedia converter tool developed at the [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/). The purpose of the tool is to build Wikipedia corpora in I5 format, that is the IDS text model used in DeReKo (Das Deutsche Referenzkorpus, http://www1.ids-mannheim.de/kl/projekte/korpora/). I5 a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012).
+The [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/) develops a corpus builder for Wikipedia. The purpose of the tool is to convert Wikipedia pages from its native text format, wikitext, into our target corpus format, I5.
 
-Our Wikipedia corpora are build through a two-stage-conversion. In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a Wikipedia namespace, e.g. articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts the WikiXML files into I5 using XSLT Stylesheets and assembles them altogether as a single corpus file (i.e. a requirement for DeReKo).
+I5 is the IDS text model used in [Das Deutsche Referenzkorpus (DeReKo)](http://www1.ids-mannheim.de/kl/projekte/korpora/). It is a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012). 
+
+As part of DeReKo, Wikipedia corpora built using this tool, are accessible through [Corpus Search, Management and Analysis System II (COSMAS II)](http://www.ids-mannheim.de/cosmas2/) and [Corpus Analysis Platform (KorAP)](https://korap.ids-mannheim.de/kalamar).
+
+The corpus builder operates in two stage conversion (Margaretha and Lüngen, 2014). In the first stage, WikiXMLConverter converts wikitext into WikiXML by using [Sweble Parser](http://sweble.org/) and generates a WikiXML file for each wikipage within a wikipedia namespace, for instance articles. In the second stage, [WikiI5Converter](https://github.com/IDS-Mannheim/WikiI5Converter) converts each WikiXML file into I5 using XSLT Stylesheets and assemble them altogether as a single corpus file as required for DeReKo.
+
+In addition to building article corpus, the corpus builder is also designed for building Computer Mediated Communication (CMC) corpora from Wikipedia talk or discussion pages, such as in the Talk and User talk [namespaces](https://en.wikipedia.org/wiki/Wikipedia:Namespace). The talk corpus is structured by means of postings and threads from users following the TEI scheme for CMC corpus (Beißwenger, et al., 2012). Our posting segmentation is done heuristically in WikiXMLConverter.
+
+The corpus builder is able to parse Wikipedia of multiple languages. It has been tested for the following languages: english, french, hungarian, norwegian, spanish, croatian, italian, polish and rumanian. We provides Wikipedia corpora of these languages in WikiXML and I5 formats for [download](http://www1.ids-mannheim.de/direktion/kl/projekte/korpora/verfuegbarkeit.html).
+ 
 
 ## Instructions
-To run WikiXMLConverter, a Wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from https://dumps.wikimedia.org/. A complete Wikipedia dump including article and talk pages typically has the following format: 
+To run WikiXMLConverter, a Wikipedia dump and a properties file is required. Wikipedia dumps can be downloaded from ```https://dumps.wikimedia.org/```. A complete Wikipedia dump including article and talk pages typically has the following format: 
 <pre>
   [languagecode]wiki-[latest or date]-pages-meta-current.xml
 </pre> 
@@ -17,7 +26,7 @@ To convert a full Wikipedia (not only a small sample), it is advised to increase
 java -jar -Xmx4g [jar-file-path] -prop [properties-file-path] > [log-file-path] 2>&1
 </pre>
 
-The main class of this project is ```/src/main/java/de/mannheim/ids/wiki/WikiXMLConverter.java```. It is the starting point of the conversion process. Besides, ```/src/main/java/de/ mannheim/ids/wiki/WikiXMLProcessor.java``` is the class managing the overall conversion process.
+The main class of this project is ```/src/main/java/de/mannheim/ids/wiki/WikiXMLConverter.java```, that is the starting point of the conversion process. Besides, ```/src/main/java/de/ mannheim/ids/wiki/WikiXMLProcessor.java``` is the class managing the overall conversion process.
 
 ## Properties
 
@@ -31,10 +40,6 @@ For article pages, the properties files requires the following properties:
 * ```page_type = article```
 
   The type of the Wikipedia pages.
-
-* ```title_prefix = Wikipedia:Löschkandidaten```
-
-  The prefix of Wikipedia pages to convert.
 
 * ```language_code = de```
 
@@ -54,7 +59,7 @@ For article pages, the properties files requires the following properties:
   
 * ```generate_wikipage = true```
   
-  The option to generate wikipage files in wikitext (true or false).
+  The option to generate wikipage files in wikitext: true or false (default).
 
 
 ### Talk properties
@@ -66,7 +71,7 @@ User page prefix in the wikidump language, for instance ```User``` in English, `
 
 * ```user_contribution = Spezial:Beiträge```
 
-    User contribution page prefix in the wikidump language, for instance ```Special:Contributions``` in English, ```Spezial:Beiträge``` in German. See https://en.wikipedia.org/wiki/Help:User_contributions.
+The prefix of user contribution pages in wikitext, for instance ```Special:Contributions``` in English, ```Spezial:Beiträge``` in German. See https://en.wikipedia.org/wiki/Help:User_contributions.
 
 * ```signature = Hilfe:Signatur```
 
@@ -75,6 +80,13 @@ Signature page in the Wikidump language, for instance ```Wikipedia:Signatures```
 * ```unsigned = unsigniert```
 
 Unsigned template in the Wikidump language, for instance ```unsigned``` in English, ```unsigniert``` in German, ```non signé``` in French. See https://en.wikipedia.org/wiki/Template:Unsigned. 
+
+
+For other pages with specific title prefix, title_prefix property is required as follows:
+
+* ```title_prefix = Wikipedia:Löschkandidaten```
+
+  The prefix of Wikipedia page titles to convert (optional)
 
 
 ## Outputs
@@ -142,11 +154,11 @@ Most postings are explicitly signed, unsigned or marked by other users. Three ty
 
 * ```Signed signatures```
 
-    are signatures that are explicitly signed by registered authors by using tildes. See  https://en.wikipedia.org/wiki/Wikipedia:Signature.
+are signatures that are explicitly signed by registered authors by using tildes. See  https://en.wikipedia.org/wiki/Wikipedia:Signature.
 
 * ```Unsigned signatures```
 
-    are signatures that are added by registered or unregistered users to mark an existing unsigned posting. See https://en.wikipedia.org/wiki/Template:Unsigned.
+are signatures that are added by registered or unregistered users to mark an existing unsigned posting. See https://en.wikipedia.org/wiki/Template:Unsigned.
     
 * ```User contributions```
 
@@ -181,7 +193,8 @@ See ```/src/main/java/de/mannheim/ids/wiki/page/WikiTimestamp.java```
 
 ## References
 
+Beißwenger, M., Ermakova, M., Geyken, A., Lemnitzer, L., and Storrer, A. (2012). A tei schema for the representation of computer-mediated communication. Journal of the Text Encoding Initiative [Online], 3.
+
 Margaretha, E., and Lüngen,H. (2014). Building linguistic corpora from Wikipedia articles and discussions.  Journal for Language Technologie and Computational Linguistics (JLCL), 2/2014.
 
 Lüngen, H., and Sperberg-McQueen, C. M. (2012). A TEI P5 Document Grammar for the IDS Text Model. Journal of the Text Encoding Initiative [Online], 3. URL : http://jtei.revues.org/508 ; DOI : 10.4000/jtei.508
-
