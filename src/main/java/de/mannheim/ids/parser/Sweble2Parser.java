@@ -101,7 +101,7 @@ public class Sweble2Parser implements Runnable {
 			pageId = new PageId(pageTitle, -1);
 			// Parse Wikitext into AST
 			cp = engine.postprocess(pageId, wikitext, null);
-			log.debug(cp);
+//			log.debug(cp);
 		}
 		catch (LinkTargetException | EngineException e) {
 			wikiStatistics.addSwebleErrors();

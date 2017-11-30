@@ -33,7 +33,7 @@ public class WikiErrorWriter {
 		String filename = Paths.get(config.getWikidump()).getFileName()
 				.toString();
 
-		writer = Utilities.createWriter("logs/wikiXML/errors",
+		writer = Utilities.createWriter("logs/wikiXML/"+config.getLanguageCode(),
 				"wikiXML-" + filename.substring(0, 15) + "-"
 						+ config.getPageType() + "-errors.log",
 				config.getOutputEncoding());
