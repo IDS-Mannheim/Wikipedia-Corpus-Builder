@@ -85,7 +85,7 @@ WikiI5Converter requires the following properties in a properties file:
 
     The corresponding password to the username to connect to the database.
 
-*```creator = creator name```
+* ```creator = creator name```
 
     The name of the person running the builder.
  
@@ -250,7 +250,11 @@ WikiI5Converter relies on a list of interaction words to recognize them in WikiX
 In wikitext, footnote descriptions are typically written directly where the footnotes themselves are placed. In the instance below, a footnote is marked by the element ```<ref>```.
 
 <pre>
-Von 1968 bis 2000 wurde es von der [[Directors Guild of America]] (DGA) für solche Situationen empfohlen, seither ist es '''Thomas Lee'''.&lt;ref&gt;[[Los Angeles Times|latimes]].com: [http://articles.latimes.com/2000/jan/15/entertainment/ca-54271 ''Name of Director Smithee Isn't What It Used to Be''], zuletzt geprüft am 2. April 2011&lt;/ref&gt; 
+Von 1968 bis 2000 wurde es von der [[Directors Guild of America]] (DGA) für 
+solche Situationen empfohlen, seither ist es '''Thomas Lee'''.&lt;ref&gt;
+[[Los Angeles Times|latimes]].com: [http://articles.latimes.com/2000/jan/
+15/entertainment/ca-54271 ''Name of Director Smithee Isn't What It Used 
+to Be''], zuletzt geprüft am 2. April 2011&lt;/ref&gt; 
 </pre>
 
 In I5, we make a distinction between footnote places and descriptions. In a footnote place, a ```<ptr>``` element is added refering to a ```<note>``` element in the footnote list. The footnote list includes the desciptions of all footnotes. It is written in the ```<back>``` element after all text is written in the ```<body>``` element. 
@@ -258,7 +262,11 @@ In I5, we make a distinction between footnote places and descriptions. In a foot
 A pointer at the footnote appearance:
 
 <pre>
-Von 1968 bis 2000 wurde es von der &lt;ref target="https://de.wikipedia.org/wiki/Directors_Guild_of_America" targOrder="u"&gt;Directors Guild of America&lt;/ref&gt; (DGA) für solche Situationen empfohlen, seither ist es &lt;hi rend="bo" &gt;Thomas Lee&lt;/hi&gt;.&lt;ptr target="WPD17.A00.00001-f1" rend="ref" targType="note" targOrder="u"/&gt;
+Von 1968 bis 2000 wurde es von der &lt;ref target="https://de.wikipedia.org/
+wiki/Directors_Guild_of_America" targOrder="u"&gt;Directors Guild of America
+&lt;/ref&gt; (DGA) für solche Situationen empfohlen, seither ist es &lt;hi 
+rend="bo" &gt;Thomas Lee&lt;/hi&gt;.&lt;ptr target="WPD17.A00.00001-f1" rend="ref" 
+targType="note" targOrder="u"/&gt;
 </pre>
 
 A footnote list:
