@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -31,6 +33,7 @@ public class Configuration {
 	private String titlePrefix;
 	private int namespaceKey;
 	private int maxThreads;
+	private List<String> excludedPages = new ArrayList<String>();
 
 	private boolean isDiscussion;
 	private boolean wikitextToGenerate = false;
@@ -157,7 +160,8 @@ public class Configuration {
 		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
 		setWikitextToGenerate(Boolean
 				.valueOf(config.getProperty("generate_wikipage", "false")));
-
+		
+		setExcludedPages(config.getProperty("exclude_page_id", ""));
 		is.close();
 	}
 
@@ -486,5 +490,16 @@ public class Configuration {
 					"Please specify the unsigned template in the language of the Wikipedia dump.");
 		}
 		this.unsigned = unsigned;
+	}
+
+	public List<String> getExcludedPages() {
+		return excludedPages;
+	}
+
+	public void setExcludedPages(String str) {
+		String[] ids = str.split(",");
+		for (String id:ids){
+			excludedPages.add(id.trim());
+		}
 	}
 }

@@ -19,7 +19,8 @@ public class WikiStatistics {
 	private int emptyPages;
 	private int emptyParsedPages;
 	private int redirectPages;
-
+	private int skippedPages;
+	
 	private int noId;
 
 	private int totalNonEmptyPages;
@@ -50,7 +51,8 @@ public class WikiStatistics {
 		System.out.println("Total empty pages " + getEmptyPages());
 		System.out.println("Total empty parsed pages " + getEmptyParsedPages());
 		System.out.println("Total pages without id " + getNoId());
-
+		System.out.println("Total skipped pages " + getSkippedPages());
+		
 		if (totalPostings > 0) {
 			System.out.println("Total postings " + getTotalPostings() + "\n");
 		}
@@ -168,5 +170,13 @@ public class WikiStatistics {
 
 	public synchronized void addNumOfThreadDeaths() {
 		this.numOfThreadDeaths++;
+	}
+
+	public int getSkippedPages() {
+		return skippedPages;
+	}
+
+	public void addSkippedPages() {
+		this.skippedPages++;
 	}
 }

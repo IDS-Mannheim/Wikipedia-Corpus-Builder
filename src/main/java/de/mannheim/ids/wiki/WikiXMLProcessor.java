@@ -15,7 +15,7 @@ import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;
 import de.mannheim.ids.wiki.page.WikiPageReader;
-import de.mannheim.ids.wiki.page.WikiPostHandler;
+import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
@@ -92,7 +92,7 @@ public class WikiXMLProcessor {
 					.equals(endPage); wikiPage = wikipages.take()) {
 				WikiPageHandler ph;
 				if (config.isDiscussion()) {
-					ph = new WikiPostHandler(config, wikiPage, wikiStatistics,
+					ph = new WikiTalkHandler(config, wikiPage, wikiStatistics,
 							errorWriter, postUser, postTime);
 				}
 				else {

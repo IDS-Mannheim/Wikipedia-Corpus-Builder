@@ -174,11 +174,18 @@ public class WikiPageReader implements Runnable {
 				else if (trimmedStrLine.startsWith("<id>") && searchId) {
 					matcher = idPattern.matcher(trimmedStrLine);
 					if (matcher.find()) {
-						wikiPage.setPageId(matcher.group(1));
-						wikiPage.setPageIndex(isDiscussion);
-						pageStructureBuilder.append(strLine);
-						pageStructureBuilder.append("\n");
-						searchId = false;
+						String id = matcher.group(1);
+						if (config.getExcludedPages().contains(id)){
+							isToRead = false;
+							wikiStatistics.addSkippedPages();
+						}
+						else{	
+							wikiPage.setPageId(id);
+							wikiPage.setPageIndex(isDiscussion);
+							pageStructureBuilder.append(strLine);
+							pageStructureBuilder.append("\n");
+							searchId = false;
+						}
 					}
 					else { // Skip page
 						isToRead = false;

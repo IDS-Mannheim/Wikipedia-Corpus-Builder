@@ -18,7 +18,7 @@ import de.mannheim.ids.writer.WikiPostUser;
  * 
  */
 
-public class WikiPostHandler extends WikiPageHandler {
+public class WikiTalkHandler extends WikiPageHandler {
 
 	public enum SignatureType {
 		SIGNED, UNSIGNED, USER_CONTRIBUTION;
@@ -68,7 +68,7 @@ public class WikiPostHandler extends WikiPageHandler {
 	 * @throws IOException
 	 *             an IOException
 	 */
-	public WikiPostHandler(Configuration config, WikiPage wikipage,
+	public WikiTalkHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
 			WikiPostUser postUser, WikiPostTime postTime) throws IOException {
 
@@ -103,7 +103,8 @@ public class WikiPostHandler extends WikiPageHandler {
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
 			}
-
+			System.out.println(wikiPage.getPageIndex() + "/"+wikiPage.getPageId() + ".xml");
+			
 			// creating postings by gradually checking small portions of
 			// wikitext (segments of wikitext)
 			wikiXMLBuilder = new StringBuilder();

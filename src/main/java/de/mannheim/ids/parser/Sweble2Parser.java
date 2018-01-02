@@ -99,6 +99,7 @@ public class Sweble2Parser implements Runnable {
 		try {
 			pageTitle = PageTitle.make(WikiXMLProcessor.wikiconfig, pagetitle);
 			pageId = new PageId(pageTitle, -1);
+//			log.debug(wikitext);
 			// Parse Wikitext into AST
 			cp = engine.postprocess(pageId, wikitext, null);
 //			log.debug(cp);
@@ -124,7 +125,7 @@ public class Sweble2Parser implements Runnable {
 			errorWriter.logErrorPage("RENDERER", pagetitle, pageIdStr,
 					e.getCause(), wikitext);
 
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		cp = null;
 	}

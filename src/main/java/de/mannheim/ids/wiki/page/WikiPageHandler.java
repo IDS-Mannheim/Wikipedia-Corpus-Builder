@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.jxpath.xml.DOMParser;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
@@ -26,6 +27,8 @@ import de.mannheim.ids.writer.WikiErrorWriter;
  */
 public abstract class WikiPageHandler implements Runnable {
 
+	private Logger log = Logger.getLogger(WikiPageHandler.class);
+	
 	private static final Pattern nonTagPattern = Pattern
 			.compile("<([^!!/a-zA-Z\\s])");
 	private static final Pattern nonTagPattern2 = Pattern.compile("<([^>]*)");
@@ -104,7 +107,7 @@ public abstract class WikiPageHandler implements Runnable {
 		// unescape XML tags
 		wikitext = StringEscapeUtils.unescapeXml(wikitext);
 		wikitext = cleanPattern(wikitext);
-
+//		log.debug(wikitext);
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
@@ -114,7 +117,12 @@ public abstract class WikiPageHandler implements Runnable {
 			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId, e.getCause(),
 					"");
 		}
-
+//		log.debug("tagSoup" + wikitext);
+		
+		// repair comment tags
+//		wikitext = wikitext.replace("&lt;!--", "<!--");
+//		wikitext = wikitext.replace("--&gt;", "-->");
+		
 		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
 				wikitext, config.getLanguageCode(), wikiStatistics,
 				errorWriter);
@@ -292,7 +300,7 @@ public abstract class WikiPageHandler implements Runnable {
 		if (content != null && !content.isEmpty()) {
 
 			String path = outputFolder + "/" + wikiPage.getPageIndex() + "/";
-			System.out.println(path + wikiPage.getPageId() + ".xml");
+			//System.out.println(path + wikiPage.getPageId() + ".xml");
 
 			OutputStreamWriter writer = Utilities.createWriter(path,
 					wikiPage.getPageId() + ".xml", config.getOutputEncoding());
