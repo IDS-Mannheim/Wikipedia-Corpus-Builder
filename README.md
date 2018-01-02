@@ -57,6 +57,10 @@ For article pages, the properties files requires the following properties:
   
   The option to generate wikipage files in wikitext: true or false (default).
 
+* ```exclude_page_id = 123,456```
+  
+  A list of ids of pages to be excluded from the conversion, separated by comma.
+
 
 ### Talk properties
 
