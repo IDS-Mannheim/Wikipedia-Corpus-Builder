@@ -244,7 +244,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeAttribute("target", sb.toString());
 
 				writer.writeAttribute("xml",
-						"https://www.w3.org/XML/1998/namespace", "lang", "key");
+						"https://www.w3.org/XML/1998/namespace", "lang", key);
 				// writer.writeAttribute("xml:lang", key);
 				writer.writeCharacters(keyword);
 
