@@ -20,6 +20,7 @@ import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
+import de.mannheim.ids.writer.WikiTitleWriter;
 
 /**
  * WikiXMLProcessor manages the overall conversion process. The conversion
@@ -34,7 +35,7 @@ public class WikiXMLProcessor {
 
 	private Configuration config;
 	private WikiStatistics wikiStatistics;
-	private WikiErrorWriter errorWriter;
+	public static WikiErrorWriter errorWriter;
 	private BlockingQueue<WikiPage> wikipages;
 	private WikiPostUser postUser;
 	private WikiPostTime postTime;
@@ -43,7 +44,8 @@ public class WikiXMLProcessor {
 	public static String Wikipedia_URI;
 
 	public static final WikiConfig wikiconfig = DefaultConfigEnWp.generate();
-
+	private WikiTitleWriter titleWriter;
+	
 	/**
 	 * Constructs a WikiXMLProcessor and sets the conversion configuration.
 	 * 
@@ -59,7 +61,9 @@ public class WikiXMLProcessor {
 		}
 		this.config = config;
 		this.wikiStatistics = new WikiStatistics();
-		this.errorWriter = new WikiErrorWriter(config);
+		WikiXMLProcessor.errorWriter = new WikiErrorWriter(config);
+		titleWriter = new WikiTitleWriter(config);
+		
 		this.wikipages = new ArrayBlockingQueue<WikiPage>(
 				config.getMaxThreads());
 
@@ -90,6 +94,7 @@ public class WikiXMLProcessor {
 			wikiReaderThread.start();
 			for (WikiPage wikiPage = wikipages.take(); !wikiPage
 					.equals(endPage); wikiPage = wikipages.take()) {
+				titleWriter.indexTitle(wikiPage.getPageTitle(), wikiPage.getPageId());
 				WikiPageHandler ph;
 				if (config.isDiscussion()) {
 					ph = new WikiTalkHandler(config, wikiPage, wikiStatistics,
@@ -127,6 +132,7 @@ public class WikiXMLProcessor {
 			postTime.close();
 		}
 		errorWriter.close();
+		titleWriter.close();
 		wikiStatistics.print();
 
 		long endTime = System.currentTimeMillis();
@@ -135,13 +141,4 @@ public class WikiXMLProcessor {
 		System.out.println("WikiXMLConverter execution time " + duration);
 	}
 
-	@Deprecated
-	private void createOutputDirectories() {
-		String xmlOutputDir = config.getOutputFolder();
-		Utilities.createDirectory(xmlOutputDir);
-
-		for (String i : WikiPage.indexList) {
-			Utilities.createDirectory(xmlOutputDir + "/" + i);
-		}
-	}
 }

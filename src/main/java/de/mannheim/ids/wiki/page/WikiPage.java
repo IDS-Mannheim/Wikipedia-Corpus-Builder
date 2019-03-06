@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mannheim.ids.wiki.Utilities;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 
 /**
  * Wikipage class
@@ -60,12 +61,22 @@ public class WikiPage {
 		String[] title = null;
 		if (isDiscussion) {
 			if (hasTitlePrefix && pageTitle.contains("/")) {
-				 title = pageTitle.split("/");
+				title = pageTitle.split("/");
 			}
 			else {
-				 title = pageTitle.split(":");
+				title = pageTitle.split(":");
 			}
-			firstLetter = title[1].substring(0, 1);
+
+			try {
+				firstLetter = title[1].substring(0, 1);
+			}
+			catch (Exception e) {
+				System.err.println(title);
+				firstLetter = this.pageTitle.substring(0, 1);
+				WikiXMLProcessor.errorWriter.logErrorPage("TITLE ", pageTitle,
+						pageId, e, "");
+
+			}
 		}
 		else {
 			firstLetter = this.pageTitle.substring(0, 1);
