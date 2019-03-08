@@ -162,8 +162,7 @@ lists all the wikipedia page titles in other languages for the german wikipage o
 | ll_from | ll_lang  | ll_title                                   |
 +---------+----------+--------------------------------------------+
 |       3 | af       | Aktinium                                   | 
-|       3 | am       | አክቲኒየም                                     | 
-|       3 | ar       | أكتينيوم                                      | 
+|       3 | ar       | أكتينيوم                                   | 
 |       3 | ast      | Actiniu                                    | 
 |       3 | az       | Aktinium                                   | 
 |       3 | be       | Актыній                                    | 
