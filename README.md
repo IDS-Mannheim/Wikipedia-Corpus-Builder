@@ -1,6 +1,6 @@
 # WikiI5Converter
 
-The [Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/) develops a corpus builder for Wikipedia. The purpose of the tool is to convert Wikipedia pages from its native text format, wikitext, into our target corpus format, I5.
+The [Leibniz Institut für Deutsche Sprache (IDS)](http://www1.ids-mannheim.de/) develops a corpus builder for Wikipedia. The purpose of the tool is to convert Wikipedia pages from its native text format, wikitext, into our target corpus format, I5.
 
 I5 is the IDS text model used in [Das Deutsche Referenzkorpus (DeReKo)](http://www1.ids-mannheim.de/kl/projekte/korpora/). It is a customized TEI format based on XCES, enriched with metadata information on different corpus structure levels (Lüngen and Sperberg-McQueen, 2012). 
 

@@ -91,7 +91,7 @@ public class WikiXMLSorter extends Thread {
 		// group pages by index
 		for (String idx : Configuration.indexes) {
 			try {
-				lastId = xPath.compile(config.getPageType() + "/index[@value='"
+				lastId = xPath.compile("wiki/index[@value='"
 						+ idx + "']/id[last()]");
 				n = (int) (double) lastId.evaluate(wikiPageIndexes,
 						XPathConstants.NUMBER);
@@ -151,7 +151,7 @@ public class WikiXMLSorter extends Thread {
 
 			List pagegroup = null;
 			try {
-				group = xPath.compile(config.getPageType() + "/index[@value='"
+				group = xPath.compile("wiki/index[@value='"
 						+ idx + "']/id[xs:integer"
 						+ "(xs:integer(.) div 100000) = " + docNr + "]");
 				pagegroup = (List) group.evaluate(wikiPageIndexes,

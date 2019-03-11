@@ -165,8 +165,8 @@
                                 <h.title type="main"/>
                                 <editor>wikipedia.org</editor>
                                 <edition>
-                                    <further> Dump file &#34;<xsl:value-of select="$origfilename"
-                                        />&#34; retrieved from http://dumps.wikimedia.org </further>
+                                    <further>Dump file &#34;<xsl:value-of select="$origfilename"
+                                        />&#34; retrieved from http://dumps.wikimedia.org</further>
                                     <kind/>
                                     <appearance/>
                                 </edition>

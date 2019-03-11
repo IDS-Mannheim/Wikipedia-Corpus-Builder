@@ -15,7 +15,7 @@
 # ./WikiXMLCorpusIndexer.sh article wikixml-de/article article-index.xml
 #
 # Output format:
-# <article>
+# <wiki type="article">
 #    <index value=0>
 #         <id>2173</id>
 #	  <id>2435</id>
@@ -28,7 +28,7 @@
 #         [....]
 #    </index>
 #    [....]
-# </article>
+# </wiki>
 #
 # The index is used in WikiI5Converter for structuring the Wikipedia 
 # pages in the resulting Wikipedia I5 corpus file.
@@ -37,13 +37,13 @@
 # Institut für Deutsche Sprache
 #
 # Created: Juli 2015
-# Last update: August 2017 
+# Last update: March 2019
 #
 # This script is licensed under GPL v3.
 # -------------------------------------------------------------------
 
 function createList {
-    echo "<"$1">" > $3
+    echo "<wiki type=\""$1"\">" > $3
     
     for index in $(find -L $2 -type d | sed 's/.*\///' | sort);
     do  
@@ -52,7 +52,7 @@ function createList {
         echo "  </index>" >> $3
     done
 
-    echo "</"$1">" >> $3
+    echo "</wiki>" >> $3
 }
 
 

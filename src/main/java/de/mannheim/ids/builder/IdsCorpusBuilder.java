@@ -119,13 +119,13 @@ public class IdsCorpusBuilder extends BaseBuilder {
 						+ "by the WikiXMLConverter tool and in the second stage, WikiXML is converted into "
 						+ "I5 by the WikiI5Converter tool. The converters are available at "
 						+ "http://corpora.ids-mannheim.de/pub/tools/. Reference: "
-						+ "Eliza Margaretha and Harald Lüngen (2014): Building Linguistic Corpora"
-						+ "from Wikipedia Articles and Discussions. In: Journal of Language"
-						+ "Technology and Computational Linguistics (JLCL) 29 (2). Special Issue on"
-						+ "Building and Annotating Corpora of Computer-mediated Communication:"
-						+ "Issues and Challenges at the Interface between Computational and Corpus"
-						+ "Linguistics, edited by Michael Beißwenger, Nelleke Oostdijk, Angelika"
-						+ "Storrer and Henk van den Heuvel. URL:"
+						+ "Eliza Margaretha and Harald Lüngen (2014): Building Linguistic Corpora "
+						+ "from Wikipedia Articles and Discussions. In: Journal of Language "
+						+ "Technology and Computational Linguistics (JLCL) 29 (2). Special Issue on "
+						+ "Building and Annotating Corpora of Computer-mediated Communication: "
+						+ "Issues and Challenges at the Interface between Computational and Corpus "
+						+ "Linguistics, edited by Michael Beißwenger, Nelleke Oostdijk, Angelika "
+						+ "Storrer and Henk van den Heuvel. URL: "
 						+ "http://www.jlcl.org/2014_Heft2/Heft2-2014.pdf");
 						
 
@@ -170,7 +170,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 	protected void createPublicationStmt() throws XMLStreamException {
 		writer.writeStartElement("publicationStmt");
 
-		createSimpleElement("distributor", "Institut für Deutsche Sprache");
+		createSimpleElement("distributor", "Leibniz-Institut für Deutsche Sprache");
 		createSimpleElement("pubAddress", "Postfach 10 16 21, D-68016 Mannheim");
 		createSimpleElement("telephone", "+49 (0)621 1581 0");
 		createEAddress("www", "http://www.ids-mannheim.de");
@@ -202,7 +202,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 				+ "the IDS-Wikipedia."
 				+ config.getLanguageCode()
 				+ "-Corpus, is part of the Archive of General "
-				+ "Reference Corpora at the IDS. It is published under the Creative Commons "
+				+ "Reference Corpora at IDS. It is published under the Creative Commons "
 				+ "Attribution-ShareAlike License. See http://creativecommons.org/licenses/"
 				+ "by-sa/3.0/legalcode for details. See http://www.ids-mannheim.de/kl/projekte/"
 				+ "korpora/releases.html on how to refer to this document.");
