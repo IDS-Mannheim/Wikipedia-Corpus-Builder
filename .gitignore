@@ -1,0 +1,10 @@
+/input
+/wiki*
+/post
+/logs
+/target
+.project
+.classpath
+.settings
+/properties
+/data
