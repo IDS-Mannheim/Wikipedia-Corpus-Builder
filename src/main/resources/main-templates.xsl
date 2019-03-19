@@ -66,7 +66,7 @@
             <xsl:choose>
                 <xsl:when test="string-length(id) gt 7">
                     <xsl:choose>
-                        <xsl:when test="$lang eq 'en'">
+                        <xsl:when test="$lang ne 'de'">
                             <xsl:variable name="intermediate">
                                 <xsl:sequence
                                     select="concat($korpusSigle,'/',
