@@ -1,0 +1,13 @@
+/*xml*
+/logs
+/i5
+/target
+.classpath
+.project
+.settings
+*temp.i5
+/lib
+/properties
+/index/
+src/test/resources
+/code
