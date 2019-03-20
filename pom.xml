@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.ids_mannheim.wiki</groupId>
-	<artifactId>WikitextSampler</artifactId>
+	<artifactId>WikitextSampleBuilder</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
 

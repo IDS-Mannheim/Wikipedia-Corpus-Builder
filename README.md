@@ -1,8 +1,8 @@
-# Wikitext Sampler
+# Wikitext sample builder
 
-Wikitext Sampler is a simple program extracting a number of Wikipages from a Wikipedia dump randomly. The number of Wikipages or the size of the sample is determined by a constant factor with value between 0 and 1. The smaller the value, the smaller the number of pages included in the sample. 
+Wikitext sample builder is a simple tool to randomly extract a number of Wikipages from a Wikipedia dump as a sample. The number of Wikipages or the size of the sample is determined by a constant factor with value between 0 and 1. The smaller the value, the smaller the number of pages included in the sample. 
 
-```java -jar WikitextSampler -i [input-file] -o [output-file] -f [factor] -lw [Löschkandidaten page factor] -rw [redundanz page factor]``` 
+```java -jar WikitextSampleBuilder-[version].jar -i [input-file] -o [output-file] -f [factor] -lw [Löschkandidaten page factor] -rw [redundanz page factor]``` 
 
 where ```i``` is a required option and the other options are optional. By default the factor is set to 0.00001. 
 

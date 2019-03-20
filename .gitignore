@@ -4,3 +4,4 @@
 .classpath
 .project
 /output.xml
+/dependency-reduced-pom.xml
