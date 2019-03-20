@@ -2,16 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>de.ids_mannheim.korap</groupId>
-	<artifactId>sampler</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>de.ids_mannheim.wiki</groupId>
+	<artifactId>WikitextSampler</artifactId>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>sampler</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.java>1.8</version.java>
 	</properties>
 	<build>
 		<plugins>
@@ -25,14 +25,53 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+	        <artifactId>maven-jar-plugin</artifactId>
+	        <version>2.4</version>
+	        <configuration>
+	          <archive>
+	            <manifest>
+	              <mainClass>de.mannheim.ids.wiki.sampler.WikitextSampler</mainClass>
+	            </manifest>
+	          </archive>
+	        </configuration>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>3.8.0</version>
+	        <configuration>
+	          <source>${version.java}</source>
+	          <target>${version.java}</target>
+	        </configuration>
+	      </plugin>
+	      <plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-shade-plugin</artifactId>
+	        <version>3.2.1</version>
+	        <executions>
+	          <execution>
+	            <phase>package</phase>
+	            <goals>
+	              <goal>shade</goal>
+	            </goals>
+	            <configuration>
+	              <transformers>
+	                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+	                  <mainClass>de.mannheim.ids.wiki.sampler.WikitextSampler</mainClass>
+	                </transformer>
+	              </transformers>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
 		</plugins>
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <version>4.12</version>
+		    <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>

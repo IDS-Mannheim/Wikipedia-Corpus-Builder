@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.sampler;
+package de.mannheim.ids.wiki.sampler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -103,6 +101,9 @@ public class WikitextSampler {
 			outputPath = "output.xml";
 			System.out.println("Creating output file with name output.xml");
 		}
+		else{
+			System.out.println("Creating output file "+outputPath);
+		}	
 
 		writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(new File(outputPath))), 2048);
