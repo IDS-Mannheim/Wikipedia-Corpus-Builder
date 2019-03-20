@@ -1,0 +1,7 @@
+/target/
+/dewiki-20170701-sample.xml
+.settings
+.classpath
+.project
+/output.xml
+/dependency-reduced-pom.xml
