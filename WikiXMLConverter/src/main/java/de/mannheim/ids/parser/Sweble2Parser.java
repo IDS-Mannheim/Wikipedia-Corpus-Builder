@@ -5,7 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
@@ -34,7 +35,9 @@ public class Sweble2Parser implements Runnable {
 	private String pagetitle, pageIdStr;
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
-	private Logger log = Logger.getLogger(Sweble2Parser.class);
+	private Logger log = LogManager.getLogger(Sweble2Parser.class);
+	
+	public static boolean DEBUG = false;
 
 	/**
 	 * Generate an Abstract Syntax Tree representation (AST) representation of a
@@ -114,7 +117,9 @@ public class Sweble2Parser implements Runnable {
 		try {
 			Writer w = new StringWriter();
 			// Render AST to XML
-			XMLRenderer renderer = new XMLRenderer(new MyRendererCallback(),
+//			XMLRenderer renderer = new XMLRenderer(new RendererCallbackImpl(),
+//					WikiXMLProcessor.wikiconfig, pageTitle, w);
+			XMLRenderer3 renderer = new XMLRenderer3(new RendererCallbackImpl(),
 					WikiXMLProcessor.wikiconfig, pageTitle, w);
 			renderer.setPageId(pageId);
 			renderer.go(cp.getPage());
@@ -138,9 +143,11 @@ public class Sweble2Parser implements Runnable {
 		this.wikiXML = wikiXML;
 	}
 
-	private static final class MyRendererCallback
+	private static final class RendererCallbackImpl
 			implements
 				HtmlRendererCallback {
+		
+		private Logger log = LogManager.getLogger(RendererCallbackImpl.class);
 		protected static final String LOCAL_URL = WikiXMLProcessor.Wikipedia_URI;
 
 		@Override
@@ -149,9 +156,11 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		@Override
-		public MediaInfo getMediaInfo(String title, int width, int height)
-				throws Exception {
-			return null;
+		public MediaInfo getMediaInfo(String title, int width, int height){
+			if (DEBUG) log.debug("MediaInfo: " +title);
+			MediaInfo mi = new MediaInfo(title, null, null, width, height, null,
+					-1, -1);
+			return mi;
 		}
 
 		public String makeUrl(PageTitle target) {

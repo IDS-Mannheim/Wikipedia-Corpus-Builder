@@ -1,14 +1,14 @@
 # Run at the root folder
-# Example command: ./code/batch.sh de article 20150501
+# Example command: ./batch.sh de article 20130728
 
-wikixml="code/WikiXMLConverter-1.0.2-jar-with-dependencies.jar"
+wikixml="target/WikiXMLConverter-1.0.3-jar-with-dependencies.jar"
 
 lang=$1
 type=$2
 wiki=wiki
 date=$3
 filename=$lang$wiki-$date-$type
-properties=code/properties/$lang/xml-$lang$wiki-$type.properties
+properties=src/test/resources/$lang$wiki-$type.properties
 
 # create some directories if they don't not exists
 mkdir -p logs/wikiXML/$lang

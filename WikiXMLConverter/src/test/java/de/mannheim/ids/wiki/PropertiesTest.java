@@ -13,7 +13,7 @@ public class PropertiesTest {
 	public void testPolskiConfiguration() throws ParseException, IOException {
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
-				.createConfig(new String[]{"-prop", "pl-löschkandidaten.properties"});
+				.createConfig(new String[]{"-prop", "plwiki-löschkandidaten.properties"});
 		
 		assertEquals("Specjalna:Wkład",config.getUserContribution());
 	}

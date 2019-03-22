@@ -6,7 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
 
@@ -15,8 +15,8 @@ import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;
 import de.mannheim.ids.wiki.page.WikiPageReader;
-import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.wiki.page.WikiStatistics;
+import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
@@ -43,7 +43,7 @@ public class WikiXMLProcessor {
 	public static final WikiPage endPage = new WikiPage();
 	public static String Wikipedia_URI;
 
-	public static final WikiConfig wikiconfig = DefaultConfigEnWp.generate();
+	public static WikiConfig wikiconfig = DefaultConfigEnWp.generate();
 	private WikiTitleWriter titleWriter;
 	
 	/**

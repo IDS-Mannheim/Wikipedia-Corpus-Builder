@@ -13,7 +13,7 @@ public class WikiXMLConverterWithPropertiesTest {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
-				.createConfig(new String[]{"-prop", "test-article.properties"});
+				.createConfig(new String[]{"-prop", "dewiki-article.properties"});
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
 	}
@@ -24,7 +24,7 @@ public class WikiXMLConverterWithPropertiesTest {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
-				.createConfig(new String[]{"-prop", "test-talk.properties"});
+				.createConfig(new String[]{"-prop", "dewiki-talk.properties"});
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
 	}
@@ -35,7 +35,7 @@ public class WikiXMLConverterWithPropertiesTest {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
-				.createConfig(new String[]{"-prop", "test-wikipedia-löschkandidaten.properties"});
+				.createConfig(new String[]{"-prop", "dewiki-löschkandidaten.properties"});
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
 	}
@@ -46,7 +46,7 @@ public class WikiXMLConverterWithPropertiesTest {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
-				.createConfig(new String[]{"-prop", "test-wikipedia-redundanz.properties"});
+				.createConfig(new String[]{"-prop", "dewiki-redundanz.properties"});
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();
 	}

@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
@@ -27,7 +28,6 @@ import org.sweble.wikitext.engine.output.MediaInfo;
 import org.sweble.wikitext.engine.output.SafeLinkTitlePrinter;
 import org.sweble.wikitext.engine.utils.EngineAstTextUtils;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
-import org.sweble.wikitext.parser.nodes.WikitextNodeFactoryImpl;
 import org.sweble.wikitext.parser.nodes.WtBody;
 import org.sweble.wikitext.parser.nodes.WtBold;
 import org.sweble.wikitext.parser.nodes.WtDefinitionList;
@@ -98,11 +98,10 @@ import org.sweble.wikitext.parser.nodes.WtXmlEndTag;
 import org.sweble.wikitext.parser.nodes.WtXmlEntityRef;
 import org.sweble.wikitext.parser.nodes.WtXmlStartTag;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
-import org.sweble.wikitext.parser.utils.SimpleParserConfig;
 import org.sweble.wikitext.parser.utils.StringConversionException;
 import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 
-import de.fau.cs.osr.utils.StringUtils;
+import de.fau.cs.osr.utils.StringTools;
 import de.fau.cs.osr.utils.visitor.VisitingException;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 
@@ -1011,7 +1010,7 @@ public final class XMLRenderer extends HtmlRendererBase
 			p.print(esc(text));
 		}
 		else {
-			p.indentAtBol(esc(StringUtils.collapseWhitespace(text)));
+			p.indentAtBol(esc(StringTools.collapseWhitespace(text)));
 		}
 	}
 
@@ -1157,7 +1156,7 @@ public final class XMLRenderer extends HtmlRendererBase
 			targetStr = targetStr.substring(1);
 
 		if (targetStr.contains("&amp;")) {
-			return StringEscapeUtils.unescapeHtml(targetStr);
+			return StringEscapeUtils.unescapeHtml4(targetStr);
 		}
 		else {
 			return esc(targetStr);
@@ -1241,7 +1240,7 @@ public final class XMLRenderer extends HtmlRendererBase
 
 	protected String cleanAttribValue(WtNodeList value) {
 		try {
-			return StringUtils.collapseWhitespace(tu.astToText(value)).trim();
+			return StringTools.collapseWhitespace(tu.astToText(value)).trim();
 		}
 		catch (StringConversionException e) {
 			return toWikitext(value);
@@ -1365,7 +1364,7 @@ public final class XMLRenderer extends HtmlRendererBase
 
 	// =========================================================================
 
-	private static final Logger logger = Logger.getLogger(XMLRenderer.class);
+	private static final Logger logger = LogManager.getLogger(XMLRenderer.class);
 
 	private static final Set<String> blockElements = new HashSet<String>();
 	private static final Set<String> inlineElements = new HashSet<String>();

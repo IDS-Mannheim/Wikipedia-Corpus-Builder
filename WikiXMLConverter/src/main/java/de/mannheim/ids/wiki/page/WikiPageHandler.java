@@ -6,9 +6,13 @@ import java.io.OutputStreamWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.jxpath.xml.DOMParser;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.log4j.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+//import org.apache.commons.jxpath.xml.DOMParser;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
@@ -27,7 +31,7 @@ import de.mannheim.ids.writer.WikiErrorWriter;
  */
 public abstract class WikiPageHandler implements Runnable {
 
-	private Logger log = Logger.getLogger(WikiPageHandler.class);
+	private Logger log = LogManager.getLogger(WikiPageHandler.class);
 	
 	private static final Pattern nonTagPattern = Pattern
 			.compile("<([^!!/a-zA-Z\\s])");
@@ -191,7 +195,7 @@ public abstract class WikiPageHandler implements Runnable {
 		matcher = stylePattern.matcher(wikitext);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
-			String replace = StringEscapeUtils.escapeHtml(matcher.group(1));
+			String replace = StringEscapeUtils.escapeHtml4(matcher.group(1));
 			replace = Matcher.quoteReplacement(replace);
 			matcher.appendReplacement(sb, replace);
 		}
@@ -238,9 +242,12 @@ public abstract class WikiPageHandler implements Runnable {
 		String wikiXML = "<text>" + wikiPage.getWikiXML() + "</text>";
 		try {
 			// test XML validity
-			DOMParser domParser = new DOMParser();
-			domParser.parseXML(
-					new ByteArrayInputStream(wikiXML.getBytes("utf-8")));
+//			DOMParser domParser = new DOMParser();
+//			domParser.parseXML(
+//					new ByteArrayInputStream(wikiXML.getBytes("utf-8")));
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			dBuilder.parse(new ByteArrayInputStream(wikiXML.getBytes("utf-8")));
 		}
 		catch (Exception e) {
 			wikiStatistics.addDomErrors();
