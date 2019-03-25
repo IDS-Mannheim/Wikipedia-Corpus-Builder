@@ -2,12 +2,15 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 public class WikiXMLConverterTest {
 
 	@Test
-	public void testGenerateArticleWikiXML() throws IOException {
+	public void testGenerateArticleWikiXML() throws IOException, ParserConfigurationException, SAXException {
 		// Set the language of the Wikipedia
 		String language = "de";
 		// Set wikidump filepath
@@ -34,7 +37,7 @@ public class WikiXMLConverterTest {
 	}
 
 	@Test
-	public void testGenerateTalkWikiXML() throws IOException {
+	public void testGenerateTalkWikiXML() throws IOException, ParserConfigurationException, SAXException {
 		String language = "de";
 		String wikidump = "data/dewiki-20130728-sample.xml";
 		// User page in the Wikipedia language, e.g. Benutzer in German

@@ -1,9 +1,14 @@
 package de.mannheim.ids.parser;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,12 +17,17 @@ import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
 import org.sweble.wikitext.engine.WtEngineImpl;
+import org.sweble.wikitext.engine.config.Interwiki;
+import org.sweble.wikitext.engine.config.InterwikiImpl;
+import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.EngProcessedPage;
 import org.sweble.wikitext.engine.output.HtmlRendererCallback;
 import org.sweble.wikitext.engine.output.MediaInfo;
+import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;
 import org.sweble.wikitext.engine.utils.UrlEncoding;
 import org.sweble.wikitext.parser.nodes.WtUrl;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
+import org.xml.sax.SAXException;
 
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiStatistics;
@@ -36,6 +46,7 @@ public class Sweble2Parser implements Runnable {
 	private WikiStatistics wikiStatistics;
 	private WikiErrorWriter errorWriter;
 	private Logger log = LogManager.getLogger(Sweble2Parser.class);
+	private WikiConfig wikiConfig;
 	
 	public static boolean DEBUG = false;
 
@@ -59,7 +70,7 @@ public class Sweble2Parser implements Runnable {
 	 */
 	public Sweble2Parser(String pageId, String pagetitle, String wikitext,
 			String language, WikiStatistics wikiStatistics,
-			WikiErrorWriter errorWriter) {
+			WikiErrorWriter errorWriter, WikiConfig wikiConfig) {
 		if (wikitext == null || wikitext.isEmpty()) {
 			throw new IllegalArgumentException(
 					"Wikitext cannot be null or empty.");
@@ -84,6 +95,18 @@ public class Sweble2Parser implements Runnable {
 			throw new IllegalArgumentException(
 					"WikiErrorWriter cannot be null.");
 		}
+		if (wikiConfig == null){
+			try {
+				this.wikiConfig = LanguageConfigGenerator.generateWikiConfig(language);
+			}
+			catch (IOException | ParserConfigurationException
+					| SAXException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			this.wikiConfig = wikiConfig;
+		}
 
 		this.wikitext = wikitext;
 		this.pageIdStr = pageId;
@@ -95,12 +118,12 @@ public class Sweble2Parser implements Runnable {
 
 	@Override
 	public void run() {
-		WtEngine engine = new WtEngineImpl(WikiXMLProcessor.wikiconfig);
+		WtEngine engine = new WtEngineImpl(wikiConfig);
 		PageTitle pageTitle = null;
 		EngProcessedPage cp = null;
 		PageId pageId;
 		try {
-			pageTitle = PageTitle.make(WikiXMLProcessor.wikiconfig, pagetitle);
+			pageTitle = PageTitle.make(wikiConfig, pagetitle);
 			pageId = new PageId(pageTitle, -1);
 //			log.debug(wikitext);
 			// Parse Wikitext into AST
@@ -120,7 +143,7 @@ public class Sweble2Parser implements Runnable {
 //			XMLRenderer renderer = new XMLRenderer(new RendererCallbackImpl(),
 //					WikiXMLProcessor.wikiconfig, pageTitle, w);
 			XMLRenderer3 renderer = new XMLRenderer3(new RendererCallbackImpl(),
-					WikiXMLProcessor.wikiconfig, pageTitle, w);
+					wikiConfig, pageTitle, w);
 			renderer.setPageId(pageId);
 			renderer.go(cp.getPage());
 			wikiXML = w.toString();
@@ -164,21 +187,39 @@ public class Sweble2Parser implements Runnable {
 		}
 
 		public String makeUrl(PageTitle target) {
-			// String page = UrlEncoding.WIKI.encode(target
-			// .getNormalizedFullTitle());
-			String page = target.getNormalizedFullTitle();
-			String f = target.getFragment();
-			String url = page;
-			if (f != null && !f.isEmpty())
-				url = page + "#" + UrlEncoding.WIKI.encode(f);
-			try {
-				url = URLEncoder.encode(url, "UTF-8");
+			InterwikiImpl interwiki = (InterwikiImpl) target.getInterwikiLink();
+			if (interwiki!=null){
+				String parametrizedUrl = interwiki.getUrl();
+				// url without interwiki prefix
+				String title = target.getDenormalizedTitle();
+				String encodedTitle = UrlEncoding.WIKI.encode(title);
+				 try {
+					URL url = new URL(parametrizedUrl.replace("$1", encodedTitle));
+					return url.toString();
+				}
+				catch (MalformedURLException e) {
+					e.printStackTrace();
+					// title with interwiki prefix
+					return target.getUrl().toString();
+				}
 			}
-			catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			else {
+				return target.getUrl().toString();
 			}
-
-			return LOCAL_URL + url;
+			
+//			String page = target.getNormalizedFullTitle();
+//			String f = target.getFragment();
+//			String url = page;
+//			if (f != null && !f.isEmpty())
+//				url = page + "#" + UrlEncoding.WIKI.encode(f);
+//			try {
+//				url = URLEncoder.encode(url, "UTF-8");
+//			}
+//			catch (UnsupportedEncodingException e) {
+//				e.printStackTrace();
+//			}
+//
+//			return LOCAL_URL + url;
 		}
 
 		public String makeUrl(WtUrl target) {

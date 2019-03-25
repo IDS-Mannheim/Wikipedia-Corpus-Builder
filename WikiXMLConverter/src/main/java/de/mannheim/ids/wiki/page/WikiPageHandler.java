@@ -19,6 +19,7 @@ import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.Utilities;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
@@ -129,7 +130,7 @@ public abstract class WikiPageHandler implements Runnable {
 		
 		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
 				wikitext, config.getLanguageCode(), wikiStatistics,
-				errorWriter);
+				errorWriter, WikiXMLProcessor.wikiConfig);
 		swebleParser.run();
 
 		/*Thread swebleThread = new Thread(swebleParser, pageTitle);

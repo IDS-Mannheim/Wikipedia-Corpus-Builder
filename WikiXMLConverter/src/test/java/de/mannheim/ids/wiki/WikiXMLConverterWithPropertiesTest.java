@@ -2,14 +2,17 @@ package de.mannheim.ids.wiki;
 
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.cli.ParseException;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 public class WikiXMLConverterWithPropertiesTest {
 
 	@Test
 	public void testGenerateArticleWikiXMLWithProperties()
-			throws IOException, ParseException {
+			throws IOException, ParseException, ParserConfigurationException, SAXException {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
@@ -20,7 +23,7 @@ public class WikiXMLConverterWithPropertiesTest {
 	
 	@Test
 	public void testGenerateTalkWikiXMLWithProperties()
-			throws IOException, ParseException {
+			throws IOException, ParseException, ParserConfigurationException, SAXException {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
@@ -31,7 +34,7 @@ public class WikiXMLConverterWithPropertiesTest {
 	
 	@Test
 	public void testGenerateWikipediaLöschkandidaten()
-			throws IOException, ParseException {
+			throws IOException, ParseException, ParserConfigurationException, SAXException {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter
@@ -42,7 +45,7 @@ public class WikiXMLConverterWithPropertiesTest {
 	
 	@Test
 	public void testGenerateWikipediaRedundanz()
-			throws IOException, ParseException {
+			throws IOException, ParseException, ParserConfigurationException, SAXException {
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter

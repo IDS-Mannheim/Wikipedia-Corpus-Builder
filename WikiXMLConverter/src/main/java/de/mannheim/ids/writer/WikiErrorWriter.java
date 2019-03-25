@@ -18,7 +18,7 @@ public class WikiErrorWriter {
 
 	public OutputStreamWriter writer;
 	private int errorCounter;
-	private Configuration config;
+	private boolean isDiscussion;
 
 	/**
 	 * Constructs a WikiErrorWriter. The errors are logged in the given input
@@ -38,7 +38,11 @@ public class WikiErrorWriter {
 						+ config.getPageType() + "-errors.log",
 				config.getOutputEncoding());
 		errorCounter = 1;
-		this.config = config;
+		this.isDiscussion = config.isDiscussion();
+	}
+	
+	public WikiErrorWriter() {
+		writer = new OutputStreamWriter(System.out);
 	}
 
 	/**
@@ -65,7 +69,7 @@ public class WikiErrorWriter {
 			writer.append(pageId);
 			writer.append(", cause: ");
 			writer.append(cause.toString());
-			if (config.isDiscussion()) {
+			if (isDiscussion) {
 				writer.append("\n");
 				writer.append(wikitext);
 			}

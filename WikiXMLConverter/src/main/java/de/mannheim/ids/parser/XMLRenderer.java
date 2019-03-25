@@ -1375,7 +1375,7 @@ public final class XMLRenderer extends HtmlRendererBase
 
 	private PageId pageId;
 	public static WtEngine engine = new WtEngineImpl(
-			WikiXMLProcessor.wikiconfig);
+			WikiXMLProcessor.wikiConfig);
 
 	private final EngineNodeFactory nf;
 

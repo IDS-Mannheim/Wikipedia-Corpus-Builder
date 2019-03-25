@@ -75,12 +75,12 @@ public class XMLRenderer3 extends HtmlRenderer {
 	}
 	
 	private PageId pageId;
-	public static WtEngine engine = new WtEngineImpl(
-			WikiXMLProcessor.wikiconfig);
+	private WtEngine engine;
 	
 	protected XMLRenderer3(HtmlRendererCallback callback,
 			WikiConfig wikiConfig, PageTitle pageTitle, Writer w) {
 		super(callback, wikiConfig, pageTitle, w);
+		this.engine = new WtEngineImpl(wikiConfig);
 		p.incIndent();
 	}
 

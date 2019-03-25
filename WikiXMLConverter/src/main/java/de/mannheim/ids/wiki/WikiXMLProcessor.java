@@ -6,9 +6,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.sweble.wikitext.engine.config.WikiConfig;
-import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
+import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;
+import org.xml.sax.SAXException;
 
 import de.mannheim.ids.executor.BlockingThreadPoolExecutor;
 import de.mannheim.ids.wiki.page.WikiArticleHandler;
@@ -43,7 +46,7 @@ public class WikiXMLProcessor {
 	public static final WikiPage endPage = new WikiPage();
 	public static String Wikipedia_URI;
 
-	public static WikiConfig wikiconfig = DefaultConfigEnWp.generate();
+	public static WikiConfig wikiConfig;
 	private WikiTitleWriter titleWriter;
 	
 	/**
@@ -54,13 +57,18 @@ public class WikiXMLProcessor {
 	 * @throws IOException
 	 *             an IOException of failed instantiating a WikiXMLProcessor
 	 *             object
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
 	 */
-	public WikiXMLProcessor(Configuration config) throws IOException {
+	public WikiXMLProcessor(Configuration config)
+			throws IOException, ParserConfigurationException, SAXException {
 		if (config == null) {
 			throw new IllegalArgumentException("Configuration cannot be null.");
 		}
 		this.config = config;
 		this.wikiStatistics = new WikiStatistics();
+		WikiXMLProcessor.wikiConfig = LanguageConfigGenerator
+				.generateWikiConfig(config.getLanguageCode());
 		WikiXMLProcessor.errorWriter = new WikiErrorWriter(config);
 		titleWriter = new WikiTitleWriter(config);
 		
