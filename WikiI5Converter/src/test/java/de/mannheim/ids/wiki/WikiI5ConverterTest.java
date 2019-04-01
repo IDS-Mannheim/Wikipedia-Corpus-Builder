@@ -98,8 +98,7 @@ public class WikiI5ConverterTest {
 	public void testIndexingWikiXML() throws IOException, InterruptedException,
 			ParserConfigurationException, SAXException, I5Exception {
 		String type = "article";
-		// ATTENTION: change the paths below to your wikixml folder
-		String xmlFolder = "wikixml-de/" + type;
+		String xmlFolder = "../WikiXMLConverter/wikixml-de/" + type+"/";
 		String index = "index/dewiki-" + type + "-index.xml";
 
 		Process p = Runtime.getRuntime().exec(

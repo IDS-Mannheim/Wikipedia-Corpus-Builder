@@ -49,7 +49,6 @@ import org.sweble.wikitext.parser.nodes.WtXmlEntityRef;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
 
 import de.fau.cs.osr.utils.visitor.VisitingException;
-import de.mannheim.ids.wiki.WikiXMLProcessor;
 
 /**
  * Customized XML renderer based on {@link HtmlRenderer} of 

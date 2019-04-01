@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.parser;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,7 +32,8 @@ public class InterwikiLinkTest {
 	public void testImageLink()
 			throws IOException, ParserConfigurationException, SAXException,
 			ValidityException, ParsingException {
-		String wikitext = "[[File:Blue ribbon.svg|8px|link=:en:Blue Ribbon Online Free Speech Campaign]] ";
+		String wikitext = "[[File:Blue ribbon.svg|8px|link=:en:Blue Ribbon "
+				+ "Online Free Speech Campaign]] ";
 
 		WikiConfig wikiConfig = LanguageConfigGenerator
 				.generateWikiConfig("de");
@@ -49,7 +50,8 @@ public class InterwikiLinkTest {
 		String href = a.query("@href").get(0).getValue();
 
 		assertEquals(
-				"https://en.wikipedia.org/wiki/Blue_Ribbon_Online_Free_Speech_Campaign",
+				"https://en.wikipedia.org/wiki/Blue_Ribbon_Online_Free_"
+						+ "Speech_Campaign",
 				href);
 		assertEquals("Datei:Blue ribbon.svg", a.getValue());
 

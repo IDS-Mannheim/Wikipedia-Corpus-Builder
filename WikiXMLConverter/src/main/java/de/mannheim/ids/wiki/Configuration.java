@@ -30,7 +30,7 @@ public class Configuration {
 	private String outputEncoding;
 	private String wikitextFolder;
 	private String pageType;
-	private String titlePrefix;
+	private String titlePrefix="";
 	private int namespaceKey;
 	private int maxThreads;
 	private List<String> excludedPages = new ArrayList<String>();
@@ -320,7 +320,9 @@ public class Configuration {
 	 *            the titlePrefix to set
 	 */
 	public void setTitlePrefix(String titlePrefix) {
-		this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKC);
+		if (titlePrefix != null && !titlePrefix.isEmpty()){
+			this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKC);
+		}
 	}
 
 	/**
@@ -405,7 +407,10 @@ public class Configuration {
 	 * @param maxThreads the number of maximum threads allowed to run concurrently.
 	 */
 	public void setMaxThreads(int maxThreads) {
-		this.maxThreads = maxThreads;
+		if (maxThreads>0){
+			this.maxThreads = maxThreads;
+		}
+		else this.maxThreads=1;
 	}
 
 	/**

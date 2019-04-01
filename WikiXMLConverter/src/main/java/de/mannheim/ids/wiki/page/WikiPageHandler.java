@@ -51,6 +51,8 @@ public abstract class WikiPageHandler implements Runnable {
 
 	protected Configuration config;
 
+	private boolean DEBUG = false;
+
 	/**
 	 * Constructs a WikiPageHandler for the given wikipage using the other given
 	 * variables.
@@ -109,10 +111,12 @@ public abstract class WikiPageHandler implements Runnable {
 			throw new IllegalArgumentException("Wikitext cannot be null.");
 		}
 
+		if (DEBUG) log.debug("original wikitext: " +wikitext);
 		// unescape XML tags
 		wikitext = StringEscapeUtils.unescapeXml(wikitext);
 		wikitext = cleanPattern(wikitext);
-//		log.debug(wikitext);
+		if (DEBUG) log.debug("cleaned wikitext: " +wikitext);
+		
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
@@ -122,7 +126,7 @@ public abstract class WikiPageHandler implements Runnable {
 			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId, e.getCause(),
 					"");
 		}
-//		log.debug("tagSoup" + wikitext);
+		if (DEBUG) log.debug("tagSoup output: " + wikitext);
 		
 		// repair comment tags
 //		wikitext = wikitext.replace("&lt;!--", "<!--");
