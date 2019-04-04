@@ -10,28 +10,12 @@ import java.util.concurrent.BlockingQueue;
 
 import org.junit.Test;
 
+import de.mannheim.ids.base.GermanTestBase;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageReader;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 
-public class WikiPageReaderTest {
-
-	public static Configuration createConfig(String wikidump, int namespace,
-			String pageType) {
-		String language = "de";
-		String userPage = "Benutzer";
-		String userContribution = "Spezial:Beiträge";
-		String helpSignature = "Hilfe:Signatur";
-		String unsigned = "unsigniert";
-		int maxThread = 1;
-		boolean generateWikitext = false;
-
-		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, helpSignature, unsigned, namespace, pageType,
-				null, null, maxThread, generateWikitext);
-
-		return config;
-	}
+public class WikiPageReaderTest extends GermanTestBase{
 
 	public static WikiPage readPage(Configuration config) throws InterruptedException {
 		BlockingQueue<WikiPage> wikipages = new ArrayBlockingQueue<WikiPage>(

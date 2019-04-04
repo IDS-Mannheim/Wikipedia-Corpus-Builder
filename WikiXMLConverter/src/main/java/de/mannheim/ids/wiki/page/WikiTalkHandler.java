@@ -40,6 +40,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private static final Pattern spanPattern = Pattern
 			.compile("(.*)(&lt;span style.*&gt;)(-{0,2})");
 
+	private static final Pattern inTemplatePattern = Pattern.compile("([^}]*)}}(.*)");
+	
 	private static Pattern signaturePattern, userContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -279,8 +281,15 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 
 		Matcher matcher = signaturePattern.matcher(trimmedText);
-
+		
 		if (matcher.find()) {
+			Matcher templateMatcher = inTemplatePattern.matcher(matcher.group(3));
+			if (templateMatcher.find()){
+				if (!templateMatcher.group(1).contains("{{")){
+					return false;
+				}
+			}
+			
 			post += cleanSpanBeforeSignature(matcher.group(1));
 
 			String userLink, userLinkText;

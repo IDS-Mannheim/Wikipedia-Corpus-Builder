@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import de.mannheim.ids.base.GermanTestBase;
 import de.mannheim.ids.wiki.Configuration;
@@ -18,30 +15,31 @@ import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
-import nu.xom.Node;
+import nu.xom.Nodes;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-public class TimestampTest extends GermanTestBase{
+public class SignatureTest extends GermanTestBase {
 
 	@Test
-	public void testMissingTextBug()
-			throws IOException, ParserConfigurationException, SAXException,
-			ValidityException, ParsingException {
-
+	public void testSignatureInTemplate()
+			throws IOException, ValidityException, ParsingException {
 		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Benutzer Diskussion:Abu-Dun/Archiv/2017");
-		wikiPage.setPageId("9756545");
+		wikiPage.setPageTitle("Diskussion:Hauspferd");
+		wikiPage.setPageId("12765");
 		wikiPage.setPageIndex(true);
 		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add("Moin Abu-Dun,&lt;br /&gt;der Artikel "
-				+ "[[Journey (Computerspiel 2012)]] enthält ziemlich viele "
-				+ "defekte Weblinks. Magst Du Dich evtl. mal darum kümmern?"
-				+ "&lt;br /&gt;Vielen Dank und viele Grüße, [[Benutzer "
-				+ "Diskussion:Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 "
-				+ "(CET)");
+		wikiPage.textSegments.add("{{Diskussion aufgeräumt|24. Februar 2014|2="
+				+ "[https://de.wikipedia.org/w/index.php?title=Diskussion:"
+				+ "Hauspferd&amp;oldid=124833777 Version vom 25. November 2013"
+				+ "]|3=[[Benutzer:Fallen Sheep|Fallen Sheep]] ([[Benutzer "
+				+ "Diskussion:Fallen Sheep|Diskussion]]) 00:17, 24. Feb. 2014 "
+				+ "(CET)}}{{Autoarchiv |Alter=180 |Ziel='((Lemma))/Archiv/1'"
+				+ "|Übersicht=[[Diskussion:Hauspferd/Archiv/1|Archiv]]|"
+				+ "Mindestbeiträge=1 |Mindestabschnitte =3 |Frequenz="
+				+ "monatlich}}");
 
-		int namespaceKey = 3; // benutzer diskussion
+		int namespaceKey = 2; // diskussion
 		Configuration config = new Configuration(wikidump, language, userPage,
 				userContribution, helpSignature, unsigned, namespaceKey, "talk",
 				null, null, 0, generateWikitext);
@@ -56,9 +54,8 @@ public class TimestampTest extends GermanTestBase{
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-//		System.out.println(wikiXML);
 		Document doc = builder.build(wikiXML, null);
-		Node a = doc.query("/posting/p/a[1]").get(0);
-		assertEquals("Journey (Computerspiel 2012)", a.getValue());
+		Nodes spans = doc.query("/posting/p/span[@class='template']");
+		assertEquals(2,spans.size());
 	}
 }
