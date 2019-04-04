@@ -35,13 +35,15 @@ public class WikiTalkHandler extends WikiPageHandler {
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 
 	private static final Pattern unsignedPattern = Pattern
-			.compile("(.*)\\{\\{unsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
+			.compile(
+					"(.*)\\{\\{[uU]nsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
 	private static final Pattern spanPattern = Pattern
 			.compile("(.*)(&lt;span style.*&gt;)(-{0,2})");
 
-	private static final Pattern inTemplatePattern = Pattern.compile("([^}]*)}}(.*)");
-	
+	private static final Pattern inTemplatePattern = Pattern
+			.compile("([^}]*)}}(.*)");
+
 	private static Pattern signaturePattern, userContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -50,6 +52,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private boolean baselineMode = false;
 	private String post;
 	private StringBuilder wikiXMLBuilder;
+	private String unsignedSentenceCase;
 
 	/**
 	 * Constructs a WikiPostHandler and compiles some regex patterns used in
@@ -95,7 +98,14 @@ public class WikiTalkHandler extends WikiPageHandler {
 				.compile("(.*)\\[\\[(" + config.getUserContribution()
 						+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 
-		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + config.getUnsigned()
+		String keyword = config.getUnsigned();
+		unsignedSentenceCase = keyword.substring(0, 1).toUpperCase()
+				+ keyword.substring(1);
+		keyword = "["+keyword.substring(0, 1).toUpperCase()+"|"
+				+keyword.substring(0, 1).toLowerCase()+"]"
+				+keyword.substring(1);
+		
+		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + keyword
 				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 	}
 
@@ -105,8 +115,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
 			}
-			System.out.println(wikiPage.getPageIndex() + "/"+wikiPage.getPageId() + ".xml");
-			
+			System.out.println(wikiPage.getPageIndex() + "/"
+					+ wikiPage.getPageId() + ".xml");
+
 			// creating postings by gradually checking small portions of
 			// wikitext (segments of wikitext)
 			wikiXMLBuilder = new StringBuilder();
@@ -194,8 +205,16 @@ public class WikiTalkHandler extends WikiPageHandler {
 				if (handleUnsigned(trimmedText, "unsigned"))
 					return;
 			}
+			else if (trimmedText.contains("Unsigned")) {
+				if (handleUnsigned(trimmedText, "Unsigned"))
+					return;
+			}
 			if (trimmedText.contains(config.getUnsigned())) {
 				if (handleUnsigned(trimmedText, config.getUnsigned()))
+					return;
+			}
+			else if (trimmedText.contains(unsignedSentenceCase)){
+				if (handleUnsigned(trimmedText, unsignedSentenceCase))
 					return;
 			}
 
@@ -281,15 +300,16 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 
 		Matcher matcher = signaturePattern.matcher(trimmedText);
-		
+
 		if (matcher.find()) {
-			Matcher templateMatcher = inTemplatePattern.matcher(matcher.group(3));
-			if (templateMatcher.find()){
-				if (!templateMatcher.group(1).contains("{{")){
+			Matcher templateMatcher = inTemplatePattern
+					.matcher(matcher.group(3));
+			if (templateMatcher.find()) {
+				if (!templateMatcher.group(1).contains("{{")) {
 					return false;
 				}
 			}
-			
+
 			post += cleanSpanBeforeSignature(matcher.group(1));
 
 			String userLink, userLinkText;
@@ -323,12 +343,12 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 	private String cleanSpanBeforeSignature(String text) {
 		Matcher spanMatcher = spanPattern.matcher(text);
-		if (spanMatcher.find()){
+		if (spanMatcher.find()) {
 			text = spanMatcher.group(1) + spanMatcher.group(3);
-		}	
+		}
 		return text;
 	}
-	
+
 	/**
 	 * Re-checks and determines the signature type.
 	 * 
@@ -419,7 +439,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 		else {
 			Matcher matcher;
-			if (unsigned.equals("unsigned")) {
+			if (unsigned.toLowerCase().equals("unsigned")) {
 				matcher = unsignedPattern.matcher(trimmedText);
 			}
 			else {
@@ -434,7 +454,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 					rest = t.getPostscript();
 				}
 				rest += matcher.group(4);
-				post += matcher.group(1);
+				if (matcher.group(1) != null) {
+					post += matcher.group(1);
+				}
 				addSignature(SignatureType.UNSIGNED, timestamp);
 				writePost(matcher.group(2), null, timestamp, rest);
 
