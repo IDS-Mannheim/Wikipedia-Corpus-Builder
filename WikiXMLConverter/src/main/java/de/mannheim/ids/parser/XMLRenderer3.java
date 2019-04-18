@@ -136,8 +136,8 @@ public class XMLRenderer3 extends HtmlRenderer {
 		}
 
 		// FIXME: I think these should be removed in the parser already?!
-		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
-			return;
+//		if (target.getNamespace() == wikiConfig.getNamespace("Category"))
+//			return;
 
 		if (!callback.resourceExists(target))
 		{
@@ -170,8 +170,9 @@ public class XMLRenderer3 extends HtmlRenderer {
 		{
 			if (!target.equals(pageTitle))
 			{
-				if (n.hasTitle())
-				{
+				// EM: fix link title with empty text (e.g. space)
+				if (n.hasTitle()
+						&& !isWtTextEmpty((WtText) n.getTitle().get(0))) {
 					pt("<a href=\"%s\" title=\"%s\">%=%!%=</a>",
 							callback.makeUrl(target),
 							makeLinkTitle(n, target),
@@ -207,6 +208,13 @@ public class XMLRenderer3 extends HtmlRenderer {
 				}
 			}
 		}
+	}
+	
+	private boolean isWtTextEmpty(WtText text) {
+		if(text.getContent().trim().isEmpty()){
+			return true;
+		} 
+		return false;
 	}
 	
 	@Override

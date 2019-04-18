@@ -1,11 +1,6 @@
 package de.mannheim.ids.wiki;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
@@ -30,7 +25,7 @@ public class Configuration {
 	private String outputEncoding;
 	private String wikitextFolder;
 	private String pageType;
-	private String titlePrefix="";
+	private String titlePrefix = "";
 	private int namespaceKey;
 	private int maxThreads;
 	private List<String> excludedPages = new ArrayList<String>();
@@ -84,11 +79,11 @@ public class Configuration {
 	 * @param namespaceKey
 	 *            the namespace key of the Wikipedia pages to convert, e.g 0 for
 	 *            articles, 1 for talk pages, 3 for user talk pages
-	 * @param pageType 
-	 * 			the type of the wiki pages, e.g. article
+	 * @param pageType
+	 *            the type of the wiki pages, e.g. article
 	 * 
-	 * @param titlePrefix 
-	 * 			the prefix that the page titles start with
+	 * @param titlePrefix
+	 *            the prefix that the page titles start with
 	 * @param encoding
 	 *            the output encoding, by default is utf-8
 	 * @param maxThread
@@ -113,6 +108,9 @@ public class Configuration {
 		setPageType(pageType);
 		setTitlePrefix(titlePrefix);
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
+		if (encoding == null || encoding.isEmpty()) {
+			encoding = "utf-8";
+		}
 		setOutputEncoding(encoding);
 		setMaxThreads(maxThread);
 		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
@@ -124,45 +122,46 @@ public class Configuration {
 	 * 
 	 * @param properties
 	 *            the location of the properties file
-	 * @throws IOException
-	 *             an IOException
 	 */
-	public Configuration(String properties) throws IOException {
+	public Configuration(Properties properties) {
 
-		InputStream is = Configuration.class.getClassLoader()
-				.getResourceAsStream(properties);
-
-		if (is == null){
-			is = new FileInputStream(new File(properties));
-		}
-			
-		Properties config = new Properties();
-		config.load(new InputStreamReader(is, StandardCharsets.UTF_8));
-
-		int namespaceKey = Integer
-				.parseInt(config.getProperty("namespace_key"));
+		String namespace = loadRequiredParameter(properties, "namespace_key");
+		int namespaceKey = Integer.parseInt(namespace);
 		setDiscussion(namespaceKey);
 		setNamespaceKey(namespaceKey);
 
-		setWikidump(config.getProperty("wikidump"));
-		setLanguageCode(config.getProperty("language_code"));
-		setUserPage(config.getProperty("user_page"));
-		setUserContribution(config.getProperty("user_contribution"));
-		setUnsigned(config.getProperty("unsigned"));
-		setSignature(config.getProperty("signature"));
-
-		setTitlePrefix(config.getProperty("title_prefix", ""));
-		setPageType(config.getProperty("page_type", ""));
+		setWikidump(loadRequiredParameter(properties, "wikidump"));
+		setLanguageCode(loadRequiredParameter(properties, "language_code"));
+		setPageType(loadRequiredParameter(properties, "page_type"));
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
-		setOutputEncoding(config.getProperty("output_encoding"));
-		setMaxThreads(Integer.parseInt(config.getProperty("max_threads")));
 
-		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		if (isDiscussion) {
+			setUserPage(loadRequiredParameter(properties, "user_page"));
+			setUserContribution(
+					loadRequiredParameter(properties, "user_contribution"));
+			setUnsigned(loadRequiredParameter(properties, "unsigned"));
+			setSignature(loadRequiredParameter(properties, "signature"));
+		}
+
+		// optional
+		setOutputEncoding(properties.getProperty("output_encoding", "utf-8"));
+		setMaxThreads(Integer.parseInt(properties.getProperty("max_threads", "1")));
+		setTitlePrefix(properties.getProperty("title_prefix", ""));
 		setWikitextToGenerate(Boolean
-				.valueOf(config.getProperty("generate_wikipage", "false")));
-		
-		setExcludedPages(config.getProperty("exclude_page_id", ""));
-		is.close();
+				.valueOf(properties.getProperty("generate_wikipage", "false")));
+		if (isWikitextToGenerate()){
+			setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		}
+		setExcludedPages(properties.getProperty("exclude_page_id", ""));
+	}
+
+	public String loadRequiredParameter(Properties config, String param) {
+		String value = config.getProperty(param);
+
+		if (value == null || value.isEmpty()) {
+			throw new IllegalArgumentException(param + " is required.");
+		}
+		return value;
 	}
 
 	/**
@@ -227,9 +226,6 @@ public class Configuration {
 	 *            the output file encoding
 	 */
 	public void setOutputEncoding(String encoding) {
-		if (encoding == null || encoding.isEmpty()) {
-			encoding = "utf-8";
-		}
 		this.outputEncoding = encoding;
 	}
 
@@ -320,7 +316,7 @@ public class Configuration {
 	 *            the titlePrefix to set
 	 */
 	public void setTitlePrefix(String titlePrefix) {
-		if (titlePrefix != null && !titlePrefix.isEmpty()){
+		if (titlePrefix != null && !titlePrefix.isEmpty()) {
 			this.titlePrefix = Normalizer.normalize(titlePrefix, Form.NFKC);
 		}
 	}
@@ -404,13 +400,15 @@ public class Configuration {
 	/**
 	 * Sets the number of maximum threads allowed to run concurrently.
 	 * 
-	 * @param maxThreads the number of maximum threads allowed to run concurrently.
+	 * @param maxThreads
+	 *            the number of maximum threads allowed to run concurrently.
 	 */
 	public void setMaxThreads(int maxThreads) {
-		if (maxThreads>0){
+		if (maxThreads > 0) {
 			this.maxThreads = maxThreads;
 		}
-		else this.maxThreads=1;
+		else
+			this.maxThreads = 1;
 	}
 
 	/**
@@ -503,7 +501,7 @@ public class Configuration {
 
 	public void setExcludedPages(String str) {
 		String[] ids = str.split(",");
-		for (String id:ids){
+		for (String id : ids) {
 			excludedPages.add(id.trim());
 		}
 	}

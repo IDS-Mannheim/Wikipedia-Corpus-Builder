@@ -55,10 +55,11 @@ public class WikiXMLProcessor {
 	 * @param config
 	 *            the conversion configuration
 	 * @throws IOException
-	 *             an IOException of failed instantiating a WikiXMLProcessor
-	 *             object
-	 * @throws SAXException 
-	 * @throws ParserConfigurationException 
+	 *             an IOException in WikiXMLProcessor instantiation
+	 * @throws SAXException
+	 *             SAXException in generating Sweble WikiConfig
+	 * @throws ParserConfigurationException
+	 *             ParserConfigurationException in generating Sweble WikiConfig
 	 */
 	public WikiXMLProcessor(Configuration config)
 			throws IOException, ParserConfigurationException, SAXException {

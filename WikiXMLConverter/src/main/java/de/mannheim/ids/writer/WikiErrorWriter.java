@@ -33,14 +33,15 @@ public class WikiErrorWriter {
 		String filename = Paths.get(config.getWikidump()).getFileName()
 				.toString();
 
-		writer = Utilities.createWriter("logs/wikiXML/"+config.getLanguageCode(),
+		writer = Utilities.createWriter(
+				"logs/wikiXML/" + config.getLanguageCode(),
 				"wikiXML-" + filename.substring(0, 15) + "-"
 						+ config.getPageType() + "-errors.log",
 				config.getOutputEncoding());
 		errorCounter = 1;
 		this.isDiscussion = config.isDiscussion();
 	}
-	
+
 	public WikiErrorWriter() {
 		writer = new OutputStreamWriter(System.out);
 	}
@@ -52,6 +53,8 @@ public class WikiErrorWriter {
 	 *            the type of the error
 	 * @param pagetitle
 	 *            the wiki page title where the error has occurred
+	 * @param pageId
+	 *            the id of the wiki page
 	 * @param cause
 	 *            the cause of the error
 	 * @param wikitext

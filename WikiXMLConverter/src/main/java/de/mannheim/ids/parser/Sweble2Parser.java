@@ -2,11 +2,9 @@ package de.mannheim.ids.parser;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -17,7 +15,6 @@ import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngine;
 import org.sweble.wikitext.engine.WtEngineImpl;
-import org.sweble.wikitext.engine.config.Interwiki;
 import org.sweble.wikitext.engine.config.InterwikiImpl;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.EngProcessedPage;
@@ -67,6 +64,8 @@ public class Sweble2Parser implements Runnable {
 	 *            a statistic counter
 	 * @param errorWriter
 	 *            a WikiErrorWriter
+	 * @param wikiConfig
+	 *            the wiki configuration
 	 */
 	public Sweble2Parser(String pageId, String pagetitle, String wikitext,
 			String language, WikiStatistics wikiStatistics,
@@ -125,7 +124,7 @@ public class Sweble2Parser implements Runnable {
 		try {
 			pageTitle = PageTitle.make(wikiConfig, pagetitle);
 			pageId = new PageId(pageTitle, -1);
-//			log.debug(wikitext);
+			if (DEBUG) log.debug(wikitext);
 			// Parse Wikitext into AST
 			cp = engine.postprocess(pageId, wikitext, null);
 //			log.debug(cp);
