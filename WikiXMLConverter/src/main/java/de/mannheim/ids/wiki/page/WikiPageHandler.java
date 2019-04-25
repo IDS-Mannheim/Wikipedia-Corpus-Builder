@@ -274,9 +274,8 @@ public abstract class WikiPageHandler implements Runnable {
 			// try fixing missing tags
 			StringBuilder sb = new StringBuilder();
 			sb.append(wikiPage.getPageIndent());
-
-			sb.append(
-					tagSoupParser.generate(wikiPage.getPageStructure(), false));
+			String pageStructure = tagSoupParser.generate(wikiPage.getPageStructure(), false);
+			sb.append(pageStructure);
 			wikiPage.setPageStructure(sb.toString());
 		}
 		catch (Exception e) {
@@ -298,7 +297,7 @@ public abstract class WikiPageHandler implements Runnable {
 	 *            the output folder
 	 * @throws IOException an IOException if failed writing wikiXML
 	 */
-	private void writeWikiXML(String content, String outputFolder)
+	public void writeWikiXML(String content, String outputFolder)
 			throws IOException {
 
 		if (wikiPage == null) {

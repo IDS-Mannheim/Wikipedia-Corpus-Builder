@@ -11,6 +11,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
 import de.mannheim.ids.wiki.Configuration;
@@ -19,6 +21,10 @@ import de.mannheim.ids.wiki.Utilities;
 public class WikiTitleWriter {
 
 	public XMLStreamWriter writer;
+	
+	public WikiTitleWriter(XMLStreamWriter w) {
+		this.writer = w;
+	}
 	
 	public WikiTitleWriter(Configuration config) throws IOException {
 		
@@ -52,7 +58,7 @@ public class WikiTitleWriter {
 			}
 		}
 		catch (XMLStreamException e) {
-			System.out.println("Failed creating an XMLStreamWriter: "+e.getMessage());
+			System.err.println("Failed creating an XMLStreamWriter: "+e.getMessage());
 		}
 		
 		writer = new IndentingXMLStreamWriter(w);
@@ -69,7 +75,7 @@ public class WikiTitleWriter {
 		try {
 			writer.writeStartElement("title");
 			writer.writeAttribute("id", pageId);
-			writer.writeCharacters(pagetitle);
+			writer.writeCharacters(StringEscapeUtils.unescapeXml(pagetitle));
 			writer.writeEndElement();
 			writer.flush();
 		}

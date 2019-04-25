@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
@@ -44,4 +46,16 @@ public class WikiPageReaderTest extends GermanTestBase{
 		assertTrue(wikiPage.textSegments.size() > 0);
 	}
 
+	@Test
+	public void testTitle() throws IOException, InterruptedException, XMLStreamException {
+		String wikidump = "src/test/resources/wikitext/dewiki-20170701-1422522.xml";
+		Configuration config = createConfig(wikidump, 1, "talk");
+		WikiPage wikiPage = readPage(config);
+		assertEquals("1422522", wikiPage.getPageId());
+		assertEquals("Diskussion:.460 S&amp;W Magnum",
+				wikiPage.getPageTitle());
+		assertEquals("Char", wikiPage.getPageIndex());
+		assertNotNull(wikiPage.getPageStructure());
+		assertTrue(wikiPage.textSegments.size() > 0);
+	}
 }

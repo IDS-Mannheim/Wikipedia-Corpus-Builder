@@ -1,0 +1,60 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.8/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.8/ http://www.mediawiki.org/xml/export-0.8.xsd" version="0.8" xml:lang="de">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <base>http://de.wikipedia.org/wiki/Hauptseite</base>
+    <generator>MediaWiki 1.22wmf11</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Medium</namespace>
+      <namespace key="-1" case="first-letter">Spezial</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Diskussion</namespace>
+      <namespace key="2" case="first-letter">Benutzer</namespace>
+      <namespace key="3" case="first-letter">Benutzer Diskussion</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia Diskussion</namespace>
+      <namespace key="6" case="first-letter">Datei</namespace>
+      <namespace key="7" case="first-letter">Datei Diskussion</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki Diskussion</namespace>
+      <namespace key="10" case="first-letter">Vorlage</namespace>
+      <namespace key="11" case="first-letter">Vorlage Diskussion</namespace>
+      <namespace key="12" case="first-letter">Hilfe</namespace>
+      <namespace key="13" case="first-letter">Hilfe Diskussion</namespace>
+      <namespace key="14" case="first-letter">Kategorie</namespace>
+      <namespace key="15" case="first-letter">Kategorie Diskussion</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal Diskussion</namespace>
+      <namespace key="828" case="first-letter">Modul</namespace>
+      <namespace key="829" case="first-letter">Modul Diskussion</namespace>
+    </namespaces>
+  </siteinfo>
+  <page>
+    <title>Diskussion:.460 S&amp;W Magnum</title>
+    <ns>1</ns>
+    <id>1422522</id>
+    <revision>
+      <id>65185903</id>
+      <parentid>62926738</parentid>
+      <timestamp>2009-10-03T16:31:14Z</timestamp>
+      <contributor>
+        <username>Umherirrender</username>
+        <id>424450</id>
+      </contributor>
+      <minor />
+      <comment>unterstriche nicht mehr nötig</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">{{Waffenwiki|.460 S&amp;W Magnum}}
+
+==Fachkentniss==
+
+Was bitte schön ist X-Frame und wo liegt hier der Sachzusammenhang? Wäre schön wenn man in den Einführungsartikeln soviel infos findet das man keinen Dipl. Ing. in Waffentechnik braucht um die Infos in diesem Bereich zu verstehen... --[[Benutzer:Nemissimo|Nemissimo]] 11:10, 27. Apr 2006 (CEST)
+
+:Hm ja ... was ist ein Einführungsartikel - oder meinst Du die Einleitung ? Ingesamt zählt diese Patrone zu den &quot;dicker, breiter, länger, stärker etc.&quot; Exoten. Daher braucht man auch einen X-Frame .... bei Revolvern spricht man von Rahmengrößen wie: small Frame, (kleiner Rahmen), large Frame usw. Was das jeweils bedeutet ist oft dem Marketing der Hersteller entsprungen. Mal sehen was sich im Artikel bessern läßt. [[Benutzer:Gruß Tom|Gruß Tom]] 12:05, 2. Aug. 2009 (CEST)
+
+::Ja er meint die Einleitung--[[Benutzer:Sanandros|Sanandros]] 17:32, 3. Aug. 2009 (CEST)</text>
+      <sha1>9xwwyex95eo8eitl3uxtcq4looxx642</sha1>
+    </revision>
+  </page>
+</mediawiki>

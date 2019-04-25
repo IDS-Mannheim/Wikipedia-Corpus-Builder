@@ -1,6 +1,5 @@
 package de.mannheim.ids.wiki;
 
-import java.io.IOException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
@@ -99,22 +98,27 @@ public class Configuration {
 
 		setNamespaceKey(namespaceKey);
 		setDiscussion(namespaceKey);
+		
 		setWikidump(wikidump);
 		setLanguageCode(language);
-		setUserPage(userPage);
-		setUserContribution(userContribution);
-		setUnsigned(unsigned);
-		setSignature(helpSignature);
 		setPageType(pageType);
-		setTitlePrefix(titlePrefix);
 		setOutputFolder("wikixml-" + languageCode + "/" + pageType);
-		if (encoding == null || encoding.isEmpty()) {
-			encoding = "utf-8";
+		
+		if (isDiscussion) {
+			setUserPage(userPage);
+			setUserContribution(userContribution);
+			setUnsigned(unsigned);
+			setSignature(helpSignature);
 		}
+		
 		setOutputEncoding(encoding);
 		setMaxThreads(maxThread);
-		setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		setTitlePrefix(titlePrefix);
+		
 		setWikitextToGenerate(generateWikitext);
+		if (isWikitextToGenerate()){
+			setWikitextFolder("wikitext-" + languageCode + "/" + pageType);
+		}
 	}
 
 	/**
@@ -226,6 +230,9 @@ public class Configuration {
 	 *            the output file encoding
 	 */
 	public void setOutputEncoding(String encoding) {
+		if (encoding == null || encoding.isEmpty()) {
+			encoding = "utf-8";
+		}
 		this.outputEncoding = encoding;
 	}
 
