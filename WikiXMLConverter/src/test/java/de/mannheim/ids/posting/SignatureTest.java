@@ -15,11 +15,20 @@ import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
+import nu.xom.Node;
 import nu.xom.Nodes;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 public class SignatureTest extends GermanTestBase {
+
+	private WikiPostUser postUser;
+	private WikiPostTime postTime;
+
+	public SignatureTest() throws IOException {
+		postUser = new WikiPostUser("test", "talk");
+		postTime = new WikiPostTime("test", "talk");
+	}
 
 	@Test
 	public void testSignatureInTemplate()
@@ -39,23 +48,83 @@ public class SignatureTest extends GermanTestBase {
 				+ "Mindestbeiträge=1 |Mindestabschnitte =3 |Frequenz="
 				+ "monatlich}}");
 
-		int namespaceKey = 2; // diskussion
-		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, helpSignature, unsigned, namespaceKey, "talk",
-				null, null, 0, generateWikitext);
-
-		WikiPostUser postUser = new WikiPostUser("test", "talk");
-		WikiPostTime postTime = new WikiPostTime("test", "talk");
+		int namespaceKey = 1; // diskussion
+		Configuration config = createConfig(wikidump, namespaceKey, "talk");
 
 		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(),
-				new WikiErrorWriter(), postUser, postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
 
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		Nodes spans = doc.query("/posting/p/span[@class='template']");
-		assertEquals(2,spans.size());
+		assertEquals(2, spans.size());
+	}
+
+	@Test
+	public void testSignature()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "Ich habe über den Diskussionsteil auch schon "
+				+ "Kontakt mit einigen Wikipedianern gehabt. Wie kann "
+				+ "ich mir deren Namen merken? Gibt es ein persönliches "
+				+ "Adressbuch, oder eine ähnliche Funktion bei Wikipedia?"
+				+ "--[[Benutzer:Burggraf17|Burggraf17]] 10:04, 6. Mär 2004 (CET)";
+		WikiPage wikiPage = new WikiPage();
+		wikiPage.setPageTitle("Benutzer Diskussion:Fantasy");
+		wikiPage.setPageId("23159");
+		wikiPage.setPageIndex(true);
+		wikiPage.setPageStructure("<page><text></text></page>");
+		wikiPage.textSegments.add(wikitext);
+
+		int namespaceKey = 3; // benutzer diskussion
+		Configuration config = createConfig(wikidump, namespaceKey,
+				"user-talk");
+
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+
+		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		assertEquals("10:04, 6. Mär 2004 (CET)", timestamp.getValue());
+	}
+
+	@Test
+	public void testSignatureWithoutDash()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = ":Grüsse, und bis bald wiedermal :-) [[Benutzer:Fantasy]] "
+				+ "[[Benutzer_Diskussion:Fantasy|容]] 11:28, 17. Jul 2006 (CEST)";
+		WikiPage wikiPage = new WikiPage();
+		wikiPage.setPageTitle("Benutzer Diskussion:Fantasy");
+		wikiPage.setPageId("23159");
+		wikiPage.setPageIndex(true);
+		wikiPage.setPageStructure("<page><text></text></page>");
+		wikiPage.textSegments.add(wikitext);
+
+		int namespaceKey = 3; // benutzer diskussion
+		Configuration config = createConfig(wikidump, namespaceKey,
+				"user-talk");
+
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+
+		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		assertEquals("11:28, 17. Jul 2006 (CEST)", timestamp.getValue());
 	}
 }

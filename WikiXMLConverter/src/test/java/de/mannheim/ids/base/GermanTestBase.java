@@ -9,6 +9,7 @@ public abstract class GermanTestBase {
 	protected String language = "de";
 	protected String wikidump = "data/dewiki-20170701-sample.xml";
 	protected String userPage = "Benutzer";
+	protected String userTalk = "Benutzer Diskussion";
 	protected String userContribution = "Spezial:Beiträge";
 	protected String helpSignature = "Hilfe:Signatur";
 	protected String unsigned = "unsigniert";
@@ -23,8 +24,8 @@ public abstract class GermanTestBase {
 			String pageType) {
 
 		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, helpSignature, unsigned, namespace, pageType,
-				null, null, maxThread, generateWikitext);
+				userTalk, userContribution, helpSignature, unsigned, namespace,
+				pageType, null, null, maxThread, generateWikitext);
 
 		return config;
 	}

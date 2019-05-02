@@ -8,3 +8,4 @@
 .settings
 /properties
 /data
+/dependency-reduced-pom.xml

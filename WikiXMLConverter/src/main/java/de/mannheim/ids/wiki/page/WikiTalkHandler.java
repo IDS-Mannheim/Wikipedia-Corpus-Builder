@@ -27,32 +27,37 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 	}
 
-	private static final Pattern levelPattern = Pattern.compile("^(:+)");
+	public static final Pattern levelPattern = Pattern.compile("^(:+)");
 
-	private static final Pattern headingPattern = Pattern
+	public static final Pattern headingPattern = Pattern
 			.compile("^\'*(=+[^=]+=+)");
-	private static final Pattern headingPattern2 = Pattern
+	public static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 
-	private static final Pattern unsignedPattern = Pattern
+	public static final Pattern unsignedPattern = Pattern
 			.compile(
 					"(.*)\\{\\{[uU]nsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 
-	private static final Pattern spanPattern = Pattern
+	public static final Pattern spanPattern = Pattern
 			.compile("(.*)(&lt;span style.*&gt;)(-{0,2})");
 
-	private static final Pattern inTemplatePattern = Pattern
+	public static final Pattern inTemplatePattern = Pattern
 			.compile("([^}]*)}}(.*)");
 
-	private static Pattern signaturePattern, userContribution, unsignedPattern2;
+	private Pattern signaturePattern, userTalkPattern, userContribution,
+			unsignedPattern2;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
 
 	private boolean baselineMode = false;
+	private boolean isSignatureInTemplate = false;
+
 	private String post;
 	private StringBuilder wikiXMLBuilder;
 	private String unsignedSentenceCase;
+
+	private String userTalkUnderscore;
 
 	/**
 	 * Constructs a WikiPostHandler and compiles some regex patterns used in
@@ -94,6 +99,12 @@ public class WikiTalkHandler extends WikiPageHandler {
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
 				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
 
+		String userTalk = config.getUserTalk() + ":";
+		userTalkUnderscore = userTalk.replace(" ", "_");
+		userTalkPattern = Pattern.compile("(.*)\\[\\[(["
+				+ userTalk + "|" + userTalkUnderscore + "|user talk:"
+				+ "][^\\]]+)\\]\\](.*)");
+
 		userContribution = Pattern
 				.compile("(.*)\\[\\[(" + config.getUserContribution()
 						+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
@@ -101,10 +112,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 		String keyword = config.getUnsigned();
 		unsignedSentenceCase = keyword.substring(0, 1).toUpperCase()
 				+ keyword.substring(1);
-		keyword = "["+keyword.substring(0, 1).toUpperCase()+"|"
-				+keyword.substring(0, 1).toLowerCase()+"]"
-				+keyword.substring(1);
-		
+		keyword = "[" + keyword.substring(0, 1).toUpperCase() + "|"
+				+ keyword.substring(0, 1).toLowerCase() + "]"
+				+ keyword.substring(1);
+
 		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + keyword
 				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
 	}
@@ -156,7 +167,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		post += sigType.toString();
 		post += ">";
 		if (timestamp != null && !timestamp.isEmpty()) {
-			post += " <timestamp>";
+			post += "<timestamp>";
 			post += timestamp;
 			post += "</timestamp>";
 		}
@@ -188,8 +199,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		// User signature
 		if (trimmedText.contains(config.getUserPage() + ":")) {
-			if (handleSignature(trimmedText))
+			if (handleSignature(trimmedText)) {
 				return;
+			}
 		}
 
 		if (!baselineMode) {
@@ -213,8 +225,21 @@ public class WikiTalkHandler extends WikiPageHandler {
 				if (handleUnsigned(trimmedText, config.getUnsigned()))
 					return;
 			}
-			else if (trimmedText.contains(unsignedSentenceCase)){
+			else if (trimmedText.contains(unsignedSentenceCase)) {
 				if (handleUnsigned(trimmedText, unsignedSentenceCase))
+					return;
+			}
+
+			// User talk
+			if (trimmedText.contains(config.getUserTalk())
+					|| trimmedText.contains(userTalkUnderscore)
+					|| trimmedText.contains("user talk")) {
+				if (isSignatureInTemplate) {
+					post += trimmedText + "\n";
+					isSignatureInTemplate = false;
+					return;
+				}
+				else if (handleUserTalk(trimmedText))
 					return;
 			}
 
@@ -283,6 +308,45 @@ public class WikiTalkHandler extends WikiPageHandler {
 		return false;
 	}
 
+	private boolean handleUserTalk(String trimmedText) throws IOException {
+		Matcher matcher = userTalkPattern.matcher(trimmedText);
+
+		if (matcher.find()) {
+			// in template?
+
+			String userLink, userLinkText;
+			String mg = matcher.group(2);
+			if (mg.contains("|")) {
+				String[] s = mg.split("\\|");
+				if (s.length < 2) {
+					return false;
+				}
+				userLink = s[0].replaceAll(" ", "_");
+				userLinkText = s[1];
+			}
+			else {
+				userLink = mg;
+				userLinkText = userLink;
+			}
+
+			// must have a timestamp
+			WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+			String timestamp = t.getTimestamp();
+			if (timestamp == null){
+				return false;
+			}
+			String rest = t.getPostscript();
+
+			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
+					timestamp);
+			writePost(userLinkText, userLink, timestamp, rest);
+
+			matcher.reset();
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Identifies signature mark-ups, extracts signature information from them,
 	 * and creates an XML signature structure for them.
@@ -295,9 +359,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *             an IOException
 	 */
 	private boolean handleSignature(String trimmedText) throws IOException {
-		if (trimmedText == null) {
-			throw new IllegalArgumentException("Text cannot be null.");
-		}
+		// if (trimmedText == null) {
+		// throw new IllegalArgumentException("Text cannot be null.");
+		// }
 
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
@@ -306,6 +370,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 					.matcher(matcher.group(3));
 			if (templateMatcher.find()) {
 				if (!templateMatcher.group(1).contains("{{")) {
+					isSignatureInTemplate = true;
 					return false;
 				}
 			}

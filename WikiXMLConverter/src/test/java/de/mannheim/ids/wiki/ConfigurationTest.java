@@ -173,6 +173,7 @@ public class ConfigurationTest {
 		properties.setProperty("language_code", "de");
 		properties.setProperty("page_type", "talk");
 		properties.setProperty("user_page", "Benutzer");
+		properties.setProperty("user_talk", "Benutzer Diskussion");
 		properties.setProperty("user_contribution", "Spezial:Beiträge");
 		properties.setProperty("unsigned", "insigniert");
 		properties.setProperty("signature", "Hilfe:Signatur");

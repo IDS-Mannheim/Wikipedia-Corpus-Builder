@@ -22,7 +22,7 @@ import nu.xom.Node;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-public class TimestampTest extends GermanTestBase{
+public class TimestampTest extends GermanTestBase {
 
 	@Test
 	public void testMissingTextBug()
@@ -37,15 +37,12 @@ public class TimestampTest extends GermanTestBase{
 		wikiPage.textSegments.add("Moin Abu-Dun,&lt;br /&gt;der Artikel "
 				+ "[[Journey (Computerspiel 2012)]] enthält ziemlich viele "
 				+ "defekte Weblinks. Magst Du Dich evtl. mal darum kümmern?"
-				+ "&lt;br /&gt;Vielen Dank und viele Grüße, [[Benutzer "
-				+ "Diskussion:Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 "
-				+ "(CET)");
+				+ "&lt;br /&gt;Vielen Dank und viele Grüße, Grueslayer "
+				+ "21:08, 27. Feb. 2017 (CET)");
 
 		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, helpSignature, unsigned, namespaceKey, "talk",
-				null, null, 0, generateWikitext);
-
+		Configuration config = createConfig(wikidump, namespaceKey,
+				"user-talk");
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 		WikiPostTime postTime = new WikiPostTime("test", "talk");
 
@@ -56,9 +53,13 @@ public class TimestampTest extends GermanTestBase{
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-//		System.out.println(wikiXML);
+		// System.out.println(wikiXML);
 		Document doc = builder.build(wikiXML, null);
 		Node a = doc.query("/posting/p/a[1]").get(0);
 		assertEquals("Journey (Computerspiel 2012)", a.getValue());
+
+		Node timestamp = doc.query("/posting/p/autoSignature/timestamp[1]")
+				.get(0);
+		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
 	}
 }

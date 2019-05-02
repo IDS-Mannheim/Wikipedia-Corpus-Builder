@@ -18,6 +18,7 @@ public class Configuration {
 	private String languageCode;
 	private String userPage;
 	private String userContribution;
+	private String userTalk;
 	private String unsigned;
 	private String signature;
 	private String outputFolder;
@@ -92,9 +93,10 @@ public class Configuration {
 	 *            generated for each wikipage
 	 */
 	public Configuration(String wikidump, String language, String userPage,
-			String userContribution, String helpSignature, String unsigned,
-			int namespaceKey, String pageType, String titlePrefix,
-			String encoding, int maxThread, boolean generateWikitext) {
+			String userTalk, String userContribution, String helpSignature,
+			String unsigned, int namespaceKey, String pageType,
+			String titlePrefix, String encoding, int maxThread,
+			boolean generateWikitext) {
 
 		setNamespaceKey(namespaceKey);
 		setDiscussion(namespaceKey);
@@ -106,6 +108,7 @@ public class Configuration {
 		
 		if (isDiscussion) {
 			setUserPage(userPage);
+			setUserTalk(userTalk);
 			setUserContribution(userContribution);
 			setUnsigned(unsigned);
 			setSignature(helpSignature);
@@ -128,7 +131,6 @@ public class Configuration {
 	 *            the location of the properties file
 	 */
 	public Configuration(Properties properties) {
-
 		String namespace = loadRequiredParameter(properties, "namespace_key");
 		int namespaceKey = Integer.parseInt(namespace);
 		setDiscussion(namespaceKey);
@@ -141,6 +143,7 @@ public class Configuration {
 
 		if (isDiscussion) {
 			setUserPage(loadRequiredParameter(properties, "user_page"));
+			setUserTalk(loadRequiredParameter(properties, "user_talk"));
 			setUserContribution(
 					loadRequiredParameter(properties, "user_contribution"));
 			setUnsigned(loadRequiredParameter(properties, "unsigned"));
@@ -511,5 +514,13 @@ public class Configuration {
 		for (String id : ids) {
 			excludedPages.add(id.trim());
 		}
+	}
+
+	public String getUserTalk() {
+		return userTalk;
+	}
+
+	public void setUserTalk(String userTalk) {
+		this.userTalk = userTalk;
 	}
 }

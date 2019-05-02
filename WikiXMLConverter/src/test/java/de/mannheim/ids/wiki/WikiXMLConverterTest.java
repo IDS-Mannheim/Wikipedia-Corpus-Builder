@@ -10,7 +10,8 @@ import org.xml.sax.SAXException;
 public class WikiXMLConverterTest {
 
 	@Test
-	public void testGenerateArticleWikiXML() throws IOException, ParserConfigurationException, SAXException {
+	public void testGenerateArticleWikiXML()
+			throws IOException, ParserConfigurationException, SAXException {
 		// Set the language of the Wikipedia
 		String language = "de";
 		// Set wikidump filepath
@@ -29,7 +30,7 @@ public class WikiXMLConverterTest {
 		String titlePrefix = "";
 
 		Configuration config = new Configuration(wikidump, language, null, null,
-				null, null, namespaceKey, pageType, titlePrefix, encoding,
+				null, null, null, namespaceKey, pageType, titlePrefix, encoding,
 				maxThreads, generateWikitext);
 
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
@@ -37,12 +38,14 @@ public class WikiXMLConverterTest {
 	}
 
 	@Test
-	public void testGenerateTalkWikiXML() throws IOException, ParserConfigurationException, SAXException {
+	public void testGenerateTalkWikiXML()
+			throws IOException, ParserConfigurationException, SAXException {
 		String language = "de";
 		String wikidump = "data/dewiki-20130728-sample.xml";
 		// User page in the Wikipedia language, e.g. Benutzer in German
 		// Wikipedia
 		String userPage = "Benutzer";
+		String userTalk = "Benutzer Diskussion";
 		// User contribution page in the Wikipedia language, e.g.
 		// Spezial:Beiträge in German Wikipedia
 		String userContribution = "Spezial:Beiträge";
@@ -59,8 +62,8 @@ public class WikiXMLConverterTest {
 		String titlePrefix = "";
 
 		Configuration config = new Configuration(wikidump, language, userPage,
-				userContribution, signature, unsigned, namespaceKey, pageType,
-				titlePrefix, encoding, maxThreads, generateWikitext);
+				userTalk, userContribution, signature, unsigned, namespaceKey,
+				pageType, titlePrefix, encoding, maxThreads, generateWikitext);
 
 		WikiXMLProcessor wxp = new WikiXMLProcessor(config);
 		wxp.run();

@@ -63,7 +63,7 @@ import de.fau.cs.osr.utils.visitor.VisitingException;
  */
 public class XMLRenderer3 extends HtmlRenderer {
 
-	private static final Set<String> inlineElements = new HashSet<String>();
+	public static final Set<String> inlineElements = new HashSet<String>();
 	
 	static {
 		inlineElements.add("small");
@@ -172,7 +172,7 @@ public class XMLRenderer3 extends HtmlRenderer {
 			{
 				// EM: fix link title with empty text (e.g. space)
 				if (n.hasTitle()
-						&& !isWtTextEmpty((WtText) n.getTitle().get(0))) {
+						&& !isWtTextEmpty(n.getTitle().get(0))) {
 					pt("<a href=\"%s\" title=\"%s\">%=%!%=</a>",
 							callback.makeUrl(target),
 							makeLinkTitle(n, target),
@@ -210,10 +210,13 @@ public class XMLRenderer3 extends HtmlRenderer {
 		}
 	}
 	
-	private boolean isWtTextEmpty(WtText text) {
-		if(text.getContent().trim().isEmpty()){
-			return true;
-		} 
+	private boolean isWtTextEmpty(WtNode node) {
+		if (node instanceof WtText) {
+			WtText text = (WtText) node;
+			if (text.getContent().trim().isEmpty()) {
+				return true;
+			}
+		}
 		return false;
 	}
 	
