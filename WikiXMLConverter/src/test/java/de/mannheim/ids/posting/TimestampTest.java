@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import de.mannheim.ids.base.GermanTestBase;
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -40,13 +39,10 @@ public class TimestampTest extends GermanTestBase {
 				+ "&lt;br /&gt;Vielen Dank und viele Grüße, Grueslayer "
 				+ "21:08, 27. Feb. 2017 (CET)");
 
-		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = createConfig(wikidump, namespaceKey,
-				"user-talk");
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 		WikiPostTime postTime = new WikiPostTime("test", "talk");
 
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(),
 				new WikiErrorWriter(), postUser, postTime);
 

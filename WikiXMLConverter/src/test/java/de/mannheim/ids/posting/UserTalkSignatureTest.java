@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -28,32 +27,41 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		postUser = new WikiPostUser("test", "talk");
 		postTime = new WikiPostTime("test", "talk");
 	}
-	
+
+	@Test
+	public void testIncorrectUserTalkFormat()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "viele Grüße, [[Benutzer diskussion:"
+				+ "Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 (CET)";
+		WikiPage wikiPage = createWikiPage(
+				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(1, doc.query("/posting/p/a").size());
+	}
+
 	@Test
 	public void testUserTalkSignature()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "Magst Du Dich evtl. mal darum kümmern?&lt;br "
 				+ "/&gt;Vielen Dank und viele Grüße, [[Benutzer Diskussion:"
 				+ "Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 (CET)";
-		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Benutzer Diskussion:Abu-Dun/Archiv/2017");
-		wikiPage.setPageId("9756545");
-		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add(wikitext);
-
-		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = createConfig(wikidump, namespaceKey,
-				"user-talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiPage wikiPage = createWikiPage(
+				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-		// System.out.println(wikiXML);
 		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+
 		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
@@ -62,91 +70,81 @@ public class UserTalkSignatureTest extends GermanTestBase {
 	}
 
 	@Test
-	public void testUserTalkSignatureWithUnderscore()
+	public void testUserTalkSignatureLowercase()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "Das angebliche Zitat sollte ebenfalls mal geprüft "
+				+ "werden, da es den Ursprung ja offensichtlich nicht zu "
+				+ "geben scheint. --[[benutzer diskussion: freak 1.5|"
+				+ "Freak1.5]] 15:58, 20. Okt. 2006 (CEST)";
+		WikiPage wikiPage = createWikiPage("Diskussion:Kamelopedia",
+				"262282", wikitext);
+
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+	}
+
+	@Test
+	public void testUserTalkSignatureLowercaseAndUnderscore()
+			throws IOException, ValidityException, ParsingException {
+
+		String wikitext = "VG --[[benutzer_diskussion: freak 1.5|"
+				+ "Freak1.5]] 15:58, 20. Okt. 2006 (CEST)";
+		WikiPage wikiPage = createWikiPage("Diskussion:Kamelopedia",
+				"262282", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+	}
+
+	@Test
+	public void testUserTalkSignatureUnderscore()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "The DieBucheBot has now the flag on the it:wiki. "
 				+ "Good work :-) [[Benutzer_Diskussion:Gac|&lt;small&gt;&lt;"
 				+ "font color=&quot;green&quot;&gt;'''Gac'''&lt;/font&gt;&lt;"
 				+ "/small&gt;]] 08:55, 15. Mär. 2007 (CET)";
 
-		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Benutzer Diskussion:DieBuche");
-		wikiPage.setPageId("328552");
-		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add(wikitext);
-
-		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = createConfig(wikidump, namespaceKey,
-				"user-talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:DieBuche",
+				"328552", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+
 		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
 		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
 		assertEquals("08:55, 15. Mär. 2007 (CET)", timestamp.getValue());
 	}
-
-	// There are very few people that would use English signature format in
-	// the German Wiki. As far as I see only Leif Czerny signed using "user
-	// talk" link only. There does not seem to be "User talk", "User_talk"
-	// or "user_talk" link only signatures
-	@Test
-	public void testUserTalkSignatureInEnglish()
-			throws IOException, ValidityException, ParsingException {
-		String wikitext = "::Liebe IP, dass Du dir dafür diesen Tag ausgesucht "
-				+ "hast! Nach Aristoteles hat sich also deiner Meinung nach "
-				+ "niemand mehr relevant zum Thema geäußert?-- &lt;small&gt;"
-				+ "[[user talk:Leif Czerny|Leif Czerny]]&lt;/small&gt; 17:28, "
-				+ "22. Apr. 2017 (CEST)";
-
-		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Diskussion:Demokratie");
-		wikiPage.setPageId("1173");
-		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add(wikitext);
-
-		int namespaceKey = 1; // diskussion
-		Configuration config = createConfig(wikidump, namespaceKey, "talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
-		handler.run();
-
-		String wikiXML = wikiPage.getWikiXML();
-		Document doc = builder.build(wikiXML, null);
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
-		assertEquals("signed", signature.getValue());
-
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
-		assertEquals("17:28, 22. Apr. 2017 (CEST)", timestamp.getValue());
-	}
-
+	
 	@Test
 	public void testUserTalkSignatureWithoutTimestamp()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "* 34 (30/4) [[:Benutzer Diskussion:Meffo|"
 				+ "Meffo]] 2007-09-08 11:32 &amp;ndash; 2009-12-27 10:29";
-		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Diskussion:Definition");
-		wikiPage.setPageId("1134");
-		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add(wikitext);
-
-		int namespaceKey = 1; // diskussion
-		Configuration config = createConfig(wikidump, namespaceKey, "talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiPage wikiPage = createWikiPage("Diskussion:Definition", "1134",
+				wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 		handler.run();
@@ -156,4 +154,80 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node link = doc.query("/posting/ul/li/a").get(0);
 		assertEquals("Meffo", link.getValue());
 	}
+
+	// There are very few people that would use English signature format in
+	// the German Wiki. As far as I see only Leif Czerny signed using "user
+	// talk" link only. There does not seem to be "User talk", "User_talk"
+	// or "user_talk" link only signatures
+	@Test
+	public void testUserTalkSignatureEnglishFormat()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "::Von &quot;Dorf&quot; und  &quot;Wagen ziehen&quot; "
+				+ "steht da nichts.-- &lt;small&gt;[[User Talk:Leif Czerny|Leif "
+				+ "Czerny]]&lt;/small&gt; 12:30, 13. Feb. 2019 (CET)";
+
+		// String wikitext = "please tell me on [[user talk:pcu123456789|my "
+		// + "talk page]]. [[Benutzer:Pcu123456789|Pcu123456789]] 04:14, "
+		// + "27 January 2007 (UTC)";
+		WikiPage wikiPage = createWikiPage("Diskussion:Demokratie", "1173",
+				wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/small/a").size());
+
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+	}
+
+	@Test
+	public void testUserTalkSignatureEnglishWiki()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "I think that this trick is much older. It is "
+				+ "mentioned in Suppes, &quot;Axiomatic Set Theory&quot;, "
+				+ "(1960), but I'm triyng to find a better reference. "
+				+ "[[User Talk:Kismalac|kismalac]] 22:02, 14 April 2011"
+				+ "(UTC)";
+		WikiPage wikiPage = createWikiPage("Talk:Cardinal number", "6177",
+				wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+
+	}
+
+	@Test
+	public void testUserTalkSignatureEnglishUnderscore()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = ":::I think the idea of starting with the featured "
+				+ "article set of photos and discussing changes from there "
+				+ "is a good one.  -- [[User_Talk:SiobhanHansa|SiobhanHansa]] "
+				+ "15:08, 6 November 2007 (UTC)";
+		WikiPage wikiPage = createWikiPage("Talk:New York City/Archive 10",
+				"6908", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+
+		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		assertEquals("signed", signature.getValue());
+	}
+
 }

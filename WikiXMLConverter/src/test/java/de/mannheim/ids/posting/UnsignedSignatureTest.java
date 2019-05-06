@@ -39,13 +39,10 @@ public class UnsignedSignatureTest extends GermanTestBase {
 						+ "[[Benutzer:Roo1812|Roo1812]] 08:41, 19. Nov. 2007 "
 						+ "(CET)}}");
 
-		int namespace = 1;
-		Configuration config = createConfig(wikidump, namespace, "talk");
-
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 		WikiPostTime postTime = new WikiPostTime("test", "talk");
 
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 
@@ -76,20 +73,17 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				"{{unsigned|Synergetik-therapie@web.de|[[Benutzer:MBq|"
 						+ "MBq]] 09:30, 29. Dez 2005 (CET)}}");
 
-		int namespace = 1;
-		Configuration config = createConfig(wikidump, namespace, "talk");
-
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 		WikiPostTime postTime = new WikiPostTime("test", "talk");
 
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-		System.out.println(wikiXML);
+//		System.out.println(wikiXML);
 		Document doc = builder.build("<text>" + wikiXML + "</text>", null);
 		Node signature = doc.query("/text/posting/p/autoSignature/@type")
 				.get(0);

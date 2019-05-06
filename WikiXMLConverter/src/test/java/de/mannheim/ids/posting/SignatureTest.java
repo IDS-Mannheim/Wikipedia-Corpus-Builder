@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -31,6 +30,28 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	@Test
+	public void testSignatureWithEnglishFormat()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "Dem ist ja nicht so, es handelt sich lediglich "
+				+ "um einen Faktor, der im Standardmodell keine Berücksichtigung "
+				+ "findet. —[[User:Pill|Pill]] ([[User talk:Pill|Kontakt]]) "
+				+ "00:30, 11. Jun. 2009 (CEST)";
+
+		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
+				wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		System.out.println(wikiXML);
+		Document doc = builder.build(wikiXML, null);
+		Nodes links = doc.query("/posting/p/a");
+		assertEquals(0, links.size());
+	}
+
+	@Test
 	public void testSignatureInTemplate()
 			throws IOException, ValidityException, ParsingException {
 		WikiPage wikiPage = new WikiPage();
@@ -48,13 +69,9 @@ public class SignatureTest extends GermanTestBase {
 				+ "Mindestbeiträge=1 |Mindestabschnitte =3 |Frequenz="
 				+ "monatlich}}");
 
-		int namespaceKey = 1; // diskussion
-		Configuration config = createConfig(wikidump, namespaceKey, "talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
-
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -78,11 +95,7 @@ public class SignatureTest extends GermanTestBase {
 		wikiPage.setPageStructure("<page><text></text></page>");
 		wikiPage.textSegments.add(wikitext);
 
-		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = createConfig(wikidump, namespaceKey,
-				"user-talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 
@@ -109,11 +122,7 @@ public class SignatureTest extends GermanTestBase {
 		wikiPage.setPageStructure("<page><text></text></page>");
 		wikiPage.textSegments.add(wikitext);
 
-		int namespaceKey = 3; // benutzer diskussion
-		Configuration config = createConfig(wikidump, namespaceKey,
-				"user-talk");
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 

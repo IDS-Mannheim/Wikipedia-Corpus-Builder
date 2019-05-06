@@ -60,19 +60,24 @@ For article pages, the properties files requires the following properties:
 For talk pages, additional properties are required as follows:
 * ```user_page = Benutzer```
 
-User page prefix in the Wikidump language, for instance ```User``` in English, ```Benutzer``` in German. See [Wikipedia:User pages](https://en.wikipedia.org/wiki/Wikipedia:User_pages). 
+  User page prefix in the Wikidump language, for instance ```User``` in English, ```Benutzer``` in German. See [Wikipedia:User pages](https://en.wikipedia.org/wiki/Wikipedia:User_pages). 
+
+* ```user_talk = Benutzer Diskussion```
+
+  User talk page prefix in the Wikidump language, for instance ```User talk``` in English, ```Benutzer Diskussion``` in German. See [Wikipedia:Talk page guidelines#User talk pages](https://en.wikipedia.org/wiki/Wikipedia:Talk_page_guidelines#User_talk_pages). 
+
 
 * ```user_contribution = Spezial:Beiträge```
 
-The prefix of user contribution pages in Wikitext, for instance ```Special:Contributions``` in English, ```Spezial:Beiträge``` in German. See [Help:User contributions](https://en.wikipedia.org/wiki/Help:User_contributions).
+  The prefix of user contribution pages in Wikitext, for instance ```Special:Contributions``` in English, ```Spezial:Beiträge``` in German. See [Help:User contributions](https://en.wikipedia.org/wiki/Help:User_contributions).
 
 * ```signature = Hilfe:Signatur```
 
-Signature page in the Wikidump language, for instance ```Wikipedia:Signatures``` in English, ```Hilfe:Signatur``` in German. See: [Wikipedia:Signatures](https://en.wikipedia.org/wiki/Wikipedia:Signatures).
+  Signature page in the Wikidump language, for instance ```Wikipedia:Signatures``` in English, ```Hilfe:Signatur``` in German. See: [Wikipedia:Signatures](https://en.wikipedia.org/wiki/Wikipedia:Signatures).
 
 * ```unsigned = unsigniert```
 
-Unsigned template in the Wikidump language, for instance ```unsigned``` in English, ```unsigniert``` in German, ```non signé``` in French. See [Template:Unsigned](https://en.wikipedia.org/wiki/Template:Unsigned). 
+  Unsigned template in the Wikidump language, for instance ```unsigned``` in English, ```unsigniert``` in German, ```non signé``` in French. See [Template:Unsigned](https://en.wikipedia.org/wiki/Template:Unsigned). 
 
 
 * ```title_prefix = Wikipedia:Löschkandidaten```

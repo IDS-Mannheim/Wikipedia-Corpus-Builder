@@ -27,6 +27,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 	}
 
+	public static final String USER_PAGE_EN = "User";
+	public static final String USER_TALK_EN = "User talk|User_talk|User "
+			+ "Talk|User_Talk|user talk |user_talk";
+
 	public static final Pattern levelPattern = Pattern.compile("^(:+)");
 
 	public static final Pattern headingPattern = Pattern
@@ -51,8 +55,6 @@ public class WikiTalkHandler extends WikiPageHandler {
 	public WikiPostTime postTime;
 
 	private boolean baselineMode = false;
-	private boolean isSignatureInTemplate = false;
-
 	private String post;
 	private StringBuilder wikiXMLBuilder;
 	private String unsignedSentenceCase;
@@ -99,11 +101,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
 				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
 
-		String userTalk = config.getUserTalk() + ":";
-		userTalkUnderscore = userTalk.replace(" ", "_");
-		userTalkPattern = Pattern.compile("(.*)\\[\\[(["
-				+ userTalk + "|" + userTalkUnderscore + "|user talk:"
-				+ "][^\\]]+)\\]\\](.*)");
+		createUserTalkPattern();
 
 		userContribution = Pattern
 				.compile("(.*)\\[\\[(" + config.getUserContribution()
@@ -118,6 +116,29 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + keyword
 				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
+	}
+
+	private void createUserTalkPattern() {
+		String userTalk = config.getUserTalk();
+		userTalkUnderscore = userTalk.replace(" ", "_");
+		
+		if (!config.getLanguageCode().equals("en")) {
+			StringBuilder sb = new StringBuilder(userTalk);
+			sb.append("|");
+			sb.append(userTalk.toLowerCase());
+			sb.append("|");
+			sb.append(userTalkUnderscore);
+			sb.append("|");
+			sb.append(userTalkUnderscore.toLowerCase());
+			sb.append("|");
+			sb.append(USER_TALK_EN);
+			userTalk = sb.toString();
+		}
+		else{
+			userTalk = USER_TALK_EN;
+		}
+		userTalkPattern = Pattern.compile("(.*)\\[\\[((" + userTalk
+				+ "):[^\\]]+)\\]\\](.*)");
 	}
 
 	@Override
@@ -231,20 +252,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 			}
 
 			// User talk
-			if (trimmedText.contains(config.getUserTalk())
-					|| trimmedText.contains(userTalkUnderscore)
-					|| trimmedText.contains("user talk")) {
-				if (isSignatureInTemplate) {
-					post += trimmedText + "\n";
-					isSignatureInTemplate = false;
-					return;
-				}
-				else if (handleUserTalk(trimmedText))
-					return;
-			}
-
 			// Timestamp only
 			if (trimmedText.endsWith(")")) {
+				if (handleUserTalk(trimmedText))
+					return;
 				if (handleTimestampOnly(trimmedText))
 					return;
 			}
@@ -312,7 +323,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 		Matcher matcher = userTalkPattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			// in template?
+			if (isSignatureInTemplate(matcher.group(4))) {
+				return false;
+			}
 
 			String userLink, userLinkText;
 			String mg = matcher.group(2);
@@ -330,9 +343,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 			}
 
 			// must have a timestamp
-			WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
 			String timestamp = t.getTimestamp();
-			if (timestamp == null){
+			if (timestamp == null) {
 				return false;
 			}
 			String rest = t.getPostscript();
@@ -366,13 +379,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			Matcher templateMatcher = inTemplatePattern
-					.matcher(matcher.group(3));
-			if (templateMatcher.find()) {
-				if (!templateMatcher.group(1).contains("{{")) {
-					isSignatureInTemplate = true;
-					return false;
-				}
+			if (isSignatureInTemplate(matcher.group(3))) {
+				return false;
 			}
 
 			post += cleanSpanBeforeSignature(matcher.group(1));
@@ -402,6 +410,17 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 			matcher.reset();
 			return true;
+		}
+		return false;
+	}
+
+	private boolean isSignatureInTemplate(String signature) {
+		Matcher templateMatcher = inTemplatePattern
+				.matcher(signature);
+		if (templateMatcher.find()) {
+			if (!templateMatcher.group(1).contains("{{")) {
+				return true;
+			}
 		}
 		return false;
 	}

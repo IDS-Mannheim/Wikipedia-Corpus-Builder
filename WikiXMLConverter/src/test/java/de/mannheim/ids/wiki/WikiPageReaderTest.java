@@ -36,7 +36,7 @@ public class WikiPageReaderTest extends GermanTestBase{
 	@Test
 	public void readTalkPage() throws IOException, InterruptedException {
 		String wikidump = "src/test/resources/wikitext/dewiki-20170701-9756545.xml";
-		Configuration config = createConfig(wikidump, 3, "talk");
+		Configuration config = createUserTalkConfig(wikidump);
 		WikiPage wikiPage = readPage(config);
 		assertEquals("9756545", wikiPage.getPageId());
 		assertEquals("Benutzer Diskussion:Abu-Dun/Archiv/2017",
@@ -49,7 +49,7 @@ public class WikiPageReaderTest extends GermanTestBase{
 	@Test
 	public void testTitle() throws IOException, InterruptedException, XMLStreamException {
 		String wikidump = "src/test/resources/wikitext/dewiki-20170701-1422522.xml";
-		Configuration config = createConfig(wikidump, 1, "talk");
+		Configuration config = createTalkConfig(wikidump);
 		WikiPage wikiPage = readPage(config);
 		assertEquals("1422522", wikiPage.getPageId());
 		assertEquals("Diskussion:.460 S&amp;W Magnum",

@@ -20,8 +20,7 @@ public class WikiPageHandlerTest extends GermanTestBase {
 	@Test
 	public void testTalkHandler() throws InterruptedException, IOException {
 		String wikidump = "src/test/resources/wikitext/dewiki-20170701-9756545.xml";
-		Configuration config = createConfig(wikidump, 3,
-				"talk");
+		Configuration config = createUserTalkConfig(wikidump);
 		WikiPage wikiPage = WikiPageReaderTest.readPage(config);
 		assertTrue(wikiPage.getWikiXML().isEmpty());
 
