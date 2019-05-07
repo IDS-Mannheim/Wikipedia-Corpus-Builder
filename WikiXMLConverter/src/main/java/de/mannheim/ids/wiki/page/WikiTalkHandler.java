@@ -27,7 +27,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 	}
 
-	public static final String USER_PAGE_EN = "User";
+	public static final String USER_PAGE_EN = "User|user";
 	public static final String USER_TALK_EN = "User talk|User_talk|User "
 			+ "Talk|User_Talk|user talk |user_talk";
 
@@ -98,9 +98,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		post = "";
 
-		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?("
-				+ config.getUserPage() + ":[^\\]]+)\\]\\](.*)");
-
+		createSignaturePattern();
 		createUserTalkPattern();
 
 		userContribution = Pattern
@@ -116,6 +114,23 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + keyword
 				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
+	}
+
+	private void createSignaturePattern() {
+		String userPage = config.getUserPage();
+		if (!config.getLanguageCode().equals("en")) {
+			StringBuilder sb = new StringBuilder(userPage);
+			sb.append("|");
+			sb.append(userPage.toLowerCase());
+			sb.append("|");
+			sb.append(USER_PAGE_EN);
+			userPage = sb.toString();
+		}
+		else{
+			userPage = USER_PAGE_EN;
+		}
+		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
+				+ userPage + "):[^\\]]+)\\]\\](.*)");
 	}
 
 	private void createUserTalkPattern() {
@@ -219,7 +234,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 
 		// User signature
-		if (trimmedText.contains(config.getUserPage() + ":")) {
+		if (trimmedText.contains("[[")) {
 			if (handleSignature(trimmedText)) {
 				return;
 			}
@@ -292,6 +307,20 @@ public class WikiTalkHandler extends WikiPageHandler {
 		post += trimmedText + "\n";
 	}
 
+	private void addPostscript(String postscript) {
+		StringBuilder sb = new StringBuilder();
+		String trimmedPostscript = postscript.toLowerCase().trim();
+		if (trimmedPostscript.startsWith("ps")
+				|| trimmedPostscript.startsWith("p.s")) {
+			sb.append("<seg type=\"postscript\">");
+			sb.append(postscript);
+			sb.append("</seg>");
+		}
+		else {
+			sb.append(postscript);
+		}
+		post += sb.toString();
+	}
 	/**
 	 * Recognizes timestamp mark-ups in user signature mark-ups that do not
 	 * appear together with user links.
@@ -379,7 +408,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		Matcher matcher = signaturePattern.matcher(trimmedText);
 
 		if (matcher.find()) {
-			if (isSignatureInTemplate(matcher.group(3))) {
+			if (isSignatureInTemplate(matcher.group(4))) {
 				return false;
 			}
 
@@ -400,7 +429,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 				userLinkText = userLink;
 			}
 
-			WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
 			String timestamp = t.getTimestamp();
 			String rest = t.getPostscript();
 
@@ -621,6 +650,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private void writePost(String username, String userLink, String timestamp,
 			String postscript) throws IOException {
 
+		if (postscript != null && !postscript.isEmpty()) {
+			addPostscript(postscript);
+		}
+		
 		String post = this.post.trim();
 		this.post = ""; // reset post
 
@@ -632,7 +665,6 @@ public class WikiTalkHandler extends WikiPageHandler {
 			post = new String(post.substring(level, post.length()).trim());
 
 		}
-
 		String wikiXML = parseToXML(wikiPage.getPageId(),
 				wikiPage.getPageTitle(), post);
 		if (wikiXML.isEmpty())
@@ -641,7 +673,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		wikiStatistics.addTotalPostings();
 
 		String postingElement = createPostingElement(level, username, userLink,
-				timestamp, wikiXML, postscript);
+				timestamp, wikiXML);
 		wikiXMLBuilder.append(postingElement);
 	}
 
@@ -665,8 +697,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *             an IOException
 	 */
 	private String createPostingElement(int level, String username,
-			String userLink, String timestamp, String wikiXML,
-			String postscript) throws IOException {
+			String userLink, String timestamp, String wikiXML)
+			throws IOException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("        <posting indentLevel=\"");
@@ -689,24 +721,24 @@ public class WikiTalkHandler extends WikiPageHandler {
 		sb.append(wikiXML);
 		sb.append("\n");
 
-		if (postscript != null && !postscript.isEmpty()) {
-			String ps = parseToXML(wikiPage.getPageId(),
-					wikiPage.getPageTitle(), postscript);
-
-			String trimmedPostscript = postscript.toLowerCase().trim();
-			// if (!Thread.interrupted()) {
-			if (trimmedPostscript.startsWith("ps")
-					|| trimmedPostscript.startsWith("p.s")) {
-				sb.append("<seg type=\"postscript\">");
-				sb.append(ps);
-				sb.append("</seg>\n");
-			}
-			else {
-				sb.append(ps);
-				sb.append("\n");
-			}
-			// }
-		}
+//		if (postscript != null && !postscript.isEmpty()) {
+//			String ps = parseToXML(wikiPage.getPageId(),
+//					wikiPage.getPageTitle(), postscript);
+//
+//			String trimmedPostscript = postscript.toLowerCase().trim();
+//			// if (!Thread.interrupted()) {
+//			if (trimmedPostscript.startsWith("ps")
+//					|| trimmedPostscript.startsWith("p.s")) {
+//				sb.append("<seg type=\"postscript\">");
+//				sb.append(ps);
+//				sb.append("</seg>\n");
+//			}
+//			else {
+//				sb.append(ps);
+//				sb.append("\n");
+//			}
+//			// }
+//		}
 		sb.append("        </posting>\n");
 
 		return sb.toString();
