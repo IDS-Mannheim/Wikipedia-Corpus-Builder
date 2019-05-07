@@ -48,8 +48,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	public static final Pattern inTemplatePattern = Pattern
 			.compile("([^}]*)}}(.*)");
 
-	private Pattern signaturePattern, userTalkPattern, userContribution,
-			unsignedPattern2;
+	private Pattern signaturePattern, signaturePattern2, userTalkPattern, 
+			userContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
@@ -131,6 +131,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
 				+ userPage + "):[^\\]]+)\\]\\](.*)");
+		signaturePattern2 = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
+				+ userPage + "):[^/]+\\|[^\\]]+)\\]\\](.*)");
 	}
 
 	private void createUserTalkPattern() {
@@ -401,11 +403,13 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *             an IOException
 	 */
 	private boolean handleSignature(String trimmedText) throws IOException {
-		// if (trimmedText == null) {
-		// throw new IllegalArgumentException("Text cannot be null.");
-		// }
-
-		Matcher matcher = signaturePattern.matcher(trimmedText);
+		Matcher matcher;
+		if (trimmedText.contains("|")){
+			matcher = signaturePattern2.matcher(trimmedText);
+		}
+		else {
+			matcher = signaturePattern.matcher(trimmedText);
+		}
 
 		if (matcher.find()) {
 			if (isSignatureInTemplate(matcher.group(4))) {

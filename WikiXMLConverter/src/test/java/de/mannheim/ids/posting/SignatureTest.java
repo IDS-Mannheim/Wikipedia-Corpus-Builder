@@ -33,11 +33,9 @@ public class SignatureTest extends GermanTestBase {
 	@Test
 	public void testSignature()
 			throws IOException, ValidityException, ParsingException {
-		String wikitext = "Ich habe über den Diskussionsteil auch schon "
-				+ "Kontakt mit einigen Wikipedianern gehabt. Wie kann "
-				+ "ich mir deren Namen merken? Gibt es ein persönliches "
-				+ "Adressbuch, oder eine ähnliche Funktion bei Wikipedia?"
-				+ "--[[Benutzer:Burggraf17|Burggraf17]] 10:04, 6. Mär 2004 (CET)";
+		String wikitext = "Gibt es ein persönliches Adressbuch, oder eine "
+				+ "ähnliche Funktion bei Wikipedia? --[[Benutzer:Burggraf17|"
+				+ "Burggraf17]] 10:04, 6. Mär 2004 (CET)";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
@@ -217,8 +215,28 @@ public class SignatureTest extends GermanTestBase {
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-//		System.out.println(wikiXML);
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+	}
 
+	@Test
+	public void testSignatureWithExtraUserVariantLink()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = ":Kapitel 2, Entstehungszeit endet 1933 mit Beginn von "
+				+ "Kapitel 3, Vorkriegszeit. [[Benutzer:Sargoth|Sargoth]][[Benutzer "
+				+ "Diskussion:Sargoth|&lt;sup&gt;¿!&lt;/sup&gt;]][[Benutzer:"
+				+ "Sargoth/Bewertung|&lt;sup&gt;±&lt;/sup&gt;]] 11:22, 25. Mär. "
+				+ "2008 (CET)";
+
+		WikiPage wikiPage = createWikiPage(
+				"Diskussion:Zeit des Nationalsozialismus/Archiv/1",
+				"1169", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 	}
@@ -275,23 +293,26 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	@Test
-	public void testSignatureWithEnglishFormat()
+	public void testSignatureWithEnglishMarkup()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "Dem ist ja nicht so, es handelt sich lediglich "
 				+ "um einen Faktor, der im Standardmodell keine Berücksichtigung "
 				+ "findet. —[[User:Pill|Pill]] ([[User talk:Pill|Kontakt]]) "
 				+ "00:30, 11. Jun. 2009 (CEST)";
 
+		String wikitext2 = "Gruß, —[[user:Pill|Pill]] 00:30, 11. Jun. 2009 (CEST)";
+
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
-				wikitext);
+				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
 		handler.run();
 
-		String wikiXML = wikiPage.getWikiXML();
+		String wikiXML = "<page>\n" + wikiPage.getWikiXML() + "\n</page>";
 		Document doc = builder.build(wikiXML, null);
-		assertEquals(0, doc.query("/posting/p/a").size());
+		assertEquals(0, doc.query("/page/posting/p/a").size());
+		assertEquals(2, doc.query("/page/posting/p/autoSignature").size());
 	}
 
 	@Test
@@ -339,7 +360,7 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	// Problematic case
-	// The user link is recognized as a signature
+	// User links are always recognized as signatures
 	@Ignore
 	@Test
 	public void testUserLinkWithoutSignature()
