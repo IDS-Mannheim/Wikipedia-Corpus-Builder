@@ -32,6 +32,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			+ "Talk|User_Talk|user talk |user_talk";
 	public static final String SPECIAL_CONTRIBUTIONS_EN = "Special:"
 			+ "Contributions|special:contributions";
+	public static final String SIGNATURE_EN = "wikipedia:signatures";
 
 	public static final Pattern levelPattern = Pattern.compile("^(:+)");
 
@@ -50,7 +51,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	public static final Pattern inTemplatePattern = Pattern
 			.compile("([^}]*)}}(.*)");
 
-	private Pattern signaturePattern, signaturePattern2, userTalkPattern, 
+	private Pattern signaturePattern, signaturePattern2, userTalkPattern,
 			specialContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
@@ -103,7 +104,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		createSignaturePattern();
 		createUserTalkPattern();
 		createSpecialContribution();
-		
+
 		String keyword = config.getUnsigned();
 		unsignedSentenceCase = keyword.substring(0, 1).toUpperCase()
 				+ keyword.substring(1);
@@ -125,7 +126,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			sb.append(USER_PAGE_EN);
 			userPage = sb.toString();
 		}
-		else{
+		else {
 			userPage = USER_PAGE_EN;
 		}
 		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
@@ -137,7 +138,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private void createUserTalkPattern() {
 		String userTalk = config.getUserTalk();
 		userTalkUnderscore = userTalk.replace(" ", "_");
-		
+
 		if (!config.getLanguageCode().equals("en")) {
 			StringBuilder sb = new StringBuilder(userTalk);
 			sb.append("|");
@@ -150,16 +151,16 @@ public class WikiTalkHandler extends WikiPageHandler {
 			sb.append(USER_TALK_EN);
 			userTalk = sb.toString();
 		}
-		else{
+		else {
 			userTalk = USER_TALK_EN;
 		}
 		userTalkPattern = Pattern.compile("(.*)\\[\\[((" + userTalk
 				+ "):[^\\]]+)\\]\\](.*)");
 	}
-	
+
 	private void createSpecialContribution() {
 		String contributions = config.getSpecialContribution();
-		
+
 		if (!config.getLanguageCode().equals("en")) {
 			StringBuilder sb = new StringBuilder(contributions);
 			sb.append("|");
@@ -168,10 +169,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 			sb.append(SPECIAL_CONTRIBUTIONS_EN);
 			contributions = sb.toString();
 		}
-		else{
+		else {
 			contributions = SPECIAL_CONTRIBUTIONS_EN;
 		}
-		
+
 		specialContribution = Pattern.compile("(.*)\\[\\[((" + contributions
 				+ ")/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 	}
@@ -263,7 +264,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		if (!baselineMode) {
 
 			// Special contribution
-			//if (trimmedText.contains(config.getUserContribution())) {
+			// if (trimmedText.contains(config.getUserContribution())) {
 			if (trimmedText.contains("[[")) {
 				if (handleSpecialContribution(trimmedText))
 					return;
@@ -423,7 +424,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 */
 	private boolean handleSignature(String trimmedText) throws IOException {
 		Matcher matcher;
-		if (trimmedText.contains("|")){
+		if (trimmedText.contains("|")) {
 			matcher = signaturePattern2.matcher(trimmedText);
 		}
 		else {
@@ -495,15 +496,20 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @return a signature type
 	 */
 	private SignatureType chooseSignatureType(SignatureType type, String rest) {
+		String lowercasePost = post.toLowerCase();
 		if (baselineMode) {
 			return SignatureType.SIGNED;
 		}
-		else if (post.contains(config.getSignature())) {
+		else if (lowercasePost.contains(config.getSignature())
+				|| lowercasePost.contains(SIGNATURE_EN)) {
 			return SignatureType.UNSIGNED;
 		}
-		else if (rest != null && !rest.isEmpty()
-				&& rest.contains(config.getSignature())) {
-			return SignatureType.UNSIGNED;
+		else if (rest != null && !rest.isEmpty()) {
+			String lowercaseRest = rest.toLowerCase();
+			if (lowercaseRest.contains(config.getSignature())
+					|| lowercaseRest.contains(SIGNATURE_EN)) {
+				return SignatureType.UNSIGNED;
+			}
 		}
 		return type;
 	}
@@ -676,7 +682,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		if (postscript != null && !postscript.isEmpty()) {
 			addPostscript(postscript);
 		}
-		
+
 		String post = this.post.trim();
 		this.post = ""; // reset post
 
@@ -743,25 +749,6 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		sb.append(wikiXML);
 		sb.append("\n");
-
-//		if (postscript != null && !postscript.isEmpty()) {
-//			String ps = parseToXML(wikiPage.getPageId(),
-//					wikiPage.getPageTitle(), postscript);
-//
-//			String trimmedPostscript = postscript.toLowerCase().trim();
-//			// if (!Thread.interrupted()) {
-//			if (trimmedPostscript.startsWith("ps")
-//					|| trimmedPostscript.startsWith("p.s")) {
-//				sb.append("<seg type=\"postscript\">");
-//				sb.append(ps);
-//				sb.append("</seg>\n");
-//			}
-//			else {
-//				sb.append(ps);
-//				sb.append("\n");
-//			}
-//			// }
-//		}
 		sb.append("        </posting>\n");
 
 		return sb.toString();

@@ -46,15 +46,20 @@ public abstract class GermanTestBase {
 	}
 
 	protected WikiPage createWikiPage(String pageTitle, String pageId,
-			String ... wikitext) throws IOException {
+			String... wikitext) throws IOException {
 		WikiPage wikiPage = new WikiPage();
 		wikiPage.setPageTitle(pageTitle);
 		wikiPage.setPageId(pageId);
 		wikiPage.setPageIndex(true);
 		wikiPage.setPageStructure("<page><text></text></page>");
-		for (String text : wikitext){
+		for (String text : wikitext) {
 			wikiPage.textSegments.add(text);
 		}
 		return wikiPage;
+	}
+
+	protected String wrapWithTextElement(String wikiXML) {
+		return "<text>" + wikiXML + "</text>";
+
 	}
 }

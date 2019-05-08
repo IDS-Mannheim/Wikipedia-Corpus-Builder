@@ -279,9 +279,11 @@ public class Configuration {
 	 */
 	public void setSpecialContribution(String specialContribution) {
 		if (isDiscussion
-				&& (specialContribution == null || specialContribution.isEmpty())) {
+				&& (specialContribution == null
+						|| specialContribution.isEmpty())) {
 			throw new IllegalArgumentException("Please specify the user "
-					+ "contribution page in the language of the Wikipedia dump.");
+					+ "contribution page in the language of the Wikipedia"
+					+ " dump.");
 		}
 
 		this.specialContribution = specialContribution;
@@ -304,10 +306,11 @@ public class Configuration {
 	 */
 	public void setSignature(String signature) {
 		if (isDiscussion && (signature == null || signature.isEmpty())) {
-			throw new IllegalArgumentException(
-					"Please specify the signature page in the language of the Wikipedia dump.");
+			throw new IllegalArgumentException("Please specify the "
+					+ "signature page in the language of the Wikipedia "
+					+ "dump.");
 		}
-		this.signature = signature;
+		this.signature = signature.toLowerCase();
 	}
 
 	/**
@@ -499,8 +502,9 @@ public class Configuration {
 	 */
 	public void setUnsigned(String unsigned) {
 		if (isDiscussion && (unsigned == null || unsigned.isEmpty())) {
-			throw new IllegalArgumentException(
-					"Please specify the unsigned template in the language of the Wikipedia dump.");
+			throw new IllegalArgumentException("Please specify the "
+					+ "unsigned template in the language of the "
+					+ "Wikipedia dump.");
 		}
 		this.unsigned = unsigned;
 	}
