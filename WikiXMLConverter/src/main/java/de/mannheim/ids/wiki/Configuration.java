@@ -17,7 +17,7 @@ public class Configuration {
 	private String wikidump;
 	private String languageCode;
 	private String userPage;
-	private String userContribution;
+	private String specialContribution;
 	private String userTalk;
 	private String unsigned;
 	private String signature;
@@ -65,7 +65,7 @@ public class Configuration {
 	 * @param userPage
 	 *            the user page prefix in the Wikidump language, e.g. User in
 	 *            English, Benutzer in German
-	 * @param userContribution
+	 * @param specialContribution
 	 *            the user contribution page prefix in the Wikidump language,
 	 *            e.g. Special:Contributions in English, Spezial:Beiträge in
 	 *            German
@@ -93,7 +93,7 @@ public class Configuration {
 	 *            generated for each wikipage
 	 */
 	public Configuration(String wikidump, String language, String userPage,
-			String userTalk, String userContribution, String helpSignature,
+			String userTalk, String specialContribution, String helpSignature,
 			String unsigned, int namespaceKey, String pageType,
 			String titlePrefix, String encoding, int maxThread,
 			boolean generateWikitext) {
@@ -109,7 +109,7 @@ public class Configuration {
 		if (isDiscussion) {
 			setUserPage(userPage);
 			setUserTalk(userTalk);
-			setUserContribution(userContribution);
+			setSpecialContribution(specialContribution);
 			setUnsigned(unsigned);
 			setSignature(helpSignature);
 		}
@@ -144,8 +144,8 @@ public class Configuration {
 		if (isDiscussion) {
 			setUserPage(loadRequiredParameter(properties, "user_page"));
 			setUserTalk(loadRequiredParameter(properties, "user_talk"));
-			setUserContribution(
-					loadRequiredParameter(properties, "user_contribution"));
+			setSpecialContribution(
+					loadRequiredParameter(properties, "special_contribution"));
 			setUnsigned(loadRequiredParameter(properties, "unsigned"));
 			setSignature(loadRequiredParameter(properties, "signature"));
 		}
@@ -267,24 +267,24 @@ public class Configuration {
 	 * 
 	 * @return the user contribution prefix
 	 */
-	public String getUserContribution() {
-		return userContribution;
+	public String getSpecialContribution() {
+		return specialContribution;
 	}
 
 	/**
 	 * Sets the user contribution prefix.
 	 * 
-	 * @param userContribution
+	 * @param specialContribution
 	 *            the user contribution prefix
 	 */
-	public void setUserContribution(String userContribution) {
+	public void setSpecialContribution(String specialContribution) {
 		if (isDiscussion
-				&& (userContribution == null || userContribution.isEmpty())) {
+				&& (specialContribution == null || specialContribution.isEmpty())) {
 			throw new IllegalArgumentException("Please specify the user "
 					+ "contribution page in the language of the Wikipedia dump.");
 		}
 
-		this.userContribution = userContribution;
+		this.specialContribution = specialContribution;
 	}
 
 	/**

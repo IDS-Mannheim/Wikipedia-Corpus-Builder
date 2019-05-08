@@ -50,7 +50,7 @@ public class ConfigurationTest {
 		assertEquals("wikitext-de/talk", config.getWikitextFolder());
 
 		assertEquals("Benutzer", config.getUserPage());
-		assertEquals("Spezial:Beiträge", config.getUserContribution());
+		assertEquals("Spezial:Beiträge", config.getSpecialContribution());
 		assertEquals("unsigniert", config.getUnsigned());
 		assertEquals("Hilfe:Signatur", config.getSignature());
 	}
@@ -62,7 +62,7 @@ public class ConfigurationTest {
 				.createConfig(new String[]{"-prop",
 						"plwiki-löschkandidaten.properties"});
 
-		assertEquals("Specjalna:Wkład", config.getUserContribution());
+		assertEquals("Specjalna:Wkład", config.getSpecialContribution());
 	}
 
 	@Test(expected = NullPointerException.class)
@@ -174,7 +174,7 @@ public class ConfigurationTest {
 		properties.setProperty("page_type", "talk");
 		properties.setProperty("user_page", "Benutzer");
 		properties.setProperty("user_talk", "Benutzer Diskussion");
-		properties.setProperty("user_contribution", "Spezial:Beiträge");
+		properties.setProperty("special_contribution", "Spezial:Beiträge");
 		properties.setProperty("unsigned", "insigniert");
 		properties.setProperty("signature", "Hilfe:Signatur");
 		new Configuration(properties);

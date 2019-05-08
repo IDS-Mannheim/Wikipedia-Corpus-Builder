@@ -21,7 +21,7 @@ import de.mannheim.ids.writer.WikiPostUser;
 public class WikiTalkHandler extends WikiPageHandler {
 
 	public enum SignatureType {
-		SIGNED, UNSIGNED, USER_CONTRIBUTION;
+		SIGNED, UNSIGNED, SPECIAL_CONTRIBUTION;
 		public String toString() {
 			return name().toLowerCase();
 		}
@@ -30,6 +30,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	public static final String USER_PAGE_EN = "User|user";
 	public static final String USER_TALK_EN = "User talk|User_talk|User "
 			+ "Talk|User_Talk|user talk |user_talk";
+	public static final String SPECIAL_CONTRIBUTIONS_EN = "Special:"
+			+ "Contributions|special:contributions";
 
 	public static final Pattern levelPattern = Pattern.compile("^(:+)");
 
@@ -49,7 +51,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			.compile("([^}]*)}}(.*)");
 
 	private Pattern signaturePattern, signaturePattern2, userTalkPattern, 
-			userContribution, unsignedPattern2;
+			specialContribution, unsignedPattern2;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
@@ -100,11 +102,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		createSignaturePattern();
 		createUserTalkPattern();
-
-		userContribution = Pattern
-				.compile("(.*)\\[\\[(" + config.getUserContribution()
-						+ "/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
-
+		createSpecialContribution();
+		
 		String keyword = config.getUnsigned();
 		unsignedSentenceCase = keyword.substring(0, 1).toUpperCase()
 				+ keyword.substring(1);
@@ -156,6 +155,25 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 		userTalkPattern = Pattern.compile("(.*)\\[\\[((" + userTalk
 				+ "):[^\\]]+)\\]\\](.*)");
+	}
+	
+	private void createSpecialContribution() {
+		String contributions = config.getSpecialContribution();
+		
+		if (!config.getLanguageCode().equals("en")) {
+			StringBuilder sb = new StringBuilder(contributions);
+			sb.append("|");
+			sb.append(contributions.toLowerCase());
+			sb.append("|");
+			sb.append(SPECIAL_CONTRIBUTIONS_EN);
+			contributions = sb.toString();
+		}
+		else{
+			contributions = SPECIAL_CONTRIBUTIONS_EN;
+		}
+		
+		specialContribution = Pattern.compile("(.*)\\[\\[((" + contributions
+				+ ")/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
 	}
 
 	@Override
@@ -245,8 +263,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 		if (!baselineMode) {
 
 			// Special contribution
-			if (trimmedText.contains(config.getUserContribution())) {
-				if (handleUserContribution(trimmedText))
+			//if (trimmedText.contains(config.getUserContribution())) {
+			if (trimmedText.contains("[[")) {
+				if (handleSpecialContribution(trimmedText))
 					return;
 			}
 
@@ -501,17 +520,17 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @throws IOException
 	 *             an IOException
 	 */
-	private boolean handleUserContribution(String trimmedText)
+	private boolean handleSpecialContribution(String trimmedText)
 			throws IOException {
 		if (trimmedText == null) {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
 
-		Matcher matcher = userContribution.matcher(trimmedText);
+		Matcher matcher = specialContribution.matcher(trimmedText);
 		if (matcher.find()) {
-			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(5));
 			post += matcher.group(1);
-			addSignature(chooseSignatureType(SignatureType.USER_CONTRIBUTION,
+			addSignature(chooseSignatureType(SignatureType.SPECIAL_CONTRIBUTION,
 					t.getPostscript()), t.getTimestamp());
 			writePost(matcher.group(3), matcher.group(2), t.getTimestamp(),
 					t.getPostscript());
