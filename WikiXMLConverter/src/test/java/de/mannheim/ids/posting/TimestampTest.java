@@ -28,16 +28,14 @@ public class TimestampTest extends GermanTestBase {
 			throws IOException, ParserConfigurationException, SAXException,
 			ValidityException, ParsingException {
 
-		WikiPage wikiPage = new WikiPage();
-		wikiPage.setPageTitle("Benutzer Diskussion:Abu-Dun/Archiv/2017");
-		wikiPage.setPageId("9756545");
-		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
-		wikiPage.textSegments.add("Moin Abu-Dun,&lt;br /&gt;der Artikel "
+		String wikitext = "Moin Abu-Dun,&lt;br /&gt;der Artikel "
 				+ "[[Journey (Computerspiel 2012)]] enthält ziemlich viele "
 				+ "defekte Weblinks. Magst Du Dich evtl. mal darum kümmern?"
 				+ "&lt;br /&gt;Vielen Dank und viele Grüße, Grueslayer "
-				+ "21:08, 27. Feb. 2017 (CET)");
+				+ "21:08, 27. Feb. 2017 (CET)";
+
+		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Abu-Dun/"
+				+ "Archiv/2017", "9756545", wikitext);
 
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 		WikiPostTime postTime = new WikiPostTime("test", "talk");
@@ -45,11 +43,9 @@ public class TimestampTest extends GermanTestBase {
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(),
 				new WikiErrorWriter(), postUser, postTime);
-
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-		// System.out.println(wikiXML);
 		Document doc = builder.build(wikiXML, null);
 		Node a = doc.query("/posting/p/a[1]").get(0);
 		assertEquals("Journey (Computerspiel 2012)", a.getValue());

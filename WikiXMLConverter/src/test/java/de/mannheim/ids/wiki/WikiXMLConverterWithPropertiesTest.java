@@ -8,6 +8,8 @@ import org.apache.commons.cli.ParseException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.mannheim.ids.wiki.config.Configuration;
+
 public class WikiXMLConverterWithPropertiesTest {
 
 	@Test

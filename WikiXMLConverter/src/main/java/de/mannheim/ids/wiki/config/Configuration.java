@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki;
+package de.mannheim.ids.wiki.config;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;

@@ -15,8 +15,8 @@ import org.apache.commons.text.StringEscapeUtils;
 
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.Utilities;
+import de.mannheim.ids.wiki.config.Configuration;
 
 public class WikiTitleWriter {
 

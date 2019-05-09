@@ -14,6 +14,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import de.mannheim.ids.wiki.config.Configuration;
+
 /**
  * Main class for Wikitext to WikiXML conversion
  * 

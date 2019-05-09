@@ -204,8 +204,8 @@ public class HelpSignatureTest extends GermanTestBase {
 
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
 		Document doc = builder.build(wikiXML, null);
-		assertEquals(0, doc.query("/page/posting/p/small/a").size());
-		Nodes signatures = doc.query("/page/posting/p/small/autoSignature");
+		assertEquals(0, doc.query("/text/posting/p/small/a").size());
+		Nodes signatures = doc.query("/text/posting/p/small/autoSignature");
 		assertEquals(2, signatures.size());
 		for (int i = 0; i < 2; i++) {
 			assertEquals(SignatureType.UNSIGNED.toString(),

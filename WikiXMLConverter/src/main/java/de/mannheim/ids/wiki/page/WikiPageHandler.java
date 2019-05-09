@@ -17,9 +17,9 @@ import org.xml.sax.SAXException;
 
 import de.mannheim.ids.parser.Sweble2Parser;
 import de.mannheim.ids.parser.TagSoupParser;
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
+import de.mannheim.ids.wiki.config.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**

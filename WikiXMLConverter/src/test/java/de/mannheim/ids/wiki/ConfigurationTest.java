@@ -11,11 +11,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import de.mannheim.ids.wiki.config.Configuration;
+
 public class ConfigurationTest {
 
 	@Rule
-	public ExpectedException thrown= ExpectedException.none();
-	
+	public ExpectedException thrown = ExpectedException.none();
+
 	WikiXMLConverter converter;
 	public ConfigurationTest() {
 		converter = new WikiXMLConverter();
@@ -51,18 +53,39 @@ public class ConfigurationTest {
 
 		assertEquals("Benutzer", config.getUserPage());
 		assertEquals("Spezial:Beiträge", config.getSpecialContribution());
-		assertEquals("unsigniert", config.getUnsigned());
-		assertEquals("Hilfe:Signatur", config.getSignature());
+		assertEquals("Unsigniert", config.getUnsigned());
+		assertEquals("hilfe:signatur", config.getSignature());
 	}
-	
+
 	@Test
-	public void testPolskiConfiguration() throws ParseException, IOException {
+	public void testSpecialCharacters() throws ParseException, IOException {
 
-		Configuration config = converter
-				.createConfig(new String[]{"-prop",
-						"plwiki-löschkandidaten.properties"});
-
+		Configuration config = converter.createConfig(new String[]{"-prop",
+				"plwiki-löschkandidaten.properties"});
 		assertEquals("Specjalna:Wkład", config.getSpecialContribution());
+
+		config = converter.createConfig(new String[]{"-prop",
+				"eswiki-talk.properties"});
+		assertEquals("Usuario discusión", config.getUserTalk());
+
+		config = converter.createConfig(new String[]{"-prop",
+				"frwiki-talk.properties"});
+		assertEquals("Spécial:Contributions", config.getSpecialContribution());
+		assertEquals("Non signé", config.getUnsigned());
+
+		config = converter.createConfig(new String[]{"-prop",
+				"huwiki-talk.properties"});
+		assertEquals("Szerkesztővita", config.getUserTalk());
+		assertEquals("Speciális:Contributions",
+				config.getSpecialContribution());
+		assertEquals("wikipédia:aláírás", config.getSignature());
+		assertEquals("Aláíratlan", config.getUnsigned());
+
+		config = converter.createConfig(new String[]{"-prop",
+				"rowiki-talk.properties"});
+		assertEquals("Special:Contribuții", config.getSpecialContribution());
+		assertEquals("ajutor:semnătura personală", config.getSignature());
+		assertEquals("Discuție Utilizator", config.getUserTalk());
 	}
 
 	@Test(expected = NullPointerException.class)
@@ -72,22 +95,22 @@ public class ConfigurationTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesEmpty(){
+	public void testPropertiesEmpty() {
 		Properties properties = new Properties();
 		new Configuration(properties);
 		thrown.expectMessage("namespace_key is required");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingWikidump(){
+	public void testPropertiesMissingWikidump() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		new Configuration(properties);
 		thrown.expectMessage("wikidump is required");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingLanguageCode(){
+	public void testPropertiesMissingLanguageCode() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -96,7 +119,7 @@ public class ConfigurationTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingPageType(){
+	public void testPropertiesMissingPageType() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -104,9 +127,9 @@ public class ConfigurationTest {
 		new Configuration(properties);
 		thrown.expectMessage("page_type is required");
 	}
-	
+
 	@Test
-	public void testArticleProperties(){
+	public void testArticleProperties() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "0");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -114,9 +137,9 @@ public class ConfigurationTest {
 		properties.setProperty("page_type", "article");
 		new Configuration(properties);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingUser(){
+	public void testPropertiesMissingUser() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -127,7 +150,7 @@ public class ConfigurationTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingUserContribution(){
+	public void testPropertiesMissingUserContribution() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -137,9 +160,9 @@ public class ConfigurationTest {
 		new Configuration(properties);
 		thrown.expectMessage("user_contribution is required");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingUnsigned(){
+	public void testPropertiesMissingUnsigned() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -150,9 +173,9 @@ public class ConfigurationTest {
 		new Configuration(properties);
 		thrown.expectMessage("unsigned is required");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingSignature(){
+	public void testPropertiesMissingSignature() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -164,9 +187,9 @@ public class ConfigurationTest {
 		new Configuration(properties);
 		thrown.expectMessage("signature is required");
 	}
-	
+
 	@Test
-	public void testTalkProperties(){
+	public void testTalkProperties() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");

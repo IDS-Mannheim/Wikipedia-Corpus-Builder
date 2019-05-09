@@ -13,6 +13,7 @@ import javax.xml.stream.XMLStreamException;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
+import de.mannheim.ids.wiki.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageReader;
 import de.mannheim.ids.wiki.page.WikiStatistics;

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.config.Configuration;
 
 /**
  * This class reads the wikidump and generates WikiPage objects from the page

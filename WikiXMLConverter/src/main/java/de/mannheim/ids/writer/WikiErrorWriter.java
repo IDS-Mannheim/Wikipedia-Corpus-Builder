@@ -5,8 +5,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.Utilities;
+import de.mannheim.ids.wiki.config.Configuration;
 
 /**
  * Class for logging errors occurring during the wikitext to wikiXML conversion

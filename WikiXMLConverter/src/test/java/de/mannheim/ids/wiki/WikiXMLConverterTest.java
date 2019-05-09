@@ -7,6 +7,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.mannheim.ids.wiki.config.Configuration;
+
 public class WikiXMLConverterTest {
 
 	@Test

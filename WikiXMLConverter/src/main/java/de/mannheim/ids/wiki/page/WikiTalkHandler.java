@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.config.Configuration;
+import de.mannheim.ids.wiki.config.PostingPatterns;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
@@ -27,13 +28,6 @@ public class WikiTalkHandler extends WikiPageHandler {
 		}
 	}
 
-	public static final String USER_PAGE_EN = "User|user";
-	public static final String USER_TALK_EN = "User talk|User_talk|User "
-			+ "Talk|User_Talk|user talk |user_talk";
-	public static final String SPECIAL_CONTRIBUTIONS_EN = "Special:"
-			+ "Contributions|special:contributions";
-	public static final String SIGNATURE_EN = "wikipedia:signatures";
-
 	public static final Pattern levelPattern = Pattern.compile("^(:+)");
 
 	public static final Pattern headingPattern = Pattern
@@ -41,18 +35,13 @@ public class WikiTalkHandler extends WikiPageHandler {
 	public static final Pattern headingPattern2 = Pattern
 			.compile("^\'*(&lt;h[0-9]&gt;.*&lt;/h[0-9]&gt;)");
 
-	public static final Pattern unsignedPattern = Pattern
-			.compile(
-					"(.*)\\{\\{[uU]nsigned\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
-
 	public static final Pattern spanPattern = Pattern
 			.compile("(.*)(&lt;span style.*&gt;)(-{0,2})");
 
 	public static final Pattern inTemplatePattern = Pattern
 			.compile("([^}]*)}}(.*)");
 
-	private Pattern signaturePattern, signaturePattern2, userTalkPattern,
-			specialContribution, unsignedPattern2;
+	public PostingPatterns postingPatterns;
 
 	public WikiPostUser postUser;
 	public WikiPostTime postTime;
@@ -60,9 +49,6 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private boolean baselineMode = false;
 	private String post;
 	private StringBuilder wikiXMLBuilder;
-	private String unsignedSentenceCase;
-
-	private String userTalkUnderscore;
 
 	/**
 	 * Constructs a WikiPostHandler and compiles some regex patterns used in
@@ -98,83 +84,11 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		this.postUser = postUser;
 		this.postTime = postTime;
-
 		post = "";
 
-		createSignaturePattern();
-		createUserTalkPattern();
-		createSpecialContribution();
-
-		String keyword = config.getUnsigned();
-		unsignedSentenceCase = keyword.substring(0, 1).toUpperCase()
-				+ keyword.substring(1);
-		keyword = "[" + keyword.substring(0, 1).toUpperCase() + "|"
-				+ keyword.substring(0, 1).toLowerCase() + "]"
-				+ keyword.substring(1);
-
-		unsignedPattern2 = Pattern.compile("(.*)\\{\\{" + keyword
-				+ "\\|([^\\|\\}]+)\\|?(.*)\\}\\}(.*)");
-	}
-
-	private void createSignaturePattern() {
-		String userPage = config.getUserPage();
-		if (!config.getLanguageCode().equals("en")) {
-			StringBuilder sb = new StringBuilder(userPage);
-			sb.append("|");
-			sb.append(userPage.toLowerCase());
-			sb.append("|");
-			sb.append(USER_PAGE_EN);
-			userPage = sb.toString();
-		}
-		else {
-			userPage = USER_PAGE_EN;
-		}
-		signaturePattern = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
-				+ userPage + "):[^\\]]+)\\]\\](.*)");
-		signaturePattern2 = Pattern.compile("(.*-{0,2})\\s*\\[\\[:?(("
-				+ userPage + "):[^/]+\\|[^\\]]+)\\]\\](.*)");
-	}
-
-	private void createUserTalkPattern() {
-		String userTalk = config.getUserTalk();
-		userTalkUnderscore = userTalk.replace(" ", "_");
-
-		if (!config.getLanguageCode().equals("en")) {
-			StringBuilder sb = new StringBuilder(userTalk);
-			sb.append("|");
-			sb.append(userTalk.toLowerCase());
-			sb.append("|");
-			sb.append(userTalkUnderscore);
-			sb.append("|");
-			sb.append(userTalkUnderscore.toLowerCase());
-			sb.append("|");
-			sb.append(USER_TALK_EN);
-			userTalk = sb.toString();
-		}
-		else {
-			userTalk = USER_TALK_EN;
-		}
-		userTalkPattern = Pattern.compile("(.*)\\[\\[((" + userTalk
-				+ "):[^\\]]+)\\]\\](.*)");
-	}
-
-	private void createSpecialContribution() {
-		String contributions = config.getSpecialContribution();
-
-		if (!config.getLanguageCode().equals("en")) {
-			StringBuilder sb = new StringBuilder(contributions);
-			sb.append("|");
-			sb.append(contributions.toLowerCase());
-			sb.append("|");
-			sb.append(SPECIAL_CONTRIBUTIONS_EN);
-			contributions = sb.toString();
-		}
-		else {
-			contributions = SPECIAL_CONTRIBUTIONS_EN;
-		}
-
-		specialContribution = Pattern.compile("(.*)\\[\\[((" + contributions
-				+ ")/[^\\|]+)\\|([^\\]]+)\\]\\](.*)");
+		postingPatterns = new PostingPatterns(config.getLanguageCode(),
+				config.getUserPage(), config.getUserTalk(),
+				config.getSpecialContribution(), config.getUnsigned());
 	}
 
 	@Override
@@ -271,20 +185,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 			}
 
 			// Unsigned
-			if (trimmedText.contains("unsigned")) {
-				if (handleUnsigned(trimmedText, "unsigned"))
-					return;
-			}
-			else if (trimmedText.contains("Unsigned")) {
-				if (handleUnsigned(trimmedText, "Unsigned"))
-					return;
-			}
-			if (trimmedText.contains(config.getUnsigned())) {
-				if (handleUnsigned(trimmedText, config.getUnsigned()))
-					return;
-			}
-			else if (trimmedText.contains(unsignedSentenceCase)) {
-				if (handleUnsigned(trimmedText, unsignedSentenceCase))
+			if (trimmedText.contains("{{")) {
+				if (handleUnsigned(trimmedText))
 					return;
 			}
 
@@ -371,7 +273,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	}
 
 	private boolean handleUserTalk(String trimmedText) throws IOException {
-		Matcher matcher = userTalkPattern.matcher(trimmedText);
+		Matcher matcher = postingPatterns.getUserTalkPattern()
+				.matcher(trimmedText);
 
 		if (matcher.find()) {
 			if (isSignatureInTemplate(matcher.group(4))) {
@@ -425,10 +328,12 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private boolean handleSignature(String trimmedText) throws IOException {
 		Matcher matcher;
 		if (trimmedText.contains("|")) {
-			matcher = signaturePattern2.matcher(trimmedText);
+			matcher = postingPatterns.getSignaturePattern2()
+					.matcher(trimmedText);
 		}
 		else {
-			matcher = signaturePattern.matcher(trimmedText);
+			matcher = postingPatterns.getSignaturePattern()
+					.matcher(trimmedText);
 		}
 
 		if (matcher.find()) {
@@ -501,13 +406,13 @@ public class WikiTalkHandler extends WikiPageHandler {
 			return SignatureType.SIGNED;
 		}
 		else if (lowercasePost.contains(config.getSignature())
-				|| lowercasePost.contains(SIGNATURE_EN)) {
+				|| lowercasePost.contains(PostingPatterns.SIGNATURE_EN)) {
 			return SignatureType.UNSIGNED;
 		}
 		else if (rest != null && !rest.isEmpty()) {
 			String lowercaseRest = rest.toLowerCase();
 			if (lowercaseRest.contains(config.getSignature())
-					|| lowercaseRest.contains(SIGNATURE_EN)) {
+					|| lowercaseRest.contains(PostingPatterns.SIGNATURE_EN)) {
 				return SignatureType.UNSIGNED;
 			}
 		}
@@ -532,7 +437,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
 
-		Matcher matcher = specialContribution.matcher(trimmedText);
+		Matcher matcher = postingPatterns.getSpecialContribution()
+				.matcher(trimmedText);
 		if (matcher.find()) {
 			WikiTimestamp t = new WikiTimestamp(matcher.group(5));
 			post += matcher.group(1);
@@ -560,47 +466,36 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @throws IOException
 	 *             an IOException
 	 */
-	private boolean handleUnsigned(String trimmedText, String unsigned)
+	private boolean handleUnsigned(String trimmedText)
 			throws IOException {
-		if (trimmedText == null) {
-			throw new IllegalArgumentException("Text cannot be null.");
-		}
-
-		if (trimmedText.contains("{{" + unsigned + "}}")) {
-			String rest = "";
-			String[] a = trimmedText.split("\\{\\{" + unsigned + "\\}\\}");
-			if (a.length > 0) {
-				post += a[0];
-				if (a.length > 1)
-					rest = a[1];
+		Matcher matcher = postingPatterns.getUnsignedPattern()
+				.matcher(trimmedText);
+		if (matcher.find()) {
+			if (matcher.group(1) != null) {
+				post += matcher.group(1);
 			}
-
 			addSignature(SignatureType.UNSIGNED, "");
-			writePost("", null, null, rest);
+			writePost("", null, null, matcher.group(3));
 			return true;
 		}
 		else {
-			Matcher matcher;
-			if (unsigned.toLowerCase().equals("unsigned")) {
-				matcher = unsignedPattern.matcher(trimmedText);
-			}
-			else {
-				matcher = unsignedPattern2.matcher(trimmedText);
-			}
+			matcher = postingPatterns.getUnsignedPattern2()
+					.matcher(trimmedText);
 
 			if (matcher.find()) {
 				String timestamp = "", rest = "";
-				if (matcher.group(3) != null) {
-					WikiTimestamp t = new WikiTimestamp(matcher.group(3));
+				String group4 = matcher.group(4);
+				if (group4 != null) {
+					WikiTimestamp t = new WikiTimestamp(group4);
 					timestamp = t.getTimestamp();
-					rest = t.getPostscript();
+					// rest = t.getPostscript();
 				}
-				rest += matcher.group(4);
+				rest += matcher.group(5);
 				if (matcher.group(1) != null) {
 					post += matcher.group(1);
 				}
 				addSignature(SignatureType.UNSIGNED, timestamp);
-				writePost(matcher.group(2), null, timestamp, rest);
+				writePost(matcher.group(3), null, timestamp, rest);
 
 				matcher.reset();
 				return true;

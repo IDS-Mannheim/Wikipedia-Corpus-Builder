@@ -2,7 +2,7 @@ package de.mannheim.ids.base;
 
 import java.io.IOException;
 
-import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import nu.xom.Builder;
 
@@ -15,7 +15,7 @@ public abstract class GermanTestBase {
 	protected String userTalk = "Benutzer Diskussion";
 	protected String userContribution = "Spezial:Beiträge";
 	protected String helpSignature = "Hilfe:Signatur";
-	protected String unsigned = "unsigniert";
+	protected String unsigned = "Unsigniert";
 	protected int maxThread = 1;
 	protected boolean generateWikitext = false;
 

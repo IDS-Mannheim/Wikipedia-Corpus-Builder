@@ -1,6 +1,6 @@
 package de.mannheim.ids.wiki.page;
 
-import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.config.Configuration;
 import de.mannheim.ids.writer.WikiErrorWriter;
 
 /**
