@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
-import de.mannheim.ids.wiki.config.Configuration;
+import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;

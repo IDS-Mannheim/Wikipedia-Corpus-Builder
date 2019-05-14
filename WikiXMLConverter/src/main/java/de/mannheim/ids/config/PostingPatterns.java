@@ -1,4 +1,4 @@
-package de.mannheim.ids.wiki.config;
+package de.mannheim.ids.config;
 
 import java.util.regex.Pattern;
 

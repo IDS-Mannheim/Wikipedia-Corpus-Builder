@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import de.mannheim.ids.wiki.config.Configuration;
+import de.mannheim.ids.config.Configuration;
 
 public class ConfigurationTest {
 
@@ -94,38 +94,42 @@ public class ConfigurationTest {
 				"dewiki.properties"});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesEmpty() {
 		Properties properties = new Properties();
-		new Configuration(properties);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("namespace_key is required");
+		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingWikidump() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
-		new Configuration(properties);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("wikidump is required");
+		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingLanguageCode() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
-		new Configuration(properties);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("language_code is required");
+		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingPageType() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
 		properties.setProperty("language_code", "de");
-		new Configuration(properties);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("page_type is required");
+		new Configuration(properties);
 	}
 
 	@Test
@@ -138,30 +142,47 @@ public class ConfigurationTest {
 		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingUser() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
 		properties.setProperty("language_code", "de");
 		properties.setProperty("page_type", "talk");
-		new Configuration(properties);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("user_page is required");
+		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testPropertiesMissingUserContribution() {
+	@Test
+	public void testPropertiesMissingUserTalk() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
 		properties.setProperty("language_code", "de");
 		properties.setProperty("page_type", "talk");
 		properties.setProperty("user_page", "Benutzer");
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("user_talk is required");
 		new Configuration(properties);
-		thrown.expectMessage("user_contribution is required");
+	}
+	
+	@Test
+	public void testPropertiesMissingSpecialContribution() {
+		Properties properties = new Properties();
+		properties.setProperty("namespace_key", "1");
+		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
+		properties.setProperty("language_code", "de");
+		properties.setProperty("page_type", "talk");
+		properties.setProperty("user_page", "Benutzer");
+		properties.setProperty("user_talk", "Benutzer Diskussion");
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("special_contribution is required");
+		new Configuration(properties);
+		
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingUnsigned() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
@@ -169,12 +190,14 @@ public class ConfigurationTest {
 		properties.setProperty("language_code", "de");
 		properties.setProperty("page_type", "talk");
 		properties.setProperty("user_page", "Benutzer");
-		properties.setProperty("user_contribution", "Spezial:Beiträge");
-		new Configuration(properties);
+		properties.setProperty("user_talk", "Benutzer Diskussion");
+		properties.setProperty("special_contribution", "Spezial:Beiträge");
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("unsigned is required");
+		new Configuration(properties);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPropertiesMissingSignature() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
@@ -182,10 +205,12 @@ public class ConfigurationTest {
 		properties.setProperty("language_code", "de");
 		properties.setProperty("page_type", "talk");
 		properties.setProperty("user_page", "Benutzer");
-		properties.setProperty("user_contribution", "Spezial:Beiträge");
-		properties.setProperty("unsigned", "insigniert");
-		new Configuration(properties);
+		properties.setProperty("user_talk", "Benutzer Diskussion");
+		properties.setProperty("special_contribution", "Spezial:Beiträge");
+		properties.setProperty("unsigned", "Unsigniert");
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("signature is required");
+		new Configuration(properties);
 	}
 
 	@Test

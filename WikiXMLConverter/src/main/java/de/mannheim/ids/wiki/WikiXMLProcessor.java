@@ -13,8 +13,8 @@ import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;
 import org.xml.sax.SAXException;
 
+import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.executor.BlockingThreadPoolExecutor;
-import de.mannheim.ids.wiki.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiArticleHandler;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiPageHandler;

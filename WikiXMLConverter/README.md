@@ -75,9 +75,9 @@ For talk pages, additional properties are required as follows:
 
   Signature page in the Wikidump language, for instance ```Wikipedia:Signatures``` in English, ```Hilfe:Signatur``` in German. See: [Wikipedia:Signatures](https://en.wikipedia.org/wiki/Wikipedia:Signatures).
 
-* ```unsigned = unsigniert```
+* ```unsigned = Unsigniert```
 
-  Unsigned template in the Wikidump language, for instance ```unsigned``` in English, ```unsigniert``` in German, ```non signé``` in French. See [Template:Unsigned](https://en.wikipedia.org/wiki/Template:Unsigned). 
+  Unsigned template in the Wikidump language, for instance ```Unsigned``` in English, ```Unsigniert``` in German, ```Non signé``` in French. See [Template:Unsigned](https://en.wikipedia.org/wiki/Template:Unsigned). 
 
 
 * ```title_prefix = Wikipedia:Löschkandidaten```

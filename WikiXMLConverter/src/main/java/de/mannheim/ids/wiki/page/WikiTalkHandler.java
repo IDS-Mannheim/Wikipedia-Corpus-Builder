@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.mannheim.ids.wiki.config.Configuration;
-import de.mannheim.ids.wiki.config.PostingPatterns;
+import de.mannheim.ids.config.Configuration;
+import de.mannheim.ids.config.PostingPatterns;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;

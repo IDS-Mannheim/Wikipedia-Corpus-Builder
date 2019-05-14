@@ -2,7 +2,7 @@ package de.mannheim.ids.base;
 
 import java.io.IOException;
 
-import de.mannheim.ids.wiki.config.Configuration;
+import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import nu.xom.Builder;
 
