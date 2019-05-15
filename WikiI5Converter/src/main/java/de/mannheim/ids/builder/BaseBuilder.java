@@ -3,9 +3,8 @@ package de.mannheim.ids.builder;
 import java.util.HashMap;
 import java.util.Map;
 
-import javanet.staxutils.IndentingXMLStreamWriter;
-
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * Constructs basic I5 elements used in other builders.
@@ -15,7 +14,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class BaseBuilder {
 
-	protected IndentingXMLStreamWriter writer;
+	protected XMLStreamWriter writer;
 
 	public static final Map<String, String> titleTypes;
 	static {
@@ -33,7 +32,7 @@ public class BaseBuilder {
 	 * @param writer
 	 *            an IndentingXMLStreamWriter writing I5 to the output file
 	 */
-	public BaseBuilder(IndentingXMLStreamWriter writer) {
+	public BaseBuilder(XMLStreamWriter writer) {
 		this.writer = writer;
 	}
 

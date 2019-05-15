@@ -26,33 +26,35 @@ public class WikiI5ConverterExample {
 
 	public static void main(String[] args) throws I5Exception {
 
-		String xmlFolder = "xml-de/articles";
-		int namespacekey = 0;
-		String index = "xml-de/articleIndex.xml";
-
+		int namespacekey = 1;
+		String pageType = "talk";
 		String language = "Deutsch";
-		String korpusSigle = "WPD13";
+		String korpusSigle = "WPD17";
+		int maxThreads = 2;
+		String category = "Kategorie";
+		String categoryScheme = "https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie";
+		String creator = "creatorname";
 
 		// The dumpFilename should be in the following format:
 		// [2 letter language code]wiki-[year][month][date]-[type]
-		String dumpFilename = "dewiki-20130728-sample.xml";
-		String outputFile = "i5/dewiki-20130728-articles.i5";
+		String dumpFilename = "dewiki-20170701-sample.xml";
 
-		// Set the inflectives filepath or null if not available
+		String xmlFolder = "../WikiXMLConverter/wikixml-de/article";
+		String index = "index/dewiki-article-index.xml";
+		// Set the inflectives file path or null if not available
 		String inflectives = "inflectives.xml";
-		String encoding = "UTF-8";
 
-		String url = "jdbc:mysql://host:port/dbname";
+		String outputFile = "i5/dewiki-20170701-article.i5.xml";
+		String encoding = "ISO-8859-1";
+
+		String url = "jdbc:mysql://localhost:3306/database";
 		String username = "username";
 		String password = "password";
-		int maxThreads = 3;
-		String pageType = "article";
-		String creator = "creatorname";
 
 		Configuration config = new Configuration(xmlFolder, namespacekey,
 				pageType, dumpFilename, language, korpusSigle, inflectives,
 				encoding, outputFile, index, url, username, password,
-				maxThreads, creator);
+				maxThreads, creator, category, categoryScheme);
 
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();

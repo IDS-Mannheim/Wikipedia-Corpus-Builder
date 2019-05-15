@@ -9,7 +9,7 @@
 /lib
 /properties
 /index/
-src/test/resources
 /code
 /I5Batch-no-indexing.sh
 /saxon-validation.sh
+/local-properties/

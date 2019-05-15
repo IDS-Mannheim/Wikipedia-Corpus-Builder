@@ -1,27 +1,21 @@
 package de.mannheim.ids.builder;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
-import javanet.staxutils.IndentingXMLStreamWriter;
 
 public class IdsTextHandler extends DefaultHandler {
 
-	private IndentingXMLStreamWriter writer;
+	private XMLStreamWriter writer;
 
-	public IdsTextHandler(Configuration config, IndentingXMLStreamWriter writer)
+	public IdsTextHandler(XMLStreamWriter writer)
 			throws I5Exception {
-		if (config == null) {
-			throw new IllegalArgumentException("Config cannot be null.");
-		}
-
 		this.writer = writer;
-
 	}
 
 	@Override
@@ -29,7 +23,6 @@ public class IdsTextHandler extends DefaultHandler {
 			Attributes attributes) throws SAXException {
 		try {
 			writer.writeStartElement(localName);
-
 			for (int i = 0; i < attributes.getLength(); i++) {
 				writer.writeAttribute(attributes.getQName(i),
 						attributes.getValue(i));
@@ -59,7 +52,7 @@ public class IdsTextHandler extends DefaultHandler {
 			throws SAXException {
 		try {
 			String text = new String(ch, start, length);
-			if (!text.isEmpty()) {
+			if (!text.trim().isEmpty()) {
 				writer.writeCharacters(text);
 				writer.flush();
 			}

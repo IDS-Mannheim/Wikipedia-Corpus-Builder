@@ -26,33 +26,43 @@ import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.I5Writer;
 import javanet.staxutils.IndentingXMLStreamWriter;
 
+/** IdsTextBuilder is a SAX content handler that writes events 
+ * from {@link IdsTextBuffer} to an {@link OutputStream}. This 
+ * class especially handles writing category and footnote 
+ * events to their appropriate positions in I5.  
+ * 
+ * @author margaretha
+ *
+ */
 public class IdsTextBuilder extends DefaultHandler2 {
 
 	private Logger log = Logger.getLogger(IdsTextBuilder.class);
 
 	private IndentingXMLStreamWriter writer;
 	private String pageId;
+	private String categorySchema;
 
 	private SAXBuffer categoryEvents;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;
 
-	private boolean noLangLinks = false;
+	private boolean isDiscussion = false;
 
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
 			String pageId, SAXBuffer categoryEvents,
 			LinkedHashMap<String, SAXBuffer> noteEvents)
 			throws I5Exception {
-		setWriter(config, outputStream);
+		createWriter(config, outputStream);
 		this.pageId = pageId;
 		this.categoryEvents = categoryEvents;
 		this.noteEvents = noteEvents;
 
 		if (config.isDiscussion()) {
-			noLangLinks = true;
+			isDiscussion = true;
 		}
+		this.categorySchema = config.getCategoryScheme();
 	}
 
-	private void setWriter(Configuration config, OutputStream os)
+	private void createWriter(Configuration config, OutputStream os)
 			throws I5Exception {
 		XMLOutputFactory f = XMLOutputFactory.newInstance();
 		XMLStreamWriter w = null;
@@ -100,11 +110,11 @@ public class IdsTextBuilder extends DefaultHandler2 {
 							.escapeXml10(attributes.getValue(i));
 					writer.writeAttribute(attributes.getQName(i), text);
 				}
-//				else {
-//					log.debug("pageId " + pageId + " element " + localName
-//							+ " att " + attributes.getLocalName(i)
-//							+ " value " + attributes.getValue(i));
-//				}
+				// else {
+				// log.debug("pageId " + pageId + " element " + localName
+				// + " att " + attributes.getLocalName(i)
+				// + " value " + attributes.getValue(i));
+				// }
 			}
 			writer.flush();
 		}
@@ -114,11 +124,10 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		}
 
 		try {
-			if (localName.equals("profileDesc")) {
+			if (!isDiscussion && localName.equals("profileDesc")) {
 				writer.writeStartElement("textClass");
 				writer.writeStartElement("classCode");
-				writer.writeAttribute("scheme",
-						"https://en.wikipedia.org/wiki/Portal:Contents/Categories");
+				writer.writeAttribute("scheme", categorySchema);
 				categoryEvents.toSAX(new IdsEventHandler(writer, pageId));
 				writer.writeEndElement();
 				writer.writeEndElement();
@@ -146,7 +155,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			for (String key : noteEvents.keySet()) {
 				event = noteEvents.get(key);
 				if (event.isEmpty()) {
-//					log.debug("empty note " + key);
+					// log.debug("empty note " + key);
 					AttributesImpl att = new AttributesImpl();
 					att.addAttribute("", "id", "id", "ID", key);
 					event.startElement("", "note", "note",
@@ -176,7 +185,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		try {
 			writer.writeEndElement();
 
-			if (!noLangLinks && "monogr".equals(localName)) {
+			if (!isDiscussion && "monogr".equals(localName)) {
 				try {
 					createLangLinks(
 							I5Writer.dbManager.retrieveLanguageLinks(pageId));
@@ -235,7 +244,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 				writer.writeStartElement("ref");
 				String keyword = map.get(key);
-				
+
 				StringBuilder sb = new StringBuilder();
 				sb.append("https://");
 				sb.append(key);

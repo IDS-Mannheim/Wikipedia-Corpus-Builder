@@ -6,9 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javanet.staxutils.IndentingXMLStreamWriter;
-
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import de.mannheim.ids.wiki.Configuration;
 
@@ -31,7 +30,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		textTypes.put("redundanz", "Redundanzdiskussionen");
 	}
 
-	public IdsCorpusBuilder(IndentingXMLStreamWriter writer,
+	public IdsCorpusBuilder(XMLStreamWriter writer,
 			Configuration config) {
 		super(writer);
 		this.config = config;

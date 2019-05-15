@@ -1112,7 +1112,7 @@ trans.loc CDATA #IMPLIED >
 <!ATTLIST autoSignature
  %att.pointing.attributes;
  %att.global.attributes;
-type (signed|unsigned|user_contribution) #IMPLIED >
+type (signed|unsigned|special_contribution) #IMPLIED >
 <!--doc:supplies information about the availability of a text, for example any restrictions on its use or distribution, its copyright status, any licence applying to it, etc. [2.2.4. ] -->
 <!ELEMENT availability (#PCDATA|%model.availabilityPart;|%model.pLike;)*>
 <!ATTLIST availability

@@ -29,10 +29,10 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
-import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.builder.IdsCorpusBuilder;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuffer;
+import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.builder.IdsTextHandler;
 import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.transform.WikiI5Part;
@@ -54,7 +54,7 @@ public class I5Writer {
 
 	private XMLReader reader;
 	private XMLReader validatingReader;
-	private IndentingXMLStreamWriter writer;
+	private XMLStreamWriter writer;
 	private I5ErrorHandler errorHandler;
 
 	private Configuration config;
@@ -85,12 +85,11 @@ public class I5Writer {
 		this.config = config;
 
 		configureSAXParser();
-		setWriter(config);
+		writer = createWriter(config);
 
 		idsDocBuilder = new IdsDocBuilder(writer);
-
 		idsTextBuffer = new IdsTextBuffer(config);
-		idsTextHandler = new IdsTextHandler(config, writer);
+		idsTextHandler = new IdsTextHandler(writer);
 		stats = statistics;
 
 		if (!config.isDiscussion()) {
@@ -107,15 +106,23 @@ public class I5Writer {
 	}
 
 	/**
-	 * Creates the output file and an IndentingXMLStreamWriter for writing
+	 * Creates the output file and an XMLStreamWriter for writing
 	 * (XML-based) I5 into the output file.
 	 * 
 	 * @param config
 	 *            the conversion configuration
+	 * @return 
 	 * @throws I5Exception
 	 *             an I5Exception
 	 */
-	private void setWriter(Configuration config) throws I5Exception {
+	private XMLStreamWriter createWriter(Configuration config)
+			throws I5Exception {
+		
+		File i5 = new File("i5");
+		if (!i5.exists()) {
+			i5.mkdirs();
+		}
+		
 		File file = new File(config.getOutputFile());
 		FileOutputStream fos = null;
 		try {
@@ -147,8 +154,10 @@ public class I5Writer {
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
 		}
-		writer = new IndentingXMLStreamWriter(w);
+		
+		IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(w);
 		writer.setIndent(" ");
+		return writer;
 	}
 
 	/**
@@ -228,6 +237,7 @@ public class I5Writer {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
 					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
+					
 					SAXBuffer validationBuffer = new SAXBuffer();
 					if (validateAgainstDTD(idsTextOutputStream,
 							validationBuffer, w.getWikiPath())) {
@@ -372,6 +382,17 @@ public class I5Writer {
 		return idsTextOutputStream;
 	}
 
+	/** Validates idsText by using validating SAX parser to parse it. 
+	 * The parsing results are not directly written in a I5 but first 
+	 * collected in the given saxBuffer, so that invalid idsTexts are 
+	 * not included in the I5 corpus.
+	 * 
+	 * @param idsTextOutputStream
+	 * @param saxBuffer
+	 * @param wikiXMLPath
+	 * @return
+	 * @throws I5Exception
+	 */
 	private boolean validateAgainstDTD(
 			ByteArrayOutputStream idsTextOutputStream, SAXBuffer saxBuffer,
 			String wikiXMLPath) throws I5Exception {
@@ -406,6 +427,12 @@ public class I5Writer {
 		return true;
 	}
 
+	/** Writes idsText from the given saxBuffer.
+	 * 
+	 * @param saxBuffer
+	 * @param wikiXMLPath
+	 * @throws I5Exception
+	 */
 	private void writeIdsText(SAXBuffer saxBuffer, String wikiXMLPath)
 			throws I5Exception {
 

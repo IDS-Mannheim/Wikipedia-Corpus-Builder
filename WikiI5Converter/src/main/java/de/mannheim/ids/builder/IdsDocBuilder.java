@@ -1,8 +1,7 @@
 package de.mannheim.ids.builder;
 
-import javanet.staxutils.IndentingXMLStreamWriter;
-
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /** Creates idsDoc elements and their corresponding idsHeader elements.
  * 
@@ -11,7 +10,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class IdsDocBuilder extends BaseBuilder {
 
-	public IdsDocBuilder(IndentingXMLStreamWriter writer) {
+	public IdsDocBuilder(XMLStreamWriter writer) {
 		super(writer);
 	}
 

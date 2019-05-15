@@ -1,8 +1,5 @@
 package de.mannheim.ids.builder;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -63,8 +60,11 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	private boolean isCategoryFound;
 	private boolean isTextEmpty = true;
+	private boolean isDiscussion = false;
 
 	private boolean isText = false;
+
+	private boolean DEBUG = false;
 
 	public IdsTextBuffer(Configuration config) throws I5Exception {
 		if (config == null) {
@@ -75,16 +75,9 @@ public class IdsTextBuffer extends SAXBuffer {
 		refNames = new HashMap<>();
 		refCounter = 0;
 		currentNoteRecorder = new SAXBuffer();
-
-		try {
-			category = URLEncoder.encode("Kategorie:",
-					StandardCharsets.UTF_8.name());
-			log.debug(category);
-		}
-		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		category = config.getCategory();
 		categoryEvents = new SAXBuffer();
+		isDiscussion = config.isDiscussion();
 	}
 
 	public void clearReferences() {
@@ -105,8 +98,8 @@ public class IdsTextBuffer extends SAXBuffer {
 			this.idsTextId = attributes.getValue("id");
 			writeStartElement(uri, localName, qName, attributes);
 		}
-		else if(localName.equals("text")){
-			isText=true;
+		else if (localName.equals("text")) {
+			isText = true;
 			writeStartElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("ptr")) {
@@ -121,8 +114,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		}
 		else if (localName.equals("ref")) {
 			String categoryURL = attributes.getValue("target");
-
-			if (categoryURL != null && !categoryURL.isEmpty()
+			if (!isDiscussion && categoryURL != null && !categoryURL.isEmpty()
 					&& categoryURL.contains(category)) {
 
 				categoryEvents.startElement(uri, localName, qName, attributes);
@@ -215,7 +207,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		}
 		return newAttributes;
 	}
-	
+
 	@Override
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
@@ -264,7 +256,7 @@ public class IdsTextBuffer extends SAXBuffer {
 				isCategoryFound = false;
 			}
 			else if (localName.equals("text")) {
-				isText=false;
+				isText = false;
 				super.endElement(uri, localName, qName);
 			}
 			else {
@@ -282,11 +274,11 @@ public class IdsTextBuffer extends SAXBuffer {
 		else if (isCategoryFound) {
 			categoryEvents.characters(ch, start, length);
 		}
-		else if (isText){
+		else if (isText) {
 			super.characters(ch, start, length);
 			String text = new String(ch, start, length);
-			if (isTextEmpty & text.trim().length()>1){
-				isTextEmpty=false;
+			if (isTextEmpty & text.trim().length() > 1) {
+				isTextEmpty = false;
 			}
 		}
 		else {

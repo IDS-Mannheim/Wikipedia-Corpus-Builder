@@ -1,8 +1,6 @@
 package de.mannheim.ids.wiki;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -30,6 +28,8 @@ public class Configuration {
 	private String creator;
 
 	private String korpusSigle;
+	private String category;
+	private String categoryScheme;
 
 	private int namespaceKey;
 	private int maxThreads;
@@ -41,24 +41,64 @@ public class Configuration {
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
 			"7", "8", "9"};
 
-	public Configuration() {
-		System.setProperty("entityExpansionLimit", "0");
-		System.setProperty("totalEntitySizeLimit", "0");
-		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
-		creator = "N/A";
-	}
-
 	public Configuration(String xmlFolder, int namespaceKey, String pageType,
 			String dumpFilename, String language, String korpusSigle,
 			String inflectives, String encoding, String outputFile,
 			String index, String url, String username, String password,
-			int maxThreads, String creator) {
-		this();
-
-		setCreator(creator);
-		setNamespaceKey(namespaceKey);
-		setPageType(pageType);
+			int maxThreads, String creator, String category,
+			String categoryScheme) {
 		setDiscussion(namespaceKey);
+		init(namespaceKey, xmlFolder, pageType, dumpFilename, language,
+				korpusSigle, outputFile, index, creator, url, username,
+				password, encoding, inflectives, maxThreads, category,
+				categoryScheme);
+	}
+
+	public Configuration(Properties properties) {
+		String namespace = loadRequiredParameter(properties, "namespace_key");
+		int namespaceKey = Integer.parseInt(namespace);
+		setDiscussion(namespaceKey);
+
+		String category = null, categoryScheme = null;
+		if (!isDiscussion()) {
+			category = loadRequiredParameter(properties, "category");
+			categoryScheme = loadRequiredParameter(properties,
+					"category_scheme");
+		}
+
+		init(namespaceKey,
+				loadRequiredParameter(properties, "wikixml_folder"),
+				loadRequiredParameter(properties, "page_type"),
+				loadRequiredParameter(properties, "wikidump"),
+				loadRequiredParameter(properties, "language"),
+				loadRequiredParameter(properties, "korpusSigle"),
+				loadRequiredParameter(properties, "output_file"),
+				loadRequiredParameter(properties, "wikixml_index"),
+				loadRequiredParameter(properties, "creator"),
+				loadRequiredParameter(properties, "db_url"),
+				loadRequiredParameter(properties, "db_username"),
+				loadRequiredParameter(properties, "db_password"),
+				properties.getProperty("output_encoding"),
+				properties.getProperty("inflective_file"),
+				Integer.parseInt(properties.getProperty("max_threads", "1")),
+				category,
+				categoryScheme);
+	}
+
+	private void init(int namespaceKey, String xmlFolder, String pageType,
+			String dumpFilename, String language, String korpusSigle,
+			String outputFile, String index, String creator, String url,
+			String username, String password, String encoding,
+			String inflectives, int maxThreads, String category,
+			String categoryScheme) {
+
+		System.setProperty("entityExpansionLimit", "0");
+		System.setProperty("totalEntitySizeLimit", "0");
+		System.setProperty("PARAMETER_ENTITY_SIZE_LIMIT", "0");
+
+		setNamespaceKey(namespaceKey);
+		setCreator(creator);
+		setPageType(pageType);
 
 		setDumpFilename(dumpFilename);
 		setLanguage(language);
@@ -76,40 +116,17 @@ public class Configuration {
 		setDatabasePassword(password);
 
 		setMaxThreads(maxThreads);
+		setCategory(category);
+		setCategoryScheme(categoryScheme);
 	}
 
-	public Configuration(String propertiesFilename) throws IOException {
-		InputStream is = Configuration.class.getClassLoader()
-				.getResourceAsStream(propertiesFilename);
+	public String loadRequiredParameter(Properties config, String param) {
+		String value = config.getProperty(param);
 
-		Properties config = new Properties();
-		config.load(is);
-
-		int namespaceKey = Integer
-				.parseInt(config.getProperty("namespace_key", "1"));
-		setNamespaceKey(namespaceKey);
-		setDiscussion(namespaceKey);
-
-		setCreator(config.getProperty("creator"));
-		setPageType(config.getProperty("page_type"));
-		setDumpFilename(config.getProperty("wikidump"));
-		setLanguage(config.getProperty("language"));
-		setLanguageCode();
-		setYear();
-		setKorpusSigle(config.getProperty("korpusSigle"));
-
-		setWikiXMLFolder(config.getProperty("wikixml_folder"));
-		setWikiXMLIndex(config.getProperty("wikixml_index"));
-		setOutputFile(config.getProperty("output_file"));
-		setOutputEncoding(config.getProperty("output_encoding"));
-		setInflectives(config.getProperty("inflective_file"));
-		setDatabaseUrl(config.getProperty("db_url"));
-		setDatabaseUsername(config.getProperty("db_username"));
-		setDatabasePassword(config.getProperty("db_password"));
-
-		setMaxThreads(Integer.parseInt(config.getProperty("max_threads", "1")));
-
-		is.close();
+		if (value == null || value.isEmpty()) {
+			throw new IllegalArgumentException(param + " is required.");
+		}
+		return value;
 	}
 
 	public String getWikiXMLFolder() {
@@ -199,11 +216,6 @@ public class Configuration {
 	}
 
 	public void setDatabaseUrl(String databaseUrl) {
-		if (databaseUrl == null || databaseUrl.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Please specify the Wikipedia language link "
-							+ "Mysql Database URL.");
-		}
 		this.databaseUrl = databaseUrl;
 	}
 
@@ -212,11 +224,6 @@ public class Configuration {
 	}
 
 	public void setDatabaseUsername(String databaseUsername) {
-		if (databaseUsername == null || databaseUsername.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Please specify the username of the Wikipedia "
-							+ "language link Mysql Database.");
-		}
 		this.databaseUsername = databaseUsername;
 	}
 
@@ -225,11 +232,6 @@ public class Configuration {
 	}
 
 	public void setDatabasePassword(String databasePassword) {
-		if (databasePassword == null || databasePassword.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Please specify the password of  Wikipedia "
-							+ "language link Mysql Database.");
-		}
 		this.databasePassword = databasePassword;
 	}
 
@@ -285,10 +287,6 @@ public class Configuration {
 	}
 
 	public void setKorpusSigle(String korpusSigle) {
-		if (korpusSigle == null || korpusSigle.isEmpty()) {
-			throw new IllegalArgumentException(
-					"Please specify the korpusSigle.");
-		}
 		this.korpusSigle = korpusSigle;
 	}
 
@@ -306,5 +304,21 @@ public class Configuration {
 
 	public void setCreator(String creator) {
 		this.creator = creator;
+	}
+
+	public String getCategoryScheme() {
+		return categoryScheme;
+	}
+
+	public void setCategoryScheme(String categoryScheme) {
+		this.categoryScheme = categoryScheme;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 }
