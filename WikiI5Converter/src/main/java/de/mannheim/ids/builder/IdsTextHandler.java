@@ -11,6 +11,7 @@ import de.mannheim.ids.wiki.I5Exception;
 
 public class IdsTextHandler extends DefaultHandler {
 
+	boolean isBody = false;
 	private XMLStreamWriter writer;
 
 	public IdsTextHandler(XMLStreamWriter writer)
@@ -22,6 +23,9 @@ public class IdsTextHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		try {
+			if (localName.equals("body")){
+				isBody=true;
+			}
 			writer.writeStartElement(localName);
 			for (int i = 0; i < attributes.getLength(); i++) {
 				writer.writeAttribute(attributes.getQName(i),
@@ -39,6 +43,9 @@ public class IdsTextHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		try {
+			if (localName.equals("body")){
+				isBody=false;
+			}
 			writer.writeEndElement();
 		}
 		catch (XMLStreamException e) {
@@ -52,7 +59,13 @@ public class IdsTextHandler extends DefaultHandler {
 			throws SAXException {
 		try {
 			String text = new String(ch, start, length);
-			if (!text.trim().isEmpty()) {
+			if (!isBody) {
+				if (!text.trim().isEmpty()) {
+					writer.writeCharacters(text);
+					writer.flush();
+				}
+			}
+			else if (!text.isEmpty()) {
 				writer.writeCharacters(text);
 				writer.flush();
 			}
@@ -62,5 +75,5 @@ public class IdsTextHandler extends DefaultHandler {
 			throw new SAXException("Failed writing text.", e);
 		}
 	}
-	
+
 }

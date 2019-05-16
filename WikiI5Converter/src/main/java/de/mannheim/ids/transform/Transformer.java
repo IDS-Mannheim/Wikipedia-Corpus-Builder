@@ -182,8 +182,7 @@ public class Transformer implements Callable<WikiI5Part> {
 		InputStream is = null;
 		String filepath = config.getWikiXMLFolder() + "/" + wikiXML;
 		try {
-
-			is = new FileInputStream(filepath);
+			is = new FileInputStream(new File(filepath));
 			final StreamSource source = new StreamSource(is);
 
 			XdmNode node = processor.newDocumentBuilder().build(source);
@@ -207,7 +206,7 @@ public class Transformer implements Callable<WikiI5Part> {
 			errorHandler.write(wikiXML.getPath(),
 					"Failed reading " + filepath, e);
 			throw new I5Exception("Failed reading a WikiXML file "
-					+ wikiXML.getAbsolutePath(), e);
+					+filepath , e);
 		}
 		finally {
 			try {

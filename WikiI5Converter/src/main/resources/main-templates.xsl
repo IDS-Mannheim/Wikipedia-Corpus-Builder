@@ -63,43 +63,16 @@
 
     <xsl:template match="page">
         <xsl:variable name="textSigle">
-            <xsl:choose>
-                <xsl:when test="string-length(id) gt 7">
-                    <xsl:choose>
-                        <xsl:when test="$lang ne 'de'">
-                            <xsl:variable name="intermediate">
-                                <xsl:sequence
-                                    select="concat($korpusSigle,'/',
-                                upper-case($letter), 
-                                format-number(id, '0000000000')
-                                )"
-                                />
-                            </xsl:variable>
-                            <xsl:sequence
-                                select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"
-                            />
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:message terminate="yes">ID länger als 7. Es kann kein gültiges
-                                textSigle erzeugt werden. Abbruch.</xsl:message>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:variable name="intermediate">
-                        <xsl:sequence
-                            select="concat($korpusSigle,'/',
-                    upper-case($letter), 
-                    format-number(id, '0000000')
-                    )"
-                        />
-                    </xsl:variable>
-                    <xsl:sequence
-                        select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))"
-                    />
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
+			<xsl:variable name="intermediate">
+				<xsl:sequence
+					select="concat($korpusSigle,'/',
+		                            upper-case($letter), 
+		                            format-number(id, '0000000000')
+		                            )" />
+			</xsl:variable>
+			<xsl:sequence
+				select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))" />
+		</xsl:variable>
 
         <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
 
