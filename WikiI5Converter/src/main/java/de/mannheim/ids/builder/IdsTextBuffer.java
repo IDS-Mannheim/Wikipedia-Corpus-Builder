@@ -51,6 +51,7 @@ public class IdsTextBuffer extends SAXBuffer {
 	}
 
 	private Map<String, String> refNames;
+	private List<String> categories = new ArrayList<String>(); 
 
 	private boolean isFootNote = false;
 	private boolean isInPtr = false;
@@ -61,7 +62,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	private boolean isCategoryFound;
 	private boolean isTextEmpty = true;
 	private boolean isDiscussion = false;
-
 	private boolean isText = false;
 
 	private boolean DEBUG = false;
@@ -115,10 +115,11 @@ public class IdsTextBuffer extends SAXBuffer {
 		else if (localName.equals("ref")) {
 			String categoryURL = attributes.getValue("target");
 			if (!isDiscussion && categoryURL != null && !categoryURL.isEmpty()
-					&& categoryURL.contains(category)) {
-
+					&& categoryURL.contains(category)
+					&& !categories.contains(categoryURL)) {
 				categoryEvents.startElement(uri, localName, qName, attributes);
 				isCategoryFound = true;
+				categories.add(categoryURL);
 			}
 			else {
 				writeStartElement(uri, localName, qName, attributes);
@@ -315,5 +316,13 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	public LinkedHashMap<String, SAXBuffer> getNoteEvents() {
 		return noteEvents;
+	}
+
+	public List<String> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<String> categories) {
+		this.categories = categories;
 	}
 }

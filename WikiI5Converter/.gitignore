@@ -1,4 +1,3 @@
-/*xml*
 /logs
 /i5
 /target
@@ -13,3 +12,4 @@
 /I5Batch-no-indexing.sh
 /saxon-validation.sh
 /local-properties/
+/dependency-reduced-pom.xml

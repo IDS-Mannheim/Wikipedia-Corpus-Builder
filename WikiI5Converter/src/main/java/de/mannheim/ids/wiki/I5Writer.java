@@ -378,6 +378,7 @@ public class I5Writer {
 
 		idsTextBuffer.clearReferences();
 		idsTextBuffer.clearCategories();
+		idsTextBuffer.getCategories().clear();
 
 		return idsTextOutputStream;
 	}

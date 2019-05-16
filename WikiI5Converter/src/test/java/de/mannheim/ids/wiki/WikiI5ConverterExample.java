@@ -39,12 +39,12 @@ public class WikiI5ConverterExample {
 		// [2 letter language code]wiki-[year][month][date]-[type]
 		String dumpFilename = "dewiki-20170701-sample.xml";
 
-		String xmlFolder = "../WikiXMLConverter/wikixml-de/article";
-		String index = "index/dewiki-article-index.xml";
+		String xmlFolder = "wikixml-de/talk";
+		String index = "index/dewiki-talk-index.xml";
 		// Set the inflectives file path or null if not available
 		String inflectives = "inflectives.xml";
 
-		String outputFile = "i5/dewiki-20170701-article.i5.xml";
+		String outputFile = "i5/dewiki-20170701-talk.i5.xml";
 		String encoding = "ISO-8859-1";
 
 		String url = "jdbc:mysql://localhost:3306/database";
