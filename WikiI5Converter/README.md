@@ -14,7 +14,7 @@ The main class of WikiI5Converter is ```de.mannheim.ids.wiki.WikiI5Converter```.
 
 Command example:
 
-```java -Xmx4g -cp "code/WikiI5Converter-1.0.1-jar-with-dependencies.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
+```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
 
 
 ## Properties
@@ -41,9 +41,6 @@ WikiI5Converter requires the following properties in a properties file:
 
     The namespace of the WikiXML files.
 
-* ```max_threads = 2```
-
-    The number of maximum threads allowed to run concurrently
 
 * ```wikixml_folder = wikixml-de/articles```
 
@@ -56,15 +53,7 @@ WikiI5Converter requires the following properties in a properties file:
 * ```output_file = i5/de/dewiki-20130728-articles.i5.xml```
 
     The output filename/path, namely where and how the final corpus should be named.
-
-* ```output_encoding = iso-8859-1```
-
-    The encoding of the output file (how the final corpus should be encoded). 
-
-* ```inflective_file = inflectives.xml```
-
-    The location of the inflectives file (optional). See [Inflectives](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#inflectives).
-    
+   
 * ```db_url = jdbc:mysql://localhost:port/dbname```
 
     The URL of the database containing the corresponding ```langlinks``` table. See [Language Links](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#language-links).
@@ -80,6 +69,28 @@ WikiI5Converter requires the following properties in a properties file:
 * ```creator = creator name```
 
     The name of the person creating the corpus. It will be included in the idsHeader.
+ 
+* ```category = Kategorie```
+
+    The prefix of category page titles in language of the Wiki used to identify category links.
+    
+* ```category_scheme = https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie```
+
+    A Wikipedia page used as the scheme or reference to the categories.
+ 
+ The following properties are optional:
+ 
+ * ```max_threads = 2```
+
+    The number of maximum threads allowed to run concurrently. Default is 1.
+    
+ * ```output_encoding = iso-8859-1```
+
+    The encoding of the output file (how the final corpus should be encoded). Default is  
+ 
+ * ```inflective_file = inflectives.xml```
+
+    The location of the inflectives file. See [Inflectives](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#inflectives).
  
 
 ## WikiXML index
@@ -161,11 +172,10 @@ This information is also needed to create the ```<relatedItem type="langlink">``
 
 ## Corpus structure
               
-An I5 corpus has a tripartite structure, consisting of the corpus, document and text level. The root element is ```<idsCorpus>``` having ```korpusSigle``` as identifier, for instance WPD15 denotes German Wiki I5 corpus from a dump taken in 2015. The ```<idsCorpus>``` element consist of many ```<idsDoc>``` elements, and an ```<idsDoc>``` contain many ```<idsText>``` elements. Each of these elements has an ```<idsHeader>``` describing the contents of the corresponding elements.
+An I5 corpus has a tripartite structure, consisting of the corpus, document and text level. The root element is ```<idsCorpus>``` having ```korpusSigle``` as identifier, for instance WPD15 denotes German Wiki I5 corpus from a dump taken in 2019. The ```<idsCorpus>``` element consist of many ```<idsDoc>``` elements, and an ```<idsDoc>``` contain many ```<idsText>``` elements. Each of these elements has an ```<idsHeader>``` describing the contents of the corresponding elements.
 
-Similar to the WikiXML index, each ```<idsDoc>``` is ordered by alphabets and numbers representing the first character of the page/text titles. The documents are further grouped by the text ids, that is every 10000 ids. Document identifiers known as ```documentSigle``` are 1-letter and 2-digit text group ids combined with the ```korpusSigle```. For instance, ```WPD15/A00``` contains all texts with ids are between 1 to 99999, and ```WPD15/A01``` between 100000 to 199999. Text identifiers combine the ```korpusSigle``` and their corresponding ```dokumentSigle``` with the text id. For instance, ```WPD15.A00.00001``` is the textSigle of idsText,  i.e. the Wikipage with id 1 having a title starting with A.
-
-In some cases, the length of the Wiki page ids exceeds 7 digits. Therefore, text ids are generated with length 10 for the Wikipages in languages other than German. For instance, ```WPD15.A00.12345678``` is generated for the Wiki page with id ```12345678```.  
+Similar to the WikiXML index, each ```<idsDoc>``` is ordered by alphabets and numbers representing the first character of the page/text titles. The documents are further grouped by the text ids, that is every 10 million ids. Document identifiers known as ```documentSigle``` are 1-letter and 2-digit text group ids combined with the ```korpusSigle```. For instance, ```WPD19/A00``` contains all texts with ids are between 1 to 9999999, and ```WPD19/A01``` between 10000000 to 1999999. Text identifiers combine the ```korpusSigle``` and their corresponding ```dokumentSigle``` with the text id. For instance, ```WPD19.A00.0000001``` is the textSigle of idsText,  i.e. the Wikipage with id 1 having a title starting with A.
+  
 
 ## XSLT Transformation
 

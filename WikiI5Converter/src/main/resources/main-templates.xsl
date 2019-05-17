@@ -67,7 +67,7 @@
 				<xsl:sequence
 					select="concat($korpusSigle,'/',
 		                            upper-case($letter), 
-		                            format-number(id, '0000000000')
+		                            format-number(id, '000000000')
 		                            )" />
 			</xsl:variable>
 			<xsl:sequence

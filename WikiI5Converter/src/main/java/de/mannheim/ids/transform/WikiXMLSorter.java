@@ -144,7 +144,7 @@ public class WikiXMLSorter extends Thread {
 		String docId;
 		int docNr;
 
-		for (int i = 0; i < n / 100000 + 1; i++) {
+		for (int i = 0; i < n / 10000000 + 1; i++) {
 			docNr = i;
 			docId = idx + String.format("%02d", docNr);
 //			System.out.println("DocId " + docId);
@@ -153,7 +153,7 @@ public class WikiXMLSorter extends Thread {
 			try {
 				group = xPath.compile("wiki/index[@value='"
 						+ idx + "']/id[xs:integer"
-						+ "(xs:integer(.) div 100000) = " + docNr + "]");
+						+ "(xs:integer(.) div 10000000) = " + docNr + "]");
 				pagegroup = (List) group.evaluate(wikiPageIndexes,
 						XPathConstants.NODESET);
 			}
