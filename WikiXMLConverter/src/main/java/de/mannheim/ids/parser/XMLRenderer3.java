@@ -1,5 +1,6 @@
 package de.mannheim.ids.parser;
 
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -384,6 +385,7 @@ public class XMLRenderer3 extends HtmlRenderer {
 	@Override
 	public void visit(WtTemplate n) {
 		// e.g. info box
+//		System.out.println(n);
 		p.print("<span class=\"template\"/>");
 	}
 	
@@ -471,6 +473,14 @@ public class XMLRenderer3 extends HtmlRenderer {
 	
 	static String makeLinkTitle(WtInternalLink n, PageTitle target) {
 		return esc(target.getDenormalizedFullTitle());
+	}
+	
+	@Override
+	protected String makeImageCaption(WtImageLink n) {
+		StringWriter w = new StringWriter();
+		LinkTitlePrinter p = new LinkTitlePrinter(w, wikiConfig);
+		p.go(n.getTitle());
+		return w.toString();
 	}
 	
 	@Override

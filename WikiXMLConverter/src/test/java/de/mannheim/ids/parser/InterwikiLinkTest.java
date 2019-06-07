@@ -11,25 +11,30 @@ import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;
 import org.xml.sax.SAXException;
 
-import de.mannheim.ids.base.GermanTestBase;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.writer.WikiErrorWriter;
+import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
-public class InterwikiLinkTest extends GermanTestBase{
+public class InterwikiLinkTest {
+	private Builder builder;
+	private WikiConfig wikiConfig;
+
+	public InterwikiLinkTest()
+			throws IOException, ParserConfigurationException, SAXException {
+		builder = new Builder();
+		wikiConfig = LanguageConfigGenerator
+				.generateWikiConfig("de");
+	}
 
 	@Test
 	public void testImageLink()
-			throws IOException, ParserConfigurationException, SAXException,
-			ValidityException, ParsingException {
+			throws IOException, ValidityException, ParsingException {
 		String wikitext = "[[File:Blue ribbon.svg|8px|link=:en:Blue Ribbon "
 				+ "Online Free Speech Campaign]] ";
-
-		WikiConfig wikiConfig = LanguageConfigGenerator
-				.generateWikiConfig("de");
 
 		Sweble2Parser swebleParser = new Sweble2Parser("5926612",
 				"Wikipedia:Löschkandidaten/31. Januar 2011",
@@ -52,12 +57,8 @@ public class InterwikiLinkTest extends GermanTestBase{
 
 	@Test
 	public void testAppropediaLink()
-			throws IOException, ParserConfigurationException, SAXException,
-			ValidityException, ParsingException {
+			throws IOException, ValidityException, ParsingException {
 		String wikitext = "[[appropedia:Open-Island|Open Island]]";
-
-		WikiConfig wikiConfig = LanguageConfigGenerator
-				.generateWikiConfig("de");
 
 		Sweble2Parser swebleParser = new Sweble2Parser("5926612",
 				"Wikipedia:Löschkandidaten/31. Januar 2011",

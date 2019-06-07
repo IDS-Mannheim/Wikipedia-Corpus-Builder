@@ -18,6 +18,7 @@ public abstract class GermanTestBase {
 	protected String unsigned = "Unsigniert";
 	protected int maxThread = 1;
 	protected boolean generateWikitext = false;
+	protected String pageStructure = "<page>\n      <text></text>\n</page>";
 
 	protected static Configuration talkConfig, userTalkConfig;
 
@@ -51,7 +52,8 @@ public abstract class GermanTestBase {
 		wikiPage.setPageTitle(pageTitle);
 		wikiPage.setPageId(pageId);
 		wikiPage.setPageIndex(true);
-		wikiPage.setPageStructure("<page><text></text></page>");
+		wikiPage.setPageStructure(pageStructure);
+		wikiPage.setPageIndent("");
 		for (String text : wikitext) {
 			wikiPage.textSegments.add(text);
 		}
