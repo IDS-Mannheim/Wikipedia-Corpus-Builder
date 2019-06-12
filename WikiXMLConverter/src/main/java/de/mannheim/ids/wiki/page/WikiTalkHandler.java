@@ -344,9 +344,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 			post += cleanSpanBeforeSignature(matcher.group(1));
 
 			String userLink, userLinkText;
-			String mg = matcher.group(2);
-			if (mg.contains("|")) {
-				String[] s = mg.split("\\|");
+			String groups = matcher.group(2);
+			if (groups.contains("|")) {
+				String[] s = groups.split("\\|");
 				if (s.length < 2) {
 					return false;
 				}
@@ -354,12 +354,15 @@ public class WikiTalkHandler extends WikiPageHandler {
 				userLinkText = s[1];
 			}
 			else {
-				userLink = mg;
+				userLink = groups;
 				userLinkText = userLink;
 			}
 
 			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
 			String timestamp = t.getTimestamp();
+			if (timestamp == null && matcher.group(1).isEmpty()){
+				return false;
+			}
 			String rest = t.getPostscript();
 
 			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
@@ -437,7 +440,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			throw new IllegalArgumentException("Text cannot be null.");
 		}
 
-		Matcher matcher = postingPatterns.getSpecialContribution()
+		Matcher matcher = postingPatterns.getSpecialContributionPattern()
 				.matcher(trimmedText);
 		if (matcher.find()) {
 			WikiTimestamp t = new WikiTimestamp(matcher.group(5));

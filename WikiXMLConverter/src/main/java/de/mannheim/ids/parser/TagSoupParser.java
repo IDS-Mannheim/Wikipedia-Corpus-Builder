@@ -12,7 +12,6 @@ import org.ccil.cowan.tagsoup.XMLWriter;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 /**
  * Repairs improper HTML tags in wikitext
@@ -42,10 +41,10 @@ public class TagSoupParser {
 			throws IOException, SAXException {
 		theSchema = new HTMLSchema();
 
-		XMLReader r = new Parser();
+		Parser r = new Parser();
 		r.setFeature(Parser.namespacesFeature, false); // omit namespace
 		r.setProperty(Parser.schemaProperty, theSchema);
-
+		
 		Writer w = new StringWriter();
 		ContentHandler h = specifyContentHandler(w);
 		r.setContentHandler(h);
@@ -54,6 +53,7 @@ public class TagSoupParser {
 		// will be accumulated and repeated until the end of the given text.
 		if (segment) {
 			for (String p : wikitext.split("\n\n")) {
+				p = "<p>"+p+"</p>";
 				r.parse(new InputSource(new ByteArrayInputStream(p.getBytes())));
 			}
 		}
@@ -64,7 +64,7 @@ public class TagSoupParser {
 
 		String cleanWikitext = w.toString();
 		cleanWikitext = StringUtils.replaceEach(cleanWikitext, new String[] {
-				"<html><body>", "</body></html>", "<br clear=\"none\"></br>" },
+				"<html><body><p>", "</p></body></html>", "<br clear=\"none\"></br>" },
 				new String[] { "", "\n", "<br/>" });
 		return cleanWikitext;
 

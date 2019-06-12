@@ -266,6 +266,28 @@ public class SignatureTest extends GermanTestBase {
 				ps.getValue());
 	}
 
+	// Problematic parsing because of the angle brackets
+	@Test
+	public void testSignatureWithAngleBrackets()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "&lt;Verstoß gegen KPA, daher gelöscht!--"
+				+ "[[Benutzer:Alberto568|Alberto568]] ([[Benutzer "
+				+ "Diskussion:Alberto568|Diskussion]]) 15:20, 5. Mär. "
+				+ "2014 (CET)&gt;[https://de.wikipedia.org/w/index.php?"
+				+ "title=Feminismus&amp;action=history]";
+
+		WikiPage wikiPage = createWikiPage(
+				"Diskussion:Feminismus/Archiv/006",
+				"8144626", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+//		System.out.println(wikiXML);
+	}
+
 	@Test
 	public void testSignatureInListWithPostscript()
 			throws IOException, ValidityException, ParsingException {
@@ -370,6 +392,25 @@ public class SignatureTest extends GermanTestBase {
 				+ "wie auch der anonyme Benutzer, den Du revertet hast.";
 		WikiPage wikiPage = createWikiPage("Diskussion:Mathematik/Archiv/1",
 				"3250", wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser,
+				postTime);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(1, doc.query("/posting/p/a").size());
+	}
+
+	@Test
+	public void testUserLinkAtStart()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "[[Benutzer:Katharina]] wurde bereits nachdrücklich, "
+				+ "aber erfolglos,  ersucht, ihre pauschalen Löschereien zu "
+				+ "'''begründen'''.";
+
+		WikiPage wikiPage = createWikiPage("Diskussion:Feminismus/Archiv/001",
+				"438636", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser,
 				postTime);
