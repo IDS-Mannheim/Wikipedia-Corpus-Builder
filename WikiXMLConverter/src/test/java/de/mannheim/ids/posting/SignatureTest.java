@@ -12,7 +12,6 @@ import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -23,11 +22,9 @@ import nu.xom.ValidityException;
 public class SignatureTest extends GermanTestBase {
 
 	private WikiPostUser postUser;
-	private WikiPostTime postTime;
 
 	public SignatureTest() throws IOException {
 		postUser = new WikiPostUser("test", "talk");
-		postTime = new WikiPostTime("test", "talk");
 	}
 
 	@Test
@@ -39,8 +36,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -62,8 +59,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -79,8 +76,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -96,8 +93,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -114,8 +111,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -137,8 +134,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
 				"23159", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -157,8 +154,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt",
 				"359", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -181,8 +178,8 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes",
 				"131", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -210,8 +207,8 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Eulersche Zahl",
 				"1338", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -232,8 +229,8 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Zeit des Nationalsozialismus/Archiv/1",
 				"1169", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -254,8 +251,8 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Friedrich Nietzsche/Archiv/1",
 				"1627", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -280,12 +277,12 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Feminismus/Archiv/006",
 				"8144626", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-//		System.out.println(wikiXML);
+		System.out.println(wikiXML);
 	}
 
 	@Test
@@ -299,8 +296,8 @@ public class SignatureTest extends GermanTestBase {
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes",
 				"131", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -327,8 +324,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
 				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = "<page>\n" + wikiPage.getWikiXML() + "\n</page>";
@@ -352,8 +349,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Hauspferd", "12765",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -372,8 +369,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Niccolò Machiavelli",
 				"36867", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -393,8 +390,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Mathematik/Archiv/1",
 				"3250", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -412,8 +409,8 @@ public class SignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Feminismus/Archiv/001",
 				"438636", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();

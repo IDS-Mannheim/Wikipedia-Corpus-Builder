@@ -17,7 +17,6 @@ import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.wiki.page.WikiTalkHandler.SignatureType;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
 import nu.xom.Nodes;
@@ -26,11 +25,9 @@ import nu.xom.ValidityException;
 
 public class SpecialContributionSignatureTest extends GermanTestBase {
 	private WikiPostUser postUser;
-	private WikiPostTime postTime;
 
 	public SpecialContributionSignatureTest() throws IOException {
 		postUser = new WikiPostUser("test", "talk");
-		postTime = new WikiPostTime("test", "talk");
 	}
 
 	@Test
@@ -42,8 +39,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "(CET)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Aldi", "277", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -65,8 +62,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes", "131",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -90,8 +87,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Antisemitismus (bis 1945)", "333", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -112,8 +109,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Licht (Begriffsklärung)", "13982", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -134,8 +131,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Ewiges Leben", "15957", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -155,8 +152,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Amok", "324773",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -181,8 +178,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Iod", "12765",
 				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = "<page>" + wikiPage.getWikiXML() + "</page>";
@@ -217,14 +214,13 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Configuration config = new Configuration(properties);
 
 		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/autoSignature").size());
-		assertEquals("4 mai 2007 à 00:37 (CEST) Ajoutez simplement la/les "
+		assertEquals("24 mai 2007 à 00:37 (CEST) Ajoutez simplement la/les "
 				+ "référence/s ou vous avez vu cela. Il des milliers de "
 				+ "sinistres par an.",
 				doc.query("/posting/p").get(0).getValue());

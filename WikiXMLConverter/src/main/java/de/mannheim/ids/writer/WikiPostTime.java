@@ -13,6 +13,7 @@ import de.mannheim.ids.wiki.Utilities;
  * 
  */
 
+@Deprecated
 public class WikiPostTime {
 
 	private OutputStreamWriter timeWriter;

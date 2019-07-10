@@ -42,7 +42,7 @@ public class WikiXMLProcessor {
 	public static WikiErrorWriter errorWriter;
 	private BlockingQueue<WikiPage> wikipages;
 	private WikiPostUser postUser;
-	private WikiPostTime postTime;
+//	private WikiPostTime postTime;
 
 	public static final WikiPage endPage = new WikiPage();
 	public static String Wikipedia_URI;
@@ -81,7 +81,7 @@ public class WikiXMLProcessor {
 			String prefix = Paths.get(config.getWikidump()).getFileName()
 					.toString().substring(0, 15);
 			postUser = new WikiPostUser(prefix, config.getPageType());
-			postTime = new WikiPostTime(prefix, config.getPageType());
+//			postTime = new WikiPostTime(prefix, config.getPageType());
 		}
 
 		Wikipedia_URI = "https://" + config.getLanguageCode()
@@ -108,7 +108,7 @@ public class WikiXMLProcessor {
 				WikiPageHandler ph;
 				if (config.isDiscussion()) {
 					ph = new WikiTalkHandler(config, wikiPage, wikiStatistics,
-							errorWriter, postUser, postTime);
+							errorWriter, postUser);
 				}
 				else {
 					ph = new WikiArticleHandler(config, wikiPage,
@@ -139,7 +139,7 @@ public class WikiXMLProcessor {
 
 		if (config.isDiscussion()) {
 			postUser.close();
-			postTime.close();
+//			postTime.close();
 		}
 		errorWriter.close();
 		titleWriter.close();

@@ -103,11 +103,11 @@ public class PostingPatterns {
 		this.userTalkPattern = userTalkPattern;
 	}
 
-	public Pattern getSpecialContribution() {
+	public Pattern getSpecialContributionPattern() {
 		return specialContribution;
 	}
 
-	public void setSpecialContribution(Pattern specialContribution) {
+	public void setSpecialContributionPattern(Pattern specialContribution) {
 		this.specialContribution = specialContribution;
 	}
 

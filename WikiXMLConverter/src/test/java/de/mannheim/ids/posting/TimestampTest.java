@@ -14,7 +14,6 @@ import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -38,11 +37,9 @@ public class TimestampTest extends GermanTestBase {
 				+ "Archiv/2017", "9756545", wikitext);
 
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
-		WikiPostTime postTime = new WikiPostTime("test", "talk");
 
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
-				new WikiStatistics(),
-				new WikiErrorWriter(), postUser, postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -53,5 +50,8 @@ public class TimestampTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/autoSignature/timestamp[1]")
 				.get(0);
 		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
+		
+		Node isoTimestamp = doc.query("/posting/@when-iso").get(0);
+		assertEquals("2017-02-27T21:08+01", isoTimestamp.getValue());
 	}
 }

@@ -15,7 +15,6 @@ import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.wiki.page.WikiTalkHandler.SignatureType;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
 import nu.xom.Node;
@@ -24,10 +23,8 @@ import nu.xom.ValidityException;
 
 public class UnsignedSignatureTest extends GermanTestBase {
 	WikiPostUser postUser;
-	WikiPostTime postTime;
 	public UnsignedSignatureTest() throws IOException {
 		postUser = new WikiPostUser("test", "talk");
-		postTime = new WikiPostTime("test", "talk");
 	}
 
 	@Test
@@ -39,8 +36,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Albert Camus", "31869",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
@@ -56,8 +53,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Theismus", "16009",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
@@ -78,8 +75,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				"14131", wikitext, wikitext2);
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -104,8 +101,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "Therapie/Archiv1", "1152863", wikitext, wikitext2);
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
@@ -127,8 +124,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Latenz", "27190",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -149,8 +146,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Inuit", "1152863",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -174,8 +171,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Salze", "42343",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
@@ -194,8 +191,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Friedrich Nietzsche/"
 				+ "Archiv/1", "1627", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
@@ -219,8 +216,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		Configuration config = converter.createConfig(new String[]{"-prop",
 				"eswiki-talk.properties"});
 		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 		handler.run();
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);

@@ -64,31 +64,37 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *            the writer for logging errors
 	 * @param postUser
 	 *            a WikiPostUser listing the post users
-	 * @param postTime
-	 *            a WikiPostTime listing the post time
 	 * @throws IOException
 	 *             an IOException
 	 */
 	public WikiTalkHandler(Configuration config, WikiPage wikipage,
 			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
-			WikiPostUser postUser, WikiPostTime postTime) throws IOException {
+			WikiPostUser postUser) throws IOException {
 
 		super(config, wikipage, wikiStatistics, errorWriter);
 
 		if (postUser == null) {
 			throw new IllegalArgumentException("Post user cannot be null.");
 		}
-		if (postTime == null) {
-			throw new IllegalArgumentException("Post time cannot be null.");
-		}
 
 		this.postUser = postUser;
-		this.postTime = postTime;
 		post = "";
 
 		postingPatterns = new PostingPatterns(config.getLanguageCode(),
 				config.getUserPage(), config.getUserTalk(),
 				config.getSpecialContribution(), config.getUnsigned());
+	}
+
+	@Deprecated
+	public WikiTalkHandler(Configuration config, WikiPage wikipage,
+			WikiStatistics wikiStatistics, WikiErrorWriter errorWriter,
+			WikiPostUser postUser, WikiPostTime postTime) throws IOException {
+
+		this(config, wikipage, wikiStatistics, errorWriter, postUser);
+		if (postTime == null) {
+			throw new IllegalArgumentException("Post time cannot be null.");
+		}
+		this.postTime = postTime;
 	}
 
 	@Override
@@ -257,7 +263,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 */
 	private boolean handleTimestampOnly(String trimmedText) throws IOException {
 
-		WikiTimestamp t = new WikiTimestamp(trimmedText);
+		WikiTimestamp t = new WikiTimestamp(trimmedText,
+				config.getLanguageCode());
 		if (t.getPretext() != null) {
 			post += t.getPretext();
 		}
@@ -266,7 +273,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 		if (timestamp != null) {
 			addSignature(SignatureType.SIGNED, timestamp);
-			writePost("", null, timestamp, rest);
+			writePost("", null, t, rest);
 			return true;
 		}
 		return false;
@@ -297,7 +304,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 			}
 
 			// must have a timestamp
-			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(4),
+					config.getLanguageCode());
 			String timestamp = t.getTimestamp();
 			if (timestamp == null) {
 				return false;
@@ -306,7 +314,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
 					timestamp);
-			writePost(userLinkText, userLink, timestamp, rest);
+			writePost(userLinkText, userLink, t, rest);
 
 			matcher.reset();
 			return true;
@@ -358,16 +366,17 @@ public class WikiTalkHandler extends WikiPageHandler {
 				userLinkText = userLink;
 			}
 
-			WikiTimestamp t = new WikiTimestamp(matcher.group(4));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(4),
+					config.getLanguageCode());
 			String timestamp = t.getTimestamp();
-			if (timestamp == null && matcher.group(1).isEmpty()){
+			if (timestamp == null && matcher.group(1).isEmpty()) {
 				return false;
 			}
 			String rest = t.getPostscript();
 
 			addSignature(chooseSignatureType(SignatureType.SIGNED, rest),
 					timestamp);
-			writePost(userLinkText, userLink, timestamp, rest);
+			writePost(userLinkText, userLink, t, rest);
 
 			matcher.reset();
 			return true;
@@ -443,11 +452,12 @@ public class WikiTalkHandler extends WikiPageHandler {
 		Matcher matcher = postingPatterns.getSpecialContributionPattern()
 				.matcher(trimmedText);
 		if (matcher.find()) {
-			WikiTimestamp t = new WikiTimestamp(matcher.group(5));
+			WikiTimestamp t = new WikiTimestamp(matcher.group(5),
+					config.getLanguageCode());
 			post += matcher.group(1);
 			addSignature(chooseSignatureType(SignatureType.SPECIAL_CONTRIBUTION,
 					t.getPostscript()), t.getTimestamp());
-			writePost(matcher.group(3), matcher.group(2), t.getTimestamp(),
+			writePost(matcher.group(3), matcher.group(2), t,
 					t.getPostscript());
 			matcher.reset();
 			return true;
@@ -488,8 +498,9 @@ public class WikiTalkHandler extends WikiPageHandler {
 			if (matcher.find()) {
 				String timestamp = "", rest = "";
 				String group4 = matcher.group(4);
+				WikiTimestamp t = null;
 				if (group4 != null) {
-					WikiTimestamp t = new WikiTimestamp(group4);
+					t = new WikiTimestamp(group4, config.getLanguageCode());
 					timestamp = t.getTimestamp();
 					// rest = t.getPostscript();
 				}
@@ -498,7 +509,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 					post += matcher.group(1);
 				}
 				addSignature(SignatureType.UNSIGNED, timestamp);
-				writePost(matcher.group(3), null, timestamp, rest);
+				writePost(matcher.group(3), null, t, rest);
 
 				matcher.reset();
 				return true;
@@ -574,8 +585,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @throws IOException
 	 *             an IOException
 	 */
-	private void writePost(String username, String userLink, String timestamp,
-			String postscript) throws IOException {
+	private void writePost(String username, String userLink,
+			WikiTimestamp timestamp, String postscript) throws IOException {
 
 		if (postscript != null && !postscript.isEmpty()) {
 			addPostscript(postscript);
@@ -613,7 +624,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *            the post user name
 	 * @param userLink
 	 *            the post user link
-	 * @param timestamp
+	 * @param postTime
 	 *            the post timestamp
 	 * @param wikiXML
 	 *            the post content
@@ -624,7 +635,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *             an IOException
 	 */
 	private String createPostingElement(int level, String username,
-			String userLink, String timestamp, String wikiXML)
+			String userLink, WikiTimestamp wikiTime, String wikiXML)
 			throws IOException {
 
 		StringBuilder sb = new StringBuilder();
@@ -637,11 +648,23 @@ public class WikiTalkHandler extends WikiPageHandler {
 			sb.append(postUser.getUserId(username));
 			sb.append("\"");
 		}
-		if (timestamp != null && !timestamp.isEmpty()) {
-			sb.append(" synch=\"");
-			sb.append(postTime.createTimestamp(timestamp));
-			sb.append("\"");
 
+		if (wikiTime != null) {
+			String timestamp = wikiTime.getTimestamp();
+			if (timestamp != null && !timestamp.isEmpty()) {
+				if (postTime != null) {
+					sb.append(" synch=\"");
+					sb.append(postTime.createTimestamp(timestamp));
+					sb.append("\"");
+				}
+				
+				timestamp = wikiTime.getIsoTimestamp();
+				if (timestamp !=null){
+					sb.append(" when-iso=\"");
+					sb.append(timestamp);
+					sb.append("\"");
+				}
+			}
 		}
 		sb.append(">\n");
 

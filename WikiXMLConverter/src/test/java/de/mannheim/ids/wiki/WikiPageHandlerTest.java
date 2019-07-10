@@ -13,7 +13,6 @@ import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 
 public class WikiPageHandlerTest extends GermanTestBase {
@@ -26,16 +25,16 @@ public class WikiPageHandlerTest extends GermanTestBase {
 		assertTrue(wikiPage.getWikiXML().isEmpty());
 
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
-		WikiPostTime postTime = new WikiPostTime("test", "talk");
+//		WikiPostTime postTime = new WikiPostTime("test", "talk");
 		
 		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+				
 
 		handler.run();
 		assertNotNull(wikiPage.getWikiXML());
 
 		postUser.close();
-		postTime.close();
+//		postTime.close();
 	}
 }

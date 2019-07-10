@@ -12,7 +12,6 @@ import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.wiki.page.WikiTalkHandler.SignatureType;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
 import nu.xom.Nodes;
@@ -21,11 +20,9 @@ import nu.xom.ValidityException;
 
 public class HelpSignatureTest extends GermanTestBase {
 	private WikiPostUser postUser;
-	private WikiPostTime postTime;
 
 	public HelpSignatureTest() throws IOException {
 		postUser = new WikiPostUser("test", "talk");
-		postTime = new WikiPostTime("test", "talk");
 	}
 
 	@Test
@@ -39,8 +36,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Außenbandruptur des "
 				+ "oberen Sprunggelenkes", "131", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -65,8 +62,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -87,8 +84,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Erdzeitalter", "1347",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -110,8 +107,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Computerlinguistik",
 				"904", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -135,8 +132,8 @@ public class HelpSignatureTest extends GermanTestBase {
 				"Diskussion:General Packet Radio Service",
 				"2063", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -161,8 +158,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		WikiPage wikiPage = createWikiPage("Diskussion:Berlin", "511",
 				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -198,8 +195,8 @@ public class HelpSignatureTest extends GermanTestBase {
 				"Diskussion:General Packet Radio Service",
 				"2063", wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
@@ -227,8 +224,8 @@ public class HelpSignatureTest extends GermanTestBase {
 				"Benutzer Diskussion:Lefcant",
 				"1943350", wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser,
-				postTime);
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();

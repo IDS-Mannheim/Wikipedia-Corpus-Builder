@@ -1,0 +1,56 @@
+v1.0.4
+
+2019-07-10 
+- Resolves #7 - Added timestamp conversion of various languages to ISO 8601 
+  format and added @when-iso in the posting element.  
+- Added change log.
+  
+
+v1.0.3
+
+2019-06-12
+- Resolves #6 - Handled empty elements at the start of a text because of  
+  TagSoup.
+2019-06-07
+- Handled embedded links.
+2019-05-14
+- Fixed readme and WikiXMLConverter config test, renamed config package.
+2019-05-09
+- Fixed 3 - Handled English markups in Wikipedia of other languages.
+2019-05-08
+- Improved (help) signature heuristic for posting segmentation.
+- Renamed user contribution to special contribution and extended its regex
+patterns for posting segmentation.
+2019-05-07
+- Fixed signatures with extra user-variant-links.
+- Fixed #1 - Fixed handling text after signature.
+2019-05-06
+- Extended user talk signature pattern and updated tests.
+2019-05-03
+- Added post segmentation based on user talk.
+2019-04-25
+- Fixed handling ampersand in title writer.
+2019-04-23
+- Fixed rendering category links and added parameter check in WikiXMLConventer 
+configuration.
+2019-04-04
+- Fixed posting segmentation regarding unsigned template.
+- Fixed posting segmentation with signatures in templates.
+2019-04-01
+- Fixed timestamp regex and configuration.
+2019-03-25
+- Enabled WikiConfig for multiple languages.
+2019-03-22
+- Updated libraries and tests, and fixed batch.sh.
+2019-03-20
+- Updated readme files and fixed links.
+2019-03-19
+- Allowed up to 10 digit page id for foreign wikipedia except German.
+- Restructured project.
+2019-03-11
+- Updated idsHeader and wikixml-indexer.
+2019-03-08
+- Fixed language link table.
+2019-03-06
+- Added title-index writer.
+ 
