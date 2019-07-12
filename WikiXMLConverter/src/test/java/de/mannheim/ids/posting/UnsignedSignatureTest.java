@@ -81,10 +81,10 @@ public class UnsignedSignatureTest extends GermanTestBase {
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wrapWithTextElement(wikiXML), null);
-		Node signature = doc.query("/text/posting/p/autoSignature/@type")
+		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
 		assertEquals("unsigned", signature.getValue());
-		signature = doc.query("/text/posting/p/autoSignature/@type").get(1);
+		signature = doc.query("/text/posting/p/signed/@type").get(1);
 		assertEquals("unsigned", signature.getValue());
 	}
 
@@ -107,11 +107,11 @@ public class UnsignedSignatureTest extends GermanTestBase {
 
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
 		Document doc = builder.build(wikiXML, null);
-		Node signature = doc.query("/text/posting/p/autoSignature/@type")
+		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
 		assertEquals("unsigned", signature.getValue());
 
-		signature = doc.query("/text/posting/p/autoSignature/@type").get(1);
+		signature = doc.query("/text/posting/p/signed/@type").get(1);
 		assertEquals("unsigned", signature.getValue());
 	}
 
@@ -131,7 +131,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		Node p = doc.query("/posting/p").get(0);
-		assertEquals("unsigned", p.query("autoSignature/@type").get(0)
+		assertEquals("unsigned", p.query("signed/@type").get(0)
 				.getValue());
 		assertEquals("-Das sehe ich auch so. Und wie wäre es mit einem "
 				+ "Hinweis auf die psychoanalytische Bedeutung?", p.getValue());
@@ -153,7 +153,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		Node p = doc.query("/posting/p").get(0);
-		assertEquals("unsigned", p.query("autoSignature/@type").get(0)
+		assertEquals("unsigned", p.query("signed/@type").get(0)
 				.getValue());
 		assertEquals("Wo gerade Sushi absolut en vogue ist (\"Rohfisch!!!\") "
 				+ "--", p.getValue());
@@ -178,7 +178,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 	}
 
 	@Test
@@ -197,11 +197,11 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature").get(0);
+		Node signature = doc.query("/posting/p/signed").get(0);
 		assertEquals(SignatureType.UNSIGNED.toString(),
 				signature.query("@type").get(0).getValue());
 		assertEquals("16:32, 20. Mai 2006 (CEST)",
-				signature.query("timestamp").get(0).getValue());
+				signature.query("date").get(0).getValue());
 	}
 
 	@Test
@@ -223,6 +223,6 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 	}
 }

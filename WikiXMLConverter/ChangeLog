@@ -4,7 +4,8 @@ v1.0.4
 - Resolves #7 - Added timestamp conversion of various languages to ISO 8601 
   format and added @when-iso in the posting element.  
 - Added change log.
-  
+2019-07-10
+- Renamed <autoSignature> to <signed> and <timestamp> to <date>  
 
 v1.0.3
 

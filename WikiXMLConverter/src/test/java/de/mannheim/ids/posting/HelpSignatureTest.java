@@ -44,7 +44,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/small/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 
@@ -70,7 +70,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/small/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 
@@ -92,7 +92,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 
 	}
 
@@ -115,7 +115,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/small/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 
@@ -140,7 +140,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/small/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 
@@ -166,7 +166,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/page/posting/p/small/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 		assertEquals("Hi, wie kommen diese Zahlen zustande? Destatis nennt auf "
 				+ "Basis AZR 2015 ca. 7800. (nicht signierter Beitrag von 12:44, "
@@ -202,7 +202,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/text/posting/p/small/a").size());
-		Nodes signatures = doc.query("/text/posting/p/small/autoSignature");
+		Nodes signatures = doc.query("/text/posting/p/small/signed");
 		assertEquals(2, signatures.size());
 		for (int i = 0; i < 2; i++) {
 			assertEquals(SignatureType.UNSIGNED.toString(),
@@ -234,7 +234,7 @@ public class HelpSignatureTest extends GermanTestBase {
 		assertEquals(1, links.size());
 		assertEquals("unsigned", links.get(0).getValue());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 }

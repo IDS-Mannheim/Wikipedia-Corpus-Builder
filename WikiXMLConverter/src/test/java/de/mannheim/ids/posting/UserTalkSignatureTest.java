@@ -59,10 +59,10 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
 	}
 
@@ -84,7 +84,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 	}
 
@@ -104,7 +104,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 	}
 
@@ -127,10 +127,10 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("08:55, 15. Mär. 2007 (CET)", timestamp.getValue());
 	}
 	
@@ -177,7 +177,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/small/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 	}
 
@@ -200,7 +200,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
 	}
@@ -223,7 +223,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 	}
 

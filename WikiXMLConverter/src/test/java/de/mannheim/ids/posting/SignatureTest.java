@@ -44,10 +44,12 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
-		assertEquals("10:04, 6. Mär 2004 (CET)", timestamp.getValue());
+		Node date = doc.query("/posting/p/signed/date").get(0);
+		assertEquals("10:04, 6. Mär 2004 (CET)", date.getValue());
+//		Node name = doc.query("/posting/p/signed/name").get(0);
+//		assertEquals("Burggraf17", name.getValue());
 	}
 
 	@Test
@@ -83,7 +85,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		assertEquals(0, doc.query("/posting/p/autoSignature/timestamp").size());
+		assertEquals(0, doc.query("/posting/p/signed/date").size());
 	}
 
 	@Test
@@ -100,7 +102,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		assertEquals(0, doc.query("/posting/p/autoSignature/timestamp").size());
+		assertEquals(0, doc.query("/posting/p/signed/date").size());
 	}
 
 	@Test
@@ -119,9 +121,9 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("11:28, 17. Jul 2006 (CEST)", timestamp.getValue());
 	}
 
@@ -141,7 +143,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 	}
 
@@ -161,8 +163,8 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
-		assertEquals(0, doc.query("/posting/p/autoSignature/timestamp").size());
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
+		assertEquals(0, doc.query("/posting/p/signed/date").size());
 		assertEquals("signed", signature.getValue());
 	}
 
@@ -185,9 +187,9 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node signature = doc.query("/posting/p/autoSignature/@type").get(0);
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
-		Node timestamp = doc.query("/posting/p/autoSignature/timestamp").get(0);
+		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("02:46, 4. Jul. 2010 (CEST)", timestamp.getValue());
 	}
 
@@ -331,7 +333,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = "<page>\n" + wikiPage.getWikiXML() + "\n</page>";
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/page/posting/p/a").size());
-		assertEquals(2, doc.query("/page/posting/p/autoSignature").size());
+		assertEquals(2, doc.query("/page/posting/p/signed").size());
 	}
 
 	@Test

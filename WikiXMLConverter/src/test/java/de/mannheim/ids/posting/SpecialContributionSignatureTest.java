@@ -47,7 +47,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 	}
 
 	@Test
@@ -70,9 +70,9 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 		assertEquals("16:28, 11. Aug. 2011 (CEST)",
-				doc.query("/posting/p/autoSignature/timestamp").get(0)
+				doc.query("/posting/p/signed/date").get(0)
 						.getValue());
 	}
 
@@ -95,7 +95,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 
 	}
 
@@ -117,7 +117,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/small/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/small/autoSignature/@type").get(0)
+				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
 	}
 
@@ -160,7 +160,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/autoSignature/@type").get(0).getValue());
+				doc.query("/posting/p/signed/@type").get(0).getValue());
 	}
 
 	@Test
@@ -185,7 +185,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		String wikiXML = "<page>" + wikiPage.getWikiXML() + "</page>";
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/page/posting/p/a").size());
-		Nodes signatures = doc.query("/page/posting/p/autoSignature");
+		Nodes signatures = doc.query("/page/posting/p/signed");
 		assertEquals(2, signatures.size());
 		for (int i = 0; i < 2; i++) {
 			assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
@@ -219,7 +219,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
-		assertEquals(1, doc.query("/posting/p/autoSignature").size());
+		assertEquals(1, doc.query("/posting/p/signed").size());
 		assertEquals("24 mai 2007 à 00:37 (CEST) Ajoutez simplement la/les "
 				+ "référence/s ou vous avez vu cela. Il des milliers de "
 				+ "sinistres par an.",
