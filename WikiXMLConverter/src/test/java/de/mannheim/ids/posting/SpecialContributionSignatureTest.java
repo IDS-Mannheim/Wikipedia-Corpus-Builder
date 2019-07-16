@@ -3,15 +3,10 @@ package de.mannheim.ids.posting;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
-import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -19,6 +14,7 @@ import de.mannheim.ids.wiki.page.WikiTalkHandler.SignatureType;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
+import nu.xom.Element;
 import nu.xom.Nodes;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
@@ -46,8 +42,12 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
+		Element signed = (Element) doc.query("/posting/p/signed").get(0);
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
-				doc.query("/posting/p/signed/@type").get(0).getValue());
+				signed.getAttribute("type").getValue());
+		assertEquals("19:12, 30. Dez. 2015 (CET)",
+				signed.getChildElements("date").get(0).getValue());
+		assertEquals(0,signed.getChildElements("name").size());
 	}
 
 	@Test
@@ -193,36 +193,4 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		}
 	}
 
-	@Test
-	public void testSpecialContributionLinkAtStart()
-			throws IOException, ValidityException, ParsingException {
-		String wikitext = ":: [[Utilisateur:L'amateur d'aéroplanes|L&amp;#39;"
-				+ "amateur d&amp;#39;aéroplanes]] 24 mai 2007 à 00:37 (CEST) "
-				+ "Ajoutez simplement la/les référence/s ou vous avez vu cela. "
-				+ "Il des milliers de sinistres par an.";
-
-		WikiPage wikiPage = createWikiPage(
-				"Discussion:Attentats du 11 septembre 2001/Archive 1",
-				"4046600", wikitext);
-
-		InputStream is = SpecialContributionSignatureTest.class.getClassLoader()
-				.getResourceAsStream("frwiki-talk.properties");
-		Properties properties = new Properties();
-		properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
-		is.close();
-
-		Configuration config = new Configuration(properties);
-
-		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
-				new WikiStatistics(), new WikiErrorWriter(), postUser);
-		handler.run();
-
-		String wikiXML = wikiPage.getWikiXML();
-		Document doc = builder.build(wikiXML, null);
-		assertEquals(1, doc.query("/posting/p/signed").size());
-		assertEquals("24 mai 2007 à 00:37 (CEST) Ajoutez simplement la/les "
-				+ "référence/s ou vous avez vu cela. Il des milliers de "
-				+ "sinistres par an.",
-				doc.query("/posting/p").get(0).getValue());
-	}
 }

@@ -3,11 +3,16 @@ package de.mannheim.ids.posting;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
+import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -48,8 +53,8 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node date = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("10:04, 6. Mär 2004 (CET)", date.getValue());
-//		Node name = doc.query("/posting/p/signed/name").get(0);
-//		assertEquals("Burggraf17", name.getValue());
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Burggraf17", name.getValue());
 	}
 
 	@Test
@@ -103,6 +108,9 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(0, doc.query("/posting/p/signed/date").size());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Benutzer:Fantasy", name.getValue());
 	}
 
 	@Test
@@ -125,6 +133,9 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("11:28, 17. Jul 2006 (CEST)", timestamp.getValue());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Benutzer:Fantasy", name.getValue());
 	}
 
 	@Test
@@ -166,6 +177,8 @@ public class SignatureTest extends GermanTestBase {
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals(0, doc.query("/posting/p/signed/date").size());
 		assertEquals("signed", signature.getValue());
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Fgb", name.getValue());
 	}
 
 	@Test
@@ -191,6 +204,9 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("02:46, 4. Jul. 2010 (CEST)", timestamp.getValue());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Mopskatze", name.getValue());
 	}
 
 	@Test
@@ -216,6 +232,9 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("zOiDberg", name.getValue());
 	}
 
 	@Test
@@ -238,6 +257,9 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Sargoth", name.getValue());
 	}
 
 	@Test
@@ -263,10 +285,14 @@ public class SignatureTest extends GermanTestBase {
 		Node ps = doc.query("/posting/p/small").get(0);
 		assertEquals(" mal wieder eine Nacht sinnvoll verbracht",
 				ps.getValue());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Pangloss", name.getValue());
 	}
 
 	// Problematic parsing because of the angle brackets
 	@Test
+	@Ignore
 	public void testSignatureWithAngleBrackets()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "&lt;Verstoß gegen KPA, daher gelöscht!--"
@@ -311,6 +337,9 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals(" PS: Könnte vielleicht irgend jemand ein Mal endlich "
 				+ "die Ladungen bei den Reaktionsgleichungen hochstellen!?",
 				ps.getValue());
+		
+		Node name = doc.query("/posting/ul/li/signed/name").get(0);
+		assertEquals("CHK", name.getValue());
 	}
 
 	@Test
@@ -334,6 +363,8 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/page/posting/p/a").size());
 		assertEquals(2, doc.query("/page/posting/p/signed").size());
+		Node name = doc.query("/page/posting/p/signed/name").get(0);
+		assertEquals("Pill", name.getValue());
 	}
 
 	@Test
@@ -378,6 +409,8 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/a").size());
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Armin", name.getValue());
 	}
 
 	// Problematic case
@@ -418,5 +451,38 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/a").size());
+	}
+	
+	@Test
+	public void testSignatureAtStart()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = ":: [[Utilisateur:L'amateur d'aéroplanes|L&amp;#39;"
+				+ "amateur d&amp;#39;aéroplanes]] 24 mai 2007 à 00:37 (CEST) "
+				+ "Ajoutez simplement la/les référence/s ou vous avez vu cela. "
+				+ "Il des milliers de sinistres par an.";
+
+		WikiPage wikiPage = createWikiPage(
+				"Discussion:Attentats du 11 septembre 2001/Archive 1",
+				"4046600", wikitext);
+
+		InputStream is = SpecialContributionSignatureTest.class.getClassLoader()
+				.getResourceAsStream("frwiki-talk.properties");
+		Properties properties = new Properties();
+		properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+		is.close();
+
+		Configuration config = new Configuration(properties);
+
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(1, doc.query("/posting/p/signed").size());
+		assertEquals("L'amateur d'aéroplanes24 mai 2007 à 00:37 (CEST) Ajoutez "
+				+ "simplement la/les référence/s ou vous avez vu cela. Il des "
+				+ "milliers de sinistres par an.",
+				doc.query("/posting/p").get(0).getValue());
 	}
 }

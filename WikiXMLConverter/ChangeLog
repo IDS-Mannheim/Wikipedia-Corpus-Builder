@@ -6,6 +6,8 @@ v1.0.4
 - Added change log.
 2019-07-10
 - Renamed <autoSignature> to <signed> and <timestamp> to <date>  
+2019-07-16
+- Fixed person name recognition and add <name> in <signed> element.
 
 v1.0.3
 

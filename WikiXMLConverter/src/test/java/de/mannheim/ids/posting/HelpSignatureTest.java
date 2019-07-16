@@ -14,6 +14,7 @@ import de.mannheim.ids.wiki.page.WikiTalkHandler.SignatureType;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostUser;
 import nu.xom.Document;
+import nu.xom.Node;
 import nu.xom.Nodes;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
@@ -68,10 +69,11 @@ public class HelpSignatureTest extends GermanTestBase {
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
-		assertEquals(0, doc.query("/posting/p/small/a").size());
+		Node node = doc.query("/posting/p/small").get(0);
+		assertEquals(0, node.query("/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
-				doc.query("/posting/p/small/signed/@type").get(0)
-						.getValue());
+				node.query("signed/@type").get(0).getValue());
+		assertEquals("Wi-infer", node.query("signed/name").get(0).getValue());
 	}
 
 	@Test

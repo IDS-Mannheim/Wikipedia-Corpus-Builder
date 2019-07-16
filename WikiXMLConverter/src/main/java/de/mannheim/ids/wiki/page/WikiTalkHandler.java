@@ -145,12 +145,11 @@ public class WikiTalkHandler extends WikiPageHandler {
 		post += "<signed @type=";
 		post += sigType.toString();
 		post += ">";
-//		System.out.println(username);
-//		if (username != null && !username.isEmpty()) {
-//			post += "<name>";
-//			post += username;
-//			post += "</name>";
-//		}
+		if (username != null && !username.isEmpty()) {
+			post += "<name>";
+			post += username;
+			post += "</name>";
+		}
 		if (timestamp != null && !timestamp.isEmpty()) {
 			post += "<date>";
 			post += timestamp;
@@ -361,9 +360,13 @@ public class WikiTalkHandler extends WikiPageHandler {
 			post += cleanSpanBeforeSignature(matcher.group(1));
 
 			String userLink, userLinkText;
-			String groups = matcher.group(2);
-			if (groups.contains("|")) {
-				String[] s = groups.split("\\|");
+			String group2 = matcher.group(2);
+			if (group2.contains("[[")){
+				String[] strings = group2.split("]]");
+				group2 = strings[0];
+			}
+			if (group2.contains("|")) {
+				String[] s = group2.split("\\|");
 				if (s.length < 2) {
 					return false;
 				}
@@ -371,7 +374,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 				userLinkText = s[1];
 			}
 			else {
-				userLink = groups;
+				userLink = group2;
 				userLinkText = userLink;
 			}
 
@@ -469,7 +472,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			SignatureType type = chooseSignatureType(
 					SignatureType.SPECIAL_CONTRIBUTION,
 					t.getPostscript());
-			addSignature(type, username, t.getTimestamp());
+			addSignature(type, null, t.getTimestamp());
 			writePost(matcher.group(3), username, t,
 					t.getPostscript());
 			matcher.reset();

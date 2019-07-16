@@ -83,9 +83,9 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wrapWithTextElement(wikiXML), null);
 		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
-		assertEquals("unsigned", signature.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());
 		signature = doc.query("/text/posting/p/signed/@type").get(1);
-		assertEquals("unsigned", signature.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());
 	}
 
 	@Test
@@ -109,10 +109,10 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
-		assertEquals("unsigned", signature.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());
 
 		signature = doc.query("/text/posting/p/signed/@type").get(1);
-		assertEquals("unsigned", signature.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());
 	}
 
 	@Test
@@ -131,8 +131,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		Node p = doc.query("/posting/p").get(0);
-		assertEquals("unsigned", p.query("signed/@type").get(0)
-				.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(),
+				p.query("signed/@type").get(0).getValue());
 		assertEquals("-Das sehe ich auch so. Und wie wäre es mit einem "
 				+ "Hinweis auf die psychoanalytische Bedeutung?", p.getValue());
 	}
@@ -153,8 +153,8 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		Node p = doc.query("/posting/p").get(0);
-		assertEquals("unsigned", p.query("signed/@type").get(0)
-				.getValue());
+		assertEquals(SignatureType.UNSIGNED.toString(),
+				p.query("signed/@type").get(0).getValue());
 		assertEquals("Wo gerade Sushi absolut en vogue ist (\"Rohfisch!!!\") "
 				+ "--", p.getValue());
 	}
