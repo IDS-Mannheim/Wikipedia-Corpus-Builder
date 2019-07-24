@@ -295,6 +295,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 				return false;
 			}
 
+			post += matcher.group(1);
+			
 			String userLink, userLinkText;
 			String mg = matcher.group(2);
 			if (mg.contains("|")) {
@@ -321,7 +323,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 			SignatureType type = chooseSignatureType(SignatureType.SIGNED,
 					rest);
-			addSignature(type,userLink, timestamp);
+			addSignature(type,userLinkText, timestamp);
 			writePost(userLinkText, userLink, t, rest);
 
 			matcher.reset();

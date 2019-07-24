@@ -10,6 +10,7 @@ v1.0.4
 - Fixed person name recognition and add <name> in <signed> element.
 2019-07-24
 - Added more criteria for identifying empty pages.
+- Fixed missing start text in user-talk signature handler.
 
 v1.0.3
 
