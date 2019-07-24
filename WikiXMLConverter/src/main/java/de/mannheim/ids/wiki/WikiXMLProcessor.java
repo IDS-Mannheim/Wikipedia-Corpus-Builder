@@ -22,7 +22,6 @@ import de.mannheim.ids.wiki.page.WikiPageReader;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
 import de.mannheim.ids.writer.WikiErrorWriter;
-import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
 import de.mannheim.ids.writer.WikiTitleWriter;
 

@@ -34,7 +34,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "hervor. {{unsigned}}";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Albert Camus", "31869",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -51,7 +51,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "Gott doch auch den Herrscher der Welt.{{Unsigniert}}";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Theismus", "16009",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -72,7 +72,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "|--[[Benutzer:Roo1812|Roo1812]] 08:41, 19. Nov. 2007 "
 				+ "(CET)}}";
 		WikiPage wikiPage = createWikiPage("Diskussion:Zelle (Biologie)",
-				"14131", wikitext, wikitext2);
+				"14131", true, wikitext, wikitext2);
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
@@ -80,6 +80,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
+		System.out.println(wikiXML);
 		Document doc = builder.build(wrapWithTextElement(wikiXML), null);
 		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
@@ -98,7 +99,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "Benutzer:MBq|MBq]] 09:30, 29. Dez 2005 (CET)}}";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Synergetik-"
-				+ "Therapie/Archiv1", "1152863", wikitext, wikitext2);
+				+ "Therapie/Archiv1", "1152863", true, wikitext, wikitext2);
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
@@ -122,7 +123,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "Hinweis auf die psychoanalytische Bedeutung?{{unsigned|"
 				+ "80.219.9.7|Bijick}}";
 		WikiPage wikiPage = createWikiPage("Diskussion:Latenz", "27190",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -144,7 +145,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "Rohfisch!!!&quot;) --{{unsigned|62.180.109.219|5. "
 				+ "Januar 2008, 05:32 Uhr}}";
 		WikiPage wikiPage = createWikiPage("Diskussion:Inuit", "1152863",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -169,7 +170,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "19. Mär. 2009 (CET))&lt;/small&gt;";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Salze", "42343",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -189,7 +190,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 				+ "[[Benutzer Diskussion:Chef|Diskussion]] 16:32, 20. Mai "
 				+ "2006 (CEST)}}";
 		WikiPage wikiPage = createWikiPage("Diskussion:Friedrich Nietzsche/"
-				+ "Archiv/1", "1627", wikitext);
+				+ "Archiv/1", "1627", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -210,7 +211,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		String wikitext = "una sección que justamente trata de apoyo al "
 				+ "estándar.{{no_firmado|200.84.136.144}}";
 		WikiPage wikiPage = createWikiPage("Discusión:Mozilla Firefox",
-				"152144", wikitext);
+				"152144", true, wikitext);
 
 		WikiXMLConverter converter = new WikiXMLConverter();
 		Configuration config = converter.createConfig(new String[]{"-prop",

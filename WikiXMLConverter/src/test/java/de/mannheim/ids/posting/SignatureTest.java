@@ -39,7 +39,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "ähnliche Funktion bei Wikipedia? --[[Benutzer:Burggraf17|"
 				+ "Burggraf17]] 10:04, 6. Mär 2004 (CET)";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -64,7 +64,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "--[[benutzer:Burggraf17|Burggraf17]] 10:04, 6. Mär "
 				+ "2004 (CET)";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -81,7 +81,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikitext = "oder eine ähnliche Funktion bei Wikipedia? "
 				+ "--[[benutzer:Burggraf17|Burggraf17]]";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -98,7 +98,7 @@ public class SignatureTest extends GermanTestBase {
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = ":Grüsse, und bis bald wiedermal :-) [[Benutzer:Fantasy]]";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -119,7 +119,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikitext = ":Grüsse, und bis bald wiedermal :-) [[Benutzer:Fantasy]] "
 				+ "[[Benutzer_Diskussion:Fantasy|容]] 11:28, 17. Jul 2006 (CEST)";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -145,7 +145,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "-- [[Benutzer:Burggraf17|Burggraf17]] 10:04, 6. Mär "
 				+ "2004 (CET)";
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Fantasy",
-				"23159", wikitext);
+				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -165,7 +165,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "sind keine Verein im rechtlichen Sinne.'' hineingestellt "
 				+ "und warum? -- [[:Benutzer:Fgb|Fgb]].";
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt",
-				"359", wikitext);
+				"359", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -191,7 +191,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes",
-				"131", wikitext);
+				"131", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -223,7 +223,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Eulersche Zahl",
-				"1338", wikitext);
+				"1338", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -248,7 +248,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Zeit des Nationalsozialismus/Archiv/1",
-				"1169", wikitext);
+				"1169", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -273,7 +273,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Friedrich Nietzsche/Archiv/1",
-				"1627", wikitext);
+				"1627", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -303,7 +303,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Feminismus/Archiv/006",
-				"8144626", wikitext);
+				"8144626", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -322,7 +322,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "die Ladungen bei den Reaktionsgleichungen hochstellen!?";
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes",
-				"131", wikitext);
+				"131", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -352,7 +352,7 @@ public class SignatureTest extends GermanTestBase {
 
 		String wikitext2 = "Gruß, —[[user:Pill|Pill]] 00:30, 11. Jun. 2009 (CEST)";
 
-		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
+		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359", true,
 				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
@@ -380,7 +380,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "Mindestbeiträge=1 |Mindestabschnitte =3 |Frequenz="
 				+ "monatlich}}";
 		WikiPage wikiPage = createWikiPage("Diskussion:Hauspferd", "12765",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -400,7 +400,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "Diskussion:Armin P.|Diskussion]]) 19:29, 14. Aug. 2012 "
 				+ "(CEST)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Niccolò Machiavelli",
-				"36867", wikitext);
+				"36867", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -423,7 +423,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "und das sowohl Du [[benutzer:DaTroll|Datroll]] recht hast, "
 				+ "wie auch der anonyme Benutzer, den Du revertet hast.";
 		WikiPage wikiPage = createWikiPage("Diskussion:Mathematik/Archiv/1",
-				"3250", wikitext);
+				"3250", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -442,7 +442,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "'''begründen'''.";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Feminismus/Archiv/001",
-				"438636", wikitext);
+				"438636", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -463,7 +463,7 @@ public class SignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Discussion:Attentats du 11 septembre 2001/Archive 1",
-				"4046600", wikitext);
+				"4046600", true, wikitext);
 
 		InputStream is = SpecialContributionSignatureTest.class.getClassLoader()
 				.getResourceAsStream("frwiki-talk.properties");

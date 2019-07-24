@@ -20,12 +20,13 @@ public abstract class GermanTestBase {
 	protected boolean generateWikitext = false;
 	protected String pageStructure = "<page>\n      <text></text>\n</page>";
 
-	protected static Configuration talkConfig, userTalkConfig;
+	protected static Configuration talkConfig, userTalkConfig, articleConfig;
 
 	public GermanTestBase() {
 		builder = new Builder();
 		talkConfig = createTalkConfig(wikidump);
 		userTalkConfig = createUserTalkConfig(wikidump);
+		articleConfig = createConfig(wikidump, 0, "article");
 	}
 
 	protected Configuration createTalkConfig(String wikidump) {
@@ -47,15 +48,21 @@ public abstract class GermanTestBase {
 	}
 
 	protected WikiPage createWikiPage(String pageTitle, String pageId,
+			boolean isDiscussion,
 			String... wikitext) throws IOException {
 		WikiPage wikiPage = new WikiPage();
 		wikiPage.setPageTitle(pageTitle);
 		wikiPage.setPageId(pageId);
-		wikiPage.setPageIndex(true);
+		wikiPage.setPageIndex(isDiscussion);
 		wikiPage.setPageStructure(pageStructure);
 		wikiPage.setPageIndent("");
-		for (String text : wikitext) {
-			wikiPage.textSegments.add(text);
+		if (isDiscussion) {
+			for (String text : wikitext) {
+				wikiPage.textSegments.add(text);
+			}
+		}
+		else {
+			wikiPage.setWikitext(wikitext[0]);
 		}
 		return wikiPage;
 	}

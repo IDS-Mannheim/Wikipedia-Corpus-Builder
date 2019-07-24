@@ -34,7 +34,7 @@ public class TimestampTest extends GermanTestBase {
 				+ "21:08, 27. Feb. 2017 (CET)";
 
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:Abu-Dun/"
-				+ "Archiv/2017", "9756545", wikitext);
+				+ "Archiv/2017", "9756545", true, wikitext);
 
 		WikiPostUser postUser = new WikiPostUser("test", "talk");
 

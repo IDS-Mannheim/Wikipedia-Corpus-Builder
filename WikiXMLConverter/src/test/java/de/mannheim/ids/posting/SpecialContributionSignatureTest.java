@@ -33,7 +33,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "beschreiben und belegen. --[[Spezial:Beiträge/"
 				+ "91.17.241.151|91.17.241.151]] 19:12, 30. Dez. 2015 "
 				+ "(CET)";
-		WikiPage wikiPage = createWikiPage("Diskussion:Aldi", "277", wikitext);
+		WikiPage wikiPage = createWikiPage("Diskussion:Aldi", "277", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -60,7 +60,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:Außenbandruptur des oberen Sprunggelenkes", "131",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -85,7 +85,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "2. Jun. 2017 (CEST)";
 
 		WikiPage wikiPage = createWikiPage(
-				"Diskussion:Antisemitismus (bis 1945)", "333", wikitext);
+				"Diskussion:Antisemitismus (bis 1945)", "333", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -107,7 +107,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "213.39.224.204]] ([[Benutzer Diskussion:213.39.224.204|"
 				+ "Diskussion]]) 20:16, 16. Jul 2004 (CEST)";
 		WikiPage wikiPage = createWikiPage(
-				"Diskussion:Licht (Begriffsklärung)", "13982", wikitext);
+				"Diskussion:Licht (Begriffsklärung)", "13982", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -129,7 +129,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "2. Jan. 2003 (MEZ) – und wurde nachträglich [[Hilfe:"
 				+ "Unterschreiben|unterschrieben]].)&lt;/small&gt;";
 		WikiPage wikiPage = createWikiPage(
-				"Diskussion:Ewiges Leben", "15957", wikitext);
+				"Diskussion:Ewiges Leben", "15957", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -150,7 +150,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "behandeln.--[[spezial:beiträge/the 141|the artist formerly "
 				+ "known as 141.84.69.20]] 14:12, 8. Dez. 2014 (CET)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Amok", "324773",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -161,6 +161,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/signed/@type").get(0).getValue());
+//		System.out.println(wikiXML);
 	}
 
 	@Test
@@ -175,7 +176,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		String wikitext2 = "raus. --[[special:contributions/87.123.82.135|"
 				+ "87.123.82.135]] 17:48, 16. Nov. 2007 (CET)";
 
-		WikiPage wikiPage = createWikiPage("Diskussion:Iod", "12765",
+		WikiPage wikiPage = createWikiPage("Diskussion:Iod", "12765", true,
 				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);

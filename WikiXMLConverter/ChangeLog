@@ -8,6 +8,8 @@ v1.0.4
 - Renamed <autoSignature> to <signed> and <timestamp> to <date>  
 2019-07-16
 - Fixed person name recognition and add <name> in <signed> element.
+2019-07-24
+- Added more criteria for identifying empty pages.
 
 v1.0.3
 

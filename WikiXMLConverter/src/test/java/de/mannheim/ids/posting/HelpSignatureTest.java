@@ -35,7 +35,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "Diskussion]]) 18:07, 16. Mai 2011 (CEST)) &lt;/small&gt;";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Außenbandruptur des "
-				+ "oberen Sprunggelenkes", "131", wikitext);
+				+ "oberen Sprunggelenkes", "131", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -61,7 +61,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "&lt;/small&gt;";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -84,7 +84,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "Mai 2010 (CEST), ''Datum/Uhrzeit nachträglich eingefügt, "
 				+ "siehe [[Hilfe:Signatur]]'')&lt;/small&gt;";
 		WikiPage wikiPage = createWikiPage("Diskussion:Erdzeitalter", "1347",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -107,7 +107,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "[[Spezial:Beiträge/93.221.237.29|93.221.237.29]] ([[Benutzer "
 				+ "Diskussion:93.221.237.29|Diskussion]]))&lt;/small&gt;";
 		WikiPage wikiPage = createWikiPage("Diskussion:Computerlinguistik",
-				"904", wikitext);
+				"904", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -132,7 +132,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "[[Hilfe:Signatur|signiert]].)&lt;/small&gt;";
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:General Packet Radio Service",
-				"2063", wikitext);
+				"2063", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -158,7 +158,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ "von der Zahl her auf die Einwohnerzahl umgerechnet cest. ";
 
 		WikiPage wikiPage = createWikiPage("Diskussion:Berlin", "511",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -195,7 +195,7 @@ public class HelpSignatureTest extends GermanTestBase {
 
 		WikiPage wikiPage = createWikiPage(
 				"Diskussion:General Packet Radio Service",
-				"2063", wikitext, wikitext2);
+				"2063", true, wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -224,7 +224,7 @@ public class HelpSignatureTest extends GermanTestBase {
 				+ " --&gt; &lt;!--Autosigned by SineBot--&gt;";
 		WikiPage wikiPage = createWikiPage(
 				"Benutzer Diskussion:Lefcant",
-				"1943350", wikitext);
+				"1943350", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 

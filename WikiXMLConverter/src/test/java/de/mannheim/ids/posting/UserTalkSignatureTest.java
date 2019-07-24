@@ -31,7 +31,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikitext = "viele Grüße, [[Benutzer diskussion:"
 				+ "Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 (CET)";
 		WikiPage wikiPage = createWikiPage(
-				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", wikitext);
+				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -49,7 +49,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "/&gt;Vielen Dank und viele Grüße, [[Benutzer Diskussion:"
 				+ "Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 (CET)";
 		WikiPage wikiPage = createWikiPage(
-				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", wikitext);
+				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -74,7 +74,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "geben scheint. --[[benutzer diskussion: freak 1.5|"
 				+ "Freak1.5]] 15:58, 20. Okt. 2006 (CEST)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Kamelopedia",
-				"262282", wikitext);
+				"262282", true, wikitext);
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
@@ -95,7 +95,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikitext = "VG --[[benutzer_diskussion: freak 1.5|"
 				+ "Freak1.5]] 15:58, 20. Okt. 2006 (CEST)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Kamelopedia",
-				"262282", wikitext);
+				"262282", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -117,7 +117,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "/small&gt;]] 08:55, 15. Mär. 2007 (CET)";
 
 		WikiPage wikiPage = createWikiPage("Benutzer Diskussion:DieBuche",
-				"328552", wikitext);
+				"328552", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -140,7 +140,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikitext = "* 34 (30/4) [[:Benutzer Diskussion:Meffo|"
 				+ "Meffo]] 2007-09-08 11:32 &amp;ndash; 2009-12-27 10:29";
 		WikiPage wikiPage = createWikiPage("Diskussion:Definition", "1134",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -167,7 +167,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		// + "talk page]]. [[Benutzer:Pcu123456789|Pcu123456789]] 04:14, "
 		// + "27 January 2007 (UTC)";
 		WikiPage wikiPage = createWikiPage("Diskussion:Demokratie", "1173",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -190,7 +190,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "[[User Talk:Kismalac|kismalac]] 22:02, 14 April 2011"
 				+ "(UTC)";
 		WikiPage wikiPage = createWikiPage("Talk:Cardinal number", "6177",
-				wikitext);
+				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				
@@ -213,7 +213,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "is a good one.  -- [[User_Talk:SiobhanHansa|SiobhanHansa]] "
 				+ "15:08, 6 November 2007 (UTC)";
 		WikiPage wikiPage = createWikiPage("Talk:New York City/Archive 10",
-				"6908", wikitext);
+				"6908", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 				

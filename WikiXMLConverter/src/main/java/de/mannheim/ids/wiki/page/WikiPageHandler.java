@@ -21,6 +21,9 @@ import de.mannheim.ids.parser.TagSoupParser;
 import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.writer.WikiErrorWriter;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
 
 /**
  * This class implements methods for handling Wikipages including reading page
@@ -33,11 +36,11 @@ import de.mannheim.ids.writer.WikiErrorWriter;
 public abstract class WikiPageHandler implements Runnable {
 
 	private Logger log = LogManager.getLogger(WikiPageHandler.class);
-	
+
 	private static final Pattern nonTagPattern = Pattern
 			.compile("<([^!!/a-zA-Z\\s])");
 	private static final Pattern nonTagPattern2 = Pattern.compile("<([^>]*)");
-	
+
 	private static final Pattern endTagPattern = Pattern.compile("([^\\s])/>");
 
 	private static final Pattern stylePattern = Pattern
@@ -52,6 +55,8 @@ public abstract class WikiPageHandler implements Runnable {
 	protected Configuration config;
 
 	private boolean DEBUG = false;
+
+	private Builder builder;
 
 	/**
 	 * Constructs a WikiPageHandler for the given wikipage using the other given
@@ -87,6 +92,7 @@ public abstract class WikiPageHandler implements Runnable {
 		this.wikiStatistics = wikiStatistics;
 		this.errorWriter = errorWriter;
 		this.tagSoupParser = new TagSoupParser();
+		this.builder = new Builder();
 	}
 
 	/**
@@ -111,12 +117,14 @@ public abstract class WikiPageHandler implements Runnable {
 			throw new IllegalArgumentException("Wikitext cannot be null.");
 		}
 
-		if (DEBUG) log.debug("original wikitext: " +wikitext);
+		if (DEBUG)
+			log.debug("original wikitext: " + wikitext);
 		// unescape XML tags
 		wikitext = StringEscapeUtils.unescapeXml(wikitext);
 		wikitext = cleanPattern(wikitext);
-		if (DEBUG) log.debug("cleaned wikitext: " +wikitext);
-		
+		if (DEBUG)
+			log.debug("cleaned wikitext: " + wikitext);
+
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
@@ -126,12 +134,13 @@ public abstract class WikiPageHandler implements Runnable {
 			errorWriter.logErrorPage("TAGSOUP", pageTitle, pageId, e.getCause(),
 					"");
 		}
-		if (DEBUG) log.debug("tagSoup output: " + wikitext);
-		
+		if (DEBUG)
+			log.debug("tagSoup output: " + wikitext);
+
 		// repair comment tags
-//		wikitext = wikitext.replace("&lt;!--", "<!--");
-//		wikitext = wikitext.replace("--&gt;", "-->");
-		
+		// wikitext = wikitext.replace("&lt;!--", "<!--");
+		// wikitext = wikitext.replace("--&gt;", "-->");
+
 		Sweble2Parser swebleParser = new Sweble2Parser(pageId, pageTitle,
 				wikitext, config.getLanguageCode(), wikiStatistics,
 				errorWriter, WikiXMLProcessor.wikiConfig);
@@ -218,13 +227,27 @@ public abstract class WikiPageHandler implements Runnable {
 	 *             if failed writing the wikiXML
 	 */
 	protected void writeWikiXML() throws IOException {
-		if (wikiPage.getWikiXML().isEmpty()) {
-			wikiStatistics.addEmptyParsedPages();
+		String wikiXML = wikiPage.getWikiXML();
+		try {
+			if (isEmpty(wikiXML) || isEmpty(builder.build("<text>"
+					+ wikiXML + "</text>", null).getValue().trim())) {
+				wikiStatistics.addEmptyParsedPages();
+				return;
+			}
 		}
-		else if (validateDOM() && validatePageStructure()) {
-			writeWikiXML(wikiPage.getWikiXML(), config.getOutputFolder());
+		catch (ParsingException e) {}
+
+		if (validateDOM() && validatePageStructure()) {
+			writeWikiXML(wikiXML, config.getOutputFolder());
 			wikiStatistics.addTotalNonEmptyPages();
 		}
+	}
+	
+	private boolean isEmpty(String text) {
+		if (text.isEmpty() || text.split(" ").length < 3) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -274,7 +297,8 @@ public abstract class WikiPageHandler implements Runnable {
 			// try fixing missing tags
 			StringBuilder sb = new StringBuilder();
 			sb.append(wikiPage.getPageIndent());
-			String pageStructure = tagSoupParser.generate(wikiPage.getPageStructure(), false);
+			String pageStructure = tagSoupParser
+					.generate(wikiPage.getPageStructure(), false);
 			sb.append(pageStructure);
 			wikiPage.setPageStructure(sb.toString());
 		}
