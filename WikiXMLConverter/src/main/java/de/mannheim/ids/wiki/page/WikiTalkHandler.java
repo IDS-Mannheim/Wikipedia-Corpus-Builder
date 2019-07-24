@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import de.mannheim.ids.config.Configuration;
 import de.mannheim.ids.config.PostingPatterns;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import de.mannheim.ids.writer.WikiPostTime;
 import de.mannheim.ids.writer.WikiPostUser;
@@ -140,11 +141,14 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 *            the post timestamp
 	 * @param string 
 	 */
-	private void addSignature(SignatureType sigType, String username,
+	private void addSignature(SignatureType sigType, String userlink, String username,
 			String timestamp) {
-		post += "<signed @type=";
+		post += "<signed type=\"";
 		post += sigType.toString();
-		post += ">";
+		post += "\">";
+//		if (userlink  != null && !userlink.isEmpty()){
+//			post += userlink;
+//		}
 		if (username != null && !username.isEmpty()) {
 			post += "<name>";
 			post += username;
@@ -156,6 +160,33 @@ public class WikiTalkHandler extends WikiPageHandler {
 			post += "</date>";
 		}
 		post += "</signed>";
+	}
+	
+	private String addSignature(String post, SignatureType sigType,
+			String userLink, String username,
+			String timestamp) {
+		
+		String[] parts = post.split("<signed></signed>");
+		post = parts[0];
+		post += "<signed type=\"";
+		post += sigType.toString();
+		post += "\">";
+		if (userLink  != null && !userLink.isEmpty()){
+			post += userLink;
+		}
+		if (username != null && !username.isEmpty()) {
+			post += "<name>";
+			post += username;
+			post += "</name>";
+		}
+		if (timestamp != null && !timestamp.isEmpty()) {
+			post += "<date>";
+			post += timestamp;
+			post += "</date>";
+		}
+		post += "</signed>";
+		if (parts.length>1) post += parts[1];
+		return post;
 	}
 
 	/**
@@ -245,6 +276,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	}
 
 	private void addPostscript(String postscript) {
+		
 		StringBuilder sb = new StringBuilder();
 		String trimmedPostscript = postscript.toLowerCase().trim();
 		if (trimmedPostscript.startsWith("ps")
@@ -279,7 +311,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 		String rest = t.getPostscript();
 
 		if (timestamp != null) {
-			addSignature(SignatureType.SIGNED, null, timestamp);
+			addSignature(SignatureType.SIGNED, null, null, timestamp);
 			writePost("", null, t, rest);
 			return true;
 		}
@@ -323,9 +355,21 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 			SignatureType type = chooseSignatureType(SignatureType.SIGNED,
 					rest);
-			addSignature(type,userLinkText, timestamp);
+			addSignature(type, userLink, userLinkText, timestamp);
 			writePost(userLinkText, userLink, t, rest);
 
+//			userLink = createUserLink(userLinkText, userLink);
+//			
+//			int level = identifyLevel(post);
+//			String wikiXML = prepareWikiXML(rest);
+//			wikiXML = addSignature(wikiXML, type, userLink, userLinkText,
+//					timestamp);
+//			
+//			String postingElement = createPostElement(level, userLinkText,
+//					userLink,t, wikiXML);
+//			wikiXMLBuilder.append(postingElement);
+//			this.post = ""; // reset post
+			
 			matcher.reset();
 			return true;
 		}
@@ -388,15 +432,35 @@ public class WikiTalkHandler extends WikiPageHandler {
 			}
 			String rest = t.getPostscript();
 
-			SignatureType signatureType = chooseSignatureType(
+			SignatureType type = chooseSignatureType(
 					SignatureType.SIGNED, rest);
-			addSignature(signatureType,userLinkText, t.getTimestamp());
-			writePost(userLinkText, userLink, t, rest);
+//			addSignature(signatureType, userLink, userLinkText, t.getTimestamp());
+//			writePost(userLinkText, userLink, t, rest);
+
+			userLink = createUserLink(userLinkText, userLink);
+			
+			int level = identifyLevel(post);
+			String wikiXML = prepareWikiXML(rest);
+			wikiXML = addSignature(wikiXML, type, userLink, userLinkText,
+					timestamp);
+			String postingElement = createPostElement(level, userLinkText,
+					userLink,t, wikiXML);
+			wikiXMLBuilder.append(postingElement);
+			this.post = ""; // reset post
 
 			matcher.reset();
 			return true;
 		}
 		return false;
+	}
+	
+	private String createUserLink(String username, String userLink){
+		StringBuilder sb = new StringBuilder();
+		sb.append("<ref target=\"");
+		sb.append(WikiXMLProcessor.Wikipedia_URI);
+		sb.append(userLink.replaceAll("\\s", "_") + "\">");
+		sb.append(username + "</ref>");
+		return sb.toString();
 	}
 
 	private boolean isSignatureInTemplate(String signature) {
@@ -474,7 +538,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			SignatureType type = chooseSignatureType(
 					SignatureType.SPECIAL_CONTRIBUTION,
 					t.getPostscript());
-			addSignature(type, null, t.getTimestamp());
+			addSignature(type, null, null, t.getTimestamp());
 			writePost(matcher.group(3), username, t,
 					t.getPostscript());
 			matcher.reset();
@@ -505,7 +569,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 			if (matcher.group(1) != null) {
 				post += matcher.group(1);
 			}
-			addSignature(SignatureType.UNSIGNED, null, null);
+			addSignature(SignatureType.UNSIGNED, null, null, null);
 			writePost("", null, null, matcher.group(3));
 			return true;
 		}
@@ -526,7 +590,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 				if (matcher.group(1) != null) {
 					post += matcher.group(1);
 				}
-				addSignature(SignatureType.UNSIGNED, null, timestamp);
+				addSignature(SignatureType.UNSIGNED, null, null, timestamp);
 				writePost(matcher.group(3), null, t, rest);
 
 				matcher.reset();
@@ -577,16 +641,21 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @return the level depth
 	 */
 	private int identifyLevel(String post) {
-
+		int level = 0;
 		if (post == null) {
 			throw new IllegalArgumentException("Post cannot be null.");
 		}
 
 		Matcher matcher = levelPattern.matcher(post);
 		if (matcher.find()) {
-			return matcher.group(1).length();
+			level = matcher.group(1).length();
 		}
-		return 0;
+		
+		if (level > 0) {
+			this.post = new String(post.substring(level, post.length()).trim());
+
+		}
+		return level;
 	}
 
 	/**
@@ -610,13 +679,14 @@ public class WikiTalkHandler extends WikiPageHandler {
 			addPostscript(postscript);
 		}
 
+//		System.out.println(post);
 		String post = this.post.trim();
-		this.post = ""; // reset post
 
 		if (post.isEmpty())
 			return;
 		int level = identifyLevel(post);
-
+		this.post = ""; // reset post
+		
 		if (level > 0) {
 			post = new String(post.substring(level, post.length()).trim());
 
@@ -631,6 +701,30 @@ public class WikiTalkHandler extends WikiPageHandler {
 		String postingElement = createPostElement(level, username, userLink,
 				timestamp, wikiXML);
 		wikiXMLBuilder.append(postingElement);
+	}
+	
+	private String prepareWikiXML(String rest) throws IOException {
+		if (post.isEmpty()){
+			if (rest != null && !rest.isEmpty()) {
+				post += "<signed></signed>";
+				addPostscript(rest);
+			}
+			else{
+				return post;
+			}
+		}
+		else{
+			post += "<signed></signed>";
+			if (rest != null && !rest.isEmpty()) {
+				addPostscript(rest);
+			}
+		}
+		String post = this.post.trim();
+		String wikiXML = parseToXML(wikiPage.getPageId(),
+				wikiPage.getPageTitle(), post);
+
+		wikiStatistics.addTotalPostings();
+		return wikiXML;
 	}
 
 	/**

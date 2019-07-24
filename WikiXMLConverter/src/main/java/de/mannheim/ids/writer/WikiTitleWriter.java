@@ -61,7 +61,9 @@ public class WikiTitleWriter {
 			System.err.println("Failed creating an XMLStreamWriter: "+e.getMessage());
 		}
 		
-		writer = new IndentingXMLStreamWriter(w);
+		IndentingXMLStreamWriter indentingWriter = new IndentingXMLStreamWriter(w);
+		indentingWriter.setIndentStep(" ");
+		writer = indentingWriter;
 		try {
 			writer.writeStartDocument();
 			writer.writeStartElement("titles");

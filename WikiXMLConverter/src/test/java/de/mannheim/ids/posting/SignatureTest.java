@@ -8,11 +8,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
 import de.mannheim.ids.config.Configuration;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -42,7 +44,7 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -55,6 +57,9 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("10:04, 6. Mär 2004 (CET)", date.getValue());
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Burggraf17", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Burggraf17",
+				ref.getValue());
 	}
 
 	@Test
@@ -67,7 +72,7 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -84,7 +89,7 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -101,16 +106,19 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(0, doc.query("/posting/p/signed/date").size());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Benutzer:Fantasy", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fantasy",
+				ref.getValue());
 	}
 
 	@Test
@@ -122,7 +130,7 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -133,9 +141,12 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("11:28, 17. Jul 2006 (CEST)", timestamp.getValue());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Benutzer:Fantasy", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fantasy",
+				ref.getValue());
 	}
 
 	@Test
@@ -148,7 +159,7 @@ public class SignatureTest extends GermanTestBase {
 				"23159", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -168,7 +179,7 @@ public class SignatureTest extends GermanTestBase {
 				"359", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -179,6 +190,9 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Fgb", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fgb",
+				ref.getValue());
 	}
 
 	@Test
@@ -194,7 +208,7 @@ public class SignatureTest extends GermanTestBase {
 				"131", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -204,9 +218,12 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("02:46, 4. Jul. 2010 (CEST)", timestamp.getValue());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Mopskatze", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Mopskatze",
+				ref.getValue());
 	}
 
 	@Test
@@ -226,15 +243,22 @@ public class SignatureTest extends GermanTestBase {
 				"1338", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		
 		Node name = doc.query("/posting/p/signed/name").get(0);
-		assertEquals("zOiDberg", name.getValue());
+		assertEquals("&lt;span style=&quot;padding: 1px; color: #808080; "
+				+ "border-width: 1px; border-style: dotted; border-color: "
+				+ "#DC143C;&quot;&gt;z&lt;b style=&quot;color: red;"
+				+ "&quot;&gt;O&lt;/b&gt;i&lt;b style=&quot;color: red;"
+				+ "&quot;&gt;D&lt;/b&gt;berg&lt;/span&gt;",
+				StringEscapeUtils.escapeXml10(name.getValue()));
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer:ZOiDberg",
+				ref.getValue());
 	}
 
 	@Test
@@ -251,13 +275,13 @@ public class SignatureTest extends GermanTestBase {
 				"1169", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Sargoth", name.getValue());
 	}
@@ -276,7 +300,7 @@ public class SignatureTest extends GermanTestBase {
 				"1627", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -285,7 +309,7 @@ public class SignatureTest extends GermanTestBase {
 		Node ps = doc.query("/posting/p/small").get(0);
 		assertEquals(" mal wieder eine Nacht sinnvoll verbracht",
 				ps.getValue());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Pangloss", name.getValue());
 	}
@@ -306,7 +330,7 @@ public class SignatureTest extends GermanTestBase {
 				"8144626", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -325,7 +349,7 @@ public class SignatureTest extends GermanTestBase {
 				"131", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -337,7 +361,7 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals(" PS: Könnte vielleicht irgend jemand ein Mal endlich "
 				+ "die Ladungen bei den Reaktionsgleichungen hochstellen!?",
 				ps.getValue());
-		
+
 		Node name = doc.query("/posting/ul/li/signed/name").get(0);
 		assertEquals("CHK", name.getValue());
 	}
@@ -352,11 +376,12 @@ public class SignatureTest extends GermanTestBase {
 
 		String wikitext2 = "Gruß, —[[user:Pill|Pill]] 00:30, 11. Jun. 2009 (CEST)";
 
-		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359", true,
+		WikiPage wikiPage = createWikiPage("Diskussion:Arbeitsmarkt", "359",
+				true,
 				wikitext, wikitext2);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = "<page>\n" + wikiPage.getWikiXML() + "\n</page>";
@@ -383,7 +408,7 @@ public class SignatureTest extends GermanTestBase {
 				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -403,7 +428,7 @@ public class SignatureTest extends GermanTestBase {
 				"36867", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -426,7 +451,7 @@ public class SignatureTest extends GermanTestBase {
 				"3250", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -445,14 +470,14 @@ public class SignatureTest extends GermanTestBase {
 				"438636", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/a").size());
 	}
-	
+
 	@Test
 	public void testSignatureAtStart()
 			throws IOException, ValidityException, ParsingException {
@@ -472,6 +497,8 @@ public class SignatureTest extends GermanTestBase {
 		is.close();
 
 		Configuration config = new Configuration(properties);
+		WikiXMLProcessor.Wikipedia_URI = "https://" + config.getLanguageCode()
+				+ ".wikipedia.org/wiki/";
 
 		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
@@ -480,9 +507,11 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/signed").size());
-		assertEquals("L'amateur d'aéroplanes24 mai 2007 à 00:37 (CEST) Ajoutez "
-				+ "simplement la/les référence/s ou vous avez vu cela. Il des "
-				+ "milliers de sinistres par an.",
-				doc.query("/posting/p").get(0).getValue());
+		Node posting = doc.query("/posting/p").get(0);
+		assertEquals("L&amp;#39;amateur d&amp;#39;aéroplanes"
+				+ "L&amp;#39;amateur d&amp;#39;aéroplanes24 mai 2007 à "
+				+ "00:37 (CEST) Ajoutez simplement la/les référence/s ou "
+				+ "vous avez vu cela. Il des milliers de sinistres par an.",
+				StringEscapeUtils.escapeXml10(posting.getValue()));
 	}
 }

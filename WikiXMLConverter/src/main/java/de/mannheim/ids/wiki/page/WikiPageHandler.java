@@ -22,7 +22,6 @@ import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import nu.xom.Builder;
-import nu.xom.Document;
 import nu.xom.ParsingException;
 
 /**

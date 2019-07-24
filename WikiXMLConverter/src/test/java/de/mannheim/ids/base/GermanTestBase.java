@@ -3,6 +3,7 @@ package de.mannheim.ids.base;
 import java.io.IOException;
 
 import de.mannheim.ids.config.Configuration;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiPage;
 import nu.xom.Builder;
 
@@ -27,6 +28,8 @@ public abstract class GermanTestBase {
 		talkConfig = createTalkConfig(wikidump);
 		userTalkConfig = createUserTalkConfig(wikidump);
 		articleConfig = createConfig(wikidump, 0, "article");
+		WikiXMLProcessor.Wikipedia_URI = "https://" + language
+				+ ".wikipedia.org/wiki/";
 	}
 
 	protected Configuration createTalkConfig(String wikidump) {

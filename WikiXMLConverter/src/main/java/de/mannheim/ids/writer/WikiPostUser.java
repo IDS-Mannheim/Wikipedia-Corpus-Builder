@@ -122,10 +122,13 @@ public class WikiPostUser {
 
 			if (userLink != null && !userLink.isEmpty()) {
 				userWriter.append("      <signatureContent>\n");
-				userWriter.append("         <ref target=\"");
-				userWriter.append(WikiXMLProcessor.Wikipedia_URI);
-				userWriter.append(userLink.replaceAll("\\s", "_") + "\">");
-				userWriter.append(username + "</ref>\n");
+				userWriter.append("         ");
+				userWriter.append(userLink);
+				userWriter.append("\n");
+//				userWriter.append("         <ref target=\"");
+//				userWriter.append(WikiXMLProcessor.Wikipedia_URI);
+//				userWriter.append(userLink.replaceAll("\\s", "_") + "\">");
+//				userWriter.append(username + "</ref>\n");
 				userWriter.append("      </signatureContent>\n");
 			}
 

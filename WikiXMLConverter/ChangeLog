@@ -11,6 +11,7 @@ v1.0.4
 2019-07-24
 - Added more criteria for identifying empty pages.
 - Fixed missing start text in user-talk signature handler.
+- Added <ref> to <signed> for user-link signatures.
 
 v1.0.3
 
