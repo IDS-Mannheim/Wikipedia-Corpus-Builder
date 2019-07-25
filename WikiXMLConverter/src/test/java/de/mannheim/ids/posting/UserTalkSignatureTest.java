@@ -3,10 +3,17 @@ package de.mannheim.ids.posting;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 
 import de.mannheim.ids.base.GermanTestBase;
+import de.mannheim.ids.config.Configuration;
+import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.wiki.page.WikiPage;
 import de.mannheim.ids.wiki.page.WikiStatistics;
 import de.mannheim.ids.wiki.page.WikiTalkHandler;
@@ -31,10 +38,11 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		String wikitext = "viele Grüße, [[Benutzer diskussion:"
 				+ "Grueslayer|Grueslayer]] 21:08, 27. Feb. 2017 (CET)";
 		WikiPage wikiPage = createWikiPage(
-				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", true, wikitext);
+				"Benutzer Diskussion:Abu-Dun/Archiv/2017", "9756545", true,
+				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -42,12 +50,12 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		assertEquals(1, doc.query("/posting/p/a").size());
 		assertEquals("viele Grüße, Grueslayer 21:08, 27. Feb. 2017 (CET)",
 				doc.query("/posting/p").get(0).getValue());
-		
+
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
-		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());	
+		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
 	}
 
 	@Test
@@ -60,7 +68,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "Archiv/2017", "9756545", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -68,17 +76,21 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		assertEquals("2017-02-27T21:08+01",
 				doc.query("/posting/@when-iso").get(0).getValue());
 		assertEquals("Magst Du Dich evtl. mal darum kümmern?Vielen Dank und "
-				+ "viele Grüße, Grueslayer21:08, 27. "
+				+ "viele Grüße, GrueslayerGrueslayer21:08, 27. "
 				+ "Feb. 2017 (CET)",
 				doc.query("/posting/p").get(0).getValue());
 		assertEquals(0, doc.query("/posting/p/a").size());
-		
+
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Grueslayer", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref").get(0);
+		assertEquals("Grueslayer", ref.getValue());
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer_Diskussion:"
+				+ "Grueslayer", ref.query("@target").get(0).getValue());
 	}
 
 	@Test
@@ -93,7 +105,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -101,12 +113,16 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		assertEquals(0, doc.query("/posting/p/a").size());
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
-		
+
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("15:58, 20. Okt. 2006 (CEST)", timestamp.getValue());
-		
+
 		Node name = doc.query("/posting/p/signed/name").get(0);
 		assertEquals("Freak1.5", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref").get(0);
+		assertEquals("Freak1.5", ref.getValue());
+		assertEquals("https://de.wikipedia.org/wiki/benutzer_diskussion:"
+				+ "_freak_1.5", ref.query("@target").get(0).getValue());
 	}
 
 	@Test
@@ -119,7 +135,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				"262282", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -141,7 +157,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				"328552", true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(userTalkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -153,8 +169,19 @@ public class UserTalkSignatureTest extends GermanTestBase {
 
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("08:55, 15. Mär. 2007 (CET)", timestamp.getValue());
+
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("&lt;small&gt;&lt;font color=&quot;green&quot;&gt;"
+				+ "&apos;&apos;&apos;Gac&apos;&apos;&apos;&lt;/font&gt;&lt;/small&gt;",
+				StringEscapeUtils.escapeXml10(name.getValue()));
+		Node ref = doc.query("/posting/p/signed/ref").get(0);
+		assertEquals("&lt;small&gt;&lt;font color=&quot;green&quot;&gt;"
+				+ "&apos;&apos;&apos;Gac&apos;&apos;&apos;&lt;/font&gt;&lt;/small&gt;",
+				StringEscapeUtils.escapeXml10(name.getValue()));
+		assertEquals("https://de.wikipedia.org/wiki/Benutzer_Diskussion:"
+				+ "Gac", ref.query("@target").get(0).getValue());
 	}
-	
+
 	@Test
 	public void testUserTalkSignatureWithoutTimestamp()
 			throws IOException, ValidityException, ParsingException {
@@ -164,7 +191,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -191,20 +218,36 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				true, wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
-		assertEquals(0, doc.query("/posting/p/small/a").size());
+		Node posting = doc.query("/posting/p/small").get(0);
+		assertEquals(0, posting.query("a").size());
 
-		Node signature = doc.query("/posting/p/small/signed/@type").get(0);
+		Node signature = posting.query("signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
+
+		Node name = posting.query("signed/name").get(0);
+		assertEquals("Leif Czerny", name.getValue());
+		Node ref = posting.query("signed/ref").get(0);
+		assertEquals("Leif Czerny", ref.getValue());
+		assertEquals("https://de.wikipedia.org/wiki/User_Talk:Leif_Czerny",
+				ref.query("@target").get(0).getValue());
 	}
 
 	@Test
-	public void testUserTalkSignatureEnglishWiki()
+	public void testUserTalkSignatureEnglish()
 			throws IOException, ValidityException, ParsingException {
+		WikiXMLProcessor.Wikipedia_URI = "https://en.wikipedia.org/wiki/";
+		InputStream is = UserTalkSignatureTest.class.getClassLoader()
+				.getResourceAsStream("enwiki-talk.properties");
+		Properties properties = new Properties();
+		properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+		is.close();
+		Configuration config = new Configuration(properties);
+		
 		String wikitext = "I think that this trick is much older. It is "
 				+ "mentioned in Suppes, &quot;Axiomatic Set Theory&quot;, "
 				+ "(1960), but I'm triyng to find a better reference. "
@@ -212,9 +255,8 @@ public class UserTalkSignatureTest extends GermanTestBase {
 				+ "(UTC)";
 		WikiPage wikiPage = createWikiPage("Talk:Cardinal number", "6177",
 				true, wikitext);
-		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -223,21 +265,37 @@ public class UserTalkSignatureTest extends GermanTestBase {
 
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
-
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("kismalac", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref").get(0);
+		assertEquals("kismalac", ref.getValue());
+		assertEquals("https://en.wikipedia.org/wiki/User_Talk:"
+				+ "Kismalac", ref.query("@target").get(0).getValue());
 	}
 
 	@Test
-	public void testUserTalkSignatureEnglishUnderscore()
+	public void testUserTalkSignatureUnderscoreEnglish()
 			throws IOException, ValidityException, ParsingException {
+		WikiXMLProcessor.Wikipedia_URI = "https://en.wikipedia.org/wiki/";
+		InputStream is = UserTalkSignatureTest.class.getClassLoader()
+				.getResourceAsStream("enwiki-talk.properties");
+		Properties properties = new Properties();
+		properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+		is.close();
+		Configuration config = new Configuration(properties);
+		
 		String wikitext = ":::I think the idea of starting with the featured "
 				+ "article set of photos and discussing changes from there "
 				+ "is a good one.  -- [[User_Talk:SiobhanHansa|SiobhanHansa]] "
 				+ "15:08, 6 November 2007 (UTC)";
 		WikiPage wikiPage = createWikiPage("Talk:New York City/Archive 10",
 				"6908", true, wikitext);
-		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+		
+		
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
-				
+
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
@@ -246,6 +304,13 @@ public class UserTalkSignatureTest extends GermanTestBase {
 
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
+		
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("SiobhanHansa", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref").get(0);
+		assertEquals("SiobhanHansa", ref.getValue());
+		assertEquals("https://en.wikipedia.org/wiki/User_Talk:"
+				+ "SiobhanHansa", ref.query("@target").get(0).getValue());
 	}
 
 }

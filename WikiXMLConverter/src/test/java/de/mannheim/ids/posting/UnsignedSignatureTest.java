@@ -80,7 +80,7 @@ public class UnsignedSignatureTest extends GermanTestBase {
 		handler.run();
 
 		String wikiXML = wikiPage.getWikiXML();
-		System.out.println(wikiXML);
+//		System.out.println(wikiXML);
 		Document doc = builder.build(wrapWithTextElement(wikiXML), null);
 		Node signature = doc.query("/text/posting/p/signed/@type")
 				.get(0);
@@ -108,9 +108,10 @@ public class UnsignedSignatureTest extends GermanTestBase {
 
 		String wikiXML = wrapWithTextElement(wikiPage.getWikiXML());
 		Document doc = builder.build(wikiXML, null);
-		Node signature = doc.query("/text/posting/p/signed/@type")
-				.get(0);
+		Node signature = doc.query("/text/posting/p/signed/@type").get(0);
 		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());
+		assertEquals("09:30, 29. Dez 2005 (CET)",
+				doc.query("/text/posting/p/signed/date").get(0).getValue());
 
 		signature = doc.query("/text/posting/p/signed/@type").get(1);
 		assertEquals(SignatureType.UNSIGNED.toString(), signature.getValue());

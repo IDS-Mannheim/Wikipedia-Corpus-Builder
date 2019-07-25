@@ -33,7 +33,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 				+ "beschreiben und belegen. --[[Spezial:Beiträge/"
 				+ "91.17.241.151|91.17.241.151]] 19:12, 30. Dez. 2015 "
 				+ "(CET)";
-		WikiPage wikiPage = createWikiPage("Diskussion:Aldi", "277", true, wikitext);
+		WikiPage wikiPage = createWikiPage("Diskussion:Aldi", "277", true,
+				wikitext);
 		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
 				new WikiStatistics(), new WikiErrorWriter(), postUser);
 
@@ -42,12 +43,13 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
+
 		Element signed = (Element) doc.query("/posting/p/signed").get(0);
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				signed.getAttribute("type").getValue());
 		assertEquals("19:12, 30. Dez. 2015 (CET)",
 				signed.getChildElements("date").get(0).getValue());
-		assertEquals(0,signed.getChildElements("name").size());
+		assertEquals(0, signed.getChildElements("name").size());
 	}
 
 	@Test
@@ -72,8 +74,7 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/signed/@type").get(0).getValue());
 		assertEquals("16:28, 11. Aug. 2011 (CEST)",
-				doc.query("/posting/p/signed/date").get(0)
-						.getValue());
+				doc.query("/posting/p/signed/date").get(0).getValue());
 	}
 
 	@Test
@@ -96,7 +97,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/signed/@type").get(0).getValue());
-
+		assertEquals("18:21, 2. Jun. 2017 (CEST)",
+				doc.query("/posting/p/signed/date").get(0).getValue());
 	}
 
 	@Test
@@ -118,6 +120,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(1, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/signed/@type").get(0).getValue());
+		assertEquals("20:16, 16. Jul 2004 (CEST)",
+				doc.query("/posting/p/signed/date").get(0).getValue());
 	}
 
 	@Test
@@ -141,6 +145,11 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/small/signed/@type").get(0)
 						.getValue());
+
+		assertEquals("an die Nerven funktion gebunden. rho (Der vorstehende "
+				+ "Beitrag stammt von 20:50, 2. Jan. 2003 (MEZ) – und wurde "
+				+ "nachträglich unterschrieben.)",
+				doc.query("/posting/p").get(0).getValue());
 	}
 
 	@Test
@@ -161,7 +170,9 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 				doc.query("/posting/p/signed/@type").get(0).getValue());
-//		System.out.println(wikiXML);
+		assertEquals("14:12, 8. Dez. 2014 (CET)",
+				doc.query("/posting/p/signed/date").get(0).getValue());
+//		 System.out.println(wikiXML);
 	}
 
 	@Test
@@ -191,6 +202,8 @@ public class SpecialContributionSignatureTest extends GermanTestBase {
 		for (int i = 0; i < 2; i++) {
 			assertEquals(SignatureType.SPECIAL_CONTRIBUTION.toString(),
 					signatures.get(i).query("@type").get(0).getValue());
+			assertEquals("17:48, 16. Nov. 2007 (CET)",
+					signatures.get(i).query("date").get(0).getValue());
 		}
 	}
 

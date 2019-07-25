@@ -47,10 +47,9 @@ public class TimestampTest extends GermanTestBase {
 		Node a = doc.query("/posting/p/a[1]").get(0);
 		assertEquals("Journey (Computerspiel 2012)", a.getValue());
 
-		Node timestamp = doc.query("/posting/p/signed/date[1]")
-				.get(0);
+		Node timestamp = doc.query("/posting/p/signed/date[1]").get(0);
 		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
-		
+
 		Node isoTimestamp = doc.query("/posting/@when-iso").get(0);
 		assertEquals("2017-02-27T21:08+01", isoTimestamp.getValue());
 	}

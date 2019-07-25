@@ -1,7 +1,7 @@
 v1.0.4
 
 2019-07-10 
-- Resolves #7 - Added timestamp conversion of various languages to ISO 8601 
+- Added timestamp conversion of various languages to ISO 8601 (issue #7) 
   format and added @when-iso in the posting element.  
 - Added change log.
 2019-07-10
@@ -9,28 +9,30 @@ v1.0.4
 2019-07-16
 - Fixed person name recognition and add <name> in <signed> element.
 2019-07-24
-- Added more criteria for identifying empty pages.
+- Added more criteria for identifying empty pages (issue #10).
 - Fixed missing start text in user-talk signature handler.
-- Added <ref> to <signed> for user-link signatures.
+- Added <ref> to <signed> for user-link signatures (issue #11).
+2019-07-25
+- Added <ref> to signatures with user-discussion-links (issue #11) and 
+  updated adding signatures after parsing wikitext.
 
 v1.0.3
 
 2019-06-12
-- Resolves #6 - Handled empty elements at the start of a text because of  
-  TagSoup.
+- Handled empty elements at the start of a text because of TagSoup (issue #6).
 2019-06-07
 - Handled embedded links.
 2019-05-14
 - Fixed readme and WikiXMLConverter config test, renamed config package.
 2019-05-09
-- Fixed 3 - Handled English markups in Wikipedia of other languages.
+- Handled English markups in Wikipedia of other languages (issue #3).
 2019-05-08
 - Improved (help) signature heuristic for posting segmentation.
 - Renamed user contribution to special contribution and extended its regex
 patterns for posting segmentation.
 2019-05-07
 - Fixed signatures with extra user-variant-links.
-- Fixed #1 - Fixed handling text after signature.
+- Fixed handling text after signature (issue #1)
 2019-05-06
 - Extended user talk signature pattern and updated tests.
 2019-05-03

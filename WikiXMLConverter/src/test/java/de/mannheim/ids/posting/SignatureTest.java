@@ -479,7 +479,7 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	@Test
-	public void testSignatureAtStart()
+	public void testSignatureAtStartFrench()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = ":: [[Utilisateur:L'amateur d'aéroplanes|L&amp;#39;"
 				+ "amateur d&amp;#39;aéroplanes]] 24 mai 2007 à 00:37 (CEST) "
