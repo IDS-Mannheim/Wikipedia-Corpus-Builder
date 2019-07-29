@@ -53,4 +53,84 @@ public class TemplateTest {
 
 		assertEquals("template", spanClass);
 	}
+
+	@Test
+	public void testTemplateMinimalS()
+			throws ValidityException, ParsingException, IOException {
+		String wikitext = "::nun, aus töchtern werden mütter; aber "
+				+ "nicht aus müttern töchter; diese waren bzw. sind "
+				+ "schon töchter...  {{S}} --[[Benutzer:HilmarHansWerner"
+				+ "|HilmarHansWerner]] ([[Benutzer Diskussion:"
+				+ "HilmarHansWerner|Diskussion]]) 00:23, 14. Feb. 2016 "
+				+ "(CET)";
+
+		Sweble2Parser swebleParser = new Sweble2Parser("10838",
+				"Diskussion:Alphastrahlung",
+				wikitext, "de", new WikiStatistics(),
+				new WikiErrorWriter(), wikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+
+		Document doc = builder.build(wikiXML, null);
+		Node figure = doc.query("/dl/dd/dl/dd/figure").get(0);
+		assertEquals("emoji", figure.query("@type").get(0).getValue());
+		assertEquals("template", figure.query("@creation").get(0).getValue());
+
+		Node desc = figure.query("desc").get(0);
+		assertEquals("template", desc.query("@type").get(0).getValue());
+		assertEquals("[_EMOJI:{{S}}_]", desc.getValue());
+	}
+
+	@Test
+	public void testTemplateS()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = ":::Was war es denn Deiner Meinung nach, kein "
+				+ "Angriff {{S|8P}} --[[Benutzer:MBurch|MBurch]] "
+				+ "([[Benutzer Diskussion:MBurch|Diskussion]]) 15:34, "
+				+ "17. Dez. 2014 (CET)";
+		Sweble2Parser swebleParser = new Sweble2Parser("8303069",
+				"Diskussion:Wladimir Wladimirowitsch Putin/Archiv/002",
+				wikitext, "de", new WikiStatistics(),
+				new WikiErrorWriter(), wikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+
+		Document doc = builder.build(wikiXML, null);
+		Node figure = doc.query("/dl/dd/dl/dd/dl/dd/figure").get(0);
+		assertEquals("emoji", figure.query("@type").get(0).getValue());
+		assertEquals("template", figure.query("@creation").get(0).getValue());
+
+		Node desc = figure.query("desc").get(0);
+		assertEquals("template", desc.query("@type").get(0).getValue());
+		assertEquals("[_EMOJI:{{S|8P}}_]", desc.getValue());
+	}
+
+	@Test
+	public void testTemplateSmiley()
+			throws ValidityException, ParsingException, IOException {
+		String wikitext = ":::Du wiederholst dich. Jaja, ich bin an dem "
+				+ "Schlamassel und dieser unötigen Zeit- und Byteverschwendung "
+				+ "schuld {{Smiley|applaus}} --[[Benutzer:Benqo|Benqo]] "
+				+ "([[Benutzer Diskussion:Benqo|Diskussion]]) 17:47, 16. Sep. "
+				+ "2015 (CEST)";
+
+		Sweble2Parser swebleParser = new Sweble2Parser("8967849",
+				"Diskussion:Flüchtlingskrise in Europa ab 2015/Archiv/1",
+				wikitext, "de", new WikiStatistics(),
+				new WikiErrorWriter(), wikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+
+		Document doc = builder.build(wikiXML, null);
+		Node figure = doc.query("/dl/dd/dl/dd/dl/dd/figure").get(0);
+		assertEquals("emoji", figure.query("@type").get(0).getValue());
+		assertEquals("template", figure.query("@creation").get(0).getValue());
+
+		Node desc = figure.query("desc").get(0);
+		assertEquals("template", desc.query("@type").get(0).getValue());
+		assertEquals("[_EMOJI:{{Smiley|applaus}}_]", desc.getValue());
+	}
 }

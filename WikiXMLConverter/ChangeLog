@@ -15,6 +15,8 @@ v1.0.4
 2019-07-25
 - Added <ref> to signatures with user-discussion-links (issue #11) and 
   updated adding signatures after parsing wikitext.
+2019-07-29
+- Handled smiley templates in the German wiki (issue #14).  
 
 v1.0.3
 

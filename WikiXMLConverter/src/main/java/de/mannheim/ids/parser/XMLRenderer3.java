@@ -24,6 +24,7 @@ import org.sweble.wikitext.parser.nodes.WtImageLink;
 import org.sweble.wikitext.parser.nodes.WtInternalLink;
 import org.sweble.wikitext.parser.nodes.WtItalics;
 import org.sweble.wikitext.parser.nodes.WtListItem;
+import org.sweble.wikitext.parser.nodes.WtName;
 import org.sweble.wikitext.parser.nodes.WtNode;
 import org.sweble.wikitext.parser.nodes.WtNodeList;
 import org.sweble.wikitext.parser.nodes.WtOrderedList;
@@ -48,6 +49,7 @@ import org.sweble.wikitext.parser.nodes.WtXmlCharRef;
 import org.sweble.wikitext.parser.nodes.WtXmlElement;
 import org.sweble.wikitext.parser.nodes.WtXmlEntityRef;
 import org.sweble.wikitext.parser.parser.LinkTargetException;
+import org.sweble.wikitext.parser.utils.WtRtDataPrinter;
 
 import de.fau.cs.osr.utils.visitor.VisitingException;
 
@@ -386,7 +388,17 @@ public class XMLRenderer3 extends HtmlRenderer {
 	public void visit(WtTemplate n) {
 		// e.g. info box
 //		System.out.println(n);
-		p.print("<span class=\"template\"/>");
+		String name = n.getName().getAsString();
+		if (name.equals("S") || name.equals("Smiley")){
+			p.print("<figure type=\"emoji\" creation=\"template\">");
+			p.print("<desc type=\"template\">[_EMOJI:");
+			printAsWikitext(n);	
+			p.print("_]</desc>");
+			p.print("</figure>");
+		}
+		else{
+			p.print("<span class=\"template\"/>");
+		}
 	}
 	
 	@Override
@@ -662,5 +674,9 @@ public class XMLRenderer3 extends HtmlRenderer {
 				}
 			}
 		}
+	}
+	
+	private void printAsWikitext(WtNode n) {
+		p.indentAtBol(esc(WtRtDataPrinter.print(n)));
 	}
 }
