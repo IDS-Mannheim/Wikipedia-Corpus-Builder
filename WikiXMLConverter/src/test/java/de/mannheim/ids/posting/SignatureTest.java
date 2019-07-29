@@ -227,6 +227,48 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	@Test
+	public void testSignatureWithStyleEnglish()
+			throws IOException, ValidityException, ParsingException {
+		String wikitext = "Thanks again.  &lt;span style=&quot;border: "
+				+ "solid 2px black; border-radius: 6px; box-shadow: gray "
+				+ "3px 3px 3px;&quot;&gt;&amp;nbsp;[[User:Unician|Unician]]"
+				+ "&amp;nbsp;[[User talk:Unician|'''&amp;nabla;''']]&amp;"
+				+ "nbsp;&lt;/span&gt; 21:54, 14 August 2014 (UTC)";
+
+		WikiPage wikiPage = createWikiPage("User talk:Tim Starling",
+				"101997", true, wikitext);
+
+		InputStream is = SpecialContributionSignatureTest.class.getClassLoader()
+				.getResourceAsStream("enwiki-talk.properties");
+		Properties properties = new Properties();
+		properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+		is.close();
+
+		Configuration config = new Configuration(properties);
+		WikiXMLProcessor.Wikipedia_URI = "https://" + config.getLanguageCode()
+				+ ".wikipedia.org/wiki/";
+
+		WikiTalkHandler handler = new WikiTalkHandler(config, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
+		handler.run();
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		assertEquals(0, doc.query("/posting/p/a").size());
+		Node signature = doc.query("/posting/p/signed/@type").get(0);
+		assertEquals("signed", signature.getValue());
+		Node timestamp = doc.query("/posting/p/signed/date").get(0);
+		assertEquals("21:54, 14 August 2014 (UTC)", timestamp.getValue());
+
+		Node name = doc.query("/posting/p/signed/name").get(0);
+		assertEquals("Unician", name.getValue());
+		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
+		assertEquals("https://en.wikipedia.org/wiki/User:Unician",
+				ref.getValue());
+
+	}
+
+	@Test
 	public void testSignatureUserLinkWithStyle()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "Dafür ist doch die Diskussionsseite da. --[["

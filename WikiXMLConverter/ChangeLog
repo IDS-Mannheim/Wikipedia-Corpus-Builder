@@ -17,6 +17,7 @@ v1.0.4
   updated adding signatures after parsing wikitext.
 2019-07-29
 - Handled smiley templates in the German wiki (issue #14).  
+- Handled emoji templates in the English wiki (resolved #14).
 
 v1.0.3
 

@@ -24,7 +24,6 @@ import org.sweble.wikitext.parser.nodes.WtImageLink;
 import org.sweble.wikitext.parser.nodes.WtInternalLink;
 import org.sweble.wikitext.parser.nodes.WtItalics;
 import org.sweble.wikitext.parser.nodes.WtListItem;
-import org.sweble.wikitext.parser.nodes.WtName;
 import org.sweble.wikitext.parser.nodes.WtNode;
 import org.sweble.wikitext.parser.nodes.WtNodeList;
 import org.sweble.wikitext.parser.nodes.WtOrderedList;
@@ -67,13 +66,48 @@ import de.fau.cs.osr.utils.visitor.VisitingException;
 public class XMLRenderer3 extends HtmlRenderer {
 
 	public static final Set<String> inlineElements = new HashSet<String>();
-	
 	static {
 		inlineElements.add("small");
 		inlineElements.add("big");
 		inlineElements.add("sup");
 		inlineElements.add("sub");
 		inlineElements.add("u");
+	}
+	
+	public static final Set<String> smileys = new HashSet<String>();
+	static{
+		// german
+		smileys.add("smiley");
+		smileys.add("s");
+		
+		// english
+		smileys.add("smiley2");
+		smileys.add("=2");
+		smileys.add("oldsmiley");
+		smileys.add("smiley3");
+		smileys.add("=3");
+		smileys.add("sert");
+		smileys.add("emoji");
+		smileys.add("emote");
+		
+		smileys.add("(-:");
+		smileys.add("(:");
+		smileys.add("-)");
+		smileys.add("=)");
+		smileys.add("):");
+		smileys.add("=(");
+		smileys.add("frown");
+		smileys.add("wink");
+		smileys.add(";)");
+		smileys.add("blush");
+		smileys.add("=D");
+		smileys.add("=P");
+		smileys.add("=S");
+		smileys.add("shades");
+		smileys.add(")':");
+		smileys.add("awesome");
+		smileys.add("kitty");
+		smileys.add("meh");
 	}
 	
 	private PageId pageId;
@@ -388,8 +422,8 @@ public class XMLRenderer3 extends HtmlRenderer {
 	public void visit(WtTemplate n) {
 		// e.g. info box
 //		System.out.println(n);
-		String name = n.getName().getAsString();
-		if (name.equals("S") || name.equals("Smiley")){
+		String name = n.getName().getAsString().toLowerCase();
+		if (smileys.contains(name)) {
 			p.print("<figure type=\"emoji\" creation=\"template\">");
 			p.print("<desc type=\"template\">[_EMOJI:");
 			printAsWikitext(n);	
