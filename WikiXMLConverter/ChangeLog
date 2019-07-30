@@ -18,6 +18,10 @@ v1.0.4
 2019-07-29
 - Handled smiley templates in the German wiki (issue #14).  
 - Handled emoji templates in the English wiki (resolved #14).
+2019-07-30
+- Handled page titles starting with non-alphanumeric characters 
+  (resolved #12).
+
 
 v1.0.3
 

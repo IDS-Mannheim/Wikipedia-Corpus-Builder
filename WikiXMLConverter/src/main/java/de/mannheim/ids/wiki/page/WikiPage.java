@@ -1,7 +1,10 @@
 package de.mannheim.ids.wiki.page;
 
 import java.io.IOException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.mannheim.ids.wiki.Utilities;
@@ -31,7 +34,7 @@ public class WikiPage {
 	public static final String[] indexList = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
-			"7", "8", "9", "Char"};
+			"7", "8", "9"};
 
 	public WikiPage(boolean hasTitlePrefix) {
 		this();
@@ -42,6 +45,24 @@ public class WikiPage {
 		setWikitext("");
 		wikiXML = "";
 		textSegments = new ArrayList<String>();
+	}
+	
+	/**
+	 * Determines the index of the given page title.
+	 * 
+	 * @param pageTitle
+	 *            a page title
+	 * @return the index of the page title
+	 */
+	public static String determinePageIndex(String pageTitle) {
+		String firstChar = pageTitle.substring(0, 1);
+
+		if (Arrays.asList(indexList).contains(firstChar)) {
+			return firstChar;
+		}
+		else {
+			return determinePageIndex(pageTitle.substring(1));
+		}
 	}
 
 	public String getPageTitle() {
@@ -57,7 +78,8 @@ public class WikiPage {
 	}
 
 	public void setPageIndex(boolean isDiscussion) throws IOException {
-		String firstLetter = null;
+		String pageTitle = Normalizer.normalize(this.pageTitle, Form.NFKD)
+				.toUpperCase();
 		String[] title = null;
 		if (isDiscussion) {
 			if (hasTitlePrefix && pageTitle.contains("/")) {
@@ -68,20 +90,20 @@ public class WikiPage {
 			}
 
 			try {
-				firstLetter = title[1].substring(0, 1);
+				pageIndex = determinePageIndex(title[1]);
 			}
 			catch (Exception e) {
 				System.err.println(title);
-				firstLetter = this.pageTitle.substring(0, 1);
-				WikiXMLProcessor.errorWriter.logErrorPage("TITLE ", pageTitle,
+				pageIndex = determinePageIndex(pageTitle);
+				WikiXMLProcessor.errorWriter.logErrorPage("TITLE ", this.pageTitle,
 						pageId, e, "");
 
 			}
 		}
 		else {
-			firstLetter = this.pageTitle.substring(0, 1);
+			pageIndex = determinePageIndex(pageTitle);
 		}
-		pageIndex = Utilities.normalizeIndex(firstLetter, indexList);
+		
 	}
 
 	public String getPageId() {

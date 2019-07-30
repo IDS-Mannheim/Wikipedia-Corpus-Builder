@@ -70,25 +70,4 @@ public class Utilities {
 				new BufferedOutputStream(new FileOutputStream(file)), encoding);
 	}
 
-	/**
-	 * Normalizes the given input (a letter).
-	 * 
-	 * @param input
-	 *            a letter
-	 * @param indexList
-	 *            a list letters and numbers
-	 * @return a normalized String
-	 */
-	public static String normalizeIndex(String input, String[] indexList) {
-		String normalizedStr = Normalizer.normalize(input, Form.NFKD)
-				.toUpperCase();
-		normalizedStr = normalizedStr.substring(0, 1);
-
-		if (Arrays.asList(indexList).contains(normalizedStr)) {
-			return normalizedStr;
-		}
-		else {
-			return "Char";
-		}
-	}
 }

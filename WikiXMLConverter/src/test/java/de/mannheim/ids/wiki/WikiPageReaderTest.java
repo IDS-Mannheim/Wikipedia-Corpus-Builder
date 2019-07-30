@@ -48,14 +48,15 @@ public class WikiPageReaderTest extends GermanTestBase{
 	}
 
 	@Test
-	public void testTitle() throws IOException, InterruptedException, XMLStreamException {
+	public void testNonAlphanumericTitle()
+			throws IOException, InterruptedException, XMLStreamException {
 		String wikidump = "src/test/resources/wikitext/dewiki-20170701-1422522.xml";
 		Configuration config = createTalkConfig(wikidump);
 		WikiPage wikiPage = readPage(config);
 		assertEquals("1422522", wikiPage.getPageId());
 		assertEquals("Diskussion:.460 S&amp;W Magnum",
 				wikiPage.getPageTitle());
-		assertEquals("Char", wikiPage.getPageIndex());
+		assertEquals("4", wikiPage.getPageIndex());
 		assertNotNull(wikiPage.getPageStructure());
 		assertTrue(wikiPage.textSegments.size() > 0);
 	}
