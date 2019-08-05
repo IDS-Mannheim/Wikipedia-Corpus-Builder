@@ -144,16 +144,16 @@ public class WikiXMLSorter extends Thread {
 		String docId;
 		int docNr;
 
-		for (int i = 0; i < n / 10000000 + 1; i++) {
+		for (int i = 0; i < n / 100000 + 1; i++) {
 			docNr = i;
-			docId = idx + String.format("%02d", docNr);
+			docId = idx + String.format("%04d", docNr);
 //			System.out.println("DocId " + docId);
 
 			List pagegroup = null;
 			try {
 				group = xPath.compile("wiki/index[@value='"
 						+ idx + "']/id[xs:integer"
-						+ "(xs:integer(.) div 10000000) = " + docNr + "]");
+						+ "(xs:integer(.) div 100000) = " + docNr + "]");
 				pagegroup = (List) group.evaluate(wikiPageIndexes,
 						XPathConstants.NODESET);
 			}
@@ -251,8 +251,8 @@ public class WikiXMLSorter extends Thread {
 			String xmlPath = idx + "/" + pageId + ".xml";
 //			System.out.println(xmlPath);
 
-			Transformer t = new Transformer(config, statistics, errorHandler, new File(xmlPath), idx,
-					pageId);
+			Transformer t = new Transformer(config, statistics, errorHandler,
+					new File(xmlPath), idx,	pageId);
 			try {
 				WikiI5Processor.wikiI5Queue.put(pool.submit(t));
 			}

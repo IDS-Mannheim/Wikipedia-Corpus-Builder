@@ -46,7 +46,7 @@ public class WikiI5ConverterTest {
 		p.waitFor();
 
 		File f = new File(index);
-		assertNotNull(f);
+		assertTrue(f.exists());
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = dbFactory.newDocumentBuilder();

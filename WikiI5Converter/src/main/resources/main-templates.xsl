@@ -8,6 +8,10 @@
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
+            <xd:p>Version 4.0</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> Aug 2019</xd:p>
+            <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
+            
             <xd:p>Version 3.0</xd:p>
             <xd:p><xd:b>Revision:</xd:b> July 2017</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
@@ -71,7 +75,7 @@
 		                            )" />
 			</xsl:variable>
 			<xsl:sequence
-				select="concat(substring($intermediate,1,9),'.',substring($intermediate,10))" />
+				select="concat(substring($intermediate,1,11),'.',substring($intermediate,12))" />
 		</xsl:variable>
 
         <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
