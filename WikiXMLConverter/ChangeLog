@@ -21,7 +21,8 @@ v1.0.4
 2019-07-30
 - Handled page titles starting with non-alphanumeric characters 
   (resolved #12).
-
+2019-08-08
+- Fixed excessive escapes in XMLRenderer.
 
 v1.0.3
 

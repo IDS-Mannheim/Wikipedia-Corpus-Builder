@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
@@ -511,14 +510,14 @@ public class XMLRenderer3 extends HtmlRenderer {
 		// System.out.println(n.getName());
 	}
 	
-	@Override
-	public void visit(WtXmlEntityRef n) {
-		p.indentAtBol();
-		pf("&amp;%s;", n.getName());
-	}
+//	@Override
+//	public void visit(WtXmlEntityRef n) {
+//		p.indentAtBol();
+//		pf("&amp;%s;", n.getName());
+//	}
 	
 	static String makeLinkTitle(WtInternalLink n, PageTitle target) {
-		return esc(target.getDenormalizedFullTitle());
+		return target.getDenormalizedFullTitle();
 	}
 	
 	@Override
@@ -533,14 +532,9 @@ public class XMLRenderer3 extends HtmlRenderer {
 	protected String makeImageTitle(WtImageLink n, PageTitle target) {
 		return esc(target.getDenormalizedFullTitle());
 	}
-	// EM: fix title containing &
+
 	private String makeTitleFromTarget(WtInternalLink n, PageTitle target) {
-		if (target.getTitle().contains("&")) {
-			return makeTitleFromTarget(target, n.getTarget());
-		}
-		else {
-			return esc(makeTitleFromTarget(target, n.getTarget()));
-		}
+		return makeTitleFromTarget(target, n.getTarget());
 	}
 	
 	private String makeTitleFromTarget(PageTitle target, WtPageName title) {
@@ -548,13 +542,7 @@ public class XMLRenderer3 extends HtmlRenderer {
 		if (target.hasInitialColon() && !targetStr.isEmpty()
 				&& targetStr.charAt(0) == ':')
 			targetStr = targetStr.substring(1);
-
-		if (targetStr.contains("&amp;")) {
-			return StringEscapeUtils.unescapeHtml4(targetStr);
-		}
-		else {
-			return esc(targetStr);
-		}
+		return targetStr;
 	}
 	
 	@Override

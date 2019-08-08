@@ -27,8 +27,7 @@ public class LinkTest {
 	public LinkTest()
 			throws IOException, ParserConfigurationException, SAXException {
 		builder = new Builder();
-		wikiConfig = LanguageConfigGenerator
-				.generateWikiConfig("de");
+		wikiConfig = LanguageConfigGenerator.generateWikiConfig("de");
 	}
 
 	@Test
@@ -127,6 +126,27 @@ public class LinkTest {
 				"https://de.wikipedia.org?title=Latein",
 				href);
 		assertEquals("Latein", a.getValue());
+	}
+
+	@Test
+	public void testFrenchInternalLinkWithApostrophe()
+			throws ValidityException, ParsingException, IOException,
+			ParserConfigurationException, SAXException {
+		String wikitext = "Avec ''[[L'Interprétation des rêves]]''";
+
+		WikiConfig frWikiConfig = LanguageConfigGenerator
+				.generateWikiConfig("fr");
+		Sweble2Parser swebleParser = new Sweble2Parser("42242",
+				"Psychanalyse", wikitext, "fr", new WikiStatistics(),
+				new WikiErrorWriter(), frWikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+		
+		assertEquals("<p>Avec <i><a href=\"https://fr.wikipedia.org?"
+				+ "title=L%27Interpr%C3%A9tation_des_r%C3%AAves\" title="
+				+ "\"L'Interprétation des rêves\">L&#39;Interprétation "
+				+ "des rêves</a></i></p>", wikiXML.trim());
 	}
 
 	@Test
