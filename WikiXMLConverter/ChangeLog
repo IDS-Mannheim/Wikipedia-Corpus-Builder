@@ -23,6 +23,9 @@ v1.0.4
   (resolved #12).
 2019-08-08
 - Fixed excessive escapes in XMLRenderer.
+2019-08-21
+- Moved <name> in signatures inside <ref>.
+
 
 v1.0.3
 

@@ -73,7 +73,8 @@ public class HelpSignatureTest extends GermanTestBase {
 		assertEquals(0, node.query("/a").size());
 		assertEquals(SignatureType.UNSIGNED.toString(),
 				node.query("signed/@type").get(0).getValue());
-		assertEquals("Wi-infer", node.query("signed/name").get(0).getValue());
+		assertEquals("Wi-infer",
+				node.query("signed/ref/name").get(0).getValue());
 	}
 
 	@Test

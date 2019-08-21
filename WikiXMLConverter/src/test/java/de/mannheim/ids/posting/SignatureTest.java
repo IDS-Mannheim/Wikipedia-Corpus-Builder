@@ -55,11 +55,11 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node date = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("10:04, 6. Mär 2004 (CET)", date.getValue());
-		Node name = doc.query("/posting/p/signed/name").get(0);
-		assertEquals("Burggraf17", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Burggraf17",
 				ref.getValue());
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
+		assertEquals("Burggraf17", name.getValue());
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals(0, doc.query("/posting/p/a").size());
 		assertEquals(0, doc.query("/posting/p/signed/date").size());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Benutzer:Fantasy", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fantasy",
@@ -142,7 +142,7 @@ public class SignatureTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("11:28, 17. Jul 2006 (CEST)", timestamp.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Benutzer:Fantasy", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fantasy",
@@ -188,7 +188,7 @@ public class SignatureTest extends GermanTestBase {
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals(0, doc.query("/posting/p/signed/date").size());
 		assertEquals("signed", signature.getValue());
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Fgb", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Fgb",
@@ -219,7 +219,7 @@ public class SignatureTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("02:46, 4. Jul. 2010 (CEST)", timestamp.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Mopskatze", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://de.wikipedia.org/wiki/Benutzer:Mopskatze",
@@ -260,7 +260,7 @@ public class SignatureTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("21:54, 14 August 2014 (UTC)", timestamp.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Unician", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref/@target").get(0);
 		assertEquals("https://en.wikipedia.org/wiki/User:Unician",
@@ -291,7 +291,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("&lt;span style=&quot;padding: 1px; color: #808080; "
 				+ "border-width: 1px; border-style: dotted; border-color: "
 				+ "#DC143C;&quot;&gt;z&lt;b style=&quot;color: red;"
@@ -324,7 +324,7 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/posting/p/a").size());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Sargoth", name.getValue());
 	}
 
@@ -352,7 +352,7 @@ public class SignatureTest extends GermanTestBase {
 		assertEquals(" mal wieder eine Nacht sinnvoll verbracht",
 				ps.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Pangloss", name.getValue());
 	}
 
@@ -404,7 +404,7 @@ public class SignatureTest extends GermanTestBase {
 				+ "die Ladungen bei den Reaktionsgleichungen hochstellen!?",
 				ps.getValue());
 
-		Node name = doc.query("/posting/ul/li/signed/name").get(0);
+		Node name = doc.query("/posting/ul/li/signed/ref/name").get(0);
 		assertEquals("CHK", name.getValue());
 	}
 
@@ -430,7 +430,7 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(0, doc.query("/page/posting/p/a").size());
 		assertEquals(2, doc.query("/page/posting/p/signed").size());
-		Node name = doc.query("/page/posting/p/signed/name").get(0);
+		Node name = doc.query("/page/posting/p/signed/ref/name").get(0);
 		assertEquals("Pill", name.getValue());
 	}
 
@@ -476,7 +476,7 @@ public class SignatureTest extends GermanTestBase {
 		String wikiXML = wikiPage.getWikiXML();
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/a").size());
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Armin", name.getValue());
 	}
 
@@ -550,9 +550,8 @@ public class SignatureTest extends GermanTestBase {
 		Document doc = builder.build(wikiXML, null);
 		assertEquals(1, doc.query("/posting/p/signed").size());
 		Node posting = doc.query("/posting/p").get(0);
-		assertEquals("L&amp;#39;amateur d&amp;#39;aéroplanes"
-				+ "L&amp;#39;amateur d&amp;#39;aéroplanes24 mai 2007 à "
-				+ "00:37 (CEST) Ajoutez simplement la/les référence/s ou "
+		assertEquals("L&amp;#39;amateur d&amp;#39;aéroplanes24 mai 2007 "
+				+ "à 00:37 (CEST) Ajoutez simplement la/les référence/s ou "
 				+ "vous avez vu cela. Il des milliers de sinistres par an.",
 				StringEscapeUtils.escapeXml10(posting.getValue()));
 	}

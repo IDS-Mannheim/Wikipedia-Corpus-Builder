@@ -76,7 +76,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		assertEquals("2017-02-27T21:08+01",
 				doc.query("/posting/@when-iso").get(0).getValue());
 		assertEquals("Magst Du Dich evtl. mal darum kümmern?Vielen Dank und "
-				+ "viele Grüße, GrueslayerGrueslayer21:08, 27. "
+				+ "viele Grüße, Grueslayer21:08, 27. "
 				+ "Feb. 2017 (CET)",
 				doc.query("/posting/p").get(0).getValue());
 		assertEquals(0, doc.query("/posting/p/a").size());
@@ -85,7 +85,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		assertEquals("signed", signature.getValue());
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("21:08, 27. Feb. 2017 (CET)", timestamp.getValue());
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Grueslayer", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref").get(0);
 		assertEquals("Grueslayer", ref.getValue());
@@ -117,7 +117,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("15:58, 20. Okt. 2006 (CEST)", timestamp.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("Freak1.5", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref").get(0);
 		assertEquals("Freak1.5", ref.getValue());
@@ -170,7 +170,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node timestamp = doc.query("/posting/p/signed/date").get(0);
 		assertEquals("08:55, 15. Mär. 2007 (CET)", timestamp.getValue());
 
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("&lt;small&gt;&lt;font color=&quot;green&quot;&gt;"
 				+ "&apos;&apos;&apos;Gac&apos;&apos;&apos;&lt;/font&gt;&lt;/small&gt;",
 				StringEscapeUtils.escapeXml10(name.getValue()));
@@ -229,7 +229,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node signature = posting.query("signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 
-		Node name = posting.query("signed/name").get(0);
+		Node name = posting.query("signed/ref/name").get(0);
 		assertEquals("Leif Czerny", name.getValue());
 		Node ref = posting.query("signed/ref").get(0);
 		assertEquals("Leif Czerny", ref.getValue());
@@ -266,7 +266,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 		
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("kismalac", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref").get(0);
 		assertEquals("kismalac", ref.getValue());
@@ -305,7 +305,7 @@ public class UserTalkSignatureTest extends GermanTestBase {
 		Node signature = doc.query("/posting/p/signed/@type").get(0);
 		assertEquals("signed", signature.getValue());
 		
-		Node name = doc.query("/posting/p/signed/name").get(0);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
 		assertEquals("SiobhanHansa", name.getValue());
 		Node ref = doc.query("/posting/p/signed/ref").get(0);
 		assertEquals("SiobhanHansa", ref.getValue());

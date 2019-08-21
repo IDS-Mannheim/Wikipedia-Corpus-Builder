@@ -175,14 +175,16 @@ public class WikiTalkHandler extends WikiPageHandler {
 		post += "<signed type=\"";
 		post += sigType.toString();
 		post += "\">";
+				
+		if (username != null && !username.isEmpty()) {
+			username = createNameElement(username);
+		}
+		
 		if (userLink  != null && !userLink.isEmpty()){
+			userLink = createUserLink(username, userLink);
 			post += userLink;
 		}
-		if (username != null && !username.isEmpty()) {
-			post += "<name>";
-			post += username;
-			post += "</name>";
-		}
+		
 		if (timestamp != null && !timestamp.isEmpty()) {
 			post += "<date>";
 			post += timestamp;
@@ -191,6 +193,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 		post += "</signed>";
 		if (parts.length>1) post += parts[1];
 		return post;
+	}
+
+	private String createNameElement(String username) {
+		return "<name>"+username+"</name>";
 	}
 
 	/**
@@ -370,11 +376,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 //			addSignature(type, userLink, userLinkText, timestamp);
 //			writePost(userLinkText, userLink, t, rest);
 
-			userLink = createUserLink(userLinkText, userLink);
-			
 			int level = identifyLevel(post);
 			String wikiXML = prepareWikiXML(rest,type, userLink, userLinkText,
 					timestamp);
+			userLink = createUserLink(userLinkText, userLink);
 			String postingElement = createPostElement(level, userLinkText,
 					userLink,t, wikiXML);
 			wikiXMLBuilder.append(postingElement);
@@ -447,11 +452,10 @@ public class WikiTalkHandler extends WikiPageHandler {
 //			addSignature(signatureType, userLink, userLinkText, t.getTimestamp());
 //			writePost(userLinkText, userLink, t, rest);
 
-			userLink = createUserLink(userLinkText, userLink);
-			
 			int level = identifyLevel(post);
 			String wikiXML = prepareWikiXML(rest,type, userLink, userLinkText,
 					timestamp);
+			userLink = createUserLink(userLinkText, userLink);
 			String postingElement = createPostElement(level, userLinkText,
 					userLink,t, wikiXML);
 			wikiXMLBuilder.append(postingElement);
