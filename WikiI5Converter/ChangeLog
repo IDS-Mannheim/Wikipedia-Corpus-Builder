@@ -1,0 +1,23 @@
+v1.0.4
+
+2019-08-26
+- Resolved #17. Added cross article language links to talk pages. 
+
+v1.0.3
+
+2019-03-19
+- Moved WikiI5Converter to sub directory.
+- Moved license.
+2019-03-20
+- Updated readme files and fixed links.
+- Fixed Sweble link.
+- Renamed the main readme.
+2019-04-01
+- Fixed timestamp regex and configuration.
+2019-05-15
+- Filtered categories in talk pages and updated category scheme (issue #5)
+2019-05-16
+- Resolves #5. Added unique category filtering.
+- Updated textSigle for German, fixed spaces/structure by classCode.
+2019-08-05
+- Reformatted docSigle and textSigle (resolved #13).

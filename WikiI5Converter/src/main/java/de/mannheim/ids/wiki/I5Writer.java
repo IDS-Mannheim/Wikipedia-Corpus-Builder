@@ -92,16 +92,14 @@ public class I5Writer {
 		idsTextHandler = new IdsTextHandler(writer);
 		stats = statistics;
 
-		if (!config.isDiscussion()) {
-			try {
-				dbManager = new DatabaseManager(config.getDatabaseUrl(),
-						config.getDatabaseUsername(),
-						config.getDatabasePassword(), config.getLanguageCode());
-			}
-			catch (SQLException e) {
-				throw new I5Exception(
-						"Failed configuring the database manager.", e);
-			}
+		try {
+			dbManager = new DatabaseManager(config.getDatabaseUrl(),
+					config.getDatabaseUsername(),
+					config.getDatabasePassword(), config.getLanguageCode());
+		}
+		catch (SQLException e) {
+			throw new I5Exception(
+					"Failed configuring the database manager.", e);
 		}
 	}
 
@@ -362,8 +360,10 @@ public class I5Writer {
 			throws I5Exception {
 		ByteArrayOutputStream idsTextOutputStream = new ByteArrayOutputStream(
 				1024 * 4);
+		
 		IdsTextBuilder idsTextBuilder = new IdsTextBuilder(config,
 				idsTextOutputStream, w.getPageId(),
+				idsTextBuffer.getPageTitle(),
 				idsTextBuffer.getCategoryEvents(),
 				idsTextBuffer.getNoteEvents());
 

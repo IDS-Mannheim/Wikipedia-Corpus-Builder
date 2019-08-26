@@ -66,6 +66,8 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	private boolean DEBUG = false;
 
+	private String pageTitle;
+
 	public IdsTextBuffer(Configuration config) throws I5Exception {
 		if (config == null) {
 			throw new IllegalArgumentException("Config cannot be null.");
@@ -96,6 +98,8 @@ public class IdsTextBuffer extends SAXBuffer {
 
 		if (localName.equals("idsText")) {
 			this.idsTextId = attributes.getValue("id");
+			this.setPageTitle(attributes.getValue("n").substring(3));
+			
 			writeStartElement(uri, localName, qName, attributes);
 		}
 		else if (localName.equals("text")) {
@@ -324,5 +328,13 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	public void setCategories(List<String> categories) {
 		this.categories = categories;
+	}
+
+	public String getPageTitle() {
+		return pageTitle;
+	}
+
+	public void setPageTitle(String pageTitle) {
+		this.pageTitle = pageTitle;
 	}
 }

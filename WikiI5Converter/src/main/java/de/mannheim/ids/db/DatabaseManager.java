@@ -26,9 +26,14 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
  */
 public class DatabaseManager {
 
+	public String[] langCodes = new String[]{"de", "fr", "en"};
+
 	public DataSource poolingDataSource;
 	public Connection conn;
-	private static String langlink;
+	private String langCode;
+	public static String langlink;
+	public static String articleLink;
+	public static String articlePageId;
 
 	/**
 	 * Constructs a DatabaseManager instance and connects to the database based
@@ -50,22 +55,27 @@ public class DatabaseManager {
 		setDataSource(dbUrl, username, password);
 		langlink = "SELECT ll_lang, ll_title FROM " + langCode
 				+ "_langlinks WHERE ll_from = ?";
+		articleLink = "SELECT ll_title FROM " + langCode
+				+ "_langlinks WHERE ll_from= ? AND ll_lang= ?";
+		articlePageId = "SELECT page_id FROM " + langCode
+				+ "_page where page_title=? AND page_namespace=0";
+		this.langCode = langCode;
 	}
 
 	private void setDataSource(String url, String username, String password) {
-//		try {
-//			if (url.contains("mariadb")){
-//				Class.forName("com.mariadb.jdbc.Driver");
-//			}
-//		}
-//		catch (ClassNotFoundException e) {
-//			e.printStackTrace();
-//		}
+		// try {
+		// if (url.contains("mariadb")){
+		// Class.forName("com.mariadb.jdbc.Driver");
+		// }
+		// }
+		// catch (ClassNotFoundException e) {
+		// e.printStackTrace();
+		// }
 		ConnectionFactory cf = new DriverManagerConnectionFactory(url, username,
 				password);
 		PoolableConnectionFactory pcf = new PoolableConnectionFactory(cf, null);
 		// pcf.setMaxOpenPrepatedStatements(100);
-		
+
 		ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(
 				pcf);
 		pcf.setPool(connectionPool);
@@ -81,7 +91,7 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             an SQLException
 	 * @throws UnsupportedEncodingException
-	 *             an UnsupportedEncodingException	
+	 *             an UnsupportedEncodingException
 	 */
 	public LanguageLinks retrieveLanguageLinks(String ll_from)
 			throws SQLException, UnsupportedEncodingException {
@@ -108,4 +118,40 @@ public class DatabaseManager {
 		conn.close();
 		return langlinks;
 	}
+
+	public LanguageLinks retrieveArticleLinks(String articleTitle)
+			throws SQLException, UnsupportedEncodingException {
+		if (articleTitle == null || articleTitle.isEmpty()) {
+			throw new IllegalArgumentException(
+					"Page title cannot be null or empty.");
+		}
+
+		Connection conn = poolingDataSource.getConnection();
+		PreparedStatement preparedStatement = conn
+				.prepareStatement(articlePageId);
+		preparedStatement.setString(1, articleTitle);
+		ResultSet rs = preparedStatement.executeQuery();
+		LanguageLinks langlinks = null;
+		if (rs.next()) {
+			int pageId = rs.getInt("page_id");
+			langlinks = new LanguageLinks(String.valueOf(pageId));
+			String pageTitle;
+
+			for (String langCode : this.langCodes) {
+				if (!langCode.equals(this.langCode)) {
+					preparedStatement = conn.prepareStatement(articleLink);
+					preparedStatement.setInt(1, pageId);
+					preparedStatement.setString(2, langCode);
+					rs = preparedStatement.executeQuery();
+					if (rs.next()) {
+						pageTitle = new String(rs.getBytes("ll_title"),
+								"UTF-8");
+						langlinks.getTitleMap().put(langCode, pageTitle);
+					}
+				}
+			}
+		}
+		
+		conn.close();
+		return langlinks;	}
 }

@@ -47,12 +47,15 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 	private boolean isDiscussion = false;
 
+	private String pageTitle;
+
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
-			String pageId, SAXBuffer categoryEvents,
+			String pageId, String pageTitle, SAXBuffer categoryEvents,
 			LinkedHashMap<String, SAXBuffer> noteEvents)
 			throws I5Exception {
 		createWriter(config, outputStream);
 		this.pageId = pageId;
+		this.pageTitle = pageTitle;
 		this.categoryEvents = categoryEvents;
 		this.noteEvents = noteEvents;
 
@@ -185,10 +188,17 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		try {
 			writer.writeEndElement();
 
-			if (!isDiscussion && "monogr".equals(localName)) {
+			if ("monogr".equals(localName)) {
 				try {
-					createLangLinks(
-							I5Writer.dbManager.retrieveLanguageLinks(pageId));
+					if (isDiscussion) {
+						String articleTitle = pageTitle.split(":", 2)[1];
+						createLangLinks(I5Writer.dbManager.retrieveArticleLinks(articleTitle));
+					}
+					else {
+						createLangLinks(I5Writer.dbManager
+								.retrieveLanguageLinks(pageId));
+
+					}
 				}
 				catch (SQLException e) {
 					throw new SAXException(
@@ -236,34 +246,37 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	 *             a {@link SAXException}
 	 */
 	private void createLangLinks(LanguageLinks ll) throws SAXException {
-		Map<String, String> map = ll.getTitleMap();
-		try {
-			for (String key : map.keySet()) {
-				writer.writeStartElement("relatedItem");
-				writer.writeAttribute("type", "langlink");
+		if (ll != null) {
+			try {
+				Map<String, String> map = ll.getTitleMap();
+				for (String key : map.keySet()) {
+					writer.writeStartElement("relatedItem");
+					writer.writeAttribute("type", "langlink");
 
-				writer.writeStartElement("ref");
-				String keyword = map.get(key);
+					writer.writeStartElement("ref");
+					String keyword = map.get(key);
 
-				StringBuilder sb = new StringBuilder();
-				sb.append("https://");
-				sb.append(key);
-				sb.append(".wikipedia.org/wiki/");
-				sb.append(keyword.replace(" ", "_"));
-				writer.writeAttribute("target", sb.toString());
+					StringBuilder sb = new StringBuilder();
+					sb.append("https://");
+					sb.append(key);
+					sb.append(".wikipedia.org/wiki/");
+					sb.append(keyword.replace(" ", "_"));
+					writer.writeAttribute("target", sb.toString());
 
-				writer.writeAttribute("xml",
-						"https://www.w3.org/XML/1998/namespace", "lang", key);
-				// writer.writeAttribute("xml:lang", key);
-				writer.writeCharacters(keyword);
+					writer.writeAttribute("xml",
+							"https://www.w3.org/XML/1998/namespace", "lang",
+							key);
+					// writer.writeAttribute("xml:lang", key);
+					writer.writeCharacters(keyword);
 
-				writer.writeEndElement(); // ref
-				writer.writeEndElement(); // relatedItem
-				writer.flush();
+					writer.writeEndElement(); // ref
+					writer.writeEndElement(); // relatedItem
+					writer.flush();
+				}
 			}
-		}
-		catch (XMLStreamException e) {
-			throw new SAXException("Failed creating language links.", e);
+			catch (XMLStreamException e) {
+				throw new SAXException("Failed creating language links.", e);
+			}
 		}
 	}
 
