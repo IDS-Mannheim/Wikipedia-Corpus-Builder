@@ -101,6 +101,16 @@ public class I5Writer {
 			throw new I5Exception(
 					"Failed configuring the database manager.", e);
 		}
+		
+		if (config.getPageType().equals("article") &&
+				!config.getLanguageCode().equals("en")){
+			try {
+				dbManager.createCategoryTable();
+			}
+			catch (SQLException e) {
+				throw new I5Exception("Failed creating category table");
+			}
+		}
 	}
 
 	/**
@@ -234,6 +244,9 @@ public class I5Writer {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
+					if (config.getPageType().equals("article")){
+						storeCategories(w.getWikiPath());
+					}
 					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
 					
 					SAXBuffer validationBuffer = new SAXBuffer();
@@ -260,6 +273,19 @@ public class I5Writer {
 				} // idsCorpus
 			}
 		}
+	}
+
+	private void storeCategories(String xmlPath) throws I5Exception {
+		for (String c: idsTextBuffer.getCategories()){
+			try {
+				I5Writer.dbManager.storeCategory(idsTextBuffer.getPageId(),
+						c);
+			}
+			catch (SQLException e) {
+				errorHandler.write(xmlPath, "Failed storing category", e);
+			}
+		}
+		
 	}
 
 	/**
@@ -352,6 +378,17 @@ public class I5Writer {
 		if (idsTextBuffer.isTextEmpty()){
 			stats.addEmptyPages();
 			return false;
+		}
+		
+		if (config.isDiscussion()){
+			try {
+				idsTextBuffer.addCategoryEvents();
+			}
+			catch (SAXException | SQLException e) {
+				stats.addSaxParserError();
+				logger.debug(e);
+				errorHandler.write(w.getWikiPath(), "Failed adding category events", e);
+			}
 		}
 		return true;
 	}

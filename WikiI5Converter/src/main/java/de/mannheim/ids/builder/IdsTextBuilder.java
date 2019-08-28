@@ -127,7 +127,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		}
 
 		try {
-			if (!isDiscussion && localName.equals("profileDesc")) {
+			if (!categoryEvents.isEmpty() && localName.equals("profileDesc")) {
 				writer.writeStartElement("textClass");
 				writer.writeStartElement("classCode");
 				writer.writeAttribute("scheme", categorySchema);
@@ -192,7 +192,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				try {
 					if (isDiscussion) {
 						String articleTitle = pageTitle.split(":", 2)[1];
-						createLangLinks(I5Writer.dbManager.retrieveArticleLinks(articleTitle));
+						createLangLinks(I5Writer.dbManager
+								.retrieveArticleLinks(articleTitle));
 					}
 					else {
 						createLangLinks(I5Writer.dbManager

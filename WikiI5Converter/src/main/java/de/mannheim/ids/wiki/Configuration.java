@@ -59,12 +59,9 @@ public class Configuration {
 		int namespaceKey = Integer.parseInt(namespace);
 		setDiscussion(namespaceKey);
 
-		String category = null, categoryScheme = null;
-		if (!isDiscussion()) {
-			category = loadRequiredParameter(properties, "category");
-			categoryScheme = loadRequiredParameter(properties,
-					"category_scheme");
-		}
+		category = loadRequiredParameter(properties, "category");
+		categoryScheme = loadRequiredParameter(properties,
+				"category_scheme");
 
 		init(namespaceKey,
 				loadRequiredParameter(properties, "wikixml_folder"),

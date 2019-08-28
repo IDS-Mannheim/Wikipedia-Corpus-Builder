@@ -66,7 +66,7 @@ public class WikiI5ConverterTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	public void testWikiI5Processor() throws I5Exception, IOException,
+	public void testWikiI5ProcessorTalk() throws I5Exception, IOException,
 			SAXException, ParserConfigurationException, ParseException,
 			InterruptedException {
 		testIndexingWikiXML("talk");
@@ -92,8 +92,8 @@ public class WikiI5ConverterTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-	@Ignore
-	public void testWikiI5Converter()
+//	@Ignore
+	public void testWikiI5ConverterArticle()
 			throws I5Exception, IOException, ParseException, SQLException,
 			ParserConfigurationException, SAXException, InterruptedException {
 		testIndexingWikiXML("article");

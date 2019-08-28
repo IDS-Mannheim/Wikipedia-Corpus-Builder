@@ -1,5 +1,8 @@
 package de.mannheim.ids.builder;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,6 +18,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
+import de.mannheim.ids.wiki.I5Writer;
 
 /**
  * IdsTextBuilder is a SAX handler implementation creating idsText elements from
@@ -336,5 +340,31 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	public void setPageTitle(String pageTitle) {
 		this.pageTitle = pageTitle;
+	}
+
+	public void addCategoryEvents() throws SAXException, SQLException {
+		String articleTitle = getPageTitle().split(":", 2)[1];
+		List<String> categoryLinks = I5Writer.dbManager
+				.retrieveCategoryLinks(articleTitle);
+		for (String c : categoryLinks) {
+			String[] cats = c.split(category + ":", 2);
+			try {
+				if (cats.length > 1) {
+					AttributesImpl attr = new AttributesImpl();
+					attr.addAttribute("", "target", "target", "CDATA", c);
+					attr.addAttribute("", "targOrder", "targOrder", "CDATA",
+							"u");
+					categoryEvents.startElement("", "ref", "ref", attr);
+
+					c = URLDecoder.decode(cats[1], "UTF-8");
+
+					categoryEvents.characters(c.toCharArray(), 0, c.length());
+					categoryEvents.endElement("", "ref", "ref");
+				}
+			}
+			catch (UnsupportedEncodingException e) {
+				// should not happen
+			}
+		}
 	}
 }
