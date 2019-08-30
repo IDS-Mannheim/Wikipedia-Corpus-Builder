@@ -460,6 +460,27 @@ public class SignatureTest extends GermanTestBase {
 	}
 
 	@Test
+	public void testSignatureBug() throws IOException, ValidityException, ParsingException {
+		String wikitext = ": MfG --[[Benutzer:Phi|Φ]] ([[Benutzer "
+				+ "Diskussion:Phi|Diskussion]]) 22:13, 13. Dez. 2017 (CET){{}}";
+
+		WikiPage wikiPage = createWikiPage(
+				"Diskussion:Terroranschläge am 11. September 2001/Archiv/4",
+				"10040058,",
+				true, wikitext);
+		WikiTalkHandler handler = new WikiTalkHandler(talkConfig, wikiPage,
+				new WikiStatistics(), new WikiErrorWriter(), postUser);
+
+		handler.run();
+
+		String wikiXML = wikiPage.getWikiXML();
+		
+		Document doc = builder.build(wikiXML, null);
+		Node name = doc.query("/posting/p/signed/ref/name").get(0);
+		assertEquals("Φ", name.getValue());
+	}
+
+	@Test
 	public void testUserLinkNotSignature()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "Du solltest die Neugliedeurng mit [[benutzer:Ot]] "

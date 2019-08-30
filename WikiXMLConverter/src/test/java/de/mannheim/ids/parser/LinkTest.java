@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;
@@ -127,6 +128,27 @@ public class LinkTest {
 				href);
 		assertEquals("Latein", a.getValue());
 	}
+	
+	@Test
+	public void testQuoteInLink()
+			throws ValidityException, ParsingException, IOException {
+		String wikitext = "''[[11'09&quot;01 – September 11]]''";
+
+		Sweble2Parser swebleParser = new Sweble2Parser("5071",
+				"Terroranschläge am 11. September 2001", wikitext, "de",
+				new WikiStatistics(),
+				new WikiErrorWriter(), wikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+
+		assertEquals(
+				"<p><i><a href=\"https://de.wikipedia.org?title="
+				+ "11%2709%2201_%E2%80%93_September_11\" title="
+				+ "\"11&#39;09&quot;01 – September 11\">"
+				+ "11&#39;09&amp;quot;01 – September 11</a></i></p>",
+				wikiXML.trim());
+	}
 
 	@Test
 	public void testFrenchInternalLinkWithApostrophe()
@@ -145,7 +167,7 @@ public class LinkTest {
 		
 		assertEquals("<p>Avec <i><a href=\"https://fr.wikipedia.org?"
 				+ "title=L%27Interpr%C3%A9tation_des_r%C3%AAves\" title="
-				+ "\"L'Interprétation des rêves\">L&#39;Interprétation "
+				+ "\"L&#39;Interprétation des rêves\">L&#39;Interprétation "
 				+ "des rêves</a></i></p>", wikiXML.trim());
 	}
 

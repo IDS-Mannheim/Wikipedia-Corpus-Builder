@@ -25,7 +25,8 @@ v1.0.4
 - Fixed excessive escapes in XMLRenderer.
 2019-08-21
 - Moved <name> in signatures inside <ref>.
-
+2019-08-30
+- Fixed unescaped title attribute in links und empty template name. 
 
 v1.0.3
 
