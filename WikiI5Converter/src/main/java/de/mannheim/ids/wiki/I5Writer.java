@@ -244,7 +244,8 @@ public class I5Writer {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
 				if (w.getInputStream() != null && parseIdsText(w)) {
-					if (config.getPageType().equals("article")){
+					if (config.getPageType().equals("article")
+							&& config.storeCategories()) {
 						storeCategories(w.getWikiPath());
 					}
 					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
@@ -400,9 +401,7 @@ public class I5Writer {
 		
 		IdsTextBuilder idsTextBuilder = new IdsTextBuilder(config,
 				idsTextOutputStream, w.getPageId(),
-				idsTextBuffer.getPageTitle(),
-				idsTextBuffer.getCategoryEvents(),
-				idsTextBuffer.getNoteEvents());
+				idsTextBuffer);
 
 		try {
 			idsTextBuffer.toSAX(idsTextBuilder);

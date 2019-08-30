@@ -39,9 +39,9 @@ public class ConfigurationTest {
 	private String outputFile = "i5/dewiki-20170701-article.i5.xml";
 	private String encoding = "ISO-8859-1";
 
-	private String url = "jdbc:mysql://localhost:3306/database";
-	private String username = "username";
-	private String password = "password";
+	private String url = "jdbc:mysql://localhost:3306/wikipedia";
+	private String username = "wikiuser";
+	private String password = "wikipass";
 
 	private WikiI5Converter converter = new WikiI5Converter();
 
@@ -78,15 +78,6 @@ public class ConfigurationTest {
 	}
 	
 	@Test
-	public void testPropertiesMissingWikiXMLFolder() {
-		Properties properties = new Properties();
-		properties.setProperty("namespace_key", "1");
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("wikixml_folder is required.");
-		new Configuration(properties);
-	}
-
-	@Test
 	public void testPropertiesMissingCategory() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "0");
@@ -106,9 +97,24 @@ public class ConfigurationTest {
 	}
 	
 	@Test
+	public void testPropertiesMissingWikiXMLFolder() {
+		Properties properties = new Properties();
+		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("wikixml_folder is required.");
+		new Configuration(properties);
+	}
+	
+	@Test
 	public void testPropertiesMissingPageType() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("page_type is required");
@@ -119,6 +125,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingWikidump() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		thrown.expect(IllegalArgumentException.class);
@@ -130,6 +139,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingLanguage() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -142,6 +154,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingCorpusSigle() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -155,6 +170,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingOutputFile() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -169,6 +187,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingIndex() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -184,6 +205,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingCreator() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -200,6 +224,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingDatabaseUrl() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -217,6 +244,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingDatabaseUsername() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -235,6 +265,9 @@ public class ConfigurationTest {
 	public void testPropertiesMissingDatabasePassword() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");
@@ -254,6 +287,9 @@ public class ConfigurationTest {
 	public void testMinimalArticleProperties() {
 		Properties properties = new Properties();
 		properties.setProperty("namespace_key", "1");
+		properties.setProperty("category", "Kategorie");
+		properties.setProperty("category_scheme",
+				"https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie");
 		properties.setProperty("wikixml_folder", "../WikiXMLConverter/wikixml-de/article");
 		properties.setProperty("page_type", "article");
 		properties.setProperty("wikidump", "data/dewiki-20170701-sample.xml");

@@ -47,9 +47,9 @@ public class WikiI5ConverterExample {
 		String outputFile = "i5/dewiki-20170701-talk.i5.xml";
 		String encoding = "ISO-8859-1";
 
-		String url = "jdbc:mysql://localhost:3306/database";
-		String username = "username";
-		String password = "password";
+		String url = "jdbc:mysql://localhost:3306/wikipedia";
+		String username = "wikiuser";
+		String password = "wikipass";
 
 		Configuration config = new Configuration(xmlFolder, namespacekey,
 				pageType, dumpFilename, language, korpusSigle, inflectives,

@@ -51,6 +51,8 @@ public class WikiI5Converter {
 	public WikiI5Converter() {
 		options = new Options();
 		options.addOption("prop", true, "Properties filename");
+		options.addOption("storeCategories", false, "If set, categories "
+				+ "in articles will be stored in database.");
 	}
 
 	public static void main(String[] args) throws ParseException, IOException,
@@ -91,7 +93,11 @@ public class WikiI5Converter {
 			properties.load(new InputStreamReader(is, StandardCharsets.UTF_8));
 			is.close();
 
-			return new Configuration(properties);
+			Configuration config = new Configuration(properties);
+			if (cmd.hasOption("storeCategories")){
+				 config.setStoreCategories(true);
+			}
+			return config; 
 		}
 	}
 

@@ -35,6 +35,7 @@ public class Configuration {
 	private int maxThreads;
 
 	private boolean isDiscussion;
+	private boolean storeCategories;
 
 	public static final String[] indexes = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -317,5 +318,13 @@ public class Configuration {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public boolean storeCategories() {
+		return storeCategories;
+	}
+
+	public void setStoreCategories(boolean storeCategories) {
+		this.storeCategories = storeCategories;
 	}
 }

@@ -5,14 +5,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.ParseException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -64,15 +66,23 @@ public class WikiI5ConverterTest {
 	 * @throws ParserConfigurationException
 	 * @throws ParseException
 	 * @throws InterruptedException
+	 * @throws SQLException
 	 */
 	@Test
-	public void testWikiI5ProcessorTalk() throws I5Exception, IOException,
+	public void testWikiI5ProcessorArticle() throws I5Exception, IOException,
 			SAXException, ParserConfigurationException, ParseException,
-			InterruptedException {
-		testIndexingWikiXML("talk");
+			InterruptedException, SQLException {
+		testIndexingWikiXML("article");
 		WikiI5Converter converter = new WikiI5Converter();
 		Configuration config = converter.createConfig(
-				new String[]{"-prop", "dewiki-talk.properties"});
+				new String[]{"-prop", "dewiki-article.properties",
+						"-storeCategories"});
+
+		Connection conn = DriverManager.getConnection(config.getDatabaseUrl(),
+				config.getDatabaseUsername(), config.getDatabasePassword());
+		Statement s = conn.createStatement();
+		s.execute("drop table if exists de_category");
+
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();
 
@@ -92,15 +102,14 @@ public class WikiI5ConverterTest {
 	 * @throws InterruptedException
 	 */
 	@Test
-//	@Ignore
-	public void testWikiI5ConverterArticle()
+	public void testWikiI5ConverterTalk()
 			throws I5Exception, IOException, ParseException, SQLException,
 			ParserConfigurationException, SAXException, InterruptedException {
-		testIndexingWikiXML("article");
-		WikiI5Converter.main(
-				new String[]{"-prop","dewiki-article.properties"});
+		testIndexingWikiXML("talk");
 
-		String outputFile = "i5/dewiki-20170701-article.i5.xml";
+		WikiI5Converter.main(new String[]{"-prop", "dewiki-talk.properties"});
+
+		String outputFile = "i5/dewiki-20170701-talk.i5.xml";
 		testI5File(outputFile);
 	}
 

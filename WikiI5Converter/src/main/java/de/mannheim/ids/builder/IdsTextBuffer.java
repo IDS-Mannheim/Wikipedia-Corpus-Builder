@@ -2,6 +2,7 @@ package de.mannheim.ids.builder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,12 +34,15 @@ public class IdsTextBuffer extends SAXBuffer {
 	 * Generated serial ID
 	 */
 	private static final long serialVersionUID = -8276104769505424958L;
+	
+	public static String englishUri = "https://en.wikipedia.org?title=";
 
 	private Logger log = Logger.getLogger(IdsTextBuffer.class);
 
 	private SAXBuffer currentNoteRecorder;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;
 	private SAXBuffer categoryEvents;
+	private SAXBuffer englishCategoryEvents;
 
 	public static final Pattern spacePattern = Pattern.compile("\\s+");
 
@@ -83,6 +87,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		currentNoteRecorder = new SAXBuffer();
 		category = config.getCategory();
 		categoryEvents = new SAXBuffer();
+		englishCategoryEvents = new SAXBuffer();
 		isDiscussion = config.isDiscussion();
 	}
 
@@ -94,6 +99,7 @@ public class IdsTextBuffer extends SAXBuffer {
 
 	public void clearCategories() {
 		categoryEvents.recycle();
+		englishCategoryEvents.recycle();
 	}
 
 	@Override
@@ -341,30 +347,65 @@ public class IdsTextBuffer extends SAXBuffer {
 	public void setPageTitle(String pageTitle) {
 		this.pageTitle = pageTitle;
 	}
+	
+	public SAXBuffer getEnglishCategoryEvents() {
+		return englishCategoryEvents;
+	}
+
+	public void setEnglishCategoryEvents(SAXBuffer englishCategoryEvents) {
+		this.englishCategoryEvents = englishCategoryEvents;
+	}
 
 	public void addCategoryEvents() throws SAXException, SQLException {
 		String articleTitle = getPageTitle().split(":", 2)[1];
 		List<String> categoryLinks = I5Writer.dbManager
 				.retrieveCategoryLinks(articleTitle);
 		for (String c : categoryLinks) {
-			String[] cats = c.split(category + ":", 2);
-			try {
-				if (cats.length > 1) {
-					AttributesImpl attr = new AttributesImpl();
-					attr.addAttribute("", "target", "target", "CDATA", c);
-					attr.addAttribute("", "targOrder", "targOrder", "CDATA",
-							"u");
-					categoryEvents.startElement("", "ref", "ref", attr);
+			String[] cats = c.split("title=", 2);
 
+			if (cats.length > 1) {
+				AttributesImpl attr = new AttributesImpl();
+				attr.addAttribute("", "target", "target", "CDATA", c);
+				attr.addAttribute("", "targOrder", "targOrder", "CDATA", "u");
+				categoryEvents.startElement("", "ref", "ref", attr);
+				try {
 					c = URLDecoder.decode(cats[1], "UTF-8");
-
-					categoryEvents.characters(c.toCharArray(), 0, c.length());
-					categoryEvents.endElement("", "ref", "ref");
 				}
-			}
-			catch (UnsupportedEncodingException e) {
-				// should not happen
+				catch (UnsupportedEncodingException e) {
+					// should not happen
+				}
+				String normalizedCategory = c.replace("_", " ");
+				categoryEvents.characters(normalizedCategory.toCharArray(), 0,
+						normalizedCategory.length());
+				categoryEvents.endElement("", "ref", "ref");
+
+				String categoryTitle = c.substring(category.length() + 1);
+				List<String> englishCategories = I5Writer.dbManager
+						.retrieveEnglishCategories(categoryTitle);
+				addEnglishCategories(englishCategories);
 			}
 		}
 	}
+
+	private void addEnglishCategories(List<String> englishCategories) throws SAXException {
+		for (String c : englishCategories){
+			try {
+				String url = englishUri
+						+ URLEncoder.encode(c.replace(" ", "_"), "UTF-8");
+
+				AttributesImpl attr = new AttributesImpl();
+				attr.addAttribute("", "target", "target", "CDATA", url);
+				attr.addAttribute("", "targOrder", "targOrder", "CDATA", "u");
+				englishCategoryEvents.startElement("", "ref", "ref", attr);
+				englishCategoryEvents.characters(c.toCharArray(), 0, c.length());
+				englishCategoryEvents.endElement("", "ref", "ref");
+			}
+			catch (UnsupportedEncodingException e) {
+				// should not happen
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
 }

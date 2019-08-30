@@ -43,6 +43,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private String categorySchema;
 
 	private SAXBuffer categoryEvents;
+	private SAXBuffer englishCategoryEvents;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;
 
 	private boolean isDiscussion = false;
@@ -50,14 +51,14 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private String pageTitle;
 
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
-			String pageId, String pageTitle, SAXBuffer categoryEvents,
-			LinkedHashMap<String, SAXBuffer> noteEvents)
+			String pageId, IdsTextBuffer idsTextBuffer)
 			throws I5Exception {
 		createWriter(config, outputStream);
 		this.pageId = pageId;
-		this.pageTitle = pageTitle;
-		this.categoryEvents = categoryEvents;
-		this.noteEvents = noteEvents;
+		this.pageTitle = idsTextBuffer.getPageTitle();
+		this.categoryEvents = idsTextBuffer.getCategoryEvents();
+		this.englishCategoryEvents = idsTextBuffer.getEnglishCategoryEvents();
+		this.noteEvents = idsTextBuffer.getNoteEvents();
 
 		if (config.isDiscussion()) {
 			isDiscussion = true;
@@ -133,6 +134,14 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeAttribute("scheme", categorySchema);
 				categoryEvents.toSAX(new IdsEventHandler(writer, pageId));
 				writer.writeEndElement();
+
+				if (!englishCategoryEvents.isEmpty()) {
+					writer.writeStartElement("classCode");
+					writer.writeAttribute("scheme",
+							"https://en.wikipedia.org/wiki/Category:Contents");
+					englishCategoryEvents.toSAX(new IdsEventHandler(writer, pageId));
+					writer.writeEndElement();
+				}
 				writer.writeEndElement();
 				writer.flush();
 			}
