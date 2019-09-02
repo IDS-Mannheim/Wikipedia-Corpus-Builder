@@ -145,7 +145,7 @@ public class DatabaseManager {
 			preparedStatement = conn.prepareStatement(categorySelect);
 			preparedStatement.setInt(1, articleId);
 			rs = preparedStatement.executeQuery();
-			if (rs.next()) {
+			while (rs.next()) {
 				categoryLinks.add(rs.getString("category_url"));
 			}
 		}
@@ -153,8 +153,8 @@ public class DatabaseManager {
 		return categoryLinks;
 	}
 	
-	public List<String> retrieveEnglishCategories(String categoryTitle) throws SQLException {
-		List<String> categorytitles = new ArrayList<>();
+	public String retrieveEnglishCategory(String categoryTitle) throws SQLException {
+		String enTitle = null;
 		Connection conn = poolingDataSource.getConnection();
 		PreparedStatement preparedStatement = conn
 				.prepareStatement(pageId);
@@ -168,11 +168,11 @@ public class DatabaseManager {
 			preparedStatement.setString(2, "en");
 			rs = preparedStatement.executeQuery();
 			if (rs.next()) {
-				categorytitles.add(rs.getString("ll_title"));
+				enTitle = rs.getString("ll_title");
 			}
 		}
 		conn.close();
-		return categorytitles;
+		return enTitle;
 	}
 	
 	public LanguageLinks retrieveArticleLinks(String articleTitle)
