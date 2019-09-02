@@ -38,6 +38,7 @@
     <xsl:param name="pubYear" required="yes"/>
     <xsl:param name="letter" required="yes"/>
     <xsl:param name="encoding" required="yes"/>
+    <xsl:param name="pageId" required="yes"/>
 
     <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.dtd"
         method="xml" encoding="{$encoding}" indent="yes"/>
@@ -91,6 +92,11 @@
             <xsl:value-of select="translate(title,' ','_')"/>
             <xsl:sequence select="concat(': Wikipedia, ', $pubYear)"/>
         </xsl:variable>
+        
+        <xsl:variable name="pageURL">
+        	<xsl:sequence select="concat('http://', $lang ,'.wikipedia.org/wiki/')"/>
+        	<xsl:value-of select="translate(title,' ','_')"/>
+        </xsl:variable>
 
         <!-- * idsText * -->
         <idsText>
@@ -134,9 +140,15 @@
                                 </h.author>
                                 <editor/>
                                 <imprint/>
+                                <idno type="wikipedia-id"><xsl:value-of select="$pageId"/></idno>
                                 <biblScope type="subsume"/>
                                 <biblScope type="pp"/>
                                 <biblNote n="1"/>
+                                <!--                                
+                                <ref type="page_url">
+                                	<xsl:attribute name="target"><xsl:sequence select="$pageURL"/></xsl:attribute>
+                                </ref>                                
+                                -->
                             </analytic>
                             <monogr>
                                 <h.title type="main"/>

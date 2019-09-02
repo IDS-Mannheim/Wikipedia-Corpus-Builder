@@ -237,7 +237,7 @@ public class DatabaseManager {
 		String categoryTable = "CREATE TABLE IF NOT EXISTS "+this.langCode+"_category("
 				+ "id INTEGER PRIMARY KEY AUTO_INCREMENT, "
 				+ "article_id INTEGER NOT NULL, "
-				+ "category_url VARCHAR(256) NOT NULL, "
+				+ "category_url VARCHAR(250) NOT NULL, "
 				+ "UNIQUE INDEX article_category (article_id,category_url));";
 		
 		Connection conn = poolingDataSource.getConnection();

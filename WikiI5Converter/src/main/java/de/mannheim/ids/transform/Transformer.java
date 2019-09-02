@@ -189,8 +189,9 @@ public class Transformer implements Callable<WikiI5Part> {
 			final XsltTransformer transformer = getTransfomer();
 			transformer.setInitialContextNode(node);
 			transformer.setParameter(new QName("letter"),
-					new XdmAtomicValue(
-							index));
+					new XdmAtomicValue(index));
+			transformer.setParameter(new QName("pageId"),
+					new XdmAtomicValue(pageId));
 
 			Destination destination = createDestination(os);
 			transformer.setDestination(destination);

@@ -108,7 +108,7 @@ public class I5Writer {
 				dbManager.createCategoryTable();
 			}
 			catch (SQLException e) {
-				throw new I5Exception("Failed creating category table");
+				throw new I5Exception("Failed creating category table", e);
 			}
 		}
 	}
@@ -249,7 +249,6 @@ public class I5Writer {
 						storeCategories(w.getWikiPath());
 					}
 					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
-					
 					SAXBuffer validationBuffer = new SAXBuffer();
 					if (validateAgainstDTD(idsTextOutputStream,
 							validationBuffer, w.getWikiPath())) {

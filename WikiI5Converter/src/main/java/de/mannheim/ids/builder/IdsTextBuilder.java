@@ -271,12 +271,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					sb.append(key);
 					sb.append(".wikipedia.org/wiki/");
 					sb.append(keyword.replace(" ", "_"));
+					writer.writeAttribute("targetLang",key);
 					writer.writeAttribute("target", sb.toString());
-
-					writer.writeAttribute("xml",
-							"https://www.w3.org/XML/1998/namespace", "lang",
-							key);
-					// writer.writeAttribute("xml:lang", key);
 					writer.writeCharacters(keyword);
 
 					writer.writeEndElement(); // ref

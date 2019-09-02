@@ -6,7 +6,8 @@ v1.0.4
 - Resolved #15. Added category table and article category links to talk pages.
 2019-08-30
 - Resolved #16. Added English category links to talk pages.
-
+2019-09-02
+- Added idno to analytic, and renamed key to targetLang in language links.
 
 v1.0.3
 
