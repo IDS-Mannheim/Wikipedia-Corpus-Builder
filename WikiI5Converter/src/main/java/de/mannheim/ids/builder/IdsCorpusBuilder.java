@@ -229,7 +229,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeEndElement(); // h.title
 
 		writer.writeEmptyElement("h.author");
-		createSimpleElement("editor", "wikipedia.org");
+		createSimpleElement("editor", "Wikimedia Foundation");
 		createEdition();
 		createImprint();
 		writer.writeEndElement(); // monogr
@@ -254,9 +254,28 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeStartElement("imprint");
 
 		createSimpleElement("publisher", "Wikipedia");
-		createSimpleElement("pubPlace",
-				"URL:http://" + config.getLanguageCode() + ".wikipedia.org");
-
+		writer.writeStartElement("pubPlace");
+		writer.writeStartElement("ref");
+		writer.writeAttribute("target", "http://" + config.getLanguageCode() + ".wikipedia.org");
+		writer.writeEndElement(); // ref
+		writer.writeEndElement(); // pubPlace
+		
+		writer.writeStartElement("pubDate");
+		writer.writeAttribute("type", "year");
+		writer.writeCharacters(config.getYear());
+		writer.writeEndElement(); // pubDate
+		
+		writer.writeStartElement("pubDate");
+		writer.writeAttribute("type", "month");
+		writer.writeCharacters(config.getDumpFilename().substring(11, 13));
+		writer.writeEndElement(); // pubDate
+		
+		writer.writeStartElement("pubDate");
+		writer.writeAttribute("type", "day");
+		writer.writeCharacters(config.getDumpFilename().substring(13, 15));
+		writer.writeEndElement(); // pubDate
+		
+		
 		writer.writeEndElement(); // imprint
 	}
 }

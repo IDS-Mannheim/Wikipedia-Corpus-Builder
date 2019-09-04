@@ -8,6 +8,10 @@
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
+            <xd:p>Version 4.1</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> Sep 2020</xd:p>
+            <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
+            
             <xd:p>Version 4.0</xd:p>
             <xd:p><xd:b>Revision:</xd:b> Aug 2019</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
@@ -130,29 +134,23 @@
                                 <h.title type="main">
                                     <xsl:value-of select="title"/>
                                 </h.title>
-                                <h.title type="sub"/>
-                                <h.title type="abbr" level="m"/>
-                                <h.title type="abbr" level="a"/>
                                 <h.author>
                                     <xsl:value-of select="revision/contributor/(username|ip)"/>
                                     <!-- Since there is only the ip or username of the last edit made to see, add 'u.a.' -->
                                     <xsl:text>,  u.a.</xsl:text>
                                 </h.author>
-                                <editor/>
-                                <imprint/>
+                                <imprint>
+									<pubPlace>
+										<ref type="page_url">
+											<xsl:attribute name="target"><xsl:sequence select="$pageURL" /></xsl:attribute>
+										</ref>
+									</pubPlace>
+								</imprint>
                                 <idno type="wikipedia-id"><xsl:value-of select="$pageId"/></idno>
-                                <biblScope type="subsume"/>
-                                <biblScope type="pp"/>
-                                <biblNote n="1"/>
-                                <!--                                
-                                <ref type="page_url">
-                                	<xsl:attribute name="target"><xsl:sequence select="$pageURL"/></xsl:attribute>
-                                </ref>                                
-                                -->
                             </analytic>
                             <monogr>
-                                <h.title type="main"/>
-                                <editor>wikipedia.org</editor>
+                                <h.title type="main">Wikipedia</h.title>
+                                <editor>Wikimedia Foundation</editor>
                                 <edition>
                                     <further>Dump file &#34;<xsl:value-of select="$origfilename"
                                         />&#34; retrieved from http://dumps.wikimedia.org</further>
@@ -160,6 +158,14 @@
                                     <appearance/>
                                 </edition>
                                 <imprint>
+									<publisher>Wikipedia</publisher>
+									<pubPlace>
+										<ref>
+											<xsl:attribute name="target">
+								               <xsl:sequence select="concat('http://', $lang ,'.wikipedia.org')" />
+								            </xsl:attribute>
+										</ref>
+									</pubPlace>
                                     <pubDate type="year">
                                         <xsl:sequence select="$pubYear"/>
                                     </pubDate>
@@ -170,8 +176,6 @@
                                         <xsl:sequence select="$pubDay"/>
                                     </pubDate>
                                 </imprint>
-                                <biblScope type="vol"/>
-                                <biblScope type="volume-title"/>
                             </monogr>
                         </biblStruct>
                         <reference type="complete" assemblage="non-automatic">
