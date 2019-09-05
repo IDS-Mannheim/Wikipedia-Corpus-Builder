@@ -27,6 +27,8 @@ v1.0.4
 - Moved <name> in signatures inside <ref>.
 2019-08-30
 - Fixed unescaped title attribute in links und empty template name. 
+2019-09-05
+- Fixed handling page title of length 1 with special character.
 
 v1.0.3
 
