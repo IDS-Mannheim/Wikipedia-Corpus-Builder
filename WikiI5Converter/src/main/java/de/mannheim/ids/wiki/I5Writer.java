@@ -102,8 +102,7 @@ public class I5Writer {
 					"Failed configuring the database manager.", e);
 		}
 		
-		if (config.getPageType().equals("article") &&
-				!config.getLanguageCode().equals("en")){
+		if (config.getPageType().equals("article")){
 			try {
 				dbManager.createCategoryTable();
 			}

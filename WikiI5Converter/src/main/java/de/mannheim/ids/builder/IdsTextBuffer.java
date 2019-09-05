@@ -75,6 +75,7 @@ public class IdsTextBuffer extends SAXBuffer {
 	private boolean DEBUG = false;
 
 	private String pageTitle;
+	private String langCode;
 
 	public IdsTextBuffer(Configuration config) throws I5Exception {
 		if (config == null) {
@@ -89,6 +90,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		categoryEvents = new SAXBuffer();
 		englishCategoryEvents = new SAXBuffer();
 		isDiscussion = config.isDiscussion();
+		langCode = config.getLanguageCode();
 	}
 
 	public void clearReferences() {
@@ -134,7 +136,9 @@ public class IdsTextBuffer extends SAXBuffer {
 				categoryEvents.startElement(uri, localName, qName, attributes);
 				isCategoryFound = true;
 				categories.add(categoryURL);
-				computeEnglishCategory(categoryURL);
+				if (!langCode.equals("en")) {
+					computeEnglishCategory(categoryURL);
+				}
 			}
 			else {
 				writeStartElement(uri, localName, qName, attributes);
@@ -371,15 +375,17 @@ public class IdsTextBuffer extends SAXBuffer {
 			}
 			
 			try {
+
 				String englishCategory = I5Writer.dbManager
 						.retrieveEnglishCategory(categoryTitle);
-				if (englishCategory!=null){
+				if (englishCategory != null) {
 					addEnglishCategory(englishCategory);
 				}
 			}
 			catch (SQLException e) {
 				e.printStackTrace();
 			}
+			
 		}
 	}
 	
@@ -406,11 +412,13 @@ public class IdsTextBuffer extends SAXBuffer {
 						normalizedCategory.length());
 				categoryEvents.endElement("", "ref", "ref");
 
-				String categoryTitle = c.substring(category.length() + 1);
-				String englishCategory = I5Writer.dbManager
-						.retrieveEnglishCategory(categoryTitle);
-				if (englishCategory!=null){
-					addEnglishCategory(englishCategory);
+				if (!langCode.equals("en")){
+					String categoryTitle = c.substring(category.length() + 1);
+					String englishCategory = I5Writer.dbManager
+							.retrieveEnglishCategory(categoryTitle);
+					if (englishCategory!=null){
+						addEnglishCategory(englishCategory);
+					}
 				}
 			}
 		}
