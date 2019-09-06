@@ -421,19 +421,25 @@ public class XMLRenderer3 extends HtmlRenderer {
 	public void visit(WtTemplate n) {
 		// e.g. info box
 //		System.out.println(n);
-		WtName wtName = n.getName();
-		if (wtName != null && !wtName.isEmpty()) {
-			String name = wtName.getAsString().toLowerCase();
-			if (smileys.contains(name)) {
-				p.print("<figure type=\"emoji\" creation=\"template\">");
-				p.print("<desc type=\"template\">[_EMOJI:");
-				printAsWikitext(n);
-				p.print("_]</desc>");
-				p.print("</figure>");
+		try {
+			WtName wtName = n.getName();
+			if (wtName != null && !wtName.isEmpty()) {
+
+				String name = wtName.getAsString().toLowerCase();
+				if (smileys.contains(name)) {
+					p.print("<figure type=\"emoji\" creation=\"template\">");
+					p.print("<desc type=\"template\">[_EMOJI:");
+					printAsWikitext(n);
+					p.print("_]</desc>");
+					p.print("</figure>");
+				}
+				else {
+					p.print("<span class=\"template\"/>");
+				}
 			}
-			else {
-				p.print("<span class=\"template\"/>");
-			}
+		}
+		catch (Exception e) {
+			p.print("<span class=\"template\"/>");
 		}
 	}
 	
