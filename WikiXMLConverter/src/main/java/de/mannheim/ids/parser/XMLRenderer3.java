@@ -208,6 +208,7 @@ public class XMLRenderer3 extends HtmlRenderer {
 			{
 				// EM: fix link title with empty text (e.g. space)
 				if (n.hasTitle()
+						&& !n.getTitle().isEmpty()
 						&& !isWtTextEmpty(n.getTitle().get(0))) {
 					pt("<a href=\"%s\" title=\"%s\">%=%!%=</a>",
 							callback.makeUrl(target),

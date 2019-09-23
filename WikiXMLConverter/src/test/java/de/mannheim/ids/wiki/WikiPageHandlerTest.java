@@ -23,6 +23,9 @@ import nu.xom.ValidityException;
 
 public class WikiPageHandlerTest extends GermanTestBase {
 
+	WikiStatistics stat = new WikiStatistics();
+	WikiErrorWriter errorWriter = new WikiErrorWriter();
+	
 //	@Test
 //	public void testEscapedElement() throws IOException {
 //		WikiStatistics stat = new WikiStatistics();
@@ -38,11 +41,32 @@ public class WikiPageHandlerTest extends GermanTestBase {
 //		System.out.println(wikiXML);
 //	}
 
+	@Test
+	public void testRenderingLinkWithEmptyTitle() throws IOException, ValidityException, ParsingException {
+		String wikitext = "2. Zu der '''Anzahl der Gläubigen im Daoismus''' "
+				+ "schreibt die englische Wikipedia[[http://en.wikipedia.org/"
+				+ "wiki/Taoism#Modern_Taoism|]]";
+
+		WikiPage wikiPage = createWikiPage("Diskussion:Osama bin Laden", "16252", false,
+				wikitext);
+		WikiArticleHandler handler = new WikiArticleHandler(talkConfig,
+				wikiPage, stat, errorWriter);
+		handler.run();
+		
+		String wikiXML = wikiPage.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		Node a = doc.query("/p/a").get(0);
+		assertEquals("Http://en.wikipedia.org/wiki/Taoism",
+				a.query("@title").get(0).getValue());
+		assertEquals("http://en.wikipedia.org/wiki/Taoism#Modern_Taoism",
+				a.getValue());
+	}
+	
+	
 	// the code content is rendered as template
 	@Test
-	public void testComplexCode() throws IOException, ValidityException, ParsingException {
-		WikiStatistics stat = new WikiStatistics();
-		WikiErrorWriter errorWriter = new WikiErrorWriter();
+	public void testComplexCode()
+			throws IOException, ValidityException, ParsingException {
 		String wikitext = "&lt;div style=&quot;margin-bottom:.4em; padding:0;&quot;&gt;\n"+ 
 				"{| {{Bausteindesign3}}\n" +
 				"| style=&quot;padding: 2px; width:34px; &quot; | [[Datei:File.svg|30px|center]]\n"	+
