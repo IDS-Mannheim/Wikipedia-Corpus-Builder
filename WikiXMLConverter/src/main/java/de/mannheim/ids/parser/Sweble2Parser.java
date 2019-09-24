@@ -8,6 +8,7 @@ import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.sweble.wikitext.engine.EngineException;
@@ -194,7 +195,8 @@ public class Sweble2Parser implements Runnable {
 				String encodedTitle = UrlEncoding.WIKI.encode(title);
 				 try {
 					URL url = new URL(parametrizedUrl.replace("$1", encodedTitle));
-					return url.toString();
+					String urlStr = StringEscapeUtils.escapeXml10(url.toString());
+					return urlStr;
 				}
 				catch (MalformedURLException e) {
 					e.printStackTrace();

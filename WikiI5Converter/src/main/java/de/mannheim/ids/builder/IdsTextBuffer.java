@@ -86,7 +86,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		refNames = new HashMap<>();
 		refCounter = 0;
 		currentNoteRecorder = new SAXBuffer();
-		category = config.getCategory();
+		category = config.getCategory() + ":";
 		categoryEvents = new SAXBuffer();
 		englishCategoryEvents = new SAXBuffer();
 		isDiscussion = config.isDiscussion();
@@ -368,7 +368,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		if (cats.length>1){
 			try {
 				categoryTitle = URLDecoder.decode(cats[1], "UTF-8");
-				categoryTitle = categoryTitle.substring(category.length() + 1);
+				categoryTitle = categoryTitle.substring(category.length());
 			}
 			catch (UnsupportedEncodingException e) {
 				// should not happen
@@ -413,7 +413,7 @@ public class IdsTextBuffer extends SAXBuffer {
 				categoryEvents.endElement("", "ref", "ref");
 
 				if (!langCode.equals("en")){
-					String categoryTitle = c.substring(category.length() + 1);
+					String categoryTitle = c.substring(category.length());
 					String englishCategory = I5Writer.dbManager
 							.retrieveEnglishCategory(categoryTitle);
 					if (englishCategory!=null){
@@ -430,7 +430,7 @@ public class IdsTextBuffer extends SAXBuffer {
 			String url = englishUri
 					+ URLEncoder.encode(englishCategory.replace(" ", "_"),
 							"UTF-8");
-
+			
 			AttributesImpl attr = new AttributesImpl();
 			attr.addAttribute("", "target", "target", "CDATA", url);
 			attr.addAttribute("", "targOrder", "targOrder", "CDATA", "u");

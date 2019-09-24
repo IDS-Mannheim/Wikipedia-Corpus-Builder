@@ -31,6 +31,26 @@ public class InterwikiLinkTest {
 	}
 
 	@Test
+	public void testTicketNumberLink()
+			throws ValidityException, ParsingException, IOException {
+		String wikitext = "Der folgende Hinweis erreichte das Support-Team "
+				+ "in [[:ticket:2015082110007769]]:";
+
+		Sweble2Parser swebleParser = new Sweble2Parser("51901",
+				"Diskussion:Aristoteles", wikitext, "de", new WikiStatistics(),
+				new WikiErrorWriter(), wikiConfig);
+
+		swebleParser.run();
+		String wikiXML = swebleParser.getWikiXML();
+		Document doc = builder.build(wikiXML, null);
+		Node a = doc.query("/p/a").get(0);
+		String href = a.query("@href").get(0).getValue();
+		assertEquals("https://ticket.wikimedia.org/otrs/index.pl?Action="
+				+ "AgentTicketZoom&TicketNumber=2015082110007769",
+				href);
+	}
+	
+	@Test
 	public void testImageLink()
 			throws IOException, ValidityException, ParsingException {
 		String wikitext = "[[File:Blue ribbon.svg|8px|link=:en:Blue Ribbon "

@@ -1,6 +1,8 @@
 v1.0.5
 2019-09-23
 - Handled rendering links with empty titles.
+2019-09-24
+- Fixed category URL recognition and XML encoding for URL.
 
 v1.0.4
 
