@@ -229,7 +229,13 @@ public class DatabaseManager {
 		preparedStatement.setInt(1, Integer.parseInt(pageId));
 		preparedStatement.setString(2, categoryURL);
 		
-		preparedStatement.executeUpdate();
+		try {
+			preparedStatement.executeUpdate();
+		}
+		catch (Exception e) {
+			System.err.println("WARNING: "+e.getMessage());
+		}
+		
 		conn.close();
 	}
 	

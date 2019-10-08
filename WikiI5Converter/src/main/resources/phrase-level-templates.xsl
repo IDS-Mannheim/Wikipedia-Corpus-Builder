@@ -20,9 +20,9 @@
                     <xsl:variable name="author" select="@who"/>
                     <xsl:attribute name="who" select="$author"/>
                 </xsl:if>
-                <xsl:if test="@synch">
-                    <xsl:variable name="timestamp" select="@synch"/>
-                    <xsl:attribute name="synch" select="$timestamp"/>
+                <xsl:if test="@when-iso">
+                    <xsl:variable name="timestamp" select="@when-iso"/>
+                    <xsl:attribute name="when-iso" select="$timestamp"/>
                 </xsl:if>
 
                 <xsl:for-each select="*">
@@ -65,8 +65,14 @@
         </xsl:if>
     </xsl:template> -->
 
-    <xsl:template match="autoSignature">
-        <xsl:copy-of select="."/>
+    <xsl:template match="signed">
+    	<xsl:value-of select="."/>
+        <!-- <xsl:copy-of select="."/> -->
+    </xsl:template>
+    
+    <xsl:template match="figure">
+        <xsl:value-of select="."/>
+        <!-- <xsl:copy-of select="."/> -->
     </xsl:template>
 
     <xsl:template match="seg">

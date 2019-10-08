@@ -16,8 +16,8 @@
       <format>text/x-wiki</format>
       <text lang="de">
 	<h2> <span class="template"/> Defekter Weblink </h2> 
-        <posting indentLevel="0" who="WU00000009" synch="t00000026">
-	<p><span class="template"/><span class="template"/> – <autoSignature type="signed"><timestamp>02:02, 28. Dez. 2015 (CET)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000009" when-iso="2015-12-28T02:02+01">
+	<p><span class="template"/><span class="template"/> – <signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:GiftBot"><name>GiftBot</name></ref><date>02:02, 28. Dez. 2015 (CET)</date></signed></p> 
         </posting>
       </text>
       <sha1>mwhzsiu9qbxzcymbbt2ci0s95nosqeq</sha1>

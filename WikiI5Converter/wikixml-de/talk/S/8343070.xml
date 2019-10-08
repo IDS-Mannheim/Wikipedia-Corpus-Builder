@@ -16,8 +16,8 @@
       <format>text/x-wiki</format>
       <text lang="de">
 	<h2> Überarbeiten </h2> 
-        <posting indentLevel="0" who="WU00000018" synch="t00000027">
-	<p>Im Text heisst es, die Franzosen hätten sich auf die [Barrière de fer|Festungslinie] zwischen Nancy und Epinal zurückgezogen, die nicht hätte durchbrochen werden können. Nun gab es aber gerade hier gar keine Befestigungen, vielmehr hatte man mit der Trouée de Charmes absichtlich eine Lücke gelassen. Die ganze Argumentation, die darauf beruht, ist damit hinfällig. Dieser Punkt müsste wohl anhand möglichst neuerer Literatur kritisch nachrecherchiert werden. Es besteht zudem die Sorge, dass auch andere Teile des Artikels ähnlich überarbeitet werden müssen. --<autoSignature type="signed"><timestamp>01:12, 2. Aug. 2014 (CEST)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000024" when-iso="2014-08-02T01:12+02">
+	<p>Im Text heisst es, die Franzosen hätten sich auf die [Barrière de fer|Festungslinie] zwischen Nancy und Epinal zurückgezogen, die nicht hätte durchbrochen werden können. Nun gab es aber gerade hier gar keine Befestigungen, vielmehr hatte man mit der Trouée de Charmes absichtlich eine Lücke gelassen. Die ganze Argumentation, die darauf beruht, ist damit hinfällig. Dieser Punkt müsste wohl anhand möglichst neuerer Literatur kritisch nachrecherchiert werden. Es besteht zudem die Sorge, dass auch andere Teile des Artikels ähnlich überarbeitet werden müssen. --<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:UMyd"><name>UMyd</name></ref><date>01:12, 2. Aug. 2014 (CEST)</date></signed></p> 
         </posting>
 	<h2> Trouée de Charmes </h2> 
         <posting indentLevel="0">
@@ -38,19 +38,21 @@
         <posting indentLevel="1">
 	<p>Bettoncourt liegt am Mosel-Zufluss <a href="https://de.wikipedia.org?title=Madon" title="Madon">Madon</a>. Zitat aus dem Artikel Bettoncourt: <i>Südwestlich und nordöstlich des Ortes Bettoncourt fließen die Bäche Le Hainvau und Le Xouillon in den Madon. In den Mündungsbereichen weitet sich das Madontal. Das Gelände steigt nach Südosten hin sanft zu einer Hochfläche an, die das Madontal um über 100 Meter überragt. [ ... ] Außer einem weiteren schmalen Waldstreifen im Norden der Gemeinde besteht das 3,18 km² umfassende Gemeindeareal vorwiegend aus Acker- und Wiesenland.</i></p> 
         </posting>
-        <posting indentLevel="1" who="WU00000003" synch="t00000028">
-	<p>Mit anderen Worten : wer es einmal bis Charmes geschafft hat (siehe Kartenskizze mit Frontverläufen <a rel="nofollow" class="external text" href="http://www.sambre-marne-yser.be/article.php3?id_article=58">hier</a>) , der hat gute Chancen, bis nach Bettoncourt und auf besagtes Plateau zu kommen. --<autoSignature type="signed"><timestamp>17:37, 17. Okt. 2015 (CEST)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000003" when-iso="2015-10-17T17:37+02">
+	<dl>
+		<dd>Mit anderen Worten : wer es einmal bis Charmes geschafft hat (siehe Kartenskizze mit Frontverläufen <a rel="nofollow" class="external text" href="http://www.sambre-marne-yser.be/article.php3?id_article=58">hier</a>) , der hat gute Chancen, bis nach Bettoncourt und auf besagtes Plateau zu kommen. --<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:Neun-x"><name>Neun-x</name></ref><date>17:37, 17. Okt. 2015 (CEST)</date></signed></dd>
+	</dl> 
         </posting>
         <posting indentLevel="1">
 	<p>Nachtrag : <a rel="nofollow" class="external text" href="http://www.gwpda.org/comment/1916expo/images/7map.jpg&amp;imgrefurl=http://www.gwpda.org/comment/1916expo/1916a.htm">Kartenskizze</a> Die Barriere de fer wurde vor der <a href="https://de.wikipedia.org?title=Brisanzgranatenkrise" title="Brisanzgranatenkrise">Brisanzgranatenkrise</a> geplant und gebaut. Blieb die Luecke auch nach dem Aufkommen der Brisanzgranaten absichtlich unbebaut ?</p> 
         </posting>
 	<h2> Fußnote 2 ... welcher der beiden Bände ? </h2> 
-        <posting indentLevel="0" who="WU00000003" synch="t00000029">
+        <posting indentLevel="0" who="WU00000003" when-iso="2015-10-16T22:56+02">
 	<p>FN 2 lautet <i> Konrad Krafft von Dellmensingen: Das Bayernbuch vom Weltkriege, Chr. Belser, Stuttgart 1930, S. 35</i></p> 
 	<p>Es gibt zwei Bände; beide sind 1930 erschienen.</p> 
 	<p>Erstautor Jakob Kraft ist seit Juni 2012 <a rel="nofollow" class="external text" href="https://de.wikipedia.org/wiki/Spezial:Beitr%C3%A4ge/Jakob_Kraft">nicht mehr aktiv</a>; von ihm stammt die Fußnote.</p> 
 	<p>Hat jemand einen der beiden Bände , könnte mal Seite 35 aufschlagen und dann die Fußnote präzisieren ?</p> 
-	<p>--<autoSignature type="signed"><timestamp>22:56, 16. Okt. 2015 (CEST)</timestamp></autoSignature></p> 
+	<p>--<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:Neun-x"><name>Neun-x</name></ref><date>22:56, 16. Okt. 2015 (CEST)</date></signed></p> 
         </posting>
       </text>
       <sha1>fmi5k7zwv2u915afllbk6lijhd1fe5o</sha1>

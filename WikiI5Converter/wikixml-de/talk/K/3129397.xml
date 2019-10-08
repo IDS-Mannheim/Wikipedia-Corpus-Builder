@@ -15,23 +15,25 @@
       <model>wikitext</model>
       <format>text/x-wiki</format>
       <text lang="de">
-        <posting indentLevel="0" who="WU00000013" synch="t00000013">
-	<p>Überarbeiten. Muss verschoben werden, Karmeliterkirchen gibt&#39;s mehrere. Ob die Linzer Karmeliterkirche gemeint ist, ist mir allerdings angesichts der Adressangabe nicht ganz klar. Außerdem Typos. Bebilderung wäre natürlich auch schön. --<autoSignature type="signed"><timestamp>17:43, 11. Dez. 2007 (CET)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000013" when-iso="2007-12-11T17:43+01">
+	<p>Überarbeiten. Muss verschoben werden, Karmeliterkirchen gibt&#39;s mehrere. Ob die Linzer Karmeliterkirche gemeint ist, ist mir allerdings angesichts der Adressangabe nicht ganz klar. Außerdem Typos. Bebilderung wäre natürlich auch schön. --<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:Xocolatl"><name>Xocolatl</name></ref><date>17:43, 11. Dez. 2007 (CET)</date></signed></p> 
         </posting>
-        <posting indentLevel="1" who="WU00000014" synch="t00000014">
-	<p>die Linzer <i>Karmeliterkirche</i> liegt an der Linzer <i>Landstraße</i>, in der Fußgängerzone und irgendwer hat die nun nach WIEN verschoben?! Ich weiß nicht, wie man sowas korrigieren kann. LG --<autoSignature type="signed"><timestamp>18:17, 11. Dez. 2007 (CET)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000014" when-iso="2007-12-11T18:17+01">
+	<dl>
+		<dd>die Linzer <i>Karmeliterkirche</i> liegt an der Linzer <i>Landstraße</i>, in der Fußgängerzone und irgendwer hat die nun nach WIEN verschoben?! Ich weiß nicht, wie man sowas korrigieren kann. LG --<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:QualiStattQuanti"><name>QSQ</name></ref><date>18:17, 11. Dez. 2007 (CET)</date></signed></dd>
+	</dl> 
         </posting>
 	<h2> Erledigt? </h2> 
-        <posting indentLevel="0" who="WU00000015" synch="t00000015">
-	<p>Ich lösche mal den Kasten, die Bemängelung erscheint mir nicht mehr zutreffend. --<autoSignature type="signed"><timestamp>23:02, 12. Dez. 2007 (CET)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000015" when-iso="2007-12-12T23:02+01">
+	<p>Ich lösche mal den Kasten, die Bemängelung erscheint mir nicht mehr zutreffend. --<signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:Brunosimonsara"><name>Brunosimonsara</name></ref><date>23:02, 12. Dez. 2007 (CET)</date></signed></p> 
         </posting>
 	<h2> Heiliger Felix </h2> 
         <posting indentLevel="0">
 	<p>Im Lemma <a href="https://de.wikipedia.org?title=Karmelitenkirche_(Linz)" title="Karmelitenkirche (Linz)">Karmelitenkirche (Linz)</a> (3. Absatz) wird der Heilige Felix genannt. Vielleicht kann man diese Person noch etwas verifizieren. Mit Dank und Gruß, 132.180.76.37 <small>(15:26, 10. Aug. 2011 (CEST), <i>Datum/Uhrzeit nachträglich eingefügt, siehe <a href="https://de.wikipedia.org?title=Hilfe:Signatur" title="Hilfe:Signatur">Hilfe:Signatur</a></i>)</small></p> 
         </posting>
 	<h2> <span class="template"/> Defekter Weblink </h2> 
-        <posting indentLevel="0" who="WU00000009" synch="t00000016">
-	<p><span class="template"/><span class="template"/> – <autoSignature type="signed"><timestamp>12:32, 8. Jan. 2016 (CET)</timestamp></autoSignature></p> 
+        <posting indentLevel="0" who="WU00000009" when-iso="2016-01-08T12:32+01">
+	<p><span class="template"/><span class="template"/> – <signed type="signed"><ref target="https://de.wikipedia.org/wiki/Benutzer:GiftBot"><name>GiftBot</name></ref><date>12:32, 8. Jan. 2016 (CET)</date></signed></p> 
         </posting>
       </text>
       <sha1>ajwbcw8455lw61mk5c8nj1fa6esgo0r</sha1>
