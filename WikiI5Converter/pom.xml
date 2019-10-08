@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.mannheim.ids</groupId>
 	<artifactId>WikiI5Converter</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.java>1.8</version.java>

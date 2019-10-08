@@ -48,7 +48,10 @@
         method="xml" encoding="{$encoding}" indent="yes"/>
     <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
     <xsl:variable name="sigle" saxon:assignable="yes"/>
-
+    
+    <xsl:variable name="threadNum" select="0" saxon:assignable="yes"/>
+    <xsl:variable name="postNum" select="0" saxon:assignable="yes"/>
+	
     <xsl:param name="headerNames">
         <name>h1</name>
         <name>h2</name>
@@ -421,6 +424,8 @@
             </xsl:when>
             <xsl:when test="parent::node()[name()='text']">
                 <div n="{(substring(name(), 2))}" type="{$headingType}">
+                	<saxon:assign name="threadNum" select="$threadNum+1"/>
+                	<saxon:assign name="postNum" select="0"/>
                     <xsl:call-template name="heading"/>
                     <!-- Continue processing elements in this header scope -->
                     <xsl:call-template name="section">
@@ -431,6 +436,8 @@
             <xsl:otherwise>
                 <!-- Define header level and write header -->
                 <div n="{(substring(name(), 2))}" type="{$headingType}">
+                	<saxon:assign name="threadNum" select="$threadNum+1"/>
+                	<saxon:assign name="postNum" select="0"/>
                     <xsl:call-template name="heading"/>
                     <!-- Continue processing elements in this header scope -->
                     <xsl:call-template name="section">

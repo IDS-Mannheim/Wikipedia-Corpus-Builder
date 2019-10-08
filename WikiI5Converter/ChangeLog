@@ -1,5 +1,7 @@
 v1.0.5
-- Updated WikiXML files and replaced XSLT for @synch with @when-iso.
+
+2019-10-08
+- Added posting @id (resolves #18).
 
 v1.0.4
 
@@ -16,6 +18,8 @@ v1.0.4
 - Updated analytic and monogr.
 2019-09-05
 - Fixed category handling for English wikipedia. 
+2019-10-08
+- Updated WikiXML files and replaced XSLT for @synch with @when-iso.
 
 v1.0.3
 

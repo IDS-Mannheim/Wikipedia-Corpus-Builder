@@ -15,6 +15,10 @@
     <xsl:template match="posting">
         <xsl:if test="text()[normalize-space(.)] | *">
             <xsl:element name="posting">
+            	<saxon:assign name="postNum" select="$postNum+1"/>
+            	<xsl:attribute name="id">i.<xsl:value-of select="$pageId"/>_<xsl:value-of 
+            		select="$threadNum"/>_<xsl:value-of select="$postNum"/>
+            	</xsl:attribute>
                 <xsl:attribute name="indentLevel" select="@indentLevel"/>
                 <xsl:if test="@who">
                     <xsl:variable name="author" select="@who"/>
