@@ -48,7 +48,8 @@ public class WikiPostUser {
 		userMap = new HashMap<String, String>();
 		userWriter = Utilities.createWriter("post",
 				prefixFileName + "-post-" + pageType + "-user.xml", "utf-8");
-		userWriter.append("<listPerson>\n");
+		userWriter.append("<particDesc>\n");
+		userWriter.append(" <listPerson>\n");
 		counter = 1;
 	}
 
@@ -117,28 +118,29 @@ public class WikiPostUser {
 			throws IOException {
 
 		synchronized (userWriter) {
-			userWriter.append("   <person xml:id=\"" + userId + "\">\n");
-			userWriter.append("      <persName>" + username + "</persName>\n");
+			userWriter.append("  <person xml:id=\"" + userId + "\">\n");
+			userWriter.append("   <persName>" + username + "</persName>\n");
 
 			if (userLink != null && !userLink.isEmpty()) {
-				userWriter.append("      <signatureContent>\n");
-				userWriter.append("         ");
+				userWriter.append("   <signatureContent>\n");
+				userWriter.append("    ");
 				userWriter.append(userLink);
 				userWriter.append("\n");
 //				userWriter.append("         <ref target=\"");
 //				userWriter.append(WikiXMLProcessor.Wikipedia_URI);
 //				userWriter.append(userLink.replaceAll("\\s", "_") + "\">");
 //				userWriter.append(username + "</ref>\n");
-				userWriter.append("      </signatureContent>\n");
+				userWriter.append("   </signatureContent>\n");
 			}
 
-			userWriter.append("   </person>\n");
+			userWriter.append("  </person>\n");
 			userWriter.flush();
 		}
 	}
 
 	public void close() throws IOException {
-		userWriter.append("</listPerson>");
+		userWriter.append(" </listPerson>\n");
+		userWriter.append("</particDesc>");
 		userWriter.close();
 	}
 

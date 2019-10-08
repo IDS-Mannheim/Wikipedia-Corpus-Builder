@@ -3,6 +3,8 @@ v1.0.5
 - Handled rendering links with empty titles.
 2019-09-24
 - Fixed category URL recognition and XML encoding for URL.
+2019-10-08
+- Updated the structure of post-talk-user.xml.
 
 v1.0.4
 
