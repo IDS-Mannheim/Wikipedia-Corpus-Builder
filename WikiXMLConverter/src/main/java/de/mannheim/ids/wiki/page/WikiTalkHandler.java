@@ -51,6 +51,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 	private String post;
 	private StringBuilder wikiXMLBuilder;
 
+	private boolean isStart;
+
 	/**
 	 * Constructs a WikiPostHandler and compiles some regex patterns used in
 	 * posting segmentation.
@@ -100,6 +102,8 @@ public class WikiTalkHandler extends WikiPageHandler {
 
 	@Override
 	public void run() {
+		isStart=true;
+		
 		try {
 			if (config.isWikitextToGenerate()) {
 				writeWikitext();
@@ -271,13 +275,13 @@ public class WikiTalkHandler extends WikiPageHandler {
 			// Heading
 			if (trimmedText.contains("==")) {
 				Matcher matcher = headingPattern.matcher(trimmedText);
-				if (headerHandler(matcher))
+				if (handleHeading(matcher))
 					return;
 			}
 
 			if (trimmedText.contains("&lt;h")) {
 				Matcher matcher = headingPattern2.matcher(trimmedText);
-				if (headerHandler(matcher))
+				if (handleHeading(matcher))
 					return;
 			}
 		}
@@ -639,7 +643,7 @@ public class WikiTalkHandler extends WikiPageHandler {
 	}
 
 	/**
-	 * Identifies headers as post boundaries.
+	 * Identifies headings as post boundaries.
 	 * 
 	 * @param matcher
 	 *            a Matcher
@@ -647,16 +651,14 @@ public class WikiTalkHandler extends WikiPageHandler {
 	 * @throws IOException
 	 *             an IOException
 	 */
-	private boolean headerHandler(Matcher matcher) throws IOException {
+	private boolean handleHeading(Matcher matcher) throws IOException {
 
 		if (matcher == null) {
 			throw new IllegalArgumentException("Matcher cannot be null.");
 		}
 
 		if (matcher.find()) {
-			if (!post.trim().isEmpty()) {
-				writePost(null, null, null, null);
-			}
+			handleTextBeforeHeading();
 
 			String text = WikiPageReader.cleanTextStart(matcher.group(1));
 			String wikiXML = parseToXML(wikiPage.getPageId(),
@@ -667,6 +669,22 @@ public class WikiTalkHandler extends WikiPageHandler {
 			return true;
 		}
 		return false;
+	}
+	
+	private void handleTextBeforeHeading() throws IOException {
+		if (!post.trim().isEmpty()) {
+			if (isStart){
+				String wikiXML = parseToXML(wikiPage.getPageId(),
+						wikiPage.getPageTitle(), post.trim());
+				wikiXMLBuilder.append(wikiXML);
+				wikiXMLBuilder.append("\n");
+				post="";
+				isStart=false;
+			}
+			else {
+				writePost(null, null, null, null);
+			}
+		}
 	}
 
 	/**

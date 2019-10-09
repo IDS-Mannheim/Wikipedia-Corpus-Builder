@@ -5,6 +5,8 @@ v1.0.5
 - Fixed category URL recognition and XML encoding for URL.
 2019-10-08
 - Updated the structure of post-talk-user.xml.
+2019-10-11
+- Handled non-posting text (e.g. templates) at the start of Wikitext.
 
 v1.0.4
 
