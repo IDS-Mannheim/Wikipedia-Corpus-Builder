@@ -2,6 +2,8 @@ v1.0.5
 
 2019-10-08
 - Added posting @id (resolves #18).
+2019-10-10
+- Fixed unique category URL (resolved #19).
 
 v1.0.4
 

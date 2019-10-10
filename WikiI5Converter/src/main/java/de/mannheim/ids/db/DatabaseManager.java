@@ -68,7 +68,8 @@ public class DatabaseManager {
 		pageId = "SELECT page_id FROM " + langCode
 				+ "_page where page_title=? AND page_namespace=?";
 		categoryInsert = "INSERT INTO " + langCode
-				+ "_category(article_id, category_url) VALUES(?,?)";
+				+ "_category(article_id, category_url, category_hash) "
+				+ "VALUES(?,?,?)";
 		categorySelect = "SELECT category_url FROM " + langCode
 				+ "_category WHERE article_id=?";
 		englishCategory = "SELECT ll_title FROM " + langCode
@@ -228,6 +229,7 @@ public class DatabaseManager {
 				.prepareStatement(categoryInsert);
 		preparedStatement.setInt(1, Integer.parseInt(pageId));
 		preparedStatement.setString(2, categoryURL);
+		preparedStatement.setInt(3, categoryURL.hashCode());
 		
 		try {
 			preparedStatement.executeUpdate();
@@ -244,7 +246,8 @@ public class DatabaseManager {
 				+ "id INTEGER PRIMARY KEY AUTO_INCREMENT, "
 				+ "article_id INTEGER NOT NULL, "
 				+ "category_url VARCHAR(250) NOT NULL, "
-				+ "UNIQUE INDEX article_category (article_id,category_url));";
+				+ "category_hash INTEGER NOT NULL, "
+				+ "UNIQUE INDEX article_category (article_id,category_hash));";
 		
 		Connection conn = poolingDataSource.getConnection();
 		conn.createStatement().execute(categoryTable);
