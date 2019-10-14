@@ -43,6 +43,7 @@ public class BaseBuilder {
 
 		writer.writeStartElement("availability");
 		writer.writeAttribute("region", "world");
+		writer.writeAttribute("status", "free");
 		writer.writeCharacters("CC-BY-SA");
 		writer.writeEndElement(); // availability
 
@@ -52,10 +53,7 @@ public class BaseBuilder {
 
 	protected void createSourceDesc() throws XMLStreamException {
 		writer.writeStartElement("sourceDesc");
-
 		writer.writeStartElement("biblStruct");
-		writer.writeAttribute("Default", "n");
-
 		createMonogr();
 		writer.writeEndElement(); // biblStruct
 		writer.writeEndElement();

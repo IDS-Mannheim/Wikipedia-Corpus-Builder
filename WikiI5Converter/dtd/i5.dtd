@@ -1,6 +1,6 @@
 
 <!--
-DTD Generated 2017-09-08T09:43:37Z. This Odd file was produced for IDS by C. M. Sperberg-McQueen of Black Mesa Technologies, LLC. Copyright (c) 2010-2013 Institute für deutsche Sprache. All rights reserved. 
+DTD Generated 2019-07-25T17:08:27Z. This Odd file was produced for IDS by C. M. Sperberg-McQueen of Black Mesa Technologies, LLC. Copyright (c) 2010-2013 Institute für deutsche Sprache. All rights reserved. 
 Edition: 2.5.0. Last updated on
 	26th July 2013.
 Edition Location: http://www.tei-c.org/Vault/P5/2.5.0/
@@ -1047,7 +1047,7 @@ to CDATA #IMPLIED'>
 
 <!ENTITY % macro.paraContent '(#PCDATA|%model.gLike;|%model.phrase;|%model.inter;|%model.global;|lg)*' >
 
-<!ENTITY % macro.limitedContent '(#PCDATA|%model.limitedPhrase;|%model.inter;)*' >
+<!ENTITY % macro.limitedContent '(#PCDATA|%model.limitedPhrase;|%model.inter;|s)*' >
 
 <!ENTITY % macro.phraseSeq '(#PCDATA|%model.gLike;|%model.phrase;|%model.global;)*' >
 
@@ -1112,7 +1112,7 @@ trans.loc CDATA #IMPLIED >
 <!ATTLIST autoSignature
  %att.pointing.attributes;
  %att.global.attributes;
-type (signed|unsigned|special_contribution) #IMPLIED >
+type (signed|unsigned|user_contribution|special_contribution) #IMPLIED >
 <!--doc:supplies information about the availability of a text, for example any restrictions on its use or distribution, its copyright status, any licence applying to it, etc. [2.2.4. ] -->
 <!ELEMENT availability (#PCDATA|%model.availabilityPart;|%model.pLike;)*>
 <!ATTLIST availability
@@ -1304,15 +1304,18 @@ method (silent|markup) "silent"  >
 <!--doc:child of creation (in profileDesc). #PCDATA only. [] -->
 <!ELEMENT creatDate  (#PCDATA)>
 <!ATTLIST creatDate
- %att.global.attributes; >
+ %att.global.attributes;
+ %att.responsibility.attributes; >
 <!--doc:child of creation (in profileDesc). #PCDATA only. [] -->
 <!ELEMENT creatRef  (#PCDATA)>
 <!ATTLIST creatRef
- %att.global.attributes; >
+ %att.global.attributes;
+ %att.responsibility.attributes; >
 <!--doc:child of creation (in profileDesc). #PCDATA only. [] -->
 <!ELEMENT creatRefShort  (#PCDATA)>
 <!ATTLIST creatRefShort
- %att.global.attributes; >
+ %att.global.attributes;
+ %att.responsibility.attributes; >
 <!--doc:contains information about the creation of a text. [2.4.1.  2.4. ] -->
 <!ELEMENT creation (creatDate,creatRef?,creatRefShort?)>
 <!ATTLIST creation
@@ -1321,7 +1324,8 @@ method (silent|markup) "silent"  >
 <!--doc:child of titleStmt. #PCDATA only, otherwise a context-specific specialization of TEI title. [] -->
 <!ELEMENT d.title  (#PCDATA)>
 <!ATTLIST d.title
- %att.global.attributes; >
+ %att.global.attributes;
+ %att.responsibility.attributes; >
 <!--doc:contains a date in any format. [3.5.4.  2.2.4.  2.5.  3.11.2.4.  15.2.3.  13.3.6. ] -->
 <!ELEMENT date (#PCDATA|%model.gLike;|%model.phrase;|%model.global;)*>
 <!ATTLIST date
@@ -1346,7 +1350,7 @@ social %data.text;  #IMPLIED >
 <!ATTLIST distributor
  %att.global.attributes; >
 <!--doc:(text division) contains a subdivision of the front, body, or back of a text. [4.1. ] -->
-<!ELEMENT div (opener|head|byline|p|sp|%model.inter;|caption|figure|note|%model.divLike;|closer|%model.ids.milestones;)*>
+<!ELEMENT div (opener|head|byline|p|sp|%model.inter;|caption|figure|note|%model.divLike;|closer|%model.ids.milestones;|dateline)*>
 <!ATTLIST div
  %att.global.attributes;
  %att.divLike.attributes;
@@ -1453,7 +1457,7 @@ topology (front_position|back_position|intermediate_position|standalone) #IMPLIE
 <!ATTLIST figDesc
  %att.global.attributes; >
 <!--doc:groups elements representing or containing graphic information such as an illustration, formula, or figure. [14.4. ] -->
-<!ELEMENT figure (%model.headLike;|ptr|%model.common;|figDesc|%model.graphicLike;|%model.global;|%model.divBottomPart;)*>
+<!ELEMENT figure (%model.headLike;|ptr|%model.common;|figDesc|%model.graphicLike;|%model.global;|%model.divBottomPart;|%model.divWrapper;)*>
 <!ATTLIST figure
  %att.global.attributes;
  %att.placement.attributes;
@@ -1484,7 +1488,8 @@ topology (front_position|back_position|intermediate_position|standalone) #IMPLIE
 <!--doc:child of edition. #PCDATA only. -->
 <!ELEMENT further  (#PCDATA)>
 <!ATTLIST further
- %att.global.attributes; >
+ %att.global.attributes;
+ %att.responsibility.attributes; >
 <!--doc:(gap) indicates a point where material has been omitted in a transcription, whether for editorial reasons described in the TEI header, as part of sampling practice, or because the material is illegible, invisible, or inaudible. [3.4.3. ] -->
 <!ELEMENT gap EMPTY>
 <!ATTLIST gap
@@ -1946,6 +1951,7 @@ form %data.enumerated;  "unknown"  >
 <!ELEMENT reference  (#PCDATA)>
 <!ATTLIST reference
  %att.header.attributes;
+ %att.responsibility.attributes;
 type NMTOKEN #IMPLIED
 assemblage NMTOKEN #IMPLIED
 existence NMTOKEN #IMPLIED
@@ -2079,6 +2085,7 @@ type %data.enumerated;  #IMPLIED >
 <!ELEMENT t.title  (#PCDATA)>
 <!ATTLIST t.title
  %att.global.attributes;
+ %att.responsibility.attributes;
 assemblage NMTOKEN #IMPLIED >
 <!--doc:contains text displayed in tabular form, in rows and columns. [14.1.1. ] -->
 <!ELEMENT table ((%model.headLike;|%model.global;)*,((row,(%model.global;)*)+|((%model.graphicLike;),(%model.global;)*)+),((%model.divBottom;),(%model.global;)*)*)>

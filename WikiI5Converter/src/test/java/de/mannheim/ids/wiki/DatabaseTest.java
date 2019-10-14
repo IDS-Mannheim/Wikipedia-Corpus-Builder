@@ -1,6 +1,7 @@
 package de.mannheim.ids.wiki;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -48,6 +49,14 @@ public class DatabaseTest {
 		assertEquals(2, rs.getInt(1));
 		
 	}
+	
+	@Test
+	public void testHashCode() {
+		String s1 = "https://de.wikipedia.org?title=Kategorie:FVp-Mitglied";
+		String s2 = "https://de.wikipedia.org?title=Kategorie:FVP-Mitglied";
+		assertTrue (s1.hashCode()!= s2.hashCode());
+	}
+
 	
 	private Connection createConnection(Configuration config) throws SQLException {
 		return DriverManager.getConnection(config.getDatabaseUrl(),

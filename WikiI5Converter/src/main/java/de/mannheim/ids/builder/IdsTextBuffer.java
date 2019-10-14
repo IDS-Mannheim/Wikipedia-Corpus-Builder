@@ -22,8 +22,9 @@ import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.I5Writer;
 
 /**
- * IdsTextBuilder is a SAX handler implementation creating idsText elements from
- * transformed wikitext in I5 per wikipage.
+ * IdsTextBuffer collects category and footnote events as temporary SAX buffers.
+ * The categories and footnotes will be added to idsText by
+ * {@link IdsTextBuilder}.
  * 
  * @author margaretha
  *
@@ -49,14 +50,10 @@ public class IdsTextBuffer extends SAXBuffer {
 	private String category;
 
 	private String pageId;
-	public static List<String> addedAttributes = new ArrayList<String>();
-	static {
-		addedAttributes.add("part");
-		addedAttributes.add("org");
-		addedAttributes.add("uniform");
-		addedAttributes.add("complete");
-		addedAttributes.add("sample");
-	}
+//	public static List<String> addedAttributes = new ArrayList<String>();
+//	static {
+//		addedAttributes.add("uniform");
+//	}
 
 	private Map<String, String> refNames;
 	private List<String> categories = new ArrayList<String>(); 
@@ -71,8 +68,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	private boolean isTextEmpty = true;
 	private boolean isDiscussion = false;
 	private boolean isText = false;
-
-	private boolean DEBUG = false;
 
 	private String pageTitle;
 	private String langCode;
@@ -107,7 +102,6 @@ public class IdsTextBuffer extends SAXBuffer {
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
-
 		if (localName.equals("idsText")) {
 			this.idsTextId = attributes.getValue("id");
 			this.setPageTitle(attributes.getValue("n").substring(3));
@@ -158,7 +152,7 @@ public class IdsTextBuffer extends SAXBuffer {
 	private void noteStartElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		if (attributes.getValue("name") != null) {
-			log.debug("note name: " + attributes.getValue("name"));
+//			log.debug("note name: " + attributes.getValue("name"));
 			noteId = refNames.get(attributes.getValue("name"));
 			if (noteId == null) {
 				if (!isInPtr) {
@@ -176,7 +170,7 @@ public class IdsTextBuffer extends SAXBuffer {
 		currentNoteRecorder.startElement(uri, localName, qName,
 				attributes);
 		isFootNote = true;
-		log.debug("note start " + noteId);
+//		log.debug("note start " + noteId);
 	}
 
 	private void ptrStartElement(String uri, String localName, String qName,
@@ -186,20 +180,20 @@ public class IdsTextBuffer extends SAXBuffer {
 		if (attributes.getValue("name") != null) {
 			if (refNames.containsKey(attributes.getValue("name"))) {
 				targetId = refNames.get(attributes.getValue("name"));
-				log.debug("targetId: " + targetId + " name:"
-						+ attributes.getValue("name"));
+//				log.debug("targetId: " + targetId + " name:"
+//						+ attributes.getValue("name"));
 			}
 			else {
 				targetId = idsTextId + "-f" + (refCounter + 1);
 				refNames.put(attributes.getValue("name"), targetId);
-				log.debug("targetId: " + targetId + " name:"
-						+ attributes.getValue("name"));
+//				log.debug("targetId: " + targetId + " name:"
+//						+ attributes.getValue("name"));
 				refCounter++;
 			}
 		}
 		else {
 			targetId = idsTextId + "-f" + (refCounter + 1);
-			log.debug("targetId: " + targetId + " no name");
+//			log.debug("targetId: " + targetId + " no name");
 			refCounter++;
 		}
 		noteId = targetId;
@@ -240,13 +234,13 @@ public class IdsTextBuffer extends SAXBuffer {
 				if (noteEvents.containsKey(noteId)) {
 					if (noteEvents.get(noteId).isEmpty()
 							&& !currentNoteRecorder.isEmpty()) {
-						log.debug("replace note " + noteId);
+//						log.debug("replace note " + noteId);
 						noteEvents.remove(noteId);
 						noteEvents.put(noteId, currentNoteRecorder);
 					}
 				}
 				else {
-					log.debug("put note " + noteId);
+//					log.debug("put note " + noteId);
 					noteEvents.put(noteId, currentNoteRecorder);
 					refCounter++;
 				}
@@ -259,7 +253,7 @@ public class IdsTextBuffer extends SAXBuffer {
 				if (noteEvents.containsKey(noteId)) {
 					if (noteEvents.get(noteId).isEmpty()
 							&& !currentNoteRecorder.isEmpty()) {
-						log.debug("replace ptr " + noteId);
+//						log.debug("replace ptr " + noteId);
 						noteEvents.remove(noteId);
 						noteEvents.put(noteId, currentNoteRecorder);
 					}
@@ -375,7 +369,6 @@ public class IdsTextBuffer extends SAXBuffer {
 			}
 			
 			try {
-
 				String englishCategory = I5Writer.dbManager
 						.retrieveEnglishCategory(categoryTitle);
 				if (englishCategory != null) {
@@ -399,7 +392,6 @@ public class IdsTextBuffer extends SAXBuffer {
 			if (cats.length > 1) {
 				AttributesImpl attr = new AttributesImpl();
 				attr.addAttribute("", "target", "target", "CDATA", c);
-				attr.addAttribute("", "targOrder", "targOrder", "CDATA", "u");
 				categoryEvents.startElement("", "ref", "ref", attr);
 				try {
 					c = URLDecoder.decode(cats[1], "UTF-8");
@@ -433,7 +425,6 @@ public class IdsTextBuffer extends SAXBuffer {
 			
 			AttributesImpl attr = new AttributesImpl();
 			attr.addAttribute("", "target", "target", "CDATA", url);
-			attr.addAttribute("", "targOrder", "targOrder", "CDATA", "u");
 			englishCategoryEvents.startElement("", "ref", "ref", attr);
 			englishCategoryEvents.characters(englishCategory.toCharArray(), 0,
 					englishCategory.length());

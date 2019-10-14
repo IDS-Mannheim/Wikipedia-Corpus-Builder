@@ -1,49 +1,42 @@
 package de.mannheim.ids.builder;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javanet.staxutils.IndentingXMLStreamWriter;
-
 public class IdsEventHandler extends DefaultHandler {
 
-	private Logger log = Logger.getLogger(IdsEventHandler.class);
+	private XMLStreamWriter writer;
 
-	private IndentingXMLStreamWriter writer;
-	private String pageId;
-
-	public IdsEventHandler(IndentingXMLStreamWriter writer, String pageId) {
+	public IdsEventHandler(XMLStreamWriter writer, String pageId) {
 		this.writer = writer;
-		this.pageId = pageId;
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		try {
-
 			writer.writeStartElement(localName);
 			for (int i = 0; i < attributes.getLength(); i++) {
-				if (!IdsTextBuffer.addedAttributes
-						.contains(attributes.getLocalName(i))) {
-					if (attributes.getLocalName(i) != null
-							&& attributes.getValue(i) != null) {
+//				if (!IdsTextBuffer.addedAttributes
+//						.contains(attributes.getLocalName(i))) {
+//					if (attributes.getLocalName(i) != null
+//							&& attributes.getValue(i) != null) {
 						String text = StringEscapeUtils
 								.escapeXml10(attributes.getValue(i));
 						writer.writeAttribute(attributes.getQName(i), text);
-					}
-					else {
-						log.debug("pageId " + pageId + " element " + localName
-								+ " att " + attributes.getLocalName(i)
-								+ " value " + attributes.getValue(i));
-					}
-				}
+//					}
+//					else {
+//						log.debug("pageId " + pageId + " element " + localName
+//								+ " att " + attributes.getLocalName(i)
+//								+ " value " + attributes.getValue(i));
+//					}
+//				}
 			}
 
 			writer.flush();

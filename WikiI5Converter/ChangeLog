@@ -4,6 +4,8 @@ v1.0.5
 - Added posting @id (resolves #18).
 2019-10-10
 - Fixed unique category URL (resolved #19).
+2019-10-10
+- Removed default attributes and handled those added from DTD.
 
 v1.0.4
 

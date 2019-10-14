@@ -44,8 +44,10 @@
     <xsl:param name="encoding" required="yes"/>
     <xsl:param name="pageId" required="yes"/>
 
-    <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.dtd"
-        method="xml" encoding="{$encoding}" indent="yes"/>
+    <!-- <xsl:output doctype-public="-//IDS//DTD IDS-XCES 1.0//EN" doctype-system="dtd/i5.dtd"
+        method="xml" encoding="{$encoding}" indent="yes"/> -->
+    <xsl:output method="xml" encoding="{$encoding}" indent="yes" saxon:indent-spaces="1" />    
+	 
     <xsl:variable name="errorCounter" select="0" saxon:assignable="yes"/>
     <xsl:variable name="sigle" saxon:assignable="yes"/>
     
@@ -114,7 +116,7 @@
             <xsl:attribute name="version" select="1.0"/>
 
             <!-- * idsHeader * -->
-            <idsHeader type="text" pattern="text" status="new" version="1.0" TEIform="teiHeader">
+            <idsHeader type="text" pattern="text" version="1.0">
                 <fileDesc>
                     <titleStmt>
                         <textSigle>
@@ -128,11 +130,11 @@
                     <publicationStmt>
                         <distributor/>
                         <pubAddress/>
-                        <availability region="world">CC-BY-SA</availability>
+                        <availability region="world" status="free">CC-BY-SA</availability>
                         <pubDate/>
                     </publicationStmt>
                     <sourceDesc Default="n">
-                        <biblStruct Default="n">
+                        <biblStruct>
                             <analytic>
                                 <h.title type="main">
                                     <xsl:value-of select="title"/>
@@ -187,10 +189,10 @@
                         <reference type="short" assemblage="regular">
                             <xsl:value-of select="$textSigle"/> Wikipedia; <xsl:value-of
                                 select="title"/>, (Letzte Änderung <xsl:value-of
-                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"/> )
-                                <xsl:variable name="pubDate"
-                                select="xs:date(concat($pubYear,'-',$pubMonth,'-',$pubDay))"/>
-                            <xsl:value-of select="format-date($pubDate,'[D1].[M1].[Y0001]')"/>
+                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+                                />) <xsl:variable name="pubDate" select="xs:date(concat($pubYear,
+                                '-',$pubMonth,'-',$pubDay))"/> <xsl:value-of select="format-date(
+                                $pubDate,'[D1].[M1].[Y0001]')"/>
                         </reference>
                     </sourceDesc>
                 </fileDesc>
@@ -449,7 +451,8 @@
     </xsl:template>
 
     <xsl:template name="heading">
-        <head type="cross">
+        <!-- <head type="cross"> -->
+        <head>
             <xsl:for-each select="child::node()">
                 <xsl:choose>
                     <xsl:when test="name() eq 'br'"/>

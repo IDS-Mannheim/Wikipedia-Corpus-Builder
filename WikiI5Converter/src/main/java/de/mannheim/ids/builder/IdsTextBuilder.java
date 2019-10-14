@@ -12,7 +12,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.cocoon.xml.sax.SAXBuffer;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -24,7 +23,6 @@ import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.I5Writer;
-import javanet.staxutils.IndentingXMLStreamWriter;
 
 /** IdsTextBuilder is a SAX content handler that writes events 
  * from {@link IdsTextBuffer} to an {@link OutputStream}. This 
@@ -36,15 +34,19 @@ import javanet.staxutils.IndentingXMLStreamWriter;
  */
 public class IdsTextBuilder extends DefaultHandler2 {
 
-	private Logger log = Logger.getLogger(IdsTextBuilder.class);
+//	private Logger log = Logger.getLogger(IdsTextBuilder.class);
 
-	private IndentingXMLStreamWriter writer;
+	public static String enScheme = "https://en.wikipedia.org/wiki/Category:Contents";
+	
+	private XMLStreamWriter writer;
 	private String pageId;
 	private String categorySchema;
 
 	private SAXBuffer categoryEvents;
 	private SAXBuffer englishCategoryEvents;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;
+	
+	private SAXBuffer extendedIdsText;
 
 	private boolean isDiscussion = false;
 
@@ -59,6 +61,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 		this.categoryEvents = idsTextBuffer.getCategoryEvents();
 		this.englishCategoryEvents = idsTextBuffer.getEnglishCategoryEvents();
 		this.noteEvents = idsTextBuffer.getNoteEvents();
+		this.extendedIdsText = new SAXBuffer();
 
 		if (config.isDiscussion()) {
 			isDiscussion = true;
@@ -69,28 +72,16 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private void createWriter(Configuration config, OutputStream os)
 			throws I5Exception {
 		XMLOutputFactory f = XMLOutputFactory.newInstance();
-		XMLStreamWriter w = null;
 		try {
-			w = f.createXMLStreamWriter(os, config.getOutputEncoding());
+			writer = f.createXMLStreamWriter(os, config.getOutputEncoding());
 		}
 		catch (XMLStreamException e) {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
 		}
-		writer = new IndentingXMLStreamWriter(w);
-		writer.setIndent(" ");
 	}
-
-	@Override
-	public void startDTD(String name, String publicId, String systemId)
-			throws SAXException {
-		try {
-			writer.writeDTD("<!DOCTYPE " + name + " PUBLIC '" + publicId + "' '"
-					+ systemId + "'>");
-		}
-		catch (XMLStreamException e) {
-			throw new SAXException(
-					"Failed writing DTD " + name, e);
-		}
+	
+	public SAXBuffer getExtendedIdsText() {
+		return extendedIdsText;
 	}
 
 	@Override
@@ -104,22 +95,22 @@ public class IdsTextBuilder extends DefaultHandler2 {
 
 		try {
 			writer.writeStartElement(localName);
+			
+			AttributesImpl attr = new AttributesImpl();
 			for (int i = 0; i < attributes.getLength(); i++) {
-				if (!IdsTextBuffer.addedAttributes
-						.contains(attributes.getLocalName(i))
-						&& attributes.getLocalName(i) != null
-						&& attributes.getValue(i) != null) {
+//				if (!IdsTextBuffer.addedAttributes
+//						.contains(attributes.getLocalName(i))
+//						&& attributes.getLocalName(i) != null
+//						&& attributes.getValue(i) != null) {
 
 					String text = StringEscapeUtils
 							.escapeXml10(attributes.getValue(i));
 					writer.writeAttribute(attributes.getQName(i), text);
-				}
-				// else {
-				// log.debug("pageId " + pageId + " element " + localName
-				// + " att " + attributes.getLocalName(i)
-				// + " value " + attributes.getValue(i));
-				// }
+					attr.addAttribute("", attributes.getLocalName(i),
+							attributes.getQName(i), attributes.getType(i), text);					
+//				}
 			}
+			extendedIdsText.startElement(uri, localName, qName, attr);
 			writer.flush();
 		}
 		catch (XMLStreamException e) {
@@ -135,15 +126,30 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				categoryEvents.toSAX(new IdsEventHandler(writer, pageId));
 				writer.writeEndElement();
 
+				extendedIdsText.startElement("", "textClass", "textClass",
+						new AttributesImpl());
+				AttributesImpl attr = new AttributesImpl();
+				attr.addAttribute("", "scheme", "scheme", "CDATA", categorySchema);
+				extendedIdsText.startElement("", "classCode", "classCode", attr);
+				extendedIdsText.saxBuffer(categoryEvents);
+				extendedIdsText.endElement("", "classCode", "classCode");
+				
 				if (!englishCategoryEvents.isEmpty()) {
 					writer.writeStartElement("classCode");
-					writer.writeAttribute("scheme",
-							"https://en.wikipedia.org/wiki/Category:Contents");
+					writer.writeAttribute("scheme",enScheme);
 					englishCategoryEvents.toSAX(new IdsEventHandler(writer, pageId));
 					writer.writeEndElement();
+					
+					attr = new AttributesImpl();
+					attr.addAttribute("", "scheme", "scheme", "CDATA", enScheme);
+					extendedIdsText.startElement("", "classCode", "classCode", attr);
+					extendedIdsText.saxBuffer(englishCategoryEvents);
+					extendedIdsText.endElement("", "classCode", "classCode");
 				}
 				writer.writeEndElement();
 				writer.flush();
+				
+				extendedIdsText.endElement("", "textClass", "textClass");
 			}
 		}
 		catch (XMLStreamException e) {
@@ -158,8 +164,13 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			writer.writeStartElement(localName);
 			writer.writeStartElement("div");
 			writer.writeAttribute("n", "1");
-			writer.writeAttribute("complete", "y");
 			writer.writeAttribute("type", "footnotes");
+			
+			extendedIdsText.startElement(uri, localName, qName, attributes);
+			AttributesImpl attr = new AttributesImpl();
+			attr.addAttribute("", "n", "n", "CDATA", "1");
+			attr.addAttribute("", "type", "type", "CDATA", "footnotes");
+			extendedIdsText.startElement("", "div", "div", attr);
 
 			ContentHandler footnoteBuilder = new IdsEventHandler(writer,
 					pageId);
@@ -170,23 +181,24 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					// log.debug("empty note " + key);
 					AttributesImpl att = new AttributesImpl();
 					att.addAttribute("", "id", "id", "ID", key);
-					event.startElement("", "note", "note",
-							att);
+					event.startElement("", "note", "note", att);
+					
 					String noteContent = "N/A";
-					event.characters(
-							noteContent.toCharArray(), 0,
+					event.characters(noteContent.toCharArray(), 0,
 							noteContent.length());
 					event.endElement("", "note", "note");
 				}
 				event.toSAX(footnoteBuilder);
+				extendedIdsText.saxBuffer(event);
 			}
 
 			writer.writeEndElement();
 			writer.flush();
+			
+			extendedIdsText.endElement("", "div", "div");
 		}
 		catch (XMLStreamException e) {
-			throw new SAXException(
-					"Failed creating start element " + localName,
+			throw new SAXException("Failed creating start element " + localName,
 					e);
 		}
 	}
@@ -196,6 +208,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			throws SAXException {
 		try {
 			writer.writeEndElement();
+			extendedIdsText.endElement(uri, localName, qName);
 
 			if ("monogr".equals(localName)) {
 				try {
@@ -207,7 +220,6 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					else {
 						createLangLinks(I5Writer.dbManager
 								.retrieveLanguageLinks(pageId));
-
 					}
 				}
 				catch (SQLException e) {
@@ -238,6 +250,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 						.replaceAll(" ");
 				writer.writeCharacters(text);
 				writer.flush();
+				
+				extendedIdsText.characters(ch, start, length);
 			}
 			ch = null;
 		}
@@ -263,21 +277,35 @@ public class IdsTextBuilder extends DefaultHandler2 {
 					writer.writeStartElement("relatedItem");
 					writer.writeAttribute("type", "langlink");
 
-					writer.writeStartElement("ref");
+					AttributesImpl atts = new AttributesImpl();
+					atts.addAttribute("", "type", "type", "CDATA", "langlink");
+					extendedIdsText.startElement("", "relatedItem", "relatedItem", atts);
+					
 					String keyword = map.get(key);
-
 					StringBuilder sb = new StringBuilder();
 					sb.append("https://");
 					sb.append(key);
 					sb.append(".wikipedia.org/wiki/");
 					sb.append(keyword.replace(" ", "_"));
+					String target = sb.toString();
+					
+					writer.writeStartElement("ref");
 					writer.writeAttribute("targetLang",key);
-					writer.writeAttribute("target", sb.toString());
+					writer.writeAttribute("target", target);
 					writer.writeCharacters(keyword);
 
+					atts = new AttributesImpl();
+					atts.addAttribute("", "targetLang", "targetLang", "CDATA", key);
+					atts.addAttribute("", "target", "target", "CDATA", target);
+					extendedIdsText.startElement("", "ref", "ref", atts);
+					extendedIdsText.characters(keyword.toCharArray(), 0, keyword.length());
+					
 					writer.writeEndElement(); // ref
 					writer.writeEndElement(); // relatedItem
 					writer.flush();
+					
+					extendedIdsText.endElement("", "ref", "ref");
+					extendedIdsText.endElement("", "relatedItem", "relatedItem");
 				}
 			}
 			catch (XMLStreamException e) {

@@ -18,7 +18,6 @@ public class IdsDocBuilder extends BaseBuilder {
 		writer.writeStartElement("idsDoc");
 		writer.writeAttribute("type", "text");
 		writer.writeAttribute("version", "1.0");
-		writer.writeAttribute("TEIform", "TEI.2");
 		writer.writeAttribute("id", docId);
 		writer.flush();
 	}
@@ -28,9 +27,7 @@ public class IdsDocBuilder extends BaseBuilder {
 		writer.writeStartElement("idsHeader");
 		writer.writeAttribute("type", "document");
 		writer.writeAttribute("pattern", "text");
-		writer.writeAttribute("status", "new");
 		writer.writeAttribute("version", "1.0");
-		writer.writeAttribute("TEIform", "teiHeader");
 
 		createFileDesc(docSigle, docTitle);
 		writer.writeEndElement();

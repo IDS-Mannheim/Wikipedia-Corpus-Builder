@@ -39,7 +39,6 @@ public class IdsCorpusBuilder extends BaseBuilder {
 	public void createIdsCorpusStartElement() throws XMLStreamException {
 		writer.writeStartElement("idsCorpus");
 		writer.writeAttribute("version", "1.0");
-		writer.writeAttribute("TEIform", "teiCorpus.2");
 		createCorpusHeader();
 	}
 
@@ -47,9 +46,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeStartElement("idsHeader");
 		writer.writeAttribute("type", "corpus");
 		writer.writeAttribute("pattern", "allesaußerZtg/Zschr");
-		writer.writeAttribute("status", "new");
 		writer.writeAttribute("version", "1.0");
-		writer.writeAttribute("TEIform", "teiHeader");
 
 		createFileDesc();
 		createEncodingDesc();
@@ -91,7 +88,6 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeStartElement("langUsage");
 		writer.writeStartElement("language");
 		writer.writeAttribute("id", config.getLanguageCode());
-		writer.writeAttribute("usage", "100");
 		writer.writeCharacters(config.getLanguage());
 		writer.writeEndElement(); // language
 		writer.writeEndElement(); // langUsage
@@ -196,7 +192,7 @@ public class IdsCorpusBuilder extends BaseBuilder {
 
 	private void createAvailability() throws XMLStreamException {
 		writer.writeStartElement("availability");
-		writer.writeAttribute("status", "restricted");
+		writer.writeAttribute("status", "free");
 		writer.writeCharacters("This document, "
 				+ "the IDS-Wikipedia."
 				+ config.getLanguageCode()
@@ -213,7 +209,6 @@ public class IdsCorpusBuilder extends BaseBuilder {
 		writer.writeStartElement("sourceDesc");
 
 		writer.writeStartElement("biblStruct");
-		writer.writeAttribute("Default", "n");
 		createMonogr();
 		writer.writeEndElement(); // biblStruct
 

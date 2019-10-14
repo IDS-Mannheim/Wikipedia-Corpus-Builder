@@ -21,6 +21,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.cocoon.xml.sax.SAXBuffer;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
@@ -47,6 +48,9 @@ import javanet.staxutils.IndentingXMLStreamWriter;
 public class I5Writer {
 
 	public static Logger logger = Logger.getLogger(I5Writer.class);
+	
+	public static String DOCTYPE = "<!DOCTYPE idsText PUBLIC \"-//IDS//DTD IDS-I5 "
+			+ "1.0//EN\" \"dtd/i5.dtd\">";
 
 	public static final Pattern invalidNativeCharPattern = Pattern
 			.compile("&#xd[89a-f]..;");
@@ -242,17 +246,24 @@ public class I5Writer {
 		synchronized (writer) {
 			if (w.isIDSText()) {
 				logger.info(w.getWikiPath());
+				
+//				String line="";
+//				InputStream inputStream = w.getInputStream();
+//				try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {	
+//					while ((line = bufferedReader.readLine()) != null) {
+//						System.out.println(line);
+//					}
+//				}
+//				catch (IOException e) {
+//					e.printStackTrace();
+//				}
+				
 				if (w.getInputStream() != null && parseIdsText(w)) {
 					if (config.getPageType().equals("article")
 							&& config.storeCategories()) {
 						storeCategories(w.getWikiPath());
 					}
-					ByteArrayOutputStream idsTextOutputStream = addEvents(w);
-					SAXBuffer validationBuffer = new SAXBuffer();
-					if (validateAgainstDTD(idsTextOutputStream,
-							validationBuffer, w.getWikiPath())) {
-						writeIdsText(validationBuffer, w.getWikiPath());
-					}
+					addEvents(w);
 				}
 				idsTextBuffer.recycle();
 				w.close();
@@ -392,8 +403,7 @@ public class I5Writer {
 		return true;
 	}
 
-	private ByteArrayOutputStream addEvents(WikiI5Part w)
-			throws I5Exception {
+	private void addEvents(WikiI5Part w) throws I5Exception {
 		ByteArrayOutputStream idsTextOutputStream = new ByteArrayOutputStream(
 				1024 * 4);
 		
@@ -409,12 +419,25 @@ public class I5Writer {
 			logger.debug(e);
 			errorHandler.write(w.getWikiPath(), "Failed adding events.", e);
 		}
-
+		
+		byte[] idsTextBytes = ArrayUtils.addAll(DOCTYPE.getBytes(),
+				idsTextOutputStream.toByteArray());
+		try {
+			idsTextOutputStream.close();
+		}
+		catch (IOException e) {
+			logger.debug(e);
+			errorHandler.write(w.getWikiPath(),
+					"Failed closing idsTextOutputStream", e);
+		}
+		
+		if (validateAgainstDTD(idsTextBytes, w.getWikiPath())) {
+			writeIdsText(idsTextBuilder.getExtendedIdsText(), w.getWikiPath());
+		}
+		
 		idsTextBuffer.clearReferences();
 		idsTextBuffer.clearCategories();
 		idsTextBuffer.getCategories().clear();
-
-		return idsTextOutputStream;
 	}
 
 	/** Validates idsText by using validating SAX parser to parse it. 
@@ -428,16 +451,13 @@ public class I5Writer {
 	 * @return
 	 * @throws I5Exception
 	 */
-	private boolean validateAgainstDTD(
-			ByteArrayOutputStream idsTextOutputStream, SAXBuffer saxBuffer,
-			String wikiXMLPath) throws I5Exception {
-
-		validatingReader.setContentHandler(saxBuffer);
+	private boolean validateAgainstDTD(byte[] idsTextBytes, String wikiXMLPath)
+			throws I5Exception {
 		try {
-			InputStream is = new ByteArrayInputStream(
-					idsTextOutputStream.toByteArray());
+			InputStream is = new ByteArrayInputStream(idsTextBytes);
 			InputSource inputSource = new InputSource(is);
 			inputSource.setEncoding(config.getOutputEncoding());
+			
 			validatingReader.parse(inputSource);
 			is.close();
 		}
@@ -445,17 +465,8 @@ public class I5Writer {
 			stats.addDtdValidationError();
 			logger.debug(e);
 			errorHandler.write(wikiXMLPath, "DTD validation failed. \n"
-					+ idsTextOutputStream.toString(), e);
+					+ idsTextBytes.toString(), e);
 			return false;
-		}
-		
-		try {
-			idsTextOutputStream.close();
-		}
-		catch (IOException e) {
-			logger.debug(e);
-			errorHandler.write(wikiXMLPath,
-					"Failed closing idsTextOutputStream", e);
 		}
 
 		stats.addValidPages();

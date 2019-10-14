@@ -472,9 +472,7 @@
         <xsl:param name="name"/>
         <xsl:choose>
             <xsl:when test="parent::node()/name()=('text','center','div')">
-                <p>
-                    <gap desc="{$name}" reason="omitted"/>
-                </p>
+                <p><gap desc="{$name}" reason="omitted"/></p>
             </xsl:when>
             <xsl:when test="parent::node()[name()=$phraseNames/*]">
                 <xsl:variable name="value">
@@ -524,7 +522,7 @@
 
     <xsl:template match="a">
         <xsl:variable select="@href" name="url"/>
-        <ref target="{$url}" targOrder="u">
+        <ref target="{$url}">
             <xsl:value-of select="text()"/>
         </ref>
     </xsl:template>

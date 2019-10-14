@@ -65,6 +65,10 @@ public class IdsTextHandler extends DefaultHandler {
 					writer.flush();
 				}
 			}
+			// remove unnecessary new lines
+			else if (text.contains("\n") && text.trim().isEmpty()){
+//				System.out.println("#"+text+"#");
+			}
 			else if (!text.isEmpty()) {
 				writer.writeCharacters(text);
 				writer.flush();
