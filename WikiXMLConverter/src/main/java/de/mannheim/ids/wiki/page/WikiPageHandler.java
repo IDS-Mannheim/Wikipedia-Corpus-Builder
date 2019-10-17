@@ -257,7 +257,7 @@ public abstract class WikiPageHandler implements Runnable {
 	 */
 	protected void writeWikitext() throws IOException {
 		writeWikiXML(wikiPage.getWikitext(), config.getWikitextFolder());
-		wikiPage.setWikitext(null);
+//		wikiPage.setWikitext(null);
 	}
 
 	/**

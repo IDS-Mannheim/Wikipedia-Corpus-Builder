@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.junit.Test;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.utils.LanguageConfigGenerator;

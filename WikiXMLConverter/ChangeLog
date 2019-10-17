@@ -7,6 +7,8 @@ v1.0.5
 - Updated the structure of post-talk-user.xml.
 2019-10-11
 - Handled non-posting text (e.g. templates) at the start of Wikitext.
+2019-10-17
+- Fixed writeWikitext.
 
 v1.0.4
 
