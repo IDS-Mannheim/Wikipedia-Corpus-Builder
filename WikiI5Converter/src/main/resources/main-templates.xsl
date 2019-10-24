@@ -2,14 +2,15 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
     xmlns:saxon="http://saxon.sf.net/" xmlns:functx="http://www.functx.com" version="3.0"
+    xmlns:err="http://www.w3.org/2005/xqt-errors"
     extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
-    <!--xmlns:err="http://www.w3.org/2005/xqt-errors"-->
+    
 
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
             <xd:p>Version 4.1</xd:p>
-            <xd:p><xd:b>Revision:</xd:b> Sep 2020</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> Oct 2019</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
             
             <xd:p>Version 4.0</xd:p>
@@ -264,9 +265,9 @@
                     <xsl:text>Id: </xsl:text>
                     <xsl:value-of select="../id"/>
                     <xsl:text>&#10;Title: </xsl:text>
-                    <xsl:value-of select="../title"/><!--<xsl:text>&#10;Error code: </xsl:text>
+                    <xsl:value-of select="../title"/><xsl:text>&#10;Error code: </xsl:text>
                     <xsl:value-of select="$err:code"/><xsl:text>&#10;Reason: </xsl:text>
-                    <xsl:value-of select="$err:description"/>-->
+                    <xsl:value-of select="$err:description"/>
                 </xsl:message>
 
             </xsl:catch>

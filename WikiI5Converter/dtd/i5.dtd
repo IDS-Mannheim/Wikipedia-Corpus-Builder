@@ -9,7 +9,7 @@ Edition Location: http://www.tei-c.org/Vault/P5/2.5.0/
 
 <!-- start datatypes -->
 
-<!ENTITY % IDSlat1 PUBLIC "-//IDS//ENTITIES Latin 1 Extension for IDS-CES//EN" "http://corpora.ids-mannheim.de/I5/DTD/ids-lat1.ent"> 
+<!ENTITY % IDSlat1 PUBLIC "-//IDS//ENTITIES Latin 1 Extension for IDS-CES//EN" "ids-lat1.ent"> 
 %IDSlat1;
 
 <!ENTITY % data.certainty '(high|medium|low|unknown)' >

@@ -5,8 +5,8 @@
     extension-element-prefixes="saxon" exclude-result-prefixes="xs xd saxon functx">
 
     <xd:doc scope="stylesheet">
-        <xd:desc>TES <xd:p>Templates for various elements</xd:p>
-            <xd:p><xd:b>Date:</xd:b> June 2013</xd:p>
+        <xd:desc><xd:p>Templates for various elements</xd:p>
+            <xd:p><xd:b>Date:</xd:b> Oct 2019</xd:p>
             <xd:p><xd:b>Author:</xd:b> Eliza Margaretha</xd:p>
         </xd:desc>
     </xd:doc>
@@ -128,14 +128,13 @@
                                 <xsl:apply-templates/>
                             </item>
                         </xsl:when>
-                        <xsl:when test="descendant::node()/name()=('li','dd','dt')">
-                            <!--<xsl:message>@<xsl:copy-of select="."/>@</xsl:message>-->
+                        <!-- <xsl:when test="descendant::node()/name()=('li','dd','dt')">
                             <xsl:for-each select="descendant::node()[name()=('li','dd','dt')]">
                                 <item>
                                     <xsl:apply-templates select="."/>
                                 </item>
-                            </xsl:for-each>                          
-                        </xsl:when>
+                            </xsl:for-each>                           
+                        </xsl:when>-->
                         <xsl:otherwise/>
                         <!-- Other elements are skipped -->
                     </xsl:choose>
@@ -145,27 +144,26 @@
     </xsl:template>
 
     <xsl:template match="li | dd | dt">
-        
         <xsl:choose>
             <xsl:when test="child::node()/name()=$headerNames/*">
                 <xsl:apply-templates select="."/>
             </xsl:when>
             <xsl:when test="child::node()/name()=('p','poem','blockquote')">
                 <item>
+                	<xsl:apply-templates select="child::node()"/>
+                </item>
+            </xsl:when>
+            <xsl:when test="../name()=('small')">
+            	<xsl:apply-templates select="child::node()"/>
+            </xsl:when>
+            <xsl:when test="../../child::node()/name()=('ul','ol','dl')">
+           		<item>
                     <xsl:for-each select="child::node()">
-                        <xsl:apply-templates select="child::node()"/>
-                    </xsl:for-each>
-                </item>
-            </xsl:when>
-            <xsl:when test="../../child::node()/name()=('ul','ol','dl')">                                
-                <item>
-                    <xsl:for-each select="child::node()">                                                
                         <xsl:apply-templates select="."/>
-                        
                     </xsl:for-each>
                 </item>
             </xsl:when>
-            <xsl:when test="../../child::node()/name()=('dd','dt')">                
+            <xsl:when test="../../child::node()/name()=('dd','dt')">    
                 <xsl:for-each select="child::node()">
                     <xsl:apply-templates select="."/>
                 </xsl:for-each>
@@ -174,9 +172,6 @@
             <xsl:otherwise/>
             <!-- Incorrect placements of the element are skipped. -->
         </xsl:choose>
-
-
-
     </xsl:template>
 
     <xsl:template match="div">

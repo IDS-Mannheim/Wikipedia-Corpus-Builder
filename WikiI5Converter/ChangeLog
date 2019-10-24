@@ -8,6 +8,9 @@ v1.0.5
 - Removed default attributes and handled those added from DTD.
 2019-10-18
 - Fixed duration calculation.
+2019-10-24
+- Fixed templates for lists and items.
+
 
 v1.0.4
 
