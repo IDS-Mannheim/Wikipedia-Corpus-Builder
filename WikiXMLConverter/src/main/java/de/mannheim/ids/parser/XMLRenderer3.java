@@ -22,6 +22,7 @@ import org.sweble.wikitext.parser.nodes.WtDefinitionListTerm;
 import org.sweble.wikitext.parser.nodes.WtImageLink;
 import org.sweble.wikitext.parser.nodes.WtInternalLink;
 import org.sweble.wikitext.parser.nodes.WtItalics;
+import org.sweble.wikitext.parser.nodes.WtLctVarConv;
 import org.sweble.wikitext.parser.nodes.WtListItem;
 import org.sweble.wikitext.parser.nodes.WtName;
 import org.sweble.wikitext.parser.nodes.WtNode;
@@ -43,6 +44,7 @@ import org.sweble.wikitext.parser.nodes.WtTemplateArgument;
 import org.sweble.wikitext.parser.nodes.WtTemplateArguments;
 import org.sweble.wikitext.parser.nodes.WtText;
 import org.sweble.wikitext.parser.nodes.WtUnorderedList;
+import org.sweble.wikitext.parser.nodes.WtValue;
 import org.sweble.wikitext.parser.nodes.WtXmlAttribute;
 import org.sweble.wikitext.parser.nodes.WtXmlCharRef;
 import org.sweble.wikitext.parser.nodes.WtXmlElement;
@@ -272,6 +274,10 @@ public class XMLRenderer3 extends HtmlRenderer {
 		p.decIndent();
 		p.print("</li>");
 	}
+	
+	public void visit(WtLctVarConv n) {
+		printAsWikitext(n);
+	}
 
 	@Override
 	public void visit(WtOrderedList n) {
@@ -426,8 +432,8 @@ public class XMLRenderer3 extends HtmlRenderer {
 			WtName wtName = n.getName();
 			if (wtName != null && !wtName.isEmpty()) {
 
-				String name = wtName.getAsString().toLowerCase();
-				if (smileys.contains(name)) {
+				String name = wtName.getAsString();
+				if (smileys.contains(name.toLowerCase())) {
 					p.print("<figure type=\"emoji\" creation=\"template\">");
 					p.print("<desc type=\"template\">[_EMOJI:");
 					printAsWikitext(n);
@@ -435,7 +441,13 @@ public class XMLRenderer3 extends HtmlRenderer {
 					p.print("</figure>");
 				}
 				else {
-					p.print("<span class=\"template\"/>");
+//					p.print("<span class=\"template\"/>");
+//					 using span with class and title
+					p.print("<span title=\"");
+					p.print(esc(name));
+					p.print("\" class=\"template\">");
+					printAsWikitext(n.getArgs());
+					p.print("</span>");
 				}
 			}
 		}
@@ -447,13 +459,17 @@ public class XMLRenderer3 extends HtmlRenderer {
 	@Override
 	public void visit(WtTemplateArgument n) {
 		try {
-			Object obj = n.getValue().get(0);
-			if (obj instanceof WtText) {
-				// System.out.print(" "+((WtText) obj).getContent());
-				p.print(" " + ((WtText) obj).getContent());
+			WtValue val = n.getValue();
+			if (val.size()>0){
+				Object obj = val.get(0);
+				if (obj instanceof WtText) {
+					 System.out.print(" "+((WtText) obj).getContent());
+					p.print(" " + ((WtText) obj).getContent());
+				}
 			}
 		}
 		catch (Exception e) {
+			System.out.println(n);
 			e.printStackTrace();
 		}
 	}

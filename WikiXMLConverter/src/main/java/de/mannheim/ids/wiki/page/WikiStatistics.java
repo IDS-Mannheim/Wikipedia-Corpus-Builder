@@ -10,7 +10,7 @@ package de.mannheim.ids.wiki.page;
 public class WikiStatistics {
 
 	private int swebleErrors;
-	private int domErrors;
+	private int xmlWellnessErrors;
 	private int pageStructureErrors;
 	private int unknownErrors;
 	private int rendererErrors;
@@ -29,7 +29,7 @@ public class WikiStatistics {
 
 	public WikiStatistics() {
 		swebleErrors = 0;
-		domErrors = 0;
+		xmlWellnessErrors = 0;
 		pageStructureErrors = 0;
 		emptyPages = 0;
 		emptyParsedPages = 0;
@@ -59,7 +59,7 @@ public class WikiStatistics {
 
 		System.out.println("Total Sweble exceptions " + getSwebleErrors());
 		System.out.println("Total Renderer exceptions " + getRendererErrors());
-		System.out.println("Total DOM exceptions " + getDomErrors());
+		System.out.println("Total XML Wellness exceptions " + getXMLWellnessErrors());
 		System.out.println("Total XML Page structure exceptions "
 				+ getPageStructureErrors());
 		System.out.println("Total thread deaths: " + getNumOfThreadDeaths());
@@ -76,12 +76,12 @@ public class WikiStatistics {
 		swebleErrors++;
 	}
 
-	public int getDomErrors() {
-		return domErrors;
+	public int getXMLWellnessErrors() {
+		return xmlWellnessErrors;
 	}
 
-	public synchronized void addDomErrors() {
-		domErrors++;
+	public synchronized void addXMLWellnessErrors() {
+		xmlWellnessErrors++;
 	}
 
 	public int getPageStructureErrors() {

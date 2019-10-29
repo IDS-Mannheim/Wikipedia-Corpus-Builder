@@ -9,6 +9,8 @@ v1.0.5
 - Handled non-posting text (e.g. templates) at the start of Wikitext.
 2019-10-17
 - Fixed writeWikitext.
+2019-10-24
+- Updated XML wellness validation and Wikitext templates rendering.
 
 v1.0.4
 

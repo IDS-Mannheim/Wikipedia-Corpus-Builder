@@ -22,6 +22,7 @@ import de.mannheim.ids.wiki.Utilities;
 import de.mannheim.ids.wiki.WikiXMLProcessor;
 import de.mannheim.ids.writer.WikiErrorWriter;
 import nu.xom.Builder;
+import nu.xom.Document;
 import nu.xom.ParsingException;
 
 /**
@@ -123,7 +124,7 @@ public abstract class WikiPageHandler implements Runnable {
 		wikitext = cleanPattern(wikitext);
 		if (DEBUG)
 			log.debug("cleaned wikitext: " + wikitext);
-
+		
 		// italic and bold are not repaired because they are written in
 		// wiki-mark-ups
 		try {
@@ -191,7 +192,7 @@ public abstract class WikiPageHandler implements Runnable {
 				
 		// space for non-tag
 		matcher = nonTagPattern.matcher(wikitext);
-		wikitext = matcher.replaceAll("&lt; $1");
+		wikitext = matcher.replaceFirst("&lt; $1");
 		matcher.reset();
 		// < without >
 		matcher = nonTagPattern2.matcher(wikitext);
@@ -199,11 +200,11 @@ public abstract class WikiPageHandler implements Runnable {
 			if (matcher.group(1).contains("<")
 					// hack for page id #7420769
 					|| matcher.group(1).contains("In:")) {
-				wikitext = matcher.replaceAll("&lt;$1");
+				wikitext = matcher.replaceFirst("&lt;$1");
 			}
 		}
 		matcher.reset();
-
+		
 		// escape for style containing tag
 		matcher = stylePattern.matcher(wikitext);
 		StringBuffer sb = new StringBuffer();
@@ -228,18 +229,30 @@ public abstract class WikiPageHandler implements Runnable {
 	protected void writeWikiXML() throws IOException {
 		String wikiXML = wikiPage.getWikiXML();
 		try {
-			if (isEmpty(wikiXML) || isEmpty(builder.build("<text>"
-					+ wikiXML + "</text>", null).getValue().trim())) {
+			if (isEmpty(wikiXML)) {
 				wikiStatistics.addEmptyParsedPages();
 				return;
 			}
+			
+			Document doc = builder.build("<text>"+ wikiXML + "</text>", null);
+			if (isEmpty(doc.getValue().trim())){
+				wikiStatistics.addEmptyParsedPages();
+			}
+			else if (validatePageStructure()){
+				writeWikiXML(wikiXML, config.getOutputFolder());
+				wikiStatistics.addTotalNonEmptyPages();
+			}
 		}
-		catch (ParsingException e) {}
+		catch (ParsingException e) {
+			wikiStatistics.addXMLWellnessErrors();
+			errorWriter.logErrorPage("SAX", wikiPage.getPageTitle(),
+					wikiPage.getPageId(), e.getCause(), "");
+		}
 
-		if (validateDOM() && validatePageStructure()) {
-			writeWikiXML(wikiXML, config.getOutputFolder());
-			wikiStatistics.addTotalNonEmptyPages();
-		}
+//		if (validateDOM() && validatePageStructure()) {
+//			writeWikiXML(wikiXML, config.getOutputFolder());
+//			wikiStatistics.addTotalNonEmptyPages();
+//		}
 	}
 	
 	private boolean isEmpty(String text) {
@@ -277,7 +290,7 @@ public abstract class WikiPageHandler implements Runnable {
 			dBuilder.parse(new ByteArrayInputStream(wikiXML.getBytes("utf-8")));
 		}
 		catch (Exception e) {
-			wikiStatistics.addDomErrors();
+			wikiStatistics.addXMLWellnessErrors();
 			errorWriter.logErrorPage("DOM", wikiPage.getPageTitle(),
 					wikiPage.getPageId(), e.getCause(), "");
 			return false;
