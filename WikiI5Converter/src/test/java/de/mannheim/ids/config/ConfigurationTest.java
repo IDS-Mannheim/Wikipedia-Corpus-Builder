@@ -42,6 +42,8 @@ public class ConfigurationTest {
 	private String url = "jdbc:mysql://localhost:3306/wikipedia";
 	private String username = "wikiuser";
 	private String password = "wikipass";
+	private String disableDTDValidation = "false";
+	
 
 	private WikiI5Converter converter = new WikiI5Converter();
 
@@ -50,7 +52,7 @@ public class ConfigurationTest {
 		Configuration config = new Configuration(xmlFolder, namespacekey,
 				pageType, dumpFilename, language, korpusSigle, inflectives,
 				encoding, outputFile, index, url, username, password,
-				maxThreads, creator, category, categoryScheme);
+				maxThreads, creator, category, categoryScheme,disableDTDValidation);
 
 		assertEquals(dumpFilename, config.getDumpFilename());
 		assertEquals(outputFile, config.getOutputFile());

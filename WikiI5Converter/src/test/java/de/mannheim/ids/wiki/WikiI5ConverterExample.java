@@ -50,11 +50,12 @@ public class WikiI5ConverterExample {
 		String url = "jdbc:mysql://localhost:3306/wikipedia";
 		String username = "wikiuser";
 		String password = "wikipass";
+		String disableDTDValidation = "false";
 
 		Configuration config = new Configuration(xmlFolder, namespacekey,
 				pageType, dumpFilename, language, korpusSigle, inflectives,
 				encoding, outputFile, index, url, username, password,
-				maxThreads, creator, category, categoryScheme);
+				maxThreads, creator, category, categoryScheme,disableDTDValidation);
 
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();

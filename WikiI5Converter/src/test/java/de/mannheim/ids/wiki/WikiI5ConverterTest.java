@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
  * @author margaretha
  */
 public class WikiI5ConverterTest {
-
+	
 	private void testIndexingWikiXML(String type)
 			throws IOException, InterruptedException,
 			ParserConfigurationException, SAXException, I5Exception {
@@ -72,7 +72,7 @@ public class WikiI5ConverterTest {
 	public void testWikiI5ProcessorArticle() throws I5Exception, IOException,
 			SAXException, ParserConfigurationException, ParseException,
 			InterruptedException, SQLException {
-		testIndexingWikiXML("article");
+//		testIndexingWikiXML("article");
 		WikiI5Converter converter = new WikiI5Converter();
 		Configuration config = converter.createConfig(
 				new String[]{"-prop", "dewiki-article.properties",
@@ -82,7 +82,8 @@ public class WikiI5ConverterTest {
 				config.getDatabaseUsername(), config.getDatabasePassword());
 		Statement s = conn.createStatement();
 		s.execute("drop table if exists de_category");
-
+		conn.close();
+		
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();
 

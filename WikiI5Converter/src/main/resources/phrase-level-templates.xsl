@@ -70,8 +70,8 @@
     </xsl:template> -->
 
     <xsl:template match="signed">
-    	<xsl:value-of select="." />
-        <!-- <xsl:copy-of select="."/> -->
+    	<!-- <xsl:value-of select="." /> -->
+        <xsl:copy-of select="."/>
     </xsl:template>
     
     <xsl:template match="figure">

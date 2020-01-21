@@ -193,7 +193,10 @@ public class I5Writer {
 		}
 
 		reader = createXMLReader(saxfactory);
-		saxfactory.setValidating(true);
+		
+		if (!config.disableDTDValidation()){
+			saxfactory.setValidating(true);
+		}
 		validatingReader = createXMLReader(saxfactory);
 	}
 

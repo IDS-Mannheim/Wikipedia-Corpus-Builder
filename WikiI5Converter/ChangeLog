@@ -10,6 +10,8 @@ v1.0.5
 - Fixed duration calculation.
 2019-10-24
 - Fixed templates for lists and items.
+2020-01-21
+- Update <signed> transformation & added config to disable DTD validation.
 
 
 v1.0.4

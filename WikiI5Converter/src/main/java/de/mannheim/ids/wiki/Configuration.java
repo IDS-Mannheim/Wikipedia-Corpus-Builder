@@ -36,6 +36,7 @@ public class Configuration {
 
 	private boolean isDiscussion;
 	private boolean storeCategories;
+	private boolean disableDTDValidation;
 
 	public static final String[] indexes = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -47,12 +48,12 @@ public class Configuration {
 			String inflectives, String encoding, String outputFile,
 			String index, String url, String username, String password,
 			int maxThreads, String creator, String category,
-			String categoryScheme) {
+			String categoryScheme,String disableDTDValidation) {
 		setDiscussion(namespaceKey);
 		init(namespaceKey, xmlFolder, pageType, dumpFilename, language,
 				korpusSigle, outputFile, index, creator, url, username,
 				password, encoding, inflectives, maxThreads, category,
-				categoryScheme);
+				categoryScheme,disableDTDValidation);
 	}
 
 	public Configuration(Properties properties) {
@@ -80,7 +81,8 @@ public class Configuration {
 				properties.getProperty("inflective_file"),
 				Integer.parseInt(properties.getProperty("max_threads", "1")),
 				category,
-				categoryScheme);
+				categoryScheme,
+				properties.getProperty("disableDTDValidation","false"));
 	}
 
 	private void init(int namespaceKey, String xmlFolder, String pageType,
@@ -88,7 +90,7 @@ public class Configuration {
 			String outputFile, String index, String creator, String url,
 			String username, String password, String encoding,
 			String inflectives, int maxThreads, String category,
-			String categoryScheme) {
+			String categoryScheme, String disableDTDValidation) {
 
 		System.setProperty("entityExpansionLimit", "0");
 		System.setProperty("totalEntitySizeLimit", "0");
@@ -116,6 +118,7 @@ public class Configuration {
 		setMaxThreads(maxThreads);
 		setCategory(category);
 		setCategoryScheme(categoryScheme);
+		setDisableDTDValidation(Boolean.parseBoolean(disableDTDValidation));
 	}
 
 	public String loadRequiredParameter(Properties config, String param) {
@@ -326,5 +329,13 @@ public class Configuration {
 
 	public void setStoreCategories(boolean storeCategories) {
 		this.storeCategories = storeCategories;
+	}
+
+	public boolean disableDTDValidation() {
+		return disableDTDValidation;
+	}
+	
+	public void setDisableDTDValidation(boolean disableDTDValidation) {
+		this.disableDTDValidation = disableDTDValidation;
 	}
 }
