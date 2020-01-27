@@ -16,9 +16,13 @@ Command example:
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
 
-Category links are included as metadata in I5 corpora. Talk pages in talk corpora include category links of their associated articles. The category links must to be stored in the database once. To store them, WikiI5Converter must be run with -storeCategories option.
+Category links are included as metadata in I5 corpora. Talk pages in talk corpora include category links of their associated articles. Besides, English category links are also included in the article and talk corpora of Wikipedias other languages than English. 
 
-```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties -storeCategories > logs/wikiI5-dewiki-20150808-article.log 2>&1```
+The category links must to be stored in the database once. To store them, WikiI5Converter must be run with **-storeCategories** option.
+
+```java -Xmx4g -cp "code/WikiI5Converter-1.0.5.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-enwiki-article.properties -storeCategories > logs/wikiI5-enwiki-20190801-article.log 2>&1```
+
+If category links have not been stored yet, the order of generating the I5 corpora is important! First of all, English article corpora with -storeCategories have to be generated. Then, the article corpora of Wikipedias of other languages with -storeCategories can be generated. Finally, the talk corpora can be generated. Article and talk corpora **must not** be generated in parallel.
 
 
 ## Properties
@@ -96,6 +100,9 @@ WikiI5Converter requires the following properties in a properties file:
 
     The location of the inflectives file. See [Inflectives](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#inflectives).
  
+ * ```disableDTDValidation=true```
+ 
+    To disable DTD validation, set to true. Default false.
 
 ## WikiXML index
 
@@ -355,15 +362,23 @@ Wikipedia articles often contain category links at the end of their pages. In I5
     &lt;idsHeader type="text" pattern="text" status="new" version="1.0" TEIform="teiHeader"&gt;
         &lt;profileDesc&gt;
             &lt;textClass Default="n"&gt;
-                &lt;classCode scheme="https://en.wikipedia.org/wiki/Portal:Contents/Categories"&gt;
-                    &lt;ref target="https://de.wikipedia.org/wiki/Kategorie%3AFiktive_Person"
-                        targOrder="u"&gt;Smithee, Alan&lt;/ref&gt;
-                    &lt;ref target="https://de.wikipedia.org/wiki/Kategorie%3APseudonym" targOrder="u"
+                &lt;classCode scheme="https://de.wikipedia.org/wiki/Kategorie:!Hauptkategorie"&gt;
+                    &lt;ref target="https://de.wikipedia.org?title=Kategorie:Fiktive_Person"
+                        &gt;Smithee, Alan&lt;/ref&gt;
+                    &lt;ref target="https://de.wikipedia.org?title=Kategorie:Pseudonym"
                         &gt;Kategorie:Pseudonym&lt;/ref&gt;
-                    &lt;ref target="https://de.wikipedia.org/wiki/Kategorie%3ASammelpseudonym"
-                        targOrder="u"&gt;Smithee, Alan&lt;/ref&gt;
-                    &lt;ref target="https://de.wikipedia.org/wiki/Kategorie%3AWerk_von_Alan_Smithee"
-                        targOrder="u"&gt;Kategorie:Werk von Alan Smithee&lt;/ref&gt;
+                    &lt;ref target="https://de.wikipedia.org?title=Kategorie:Sammelpseudonym"
+                        &gt;Smithee, Alan&lt;/ref&gt;
+                    &lt;ref target="https://de.wikipedia.org?title=Kategorie:Werk_von_Alan_Smithee"
+                        &gt;Kategorie:Werk von Alan Smithee&lt;/ref&gt;
+                &lt;/classCode&gt;
+                &lt;classCode scheme="https://en.wikipedia.org/wiki/Category:Contents"&gt;
+                    &lt;ref target="https://en.wikipedia.org?title=Category%3AFictional_characters"
+                        &gt;Category:Fictional characters&lt;/ref&gt;
+                    &lt;ref target="https://en.wikipedia.org?title=Category%3APseudonyms"
+                        &gt;Category:Pseudonyms&lt;/ref&gt;
+                    &lt;ref target="https://en.wikipedia.org?title=Category%3ACollective_pseudonyms"
+                        &gt;Category:Collective pseudonyms&lt;/ref&gt;                    
                 &lt;/classCode&gt;
             &lt;/textClass&gt;
         &lt;/profileDesc&gt;
