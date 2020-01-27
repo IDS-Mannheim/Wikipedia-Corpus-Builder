@@ -16,6 +16,10 @@ Command example:
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
 
+Category links are included as metadata in I5 corpora. Talk pages in talk corpora include category links of their associated articles. The category links must to be stored in the database once. To store them, WikiI5Converter must be run with -storeCategories option.
+
+```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties -storeCategories > logs/wikiI5-dewiki-20150808-article.log 2>&1```
+
 
 ## Properties
 
