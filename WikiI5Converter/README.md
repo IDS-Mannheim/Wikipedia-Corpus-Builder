@@ -22,7 +22,7 @@ The category links must to be stored in the database once. To store them, WikiI5
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.5.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-enwiki-article.properties -storeCategories > logs/wikiI5-enwiki-20190801-article.log 2>&1```
 
-If category links have not been stored yet, the order of generating the I5 corpora is important! First of all, English article corpora with -storeCategories have to be generated. Then, the article corpora of Wikipedias of other languages with -storeCategories can be generated. Finally, the talk corpora can be generated. Article and talk corpora **must not** be generated in parallel.
+If category links have not been stored yet, the order of generating the I5 corpora is important! Article corpora must be generated first with -storeCategories. Afterwards, talk corpora can be generated. Article and talk corpora **must not** be generated in parallel.
 
 
 ## Properties
