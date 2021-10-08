@@ -6,4 +6,10 @@ The corpus builder works in two stages of conversion (Margaretha and Lüngen, 20
 
 The corpus builder is also designed for building Computer Mediated Communication (CMC) corpora from Wikipedia talk or discussion pages, such as in the Talk and User talk [namespaces](https://en.wikipedia.org/wiki/Wikipedia:Namespace). A talk corpus is structured by postings and threads following the TEI scheme for CMC corpus (Beißwenger, et al., 2012). Our posting segmentation is done heuristically in WikiXMLConverter.
 
-The corpus builder supports parsing Wikipedia of multiple languages. It has been tested for the following languages: english, french, hungarian, norwegian, spanish, croatian, italian, polish and rumanian. We also provide Wikipedia corpora of these languages in WikiXML and I5 formats for [download](http://www1.ids-mannheim.de/direktion/kl/projekte/korpora/verfuegbarkeit.html).
+The corpus builder supports parsing Wikipedia of multiple languages. It has been tested for the following languages: english, french, hungarian, norwegian, spanish, croatian, italian, polish and rumanian. We also provide Wikipedia corpora of these languages in WikiXML and I5 formats for [download](https://www.ids-mannheim.de/digspra/kl/projekte/korpora/verfuegbarkeit-1/).
+
+## References:
+
+Eliza Margaretha, Harald Lüngen (2014): [Building linguistic corpora from Wikipedia articles and discussions.](http://www.jlcl.org/2014_Heft2/3MargarethaLuengen.pdf) In: Journal for Language Technologie and Computational Linguistics (JLCL) 2/2014
+
+Michael Beißwenger, Maria Ermakova, Alexander Geyken, Lothar Lemnitzer, Angelika Storrer (2012): [A TEI Schema for the Representation of Computer-mediated Communication.](https://doi.org/10.4000/jtei.476) In: Journal of the Text Encoding Initiative (jTEI) 3/2012
