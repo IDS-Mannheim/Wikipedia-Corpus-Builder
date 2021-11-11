@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.cocoon.xml.sax.SAXBuffer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -38,7 +39,7 @@ public class IdsTextBuffer extends SAXBuffer {
 	
 	public static String englishUri = "https://en.wikipedia.org?title=";
 
-	private Logger log = Logger.getLogger(IdsTextBuffer.class);
+	private Logger log = LogManager.getLogger(IdsTextBuffer.class);
 
 	private SAXBuffer currentNoteRecorder;
 	private LinkedHashMap<String, SAXBuffer> noteEvents;

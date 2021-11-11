@@ -23,7 +23,8 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.cocoon.xml.sax.SAXBuffer;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
@@ -37,7 +38,7 @@ import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.builder.IdsTextHandler;
 import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.transform.WikiI5Part;
-import javanet.staxutils.IndentingXMLStreamWriter;
+//import javanet.staxutils.IndentingXMLStreamWriter;
 
 /**
  * Writes WikiI5Corpus output and validates its content against IDS I5 DTD.
@@ -47,7 +48,7 @@ import javanet.staxutils.IndentingXMLStreamWriter;
  */
 public class I5Writer {
 
-	public static Logger logger = Logger.getLogger(I5Writer.class);
+	public static Logger logger = LogManager.getLogger(I5Writer.class);
 	
 	public static String DOCTYPE = "<!DOCTYPE idsText PUBLIC \"-//IDS//DTD IDS-I5 "
 			+ "1.0//EN\" \"dtd/i5.dtd\">";
@@ -166,9 +167,10 @@ public class I5Writer {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
 		}
 		
-		IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(w);
-		writer.setIndent(" ");
-		return writer;
+//		IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(w);
+//		writer.setIndent(" ");
+//		return writer;
+		return w;
 	}
 
 	/**

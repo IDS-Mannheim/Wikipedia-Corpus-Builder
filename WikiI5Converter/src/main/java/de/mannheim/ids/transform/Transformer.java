@@ -11,8 +11,13 @@ import java.util.concurrent.Callable;
 
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import de.mannheim.ids.wiki.Configuration;
+import de.mannheim.ids.wiki.I5ErrorHandler;
+import de.mannheim.ids.wiki.I5Exception;
+import de.mannheim.ids.wiki.Statistics;
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
@@ -23,10 +28,6 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
-import de.mannheim.ids.wiki.Configuration;
-import de.mannheim.ids.wiki.I5ErrorHandler;
-import de.mannheim.ids.wiki.I5Exception;
-import de.mannheim.ids.wiki.Statistics;
 
 /**
  * Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5
@@ -102,7 +103,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	private static I5ErrorHandler errorHandler;
 	private Statistics statistics;
 
-	private Logger logger = Logger.getLogger(Transformer.class);
+	private Logger logger = LogManager.getLogger(Transformer.class);
 
 	/**
 	 * Constructs a Transformer from the given variables.

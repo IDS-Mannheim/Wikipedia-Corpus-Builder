@@ -6,7 +6,8 @@
 	<version>1.0.5</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.java>1.8</version.java>
+		<java.version>1.8</java.version>
+		<log4j.version>2.14.1</log4j.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -40,11 +41,15 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<version>2.1</version>
 		</dependency>
-		<dependency>
+		
+<!-- 		<dependency>
+		
+			The required com.bea.xml:jsr173-ri:jar:1.0 is not available anymore.
+		
 			<groupId>net.java.dev.stax-utils</groupId>
 			<artifactId>stax-utils</artifactId>
 			<version>20070216</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
@@ -56,6 +61,7 @@
 			<version>3.0.0-alpha-3</version>
 		</dependency>
 		<dependency>
+			<!--EM: maybe can be removed  -->
 			<groupId>excalibur-pool</groupId>
 			<artifactId>excalibur-pool-api</artifactId>
 			<version>2.1</version>
@@ -71,9 +77,20 @@
 			<version>4.13.1</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -85,8 +102,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source>${version.java}</source>
-					<target>${version.java}</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 				</configuration>
 			</plugin>
 			<plugin>
