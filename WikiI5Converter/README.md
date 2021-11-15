@@ -28,14 +28,13 @@ Command example:
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
 
-The order of generating the I5 corpora is very important because category links have to be extracted from article corpora and be stored in the database (see [Categories](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#categories)). The generation of talk corpora relies on them because talk pages include category links of their associated articles. Thus, article corpora have to be generated first before talk corpora. Article and talk corpora **cannot** be generated in parallel. 
+The order of generating the I5 corpora is very important because category links have to be extracted from article corpora and be stored in the database (see [Categories](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#categories)). The generation of talk corpora relies on them, because the generated talk pages should include category links of their associated articles. Thus, article and talk corpora **cannot** be generated in parallel. _Article corpora have to be generated first before talk corpora._
 
-Besides, English category links are included in the article and talk corpora of Wikipedias other languages than English. Thus, the English Wikipedia article corpus has to be generated first of all, before generating other corpora.  
+Besides, English category links should be included in the article and talk corpora of Wikipedias other languages than English. Thus, _the English Wikipedia article corpus has to be generated first of all, before generating other corpora_.  
 
 The category links must to be stored in the database **once**. To store them, WikiI5Converter must be run with **-storeCategories** option.
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.5.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-enwiki-article.properties -storeCategories > logs/wikiI5-enwiki-20190801-article.log 2>&1```
-
 
 ## Properties
 
