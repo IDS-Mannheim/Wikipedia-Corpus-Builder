@@ -12,8 +12,8 @@ WikiI5Converter converts WikiXML pages, output from WikiXMLConverter, into a sin
 * A property file (see [Properties](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#properties) and [examples](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter/src/test/resources))
 * An list of inflectives (optional, see [Inflectives](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#inflectives)). 
     
-* Wikipedia dump of interlanguage link records (dewiki-20211001-langlinks.sql.gz)
-* Wikipedia dump of base per-page data (e.g. dewiki-20211001-page.sql.gz) 
+* Wikipedia dump of interlanguage link records (e.g. dewiki-20211001-langlinks.sql.gz, see [Language Links](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#language-links))
+* Wikipedia dump of base per-page data (e.g. dewiki-20211001-page.sql.gz, see [Page Info](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#wiki-page-info)) 
  
 
 ## Instructions
@@ -28,13 +28,13 @@ Command example:
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.1.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-dewiki-article.properties > logs/wikiI5-dewiki-20150808-article.log 2>&1```
 
-Category links are included as metadata in I5 corpora. Talk pages in talk corpora include category links of their associated articles. Besides, English category links are also included in the article and talk corpora of Wikipedias other languages than English. 
+The order of generating the I5 corpora is very important because category links have to be extracted from article corpora and be stored in the database (see [Categories](https://github.com/IDS-Mannheim/Wikipedia-Corpus-Builder/tree/master/WikiI5Converter#categories)). The generation of talk corpora relies on them because talk pages include category links of their associated articles. Thus, article corpora have to be generated first before talk corpora. Article and talk corpora **cannot** be generated in parallel. 
 
-The category links must to be stored in the database once. To store them, WikiI5Converter must be run with **-storeCategories** option.
+Besides, English category links are included in the article and talk corpora of Wikipedias other languages than English. Thus, the English Wikipedia article corpus has to be generated first of all, before generating other corpora.  
+
+The category links must to be stored in the database **once**. To store them, WikiI5Converter must be run with **-storeCategories** option.
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.5.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-enwiki-article.properties -storeCategories > logs/wikiI5-enwiki-20190801-article.log 2>&1```
-
-If category links have not been stored yet, the order of generating the I5 corpora is important! Article corpora must be generated first with -storeCategories. Afterwards, talk corpora can be generated. Article and talk corpora **must not** be generated in parallel.
 
 
 ## Properties
