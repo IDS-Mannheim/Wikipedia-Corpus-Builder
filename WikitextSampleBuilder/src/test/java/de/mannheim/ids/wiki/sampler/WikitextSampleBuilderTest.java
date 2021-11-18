@@ -1,4 +1,4 @@
-package de.ids_mannheim.korap.sampler;
+package de.mannheim.ids.wiki.sampler;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,9 +7,6 @@ import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
 import org.junit.Test;
-
-import de.mannheim.ids.wiki.sampler.WikitextSampler;
-import junit.framework.TestCase;
 
 public class WikitextSampleBuilderTest {
 
