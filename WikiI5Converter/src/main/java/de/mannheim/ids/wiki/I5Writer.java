@@ -7,8 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -16,7 +14,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -38,7 +35,10 @@ import de.mannheim.ids.builder.IdsTextBuilder;
 import de.mannheim.ids.builder.IdsTextHandler;
 import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.transform.WikiI5Part;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.SaxonApiException;
 //import javanet.staxutils.IndentingXMLStreamWriter;
+import net.sf.saxon.s9api.Serializer;
 
 /**
  * Writes WikiI5Corpus output and validates its content against IDS I5 DTD.
@@ -50,7 +50,7 @@ public class I5Writer {
 
 	public static Logger logger = LogManager.getLogger(I5Writer.class);
 	
-	public static String DOCTYPE = "<!DOCTYPE idsText PUBLIC \"-//IDS//DTD IDS-I5 "
+	public static String LOCAL_DOCTYPE = "<!DOCTYPE idsText PUBLIC \"-//IDS//DTD IDS-I5 "
 			+ "1.0//EN\" \"dtd/i5.dtd\">";
 
 	public static final Pattern invalidNativeCharPattern = Pattern
@@ -90,7 +90,7 @@ public class I5Writer {
 		this.config = config;
 
 		configureSAXParser();
-		writer = createWriter(config);
+		writer = createXMLWriter(config);
 
 		idsDocBuilder = new IdsDocBuilder(writer);
 		idsTextBuffer = new IdsTextBuffer(config);
@@ -116,20 +116,13 @@ public class I5Writer {
 			}
 		}
 	}
-
-	/**
-	 * Creates the output file and an XMLStreamWriter for writing
-	 * (XML-based) I5 into the output file.
+	
+	/** Creates the output file
 	 * 
-	 * @param config
-	 *            the conversion configuration
-	 * @return 
+	 * @return FileOutputStream
 	 * @throws I5Exception
-	 *             an I5Exception
 	 */
-	private XMLStreamWriter createWriter(Configuration config)
-			throws I5Exception {
-		
+	private FileOutputStream createFileOutputStream() throws I5Exception {
 		File i5 = new File("i5");
 		if (!i5.exists()) {
 			i5.mkdirs();
@@ -144,34 +137,44 @@ public class I5Writer {
 			throw new I5Exception(
 					"Failed creating FileOutputStream. File is not found.", e);
 		}
+		return fos;
+	}
 
-		XMLOutputFactory f = XMLOutputFactory.newInstance();
+	/**
+	 * Creates XMLStreamWriter using Saxon for writing (XML-based) I5 into the
+	 * output file.
+	 * 
+	 * @param config the conversion configuration
+	 * @return XMLStreamWriter
+	 * @throws I5Exception an I5Exception
+	 */
+	private XMLStreamWriter createXMLWriter(Configuration config)
+			throws I5Exception {
+		
+		FileOutputStream fos = createFileOutputStream();
+		
+		Processor p = new Processor(true);
+		Serializer s = p.newSerializer(fos);
+		s.setOutputProperty(Serializer.Property.METHOD, "xml");
+		s.setOutputProperty(Serializer.Property.INDENT, "yes");
+		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+		s.setOutputProperty(Serializer.Property.ENCODING,
+				config.getOutputEncoding());
+		s.setOutputProperty(Serializer.Property.DOCTYPE_PUBLIC, 
+				"-//IDS//DTD IDS-I5 1.0//EN");
+		s.setOutputProperty(Serializer.Property.DOCTYPE_SYSTEM, 
+				"http://corpora.ids-mannheim.de/I5/DTD/i5.dtd");
+		
 		XMLStreamWriter w = null;
 		try {
-			w = f.createXMLStreamWriter(
-					new OutputStreamWriter(fos, config.getOutputEncoding()));
+			w = s.getXMLStreamWriter();
 		}
-		catch (UnsupportedEncodingException e) {
-			try {
-				fos.close();
-			}
-			catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			throw new I5Exception(
-					"Failed creating an OutputStreamWriter. Encoding"
-							+ config.getOutputEncoding() + " is not supported.",
-					e);
-		}
-		catch (XMLStreamException e) {
+		catch (SaxonApiException e) {
 			throw new I5Exception("Failed creating an XMLStreamWriter", e);
 		}
-		
-//		IndentingXMLStreamWriter writer = new IndentingXMLStreamWriter(w);
-//		writer.setIndent(" ");
-//		return writer;
 		return w;
 	}
+	
 
 	/**
 	 * Creates a SAX parser and returns the XML reader inside the SAX parser.
@@ -316,9 +319,9 @@ public class I5Writer {
 			synchronized (writer) {
 				writer.writeStartDocument(config.getOutputEncoding(), "1.0");
 
-				writer.writeDTD(
-						"<!DOCTYPE idsCorpus PUBLIC \"-//IDS//DTD IDS-I5 1.0//EN\" "
-								+ "\"http://corpora.ids-mannheim.de/I5/DTD/i5.dtd\">");
+//				writer.writeDTD(
+//						"<!DOCTYPE idsCorpus PUBLIC \"-//IDS//DTD IDS-I5 1.0//EN\" "
+//								+ "\"http://corpora.ids-mannheim.de/I5/DTD/i5.dtd\">");
 
 				IdsCorpusBuilder cb = new IdsCorpusBuilder(writer, config);
 				cb.createIdsCorpusStartElement();
@@ -425,7 +428,7 @@ public class I5Writer {
 			errorHandler.write(w.getWikiPath(), "Failed adding events.", e);
 		}
 		
-		byte[] idsTextBytes = ArrayUtils.addAll(DOCTYPE.getBytes(),
+		byte[] idsTextBytes = ArrayUtils.addAll(LOCAL_DOCTYPE.getBytes(),
 				idsTextOutputStream.toByteArray());
 		try {
 			idsTextOutputStream.close();
