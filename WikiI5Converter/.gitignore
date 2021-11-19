@@ -13,3 +13,6 @@
 /saxon-validation.sh
 /local-properties/
 /dependency-reduced-pom.xml
+/data
+.swp
+.factorypath

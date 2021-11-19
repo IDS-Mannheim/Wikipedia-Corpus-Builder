@@ -1,6 +1,5 @@
 package de.mannheim.ids.transform;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,10 +36,10 @@ public class WikiI5Part {
 	 *            wikitext/IdsText InputStream (which was the output of XSLT
 	 *            transformation).
 	 */
-	public WikiI5Part(InputStream is, File wikiXML,
+	public WikiI5Part(InputStream is, String wikiXMLPath,
 			String pageId) {
 		setInputStream(is);
-		setWikiPath(wikiXML.getPath());
+		setWikiPath(wikiXMLPath);
 		setIDSText(true);
 		setPageId(pageId);
 	}

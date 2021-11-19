@@ -2,8 +2,10 @@ package de.mannheim.ids.wiki;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.junit.Test;
 
@@ -29,12 +31,22 @@ public class TransformerTest {
 		String xmlPath = idx + "/" + pageId + ".xml";
 
 		Transformer t = new Transformer(config, statistics, errorHandler,
-				new File(xmlPath), idx, pageId);
+				xmlPath, idx, pageId);
 
 		WikiI5Part wikipart = t.call();
 		assertEquals(true, wikipart.isIDSText());
 		InputStream is = wikipart.getInputStream();
 
+//		String line="";
+//		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is))) {	
+//			while ((line = bufferedReader.readLine()) != null) {
+//				System.out.println(line);
+//			}
+//		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
 		Document doc = builder.build(is);
 		Node idsText = doc.query("/idsText").get(0);
 		assertEquals("WDD17.B0085.68531",

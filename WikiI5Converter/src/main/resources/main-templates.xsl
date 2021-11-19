@@ -9,6 +9,10 @@
     <xd:doc scope="stylesheet">
         <xd:desc>
             <xd:p>Templates for processing Wikipedia pages and grouping</xd:p>
+            <xd:p>Version 5.0</xd:p>
+            <xd:p><xd:b>Revision:</xd:b> Nov 2021</xd:p>
+            <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
+            
             <xd:p>Version 4.1</xd:p>
             <xd:p><xd:b>Revision:</xd:b> Oct 2019</xd:p>
             <xd:p><xd:b>Editor:</xd:b> Eliza Margaretha</xd:p>
@@ -68,11 +72,7 @@
     </xsl:param>
 
     <xsl:template name="main">
-        <xsl:variable name="doc">
-            <xsl:copy-of saxon:read-once="yes" select="saxon:discard-document(.)"/>
-        </xsl:variable>
-        <xsl:apply-templates select="saxon:stream($doc/page)"/>
-
+ 		<xsl:apply-templates/>
     </xsl:template>
 
 
@@ -91,6 +91,10 @@
 
         <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
 
+		<xsl:variable name="normalizedTitle">
+			<xsl:value-of select="translate(title,' ','_')"/>
+		</xsl:variable>
+		
         <!--Current index-->
         <xsl:variable name="t.title">
             <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
@@ -99,21 +103,21 @@
             <xsl:sequence
                 select="concat(', In: Wikipedia - URL:http://', $lang ,'.wikipedia.org/wiki/')"/>
             <!-- Assume this construct may be used as a weblink, ensure working link. -->
-            <xsl:value-of select="translate(title,' ','_')"/>
+            <xsl:value-of select="$normalizedTitle"/>
             <xsl:sequence select="concat(': Wikipedia, ', $pubYear)"/>
         </xsl:variable>
         
         <xsl:variable name="pageURL">
         	<xsl:sequence select="concat('http://', $lang ,'.wikipedia.org/wiki/')"/>
-        	<xsl:value-of select="translate(title,' ','_')"/>
+        	<xsl:value-of select="$normalizedTitle"/>
         </xsl:variable>
-
+        
         <!-- * idsText * -->
         <idsText>
             <xsl:attribute name="id" select="translate($textSigle,'/','.')"/>
             <!-- Avoid spaces in attribute 'n'. Attribute 'n' carries the value of the interwiki link -->
             <xsl:attribute name="n"
-                select="concat(revision/text/@lang,concat('.',translate(title,' ','_')))"/>
+                select="concat(revision/text/@lang,concat('.',$normalizedTitle))"/>
             <xsl:attribute name="version" select="1.0"/>
 
             <!-- * idsHeader * -->

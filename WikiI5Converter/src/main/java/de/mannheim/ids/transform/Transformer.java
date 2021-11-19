@@ -18,6 +18,7 @@ import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5ErrorHandler;
 import de.mannheim.ids.wiki.I5Exception;
 import de.mannheim.ids.wiki.Statistics;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.QName;
@@ -43,7 +44,6 @@ public class Transformer implements Callable<WikiI5Part> {
 		protected XsltTransformer initialValue() {
 
 			XsltCompiler compiler = processor.newXsltCompiler();
-			compiler.setXsltLanguageVersion("3.0");
 			compiler.setURIResolver(new TemplateURIResolver());
 
 			XsltExecutable executable;
@@ -59,16 +59,8 @@ public class Transformer implements Callable<WikiI5Part> {
 			}
 
 			XsltTransformer transformer = executable.load();
-			try {
 				transformer.setInitialTemplate(new QName("main"));
-			}
-			catch (SaxonApiException e) {
-				throw new RuntimeException(
-						"Failed setting the initial template for "
-								+ "a transformer.",
-						e);
-			}
-
+				
 			transformer.setParameter(new QName("type"),
 					new XdmAtomicValue(config.getPageType()));
 			transformer.setParameter(new QName("origfilename"),
@@ -94,8 +86,11 @@ public class Transformer implements Callable<WikiI5Part> {
 	};
 
 	private static final Processor processor = new Processor(true);
+	static{
+		processor.setConfigurationProperty(Feature.ALLOW_MULTITHREADING, false);
+	}
 
-	private File wikiXML;
+	private String wikiXMLPath;
 	private String index;
 	private String pageId;
 
@@ -122,12 +117,12 @@ public class Transformer implements Callable<WikiI5Part> {
 	 *            the page id string
 	 */
 	public Transformer(Configuration config, Statistics statistics,
-			I5ErrorHandler errorHandler, File wikiXMLFile, String index,
+			I5ErrorHandler errorHandler, String wikiXMLFile, String index,
 			String pageId) {
 		Transformer.config = config;
 		Transformer.errorHandler = errorHandler;
 
-		this.wikiXML = wikiXMLFile;
+		this.wikiXMLPath = wikiXMLFile;
 		this.index = index;
 		this.pageId = pageId;
 		this.statistics = statistics;
@@ -148,7 +143,7 @@ public class Transformer implements Callable<WikiI5Part> {
 		doTransformation(bos);
 		logger.debug(bos);
 		InputStream is = new ByteArrayInputStream(bos.toByteArray());
-		WikiI5Part w = new WikiI5Part(is, wikiXML, pageId);
+		WikiI5Part w = new WikiI5Part(is, wikiXMLPath, pageId);
 		bos.close();
 		return w;
 	}
@@ -163,12 +158,13 @@ public class Transformer implements Callable<WikiI5Part> {
 	 * @return a Destination
 	 */
 	private Destination createDestination(OutputStream os) {
-		Serializer d = new Serializer(os);
-		d.setOutputProperty(Serializer.Property.METHOD, "xml");
-		d.setOutputProperty(Serializer.Property.INDENT, "yes");
-		d.setOutputProperty(Serializer.Property.ENCODING,
+		Serializer s = processor.newSerializer(os);
+		s.setOutputProperty(Serializer.Property.METHOD, "xml");
+		s.setOutputProperty(Serializer.Property.INDENT, "yes");
+		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+		s.setOutputProperty(Serializer.Property.ENCODING,
 				config.getOutputEncoding());
-		return d;
+		return s;
 	}
 
 	/**
@@ -181,7 +177,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	private void doTransformation(OutputStream os)
 			throws I5Exception {
 		InputStream is = null;
-		String filepath = config.getWikiXMLFolder() + "/" + wikiXML;
+		String filepath = config.getWikiXMLFolder() + "/" + wikiXMLPath;
 		try {
 			is = new FileInputStream(new File(filepath));
 			final StreamSource source = new StreamSource(is);
@@ -200,12 +196,12 @@ public class Transformer implements Callable<WikiI5Part> {
 		}
 		catch (SaxonApiException e) {
 			statistics.addTransformationError();
-			errorHandler.write(wikiXML.getPath(), "Tranformation error. ",
+			errorHandler.write(wikiXMLPath, "Tranformation error. ",
 					e);
 			os = null;
 		}
 		catch (IOException e) {
-			errorHandler.write(wikiXML.getPath(),
+			errorHandler.write(wikiXMLPath,
 					"Failed reading " + filepath, e);
 			throw new I5Exception("Failed reading a WikiXML file "
 					+filepath , e);
@@ -217,7 +213,7 @@ public class Transformer implements Callable<WikiI5Part> {
 				}
 			}
 			catch (IOException e) {
-				errorHandler.write(wikiXML.getPath(),
+				errorHandler.write(wikiXMLPath,
 						"Failed closing a WikiXML InputStream", e);
 			}
 		}

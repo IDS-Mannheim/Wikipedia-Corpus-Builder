@@ -64,8 +64,8 @@ public class WikiI5Processor {
 
 		long start = System.currentTimeMillis();
 
-		I5Writer wikiI5Writer = new I5Writer(config, errorHandler, statistics);
-		wikiI5Writer.writeStartDocument();
+		I5Writer i5Writer = new I5Writer(config, errorHandler, statistics);
+		i5Writer.writeStartDocument();
 
 		Future<WikiI5Part> endFuture = createEndFuture();
 		ExecutorService pool = Executors
@@ -79,7 +79,7 @@ public class WikiI5Processor {
 					.equals(endFuture); future = wikiI5Queue.take()) {
 				try {
 					WikiI5Part w = future.get();
-					wikiI5Writer.write(w);
+					i5Writer.write(w);
 				}
 				catch (ExecutionException e) {
 					System.err.println("Future execution throws an exception: "
@@ -110,7 +110,7 @@ public class WikiI5Processor {
 		}
 
 		statistics.printStats();
-		wikiI5Writer.close();
+		i5Writer.close();
 		errorHandler.close();
 
 		long end = System.currentTimeMillis();
