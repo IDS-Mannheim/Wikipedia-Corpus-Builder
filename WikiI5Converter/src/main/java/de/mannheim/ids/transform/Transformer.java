@@ -163,7 +163,8 @@ public class Transformer implements Callable<WikiI5Part> {
 		s.setOutputProperty(Serializer.Property.METHOD, "xml");
 		s.setOutputProperty(Serializer.Property.INDENT, "yes");
 		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
-		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "posting ref");
+		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "ref");
+		s.setOutputProperty(Serializer.Property.SAXON_LINE_LENGTH, "512");
 		s.setOutputProperty(Serializer.Property.ENCODING,
 				config.getOutputEncoding());
 		return s;

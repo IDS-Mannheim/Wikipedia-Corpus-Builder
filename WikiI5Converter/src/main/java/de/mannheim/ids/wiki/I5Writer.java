@@ -159,6 +159,7 @@ public class I5Writer {
 		s.setOutputProperty(Serializer.Property.INDENT, "yes");
 		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
 		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "ptr");
+		s.setOutputProperty(Serializer.Property.SAXON_LINE_LENGTH, "512");
 		s.setOutputProperty(Serializer.Property.ENCODING,
 				config.getOutputEncoding());
 		s.setOutputProperty(Serializer.Property.DOCTYPE_PUBLIC, 
