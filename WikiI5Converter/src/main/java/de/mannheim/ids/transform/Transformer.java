@@ -29,6 +29,7 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.serialize.SerializationProperties;
 
 /**
  * Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5
@@ -162,6 +163,7 @@ public class Transformer implements Callable<WikiI5Part> {
 		s.setOutputProperty(Serializer.Property.METHOD, "xml");
 		s.setOutputProperty(Serializer.Property.INDENT, "yes");
 		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
+		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "posting ref");
 		s.setOutputProperty(Serializer.Property.ENCODING,
 				config.getOutputEncoding());
 		return s;
