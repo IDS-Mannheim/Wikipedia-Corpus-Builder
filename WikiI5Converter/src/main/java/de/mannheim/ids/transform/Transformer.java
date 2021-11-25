@@ -29,7 +29,6 @@ import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
-import net.sf.saxon.serialize.SerializationProperties;
 
 /**
  * Initializes an XSLT Transformer as a ThreadLocal, transforms wikiXML into I5
@@ -62,12 +61,8 @@ public class Transformer implements Callable<WikiI5Part> {
 			XsltTransformer transformer = executable.load();
 				transformer.setInitialTemplate(new QName("main"));
 				
-			transformer.setParameter(new QName("type"),
-					new XdmAtomicValue(config.getPageType()));
 			transformer.setParameter(new QName("origfilename"),
 					new XdmAtomicValue(config.getDumpFilename()));
-			transformer.setParameter(new QName("korpusSigle"),
-					new XdmAtomicValue(config.getKorpusSigle()));
 			transformer.setParameter(new QName("lang"),
 					new XdmAtomicValue(config.getLanguageCode()));
 			transformer.setParameter(new QName("pubDay"), new XdmAtomicValue(
@@ -139,7 +134,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	}
 
 	@Override
-	public WikiI5Part call() throws Exception {
+	public WikiI5Part call() throws I5Exception, IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
 		doTransformation(bos);
 		logger.debug(bos);
@@ -163,7 +158,7 @@ public class Transformer implements Callable<WikiI5Part> {
 		s.setOutputProperty(Serializer.Property.METHOD, "xml");
 		s.setOutputProperty(Serializer.Property.INDENT, "yes");
 		s.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "1");
-		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "ref signed p");
+		s.setOutputProperty(Serializer.Property.SAXON_SUPPRESS_INDENTATION, "ref signed p item");
 		s.setOutputProperty(Serializer.Property.SAXON_LINE_LENGTH, "512");
 		s.setOutputProperty(Serializer.Property.ENCODING,
 				config.getOutputEncoding());
@@ -188,6 +183,10 @@ public class Transformer implements Callable<WikiI5Part> {
 			XdmNode node = processor.newDocumentBuilder().build(source);
 			final XsltTransformer transformer = getTransfomer();
 			transformer.setInitialContextNode(node);
+			transformer.setParameter(new QName("type"),
+                    new XdmAtomicValue(config.getPageType()));
+			transformer.setParameter(new QName("korpusSigle"),
+                    new XdmAtomicValue(config.getKorpusSigle()));
 			transformer.setParameter(new QName("letter"),
 					new XdmAtomicValue(index));
 			transformer.setParameter(new QName("pageId"),

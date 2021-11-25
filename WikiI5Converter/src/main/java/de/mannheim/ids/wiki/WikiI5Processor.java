@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import de.mannheim.ids.transform.WikiI5Part;
-import de.mannheim.ids.transform.WikiXMLSorter;
+import de.mannheim.ids.transform.TaskManager;
 
 /**
  * Manages the overall WikiXML to I5 conversion process.
@@ -27,7 +27,7 @@ public class WikiI5Processor {
 	private Statistics statistics;
 	private I5ErrorHandler errorHandler;
 
-	public static BlockingQueue<Future<WikiI5Part>> wikiI5Queue;
+	public static BlockingQueue<Future<WikiI5Part>> taskQueue;
 
 	/**
 	 * Constructs a WikiI5Processor.
@@ -44,7 +44,7 @@ public class WikiI5Processor {
 		}
 
 		this.config = config;
-		wikiI5Queue = new ArrayBlockingQueue<Future<WikiI5Part>>(
+		taskQueue = new ArrayBlockingQueue<Future<WikiI5Part>>(
 				config.getMaxThreads());
 		errorHandler = new I5ErrorHandler(config);
 		statistics = new Statistics();
@@ -67,16 +67,16 @@ public class WikiI5Processor {
 		I5Writer i5Writer = new I5Writer(config, errorHandler, statistics);
 		i5Writer.writeStartDocument();
 
-		Future<WikiI5Part> endFuture = createEndFuture();
+		Future<WikiI5Part> endTask = createEndTask();
 		ExecutorService pool = Executors
 				.newFixedThreadPool(config.getMaxThreads());
-		WikiXMLSorter sorter = new WikiXMLSorter(config, endFuture, pool,
+		TaskManager taskManager = new TaskManager(config, endTask, pool,
 				errorHandler, statistics);
-		pool.execute(sorter);
+		pool.execute(taskManager);
 
 		try {
-			for (Future<WikiI5Part> future = wikiI5Queue.take(); !future
-					.equals(endFuture); future = wikiI5Queue.take()) {
+			for (Future<WikiI5Part> future = taskQueue.take(); !future
+					.equals(endTask); future = taskQueue.take()) {
 				try {
 					WikiI5Part w = future.get();
 					i5Writer.write(w);
@@ -128,7 +128,7 @@ public class WikiI5Processor {
 	 * 
 	 * @return the end Future
 	 */
-	private Future<WikiI5Part> createEndFuture() {
+	private Future<WikiI5Part> createEndTask() {
 		return new Future<WikiI5Part>() {
 			@Override
 			public boolean isDone() {

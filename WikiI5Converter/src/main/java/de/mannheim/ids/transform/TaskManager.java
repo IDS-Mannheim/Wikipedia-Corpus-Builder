@@ -26,16 +26,18 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 
 /**
- * WikiXMLSorter sorts WikiXML pages alphabetically and groups them in idsDoc
- * elements. Each idsDoc should contain 100000 idsText elements.
+ * TaskManager sorts WikiXML pages alphabetically and groups them in
+ * idsDoc elements. Each idsDoc should contain 100000 idsText
+ * elements.
  * 
- * WikiXMLSorter creates a future transformation task for each WikiXML and the
- * task to the blocking queue of WikiI5Processor.
+ * It creates a future transformation task for each WikiXML, and other
+ * tasks to generate start and end documents.
+ * The tasks are added to the {@link WikiI5Processor#taskQueue}.
  * 
  * @author margaretha
  *
  */
-public class WikiXMLSorter extends Thread {
+public class TaskManager extends Thread {
 
 	private static final int DOCUMENT_SIZE=100000; 
 	
@@ -57,7 +59,7 @@ public class WikiXMLSorter extends Thread {
 	 * @param statistics a statistic counter
 	 * @throws I5Exception an I5Exception
 	 */
-	public WikiXMLSorter(Configuration config, Future<WikiI5Part> endFuture,
+	public TaskManager(Configuration config, Future<WikiI5Part> endFuture,
 			ExecutorService pool, I5ErrorHandler errorHandler, Statistics statistics) throws I5Exception {
 		this.config = config;
 		
@@ -92,7 +94,7 @@ public class WikiXMLSorter extends Thread {
 	public void run() {
 		groupPagesByIndex();
 		try {
-			WikiI5Processor.wikiI5Queue.put(endFuture);
+			WikiI5Processor.taskQueue.put(endFuture);
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -182,8 +184,9 @@ public class WikiXMLSorter extends Thread {
 	
 	private void addFutureDocPart(WikiI5Part part, String whichPart) throws I5Exception {
 		try {
-			WikiI5Processor.wikiI5Queue
-					.put(createFutureFromWikiI5Part(part));
+		    Future<WikiI5Part> task = createTaskFromWikiI5Part(part);
+			WikiI5Processor.taskQueue
+					.put(task);
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -196,7 +199,7 @@ public class WikiXMLSorter extends Thread {
 	 * @param w a WikiI5Part
 	 * @return
 	 */
-	private Future<WikiI5Part> createFutureFromWikiI5Part(final WikiI5Part w) {
+	private Future<WikiI5Part> createTaskFromWikiI5Part(final WikiI5Part w) {
 		return new Future<WikiI5Part>() {
 
 			@Override
@@ -251,7 +254,7 @@ public class WikiXMLSorter extends Thread {
 			Transformer t = new Transformer(config, statistics, errorHandler,
 					xmlPath, idx,	pageId);
 			try {
-				WikiI5Processor.wikiI5Queue.put(pool.submit(t));
+				WikiI5Processor.taskQueue.put(pool.submit(t));
 			}
 			catch (InterruptedException e) {
 				System.err
