@@ -29,7 +29,7 @@ public class ConfigurationTest {
 
 	// The dumpFilename should be in the following format:
 	// [2 letter language code]wiki-[year][month][date]-[type]
-	private String dumpFilename = "dewiki-20170701-sample.xml";
+	private String dumpFilename = "dewiki-20170701-pages-meta-current.xml";
 
 	private String xmlFolder = "wikixml-de/article";
 	private String index = "index/dewiki-article-index.xml";
