@@ -196,12 +196,15 @@ public class Transformer implements Callable<WikiI5Part> {
 			transformer.setDestination(destination);
 			transformer.transform();
 		}
-		catch (SaxonApiException e) {
-			statistics.addTransformationError();
-			errorHandler.write(wikiXMLPath, "Tranformation error. ",
-					e);
-			os = null;
-		}
+        catch (SaxonApiException e) {
+            statistics.addTransformationError();
+            errorHandler.write(wikiXMLPath, "Tranformation error. ", e);
+            //			os = null;
+            throw new I5Exception(
+                    "Transformation error has occurred in processing "
+                            + filepath,
+                    e);
+        }
 		catch (IOException e) {
 			errorHandler.write(wikiXMLPath,
 					"Failed reading " + filepath, e);

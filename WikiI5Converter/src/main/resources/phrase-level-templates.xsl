@@ -84,7 +84,10 @@
 
     <xsl:template match="ref|Ref|REF">
         <xsl:choose>
-            <xsl:when test="ancestor::node()[name()='ref']"> &lt;ref <xsl:value-of select="."/>&gt; </xsl:when>
+            <xsl:when test="ancestor::node()[name()='ref'] or
+            child::node()[name()=$headerNames/*]"> 
+            	&lt;ref <xsl:value-of select="."/>&gt; 
+            	</xsl:when>
             <xsl:when test="parent::node()[name()=('references','References')]">
                 <xsl:if test="*">
                     <xsl:choose>
