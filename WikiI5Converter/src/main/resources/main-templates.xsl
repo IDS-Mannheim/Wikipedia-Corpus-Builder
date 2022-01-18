@@ -77,187 +77,190 @@
 
 
     <xsl:template match="page">
-        <xsl:variable name="textSigle">
-			<xsl:variable name="intermediate">
+    	<xsl:if test="parent::node()/name() != 'p'">
+    	
+	        <xsl:variable name="textSigle">
+				<xsl:variable name="intermediate">
+					<xsl:sequence
+						select="concat($korpusSigle,'/',
+			                            upper-case($letter), 
+			                            format-number(id, '000000000')
+			                            )" />
+				</xsl:variable>
 				<xsl:sequence
-					select="concat($korpusSigle,'/',
-		                            upper-case($letter), 
-		                            format-number(id, '000000000')
-		                            )" />
+					select="concat(substring($intermediate,1,11),'.',substring($intermediate,12))" />
 			</xsl:variable>
-			<xsl:sequence
-				select="concat(substring($intermediate,1,11),'.',substring($intermediate,12))" />
-		</xsl:variable>
-
-        <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
-
-		<xsl:variable name="normalizedTitle">
-			<xsl:value-of select="translate(title,' ','_')"/>
-		</xsl:variable>
-		
-        <!--Current index-->
-        <xsl:variable name="t.title">
-            <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
-            <xsl:value-of select="concat($textSigle,' ')"/>
-            <xsl:value-of select="title"/>
-            <xsl:sequence
-                select="concat(', In: Wikipedia - URL:http://', $lang ,'.wikipedia.org/wiki/')"/>
-            <!-- Assume this construct may be used as a weblink, ensure working link. -->
-            <xsl:value-of select="$normalizedTitle"/>
-            <xsl:sequence select="concat(': Wikipedia, ', $pubYear)"/>
-        </xsl:variable>
-        
-        <xsl:variable name="pageURL">
-        	<xsl:sequence select="concat('http://', $lang ,'.wikipedia.org/wiki/')"/>
-        	<xsl:value-of select="$normalizedTitle"/>
-        </xsl:variable>
-        
-        <!-- * idsText * -->
-        <idsText>
-            <xsl:attribute name="id" select="translate($textSigle,'/','.')"/>
-            <!-- Avoid spaces in attribute 'n'. Attribute 'n' carries the value of the interwiki link -->
-            <xsl:attribute name="n"
-                select="concat(revision/text/@lang,concat('.',$normalizedTitle))"/>
-            <xsl:attribute name="version" select="1.0"/>
-
-            <!-- * idsHeader * -->
-            <idsHeader type="text" pattern="text" version="1.0">
-                <fileDesc>
-                    <titleStmt>
-                        <textSigle>
-                            <xsl:sequence select="$textSigle"/>
-                        </textSigle>
-                        <t.title assemblage="external">
-                            <xsl:sequence select="$t.title"/>
-                        </t.title>
-                    </titleStmt>
-                    <editionStmt version="0"/>
-                    <publicationStmt>
-                        <distributor/>
-                        <pubAddress/>
-                        <availability region="world" status="free">CC-BY-SA</availability>
-                        <pubDate/>
-                    </publicationStmt>
-                    <sourceDesc Default="n">
-                        <biblStruct>
-                            <analytic>
-                                <h.title type="main">
-                                    <xsl:value-of select="title"/>
-                                </h.title>
-                                <h.author>
-                                    <xsl:value-of select="revision/contributor/(username|ip)"/>
-                                    <!-- Since there is only the ip or username of the last edit made to see, add 'u.a.' -->
-                                    <xsl:text>,  u.a.</xsl:text>
-                                </h.author>
-                                <imprint>
-									<pubPlace>
-										<ref type="page_url">
-											<xsl:attribute name="target"><xsl:sequence select="$pageURL" /></xsl:attribute>
-										</ref>
-									</pubPlace>
-								</imprint>
-                                <idno type="wikipedia-id"><xsl:value-of select="$pageId"/></idno>
-                            </analytic>
-                            <monogr>
-                                <h.title type="main">Wikipedia</h.title>
-                                <editor>Wikimedia Foundation</editor>
-                                <edition>
-                                    <further>Dump file &#34;<xsl:value-of select="$origfilename"
-                                        />&#34; retrieved from http://dumps.wikimedia.org</further>
-                                    <kind/>
-                                    <appearance/>
-                                </edition>
-                                <imprint>
-									<publisher>Wikipedia</publisher>
-									<pubPlace>
-										<ref>
-											<xsl:attribute name="target">
-								               <xsl:sequence select="concat('http://', $lang ,'.wikipedia.org')" />
-								            </xsl:attribute>
-										</ref>
-									</pubPlace>
-                                    <pubDate type="year">
-                                        <xsl:sequence select="$pubYear"/>
-                                    </pubDate>
-                                    <pubDate type="month">
-                                        <xsl:sequence select="$pubMonth"/>
-                                    </pubDate>
-                                    <pubDate type="day">
-                                        <xsl:sequence select="$pubDay"/>
-                                    </pubDate>
-                                </imprint>
-                            </monogr>
-                        </biblStruct>
-                        <reference type="complete" assemblage="non-automatic">
-                            <xsl:sequence select="$t.title"/>
-                        </reference>
-                        <reference type="short" assemblage="regular">
-                            <xsl:value-of select="$textSigle"/> Wikipedia; <xsl:value-of
-                                select="title"/>, (Letzte Änderung <xsl:value-of
-                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
-                                />) <xsl:variable name="pubDate" select="xs:date(concat($pubYear,
-                                '-',$pubMonth,'-',$pubDay))"/> <xsl:value-of select="format-date(
-                                $pubDate,'[D1].[M1].[Y0001]')"/>
-                        </reference>
-                    </sourceDesc>
-                </fileDesc>
-                <encodingDesc>
-                    <samplingDecl Default="n"/>
-                    <editorialDecl Default="n">
-                        <pagination type="no"/>
-                    </editorialDecl>
-                </encodingDesc>
-                <profileDesc>
-                    <creation>
-                        <creatDate>
-                            <xsl:sequence
-                                select="format-dateTime(revision/timestamp, '[Y0001].[M01].[D01]')"
-                            />
-                        </creatDate>
-                        <creatRef>(Letzte Änderung <xsl:value-of
-                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
-                            />)</creatRef>
-                        <creatRefShort>(Letzte Änderung <xsl:value-of
-                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
-                            />)</creatRefShort>
-                    </creation>
-                    <textDesc>
-                        <xsl:choose>
-                            <xsl:when test="$type eq 'article'">
-                                <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
-                            </xsl:when>
-                            <xsl:when test="$type eq 'talk'">
-                                <textTypeArt>Diskussion</textTypeArt>
-                            </xsl:when>
-                            <xsl:when test="$type eq 'user-talk'">
-                                <textTypeArt>Benutzerdiskussion</textTypeArt>
-                            </xsl:when>
-                            <xsl:when test="$type eq 'loeschkandidaten'">
-                                <textTypeArt>Löschkandidaten</textTypeArt>
-                            </xsl:when>
-                            <xsl:when test="$type eq 'redundanz'">
-                                <textTypeArt>Redundanzdiskussion</textTypeArt>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <textTypeArt>Unerkannt</textTypeArt>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        <textDomain/>
-                    </textDesc>
-                </profileDesc>
-            </idsHeader>
-
-            <!-- * text * -->
-            <text>
-                <!-- front always empty -->
-                <front/>
-                <body>
-                    <xsl:apply-templates select="revision"/>
-                </body>
-                <!-- back contains foot note-->
-                <back/>
-            </text>
-        </idsText>
+	
+	        <saxon:assign name="sigle" select="translate($textSigle,'/','.')"/>
+	
+			<xsl:variable name="normalizedTitle">
+				<xsl:value-of select="translate(title,' ','_')"/>
+			</xsl:variable>
+			
+	        <!--Current index-->
+	        <xsl:variable name="t.title">
+	            <!--why is it a sequence when the values is not even a sequence? value-of is enough-->
+	            <xsl:value-of select="concat($textSigle,' ')"/>
+	            <xsl:value-of select="title"/>
+	            <xsl:sequence
+	                select="concat(', In: Wikipedia - URL:http://', $lang ,'.wikipedia.org/wiki/')"/>
+	            <!-- Assume this construct may be used as a weblink, ensure working link. -->
+	            <xsl:value-of select="$normalizedTitle"/>
+	            <xsl:sequence select="concat(': Wikipedia, ', $pubYear)"/>
+	        </xsl:variable>
+	        
+	        <xsl:variable name="pageURL">
+	        	<xsl:sequence select="concat('http://', $lang ,'.wikipedia.org/wiki/')"/>
+	        	<xsl:value-of select="$normalizedTitle"/>
+	        </xsl:variable>
+	        
+	        <!-- * idsText * -->
+	        <idsText>
+	            <xsl:attribute name="id" select="translate($textSigle,'/','.')"/>
+	            <!-- Avoid spaces in attribute 'n'. Attribute 'n' carries the value of the interwiki link -->
+	            <xsl:attribute name="n"
+	                select="concat(revision/text/@lang,concat('.',$normalizedTitle))"/>
+	            <xsl:attribute name="version" select="1.0"/>
+	
+	            <!-- * idsHeader * -->
+	            <idsHeader type="text" pattern="text" version="1.0">
+	                <fileDesc>
+	                    <titleStmt>
+	                        <textSigle>
+	                            <xsl:sequence select="$textSigle"/>
+	                        </textSigle>
+	                        <t.title assemblage="external">
+	                            <xsl:sequence select="$t.title"/>
+	                        </t.title>
+	                    </titleStmt>
+	                    <editionStmt version="0"/>
+	                    <publicationStmt>
+	                        <distributor/>
+	                        <pubAddress/>
+	                        <availability region="world" status="free">CC-BY-SA</availability>
+	                        <pubDate/>
+	                    </publicationStmt>
+	                    <sourceDesc Default="n">
+	                        <biblStruct>
+	                            <analytic>
+	                                <h.title type="main">
+	                                    <xsl:value-of select="title"/>
+	                                </h.title>
+	                                <h.author>
+	                                    <xsl:value-of select="revision/contributor/(username|ip)"/>
+	                                    <!-- Since there is only the ip or username of the last edit made to see, add 'u.a.' -->
+	                                    <xsl:text>,  u.a.</xsl:text>
+	                                </h.author>
+	                                <imprint>
+										<pubPlace>
+											<ref type="page_url">
+												<xsl:attribute name="target"><xsl:sequence select="$pageURL" /></xsl:attribute>
+											</ref>
+										</pubPlace>
+									</imprint>
+	                                <idno type="wikipedia-id"><xsl:value-of select="$pageId"/></idno>
+	                            </analytic>
+	                            <monogr>
+	                                <h.title type="main">Wikipedia</h.title>
+	                                <editor>Wikimedia Foundation</editor>
+	                                <edition>
+	                                    <further>Dump file &#34;<xsl:value-of select="$origfilename"
+	                                        />&#34; retrieved from http://dumps.wikimedia.org</further>
+	                                    <kind/>
+	                                    <appearance/>
+	                                </edition>
+	                                <imprint>
+										<publisher>Wikipedia</publisher>
+										<pubPlace>
+											<ref>
+												<xsl:attribute name="target">
+									               <xsl:sequence select="concat('http://', $lang ,'.wikipedia.org')" />
+									            </xsl:attribute>
+											</ref>
+										</pubPlace>
+	                                    <pubDate type="year">
+	                                        <xsl:sequence select="$pubYear"/>
+	                                    </pubDate>
+	                                    <pubDate type="month">
+	                                        <xsl:sequence select="$pubMonth"/>
+	                                    </pubDate>
+	                                    <pubDate type="day">
+	                                        <xsl:sequence select="$pubDay"/>
+	                                    </pubDate>
+	                                </imprint>
+	                            </monogr>
+	                        </biblStruct>
+	                        <reference type="complete" assemblage="non-automatic">
+	                            <xsl:sequence select="$t.title"/>
+	                        </reference>
+	                        <reference type="short" assemblage="regular">
+	                            <xsl:value-of select="$textSigle"/> Wikipedia; <xsl:value-of
+	                                select="title"/>, (Letzte Änderung <xsl:value-of
+	                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+	                                />) <xsl:variable name="pubDate" select="xs:date(concat($pubYear,
+	                                '-',$pubMonth,'-',$pubDay))"/> <xsl:value-of select="format-date(
+	                                $pubDate,'[D1].[M1].[Y0001]')"/>
+	                        </reference>
+	                    </sourceDesc>
+	                </fileDesc>
+	                <encodingDesc>
+	                    <samplingDecl Default="n"/>
+	                    <editorialDecl Default="n">
+	                        <pagination type="no"/>
+	                    </editorialDecl>
+	                </encodingDesc>
+	                <profileDesc>
+	                    <creation>
+	                        <creatDate>
+	                            <xsl:sequence
+	                                select="format-dateTime(revision/timestamp, '[Y0001].[M01].[D01]')"
+	                            />
+	                        </creatDate>
+	                        <creatRef>(Letzte Änderung <xsl:value-of
+	                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+	                            />)</creatRef>
+	                        <creatRefShort>(Letzte Änderung <xsl:value-of
+	                                select="format-dateTime(revision/timestamp,'[D1].[M1].[Y0001]')"
+	                            />)</creatRefShort>
+	                    </creation>
+	                    <textDesc>
+	                        <xsl:choose>
+	                            <xsl:when test="$type eq 'article'">
+	                                <textTypeArt>Enzyklopädie-Artikel</textTypeArt>
+	                            </xsl:when>
+	                            <xsl:when test="$type eq 'talk'">
+	                                <textTypeArt>Diskussion</textTypeArt>
+	                            </xsl:when>
+	                            <xsl:when test="$type eq 'user-talk'">
+	                                <textTypeArt>Benutzerdiskussion</textTypeArt>
+	                            </xsl:when>
+	                            <xsl:when test="$type eq 'loeschkandidaten'">
+	                                <textTypeArt>Löschkandidaten</textTypeArt>
+	                            </xsl:when>
+	                            <xsl:when test="$type eq 'redundanz'">
+	                                <textTypeArt>Redundanzdiskussion</textTypeArt>
+	                            </xsl:when>
+	                            <xsl:otherwise>
+	                                <textTypeArt>Unerkannt</textTypeArt>
+	                            </xsl:otherwise>
+	                        </xsl:choose>
+	                        <textDomain/>
+	                    </textDesc>
+	                </profileDesc>
+	            </idsHeader>
+	
+	            <!-- * text * -->
+	            <text>
+	                <!-- front always empty -->
+	                <front/>
+	                <body>
+	                    <xsl:apply-templates select="revision"/>
+	                </body>
+	                <!-- back contains foot note-->
+	                <back/>
+	            </text>
+	        </idsText>
+		</xsl:if>
     </xsl:template>
 
     <xsl:template match="revision">

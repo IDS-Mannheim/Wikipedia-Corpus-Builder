@@ -1,5 +1,6 @@
 package de.mannheim.ids.wiki;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -7,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
@@ -393,6 +395,12 @@ public class I5Writer {
 			errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
 			return false;
 		}
+		catch (Exception e) {
+            stats.addSaxParserError();
+            logger.debug(e);
+            errorHandler.write(w.getWikiPath(), "Failed parsing IdsText.", e);
+            return false;
+        }
 		
 		stats.addTransformedPages();
 		if (idsTextBuffer.isTextEmpty()){
@@ -475,7 +483,8 @@ public class I5Writer {
 			stats.addDtdValidationError();
 			logger.debug(e);
 			errorHandler.write(wikiXMLPath, "DTD validation failed. \n"
-					+ idsTextBytes.toString(), e);
+					//+ new String(idsTextBytes)
+					, e);
 			return false;
 		}
 

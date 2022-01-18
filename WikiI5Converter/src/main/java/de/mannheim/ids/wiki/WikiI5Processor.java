@@ -82,8 +82,8 @@ public class WikiI5Processor {
 					i5Writer.write(w);
 				}
 				catch (ExecutionException e) {
-					System.err.println("Future execution throws an exception: "
-							+ e.getCause());
+                    System.err.println("Future execution throws an exception: "
+                            + e.getCause());
 				}
 			}
 			pool.shutdown();
