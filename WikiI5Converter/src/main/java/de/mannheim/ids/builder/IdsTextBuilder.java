@@ -49,7 +49,8 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private SAXBuffer extendedIdsText;
 
 	private boolean isDiscussion = false;
-
+	private boolean includeLanguageLinks = false;
+	
 	private String pageTitle;
 
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
@@ -217,7 +218,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 						createLangLinks(I5Writer.dbManager
 								.retrieveArticleLinks(articleTitle));
 					}
-					else {
+					else if (includeLanguageLinks){
 						createLangLinks(I5Writer.dbManager
 								.retrieveLanguageLinks(pageId));
 					}

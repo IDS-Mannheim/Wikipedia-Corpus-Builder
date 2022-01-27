@@ -37,12 +37,15 @@ public class Configuration {
 	private boolean isDiscussion;
 	private boolean storeCategories;
 	private boolean disableDTDValidation;
+	
+	private boolean includeLangLinks;
 
 	public static final String[] indexes = {"A", "B", "C", "D", "E", "F", "G",
 			"H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 			"U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6",
 			"7", "8", "9"};
 
+	@Deprecated
 	public Configuration(String xmlFolder, int namespaceKey, String pageType,
 			String dumpFilename, String language, String korpusSigle,
 			String inflectives, String encoding, String outputFile,
@@ -53,7 +56,7 @@ public class Configuration {
 		init(namespaceKey, xmlFolder, pageType, dumpFilename, language,
 				korpusSigle, outputFile, index, creator, url, username,
 				password, encoding, inflectives, maxThreads, category,
-				categoryScheme,disableDTDValidation);
+				categoryScheme,disableDTDValidation, "false");
 	}
 
 	public Configuration(Properties properties) {
@@ -82,7 +85,8 @@ public class Configuration {
 				Integer.parseInt(properties.getProperty("max_threads", "1")),
 				category,
 				categoryScheme,
-				properties.getProperty("disableDTDValidation","false"));
+				properties.getProperty("disableDTDValidation","false"),
+				properties.getProperty("include_langlinks","true"));
 	}
 
 	private void init(int namespaceKey, String xmlFolder, String pageType,
@@ -90,7 +94,8 @@ public class Configuration {
 			String outputFile, String index, String creator, String url,
 			String username, String password, String encoding,
 			String inflectives, int maxThreads, String category,
-			String categoryScheme, String disableDTDValidation) {
+			String categoryScheme, String disableDTDValidation, 
+			String includeLanglinks) {
 
 		System.setProperty("entityExpansionLimit", "0");
 		System.setProperty("totalEntitySizeLimit", "0");
@@ -119,6 +124,7 @@ public class Configuration {
 		setCategory(category);
 		setCategoryScheme(categoryScheme);
 		setDisableDTDValidation(Boolean.parseBoolean(disableDTDValidation));
+		setIncludeLangLinks(Boolean.parseBoolean(includeLanglinks));
 	}
 
 	public String loadRequiredParameter(Properties config, String param) {
@@ -338,4 +344,12 @@ public class Configuration {
 	public void setDisableDTDValidation(boolean disableDTDValidation) {
 		this.disableDTDValidation = disableDTDValidation;
 	}
+
+    public boolean isIncludeLangLinks () {
+        return includeLangLinks;
+    }
+
+    public void setIncludeLangLinks (boolean includeLangLinks) {
+        this.includeLangLinks = includeLangLinks;
+    }
 }

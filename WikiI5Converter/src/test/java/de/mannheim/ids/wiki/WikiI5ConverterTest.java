@@ -36,27 +36,6 @@ import org.xml.sax.SAXException;
  */
 public class WikiI5ConverterTest {
 	
-	private void testIndexingWikiXML(String type)
-			throws IOException, InterruptedException,
-			ParserConfigurationException, SAXException, I5Exception {
-		String xmlFolder = "wikixml-de/" + type + "/";
-		String index = "index/dewiki-" + type + "-index.xml";
-
-		Process p = Runtime.getRuntime().exec(
-				"./WikiXMLCorpusIndexer.sh " + type + " " + xmlFolder + " "
-						+ index);
-		p.waitFor();
-
-		File f = new File(index);
-		assertTrue(f.exists());
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = dbFactory.newDocumentBuilder();
-		Document doc = builder.parse(f);
-		NodeList list = doc.getElementsByTagName("index");
-		assertTrue(list.getLength() > 0);
-	}
-
 	/**
 	 * This test requires wikixml folder and its index file
 	 * 
@@ -72,7 +51,8 @@ public class WikiI5ConverterTest {
 	public void testWikiI5ProcessorArticle() throws I5Exception, IOException,
 			SAXException, ParserConfigurationException, ParseException,
 			InterruptedException, SQLException {
-//		testIndexingWikiXML("article");
+		
+		IndexingTest.testIndexingWikiXML("article","de");
 		WikiI5Converter converter = new WikiI5Converter();
 		Configuration config = converter.createConfig(
 				new String[]{"-prop", "dewiki-article.properties",
@@ -106,7 +86,7 @@ public class WikiI5ConverterTest {
 	public void testWikiI5ConverterTalk()
 			throws I5Exception, IOException, ParseException, SQLException,
 			ParserConfigurationException, SAXException, InterruptedException {
-		testIndexingWikiXML("talk");
+		IndexingTest.testIndexingWikiXML("talk","de");
 
 		WikiI5Converter.main(new String[]{"-prop", "dewiki-talk.properties"});
 
@@ -114,7 +94,7 @@ public class WikiI5ConverterTest {
 		testI5File(outputFile);
 	}
 
-	private void testI5File(String outputFile)
+	public static void testI5File(String outputFile)
 			throws ParserConfigurationException, SAXException, IOException {
 		File f = new File(outputFile);
 		assertNotNull(f);
