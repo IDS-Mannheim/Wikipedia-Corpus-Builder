@@ -146,7 +146,10 @@
     <xsl:template match="li | dd | dt">
         <xsl:choose>
             <xsl:when test="child::node()/name()=$headerNames/*">
-                <xsl:apply-templates select="."/>
+                <!-- <xsl:apply-templates select="."/> -->
+                <item>
+                	<xsl:value-of select="."/>
+               	</item>
             </xsl:when>
             <xsl:when test="child::node()/name()=('p','poem','blockquote')">
                 <item>

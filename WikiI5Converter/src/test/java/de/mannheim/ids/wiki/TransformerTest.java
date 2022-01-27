@@ -2,12 +2,12 @@ package de.mannheim.ids.wiki;
 
 import static org.junit.Assert.assertEquals;
 
-//import java.io.BufferedReader;
-//import java.io.IOException;
-//import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
-
+import org.apache.commons.cli.ParseException;
 import org.junit.Test;
 
 import de.mannheim.ids.transform.Transformer;
@@ -15,6 +15,8 @@ import de.mannheim.ids.transform.WikiI5Part;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Node;
+import nu.xom.ParsingException;
+import nu.xom.ValidityException;
 
 public class TransformerTest {
 
@@ -51,7 +53,8 @@ public class TransformerTest {
         Node body = idsText.query("text/body").get(0);
         // text
         assertEquals("0", body.query("div/@n").get(0).getValue());
-        assertEquals("template", body.query("div/p/gap/@desc").get(0).getValue());
+        assertEquals("template",
+                body.query("div/p/gap/@desc").get(0).getValue());
         assertEquals("table", body.query("div/p/gap/@desc").get(1).getValue());
         // header
         assertEquals("2", body.query("div/div/@n").get(0).getValue());
@@ -76,17 +79,6 @@ public class TransformerTest {
         WikiI5Part wikipart = t.call();
         assertEquals(true, wikipart.isIDSText());
         InputStream is = wikipart.getInputStream();
-
-        //        String line = "";
-        //        try (BufferedReader bufferedReader = new BufferedReader(
-        //                new InputStreamReader(is))) {
-        //            while ((line = bufferedReader.readLine()) != null) {
-        //                System.out.println(line);
-        //            }
-        //        }
-        //        catch (IOException e) {
-        //            e.printStackTrace();
-        //        }
 
         Builder builder = new Builder();
         Document doc = builder.build(is);
@@ -164,4 +156,73 @@ public class TransformerTest {
                 signature.query("date").get(0).getValue());
 
     }
+
+
+    @Test
+    public void testHeaderWithinRef () throws Exception {
+        WikiI5Converter converter = new WikiI5Converter();
+        Configuration config = converter.createConfig(
+                new String[] { "-prop", "enwiki-article.properties" });
+        Statistics statistics = new Statistics();
+        I5ErrorHandler errorHandler = new I5ErrorHandler(config);
+
+        String idx = "B";
+        String pageId = "260696";
+        String xmlPath = idx + "/" + pageId + ".xml";
+
+        Transformer t = new Transformer(config, statistics, errorHandler,
+                xmlPath, idx, pageId);
+
+        WikiI5Part wikipart = t.call();
+        assertEquals(true, wikipart.isIDSText());
+        InputStream is = wikipart.getInputStream();
+
+        Builder builder = new Builder();
+        Document doc = builder.build(is);
+        Node idsText = doc.query("/idsText").get(0);
+        Node item = idsText.query("text/body/div/list/item").get(2);
+
+        assertEquals(2, item.query("ref").size());
+    }
+
+
+    @Test
+    public void testHeaderWithinLi () throws ParseException, IOException,
+            I5Exception, ValidityException, ParsingException {
+        WikiI5Converter converter = new WikiI5Converter();
+        Configuration config = converter.createConfig(
+                new String[] { "-prop", "enwiki-article.properties" });
+        Statistics statistics = new Statistics();
+        I5ErrorHandler errorHandler = new I5ErrorHandler(config);
+
+        String idx = "L";
+        String pageId = "41178893";
+        String xmlPath = idx + "/" + pageId + ".xml";
+
+        Transformer t = new Transformer(config, statistics, errorHandler,
+                xmlPath, idx, pageId);
+
+        WikiI5Part wikipart = t.call();
+        assertEquals(true, wikipart.isIDSText());
+        InputStream is = wikipart.getInputStream();
+        
+//        String line = "";
+//        try (BufferedReader bufferedReader = new BufferedReader(
+//                new InputStreamReader(is))) {
+//            while ((line = bufferedReader.readLine()) != null) {
+//                System.out.println(line);
+//            }
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        
+
+        Builder builder = new Builder();
+        Document doc = builder.build(is);
+        Node idsText = doc.query("/idsText").get(0);
+        Node item = idsText.query("text/body/div/list/item").get(0);
+        assertEquals(1, item.query("list/item").size());
+    }
+
 }
