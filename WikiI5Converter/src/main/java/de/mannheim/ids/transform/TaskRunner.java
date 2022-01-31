@@ -82,6 +82,18 @@ public class TaskRunner implements Callable<WikiI5Part> {
 
         // Collecting category and footnote events
         InputStream is = new ByteArrayInputStream(bos.toByteArray());
+        
+//      String line = "";
+//      try (BufferedReader bufferedReader = new BufferedReader(
+//              new InputStreamReader(is))) {
+//          while ((line = bufferedReader.readLine()) != null) {
+//              System.out.println(line);
+//          }
+//      }
+//      catch (IOException e) {
+//          e.printStackTrace();
+//      }
+        
         bos.close();
         if (is != null) {
             InputSource inputSource = new InputSource(is);
@@ -101,18 +113,13 @@ public class TaskRunner implements Callable<WikiI5Part> {
         SAXBuffer extendedBuffer = new SAXBuffer(addEvents(idsTextOutputStream,
                 pageId, wikiXMLPath, idsTextBuffer));
 
-        idsTextBuffer.clearReferences();
-        idsTextBuffer.clearCategories();
-        idsTextBuffer.getCategories().clear();
-        idsTextBuffer.recycle();
-
         // validate idsText
         byte[] idsTextBytes = ArrayUtils.addAll(LOCAL_DOCTYPE.getBytes(),
                 idsTextOutputStream.toByteArray());
         idsTextOutputStream.close();
 
         validateAgainstDTD(idsTextBytes, wikiXMLPath);
-
+        
         WikiI5Part w = new WikiI5Part(wikiXMLPath, pageId, extendedBuffer);
         return w;
     }
@@ -177,7 +184,7 @@ public class TaskRunner implements Callable<WikiI5Part> {
         statistics.addTransformedPages();
         if (idsTextBuffer.isTextEmpty()) {
             statistics.addEmptyPages();
-            throw new I5Exception("Page id: " + pageId + " has empty text.");
+            throw new I5Exception(pagePath + " has empty text.");
         }
 
         if (config.isDiscussion()) {

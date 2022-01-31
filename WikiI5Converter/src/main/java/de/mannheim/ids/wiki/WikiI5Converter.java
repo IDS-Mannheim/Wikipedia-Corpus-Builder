@@ -46,25 +46,20 @@ import org.apache.commons.cli.ParseException;
 
 public class WikiI5Converter {
 
-	private static Options options;
-
-	public WikiI5Converter() {
-		options = new Options();
-		options.addOption("prop", true, "Properties filename");
-		options.addOption("storeCategories", false, "If set, categories "
-				+ "in articles will be stored in database.");
-	}
-
 	public static void main(String[] args) throws ParseException, IOException,
 			I5Exception, SQLException {
-		WikiI5Converter converter = new WikiI5Converter();
-		Configuration config = converter.createConfig(args);
+		Configuration config = createConfig(args);
 		WikiI5Processor processor = new WikiI5Processor(config);
 		processor.run();
 	}
 
-	public Configuration createConfig(String[] args) throws ParseException,
+	public static Configuration createConfig(String[] args) throws ParseException,
 			IOException {
+	    Options options = new Options();
+        options.addOption("prop", true, "Properties filename");
+        options.addOption("storeCategories", false, "If set, categories "
+                + "in articles will be stored in database.");
+        
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = parser.parse(options, args);
 

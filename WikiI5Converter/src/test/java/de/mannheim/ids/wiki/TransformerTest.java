@@ -2,10 +2,8 @@ package de.mannheim.ids.wiki;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.apache.commons.cli.ParseException;
 import org.junit.Test;
@@ -19,12 +17,12 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 public class TransformerTest {
-
+    
     @Test
     public void testXsltResultArticle () throws Exception {
-        WikiI5Converter converter = new WikiI5Converter();
-        Configuration config = converter.createConfig(
+        Configuration config = WikiI5Converter.createConfig(
                 new String[] { "-prop", "dewiki-article.properties" });
+        Transformer.resetTransformer(config);
         Statistics statistics = new Statistics();
         I5ErrorHandler errorHandler = new I5ErrorHandler(config);
 
@@ -63,9 +61,9 @@ public class TransformerTest {
 
     @Test
     public void testXsltResultTalkPage () throws Exception {
-        WikiI5Converter converter = new WikiI5Converter();
-        Configuration config = converter.createConfig(
+        Configuration config = WikiI5Converter.createConfig(
                 new String[] { "-prop", "dewiki-talk.properties" });
+        Transformer.resetTransformer(config);
         Statistics statistics = new Statistics();
         I5ErrorHandler errorHandler = new I5ErrorHandler(config);
 
@@ -160,9 +158,9 @@ public class TransformerTest {
 
     @Test
     public void testHeaderWithinRef () throws Exception {
-        WikiI5Converter converter = new WikiI5Converter();
-        Configuration config = converter.createConfig(
+        Configuration config = WikiI5Converter.createConfig(
                 new String[] { "-prop", "enwiki-article.properties" });
+        Transformer.resetTransformer(config);
         Statistics statistics = new Statistics();
         I5ErrorHandler errorHandler = new I5ErrorHandler(config);
 
@@ -189,9 +187,9 @@ public class TransformerTest {
     @Test
     public void testHeaderWithinLi () throws ParseException, IOException,
             I5Exception, ValidityException, ParsingException {
-        WikiI5Converter converter = new WikiI5Converter();
-        Configuration config = converter.createConfig(
+        Configuration config = WikiI5Converter.createConfig(
                 new String[] { "-prop", "enwiki-article.properties" });
+        Transformer.resetTransformer(config);
         Statistics statistics = new Statistics();
         I5ErrorHandler errorHandler = new I5ErrorHandler(config);
 

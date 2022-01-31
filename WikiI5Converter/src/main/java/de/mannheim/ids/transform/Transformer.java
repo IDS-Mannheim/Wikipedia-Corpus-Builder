@@ -39,45 +39,10 @@ import net.sf.saxon.s9api.XsltTransformer;
  */
 public class Transformer implements Callable<WikiI5Part> {
 
-	private static final ThreadLocal<XsltTransformer> transformer = new ThreadLocal<XsltTransformer>() {
+	private static ThreadLocal<XsltTransformer> transformer = new ThreadLocal<XsltTransformer>() {
 
 		protected XsltTransformer initialValue() {
-
-			XsltCompiler compiler = processor.newXsltCompiler();
-			compiler.setURIResolver(new TemplateURIResolver());
-
-			XsltExecutable executable;
-			try {
-				InputStream is = this.getClass().getClassLoader()
-						.getResourceAsStream("main-templates.xsl");
-				executable = compiler.compile(new StreamSource(is));
-				is.close();
-			}
-			catch (SaxonApiException | IOException e) {
-				throw new RuntimeException(
-						"Failed compiling the XSLT Stylesheet.", e);
-			}
-
-			XsltTransformer transformer = executable.load();
-				transformer.setInitialTemplate(new QName("main"));
-				
-			transformer.setParameter(new QName("origfilename"),
-					new XdmAtomicValue(config.getDumpFilename()));
-			transformer.setParameter(new QName("lang"),
-					new XdmAtomicValue(config.getLanguageCode()));
-			transformer.setParameter(new QName("pubDay"), new XdmAtomicValue(
-					config.getDumpFilename().substring(13, 15)));
-			transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(
-					config.getDumpFilename().substring(11, 13)));
-			transformer.setParameter(new QName("pubYear"),
-					new XdmAtomicValue(config.getYear()));
-			transformer.setParameter(new QName("inflectives"),
-					new XdmAtomicValue(config.getInflectives()));
-			transformer.setParameter(new QName("encoding"),
-					new XdmAtomicValue(config.getOutputEncoding()));
-			transformer.setErrorListener(errorHandler);
-
-			return transformer;
+		    return createTransformer(config);
 		}
 	};
 
@@ -132,7 +97,54 @@ public class Transformer implements Callable<WikiI5Part> {
 	public static XsltTransformer getTransfomer() {
 		return transformer.get();
 	}
+	
+	public static XsltTransformer createTransformer(Configuration config) {
+	    XsltCompiler compiler = processor.newXsltCompiler();
+        compiler.setURIResolver(new TemplateURIResolver());
 
+        XsltExecutable executable;
+        try {
+            InputStream is = Transformer.class.getClassLoader()
+                    .getResourceAsStream("main-templates.xsl");
+            executable = compiler.compile(new StreamSource(is));
+            is.close();
+        }
+        catch (SaxonApiException | IOException e) {
+            throw new RuntimeException(
+                    "Failed compiling the XSLT Stylesheet.", e);
+        }
+
+        XsltTransformer transformer = executable.load();
+            transformer.setInitialTemplate(new QName("main"));
+            
+        transformer.setParameter(new QName("origfilename"),
+                new XdmAtomicValue(config.getDumpFilename()));
+        transformer.setParameter(new QName("lang"),
+                new XdmAtomicValue(config.getLanguageCode()));
+        transformer.setParameter(new QName("pubDay"), new XdmAtomicValue(
+                config.getDumpFilename().substring(13, 15)));
+        transformer.setParameter(new QName("pubMonth"), new XdmAtomicValue(
+                config.getDumpFilename().substring(11, 13)));
+        transformer.setParameter(new QName("pubYear"),
+                new XdmAtomicValue(config.getYear()));
+        transformer.setParameter(new QName("inflectives"),
+                new XdmAtomicValue(config.getInflectives()));
+        transformer.setParameter(new QName("encoding"),
+                new XdmAtomicValue(config.getOutputEncoding()));
+        transformer.setErrorListener(errorHandler);
+
+        return transformer;
+	}
+	
+	public static void resetTransformer(Configuration config) {
+	    transformer = new ThreadLocal<XsltTransformer>() {
+
+	        protected XsltTransformer initialValue() {
+	            return createTransformer(config);
+	        }
+	    };
+	}
+	
 	@Override
 	public WikiI5Part call() throws I5Exception, IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 4);
