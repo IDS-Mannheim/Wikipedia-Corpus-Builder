@@ -20,7 +20,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
-import de.mannheim.ids.wiki.I5Writer;
+import de.mannheim.ids.wiki.WikiI5Processor;
 
 /**
  * IdsTextBuffer collects category and footnote events as temporary SAX buffers.
@@ -370,7 +370,7 @@ public class IdsTextBuffer extends SAXBuffer {
 			}
 			
 			try {
-				String englishCategory = I5Writer.dbManager
+				String englishCategory = WikiI5Processor.dbManager
 						.retrieveEnglishCategory(categoryTitle);
 				if (englishCategory != null) {
 					addEnglishCategory(englishCategory);
@@ -385,7 +385,7 @@ public class IdsTextBuffer extends SAXBuffer {
 	
 	public void addCategoryEvents() throws SAXException, SQLException {
 		String articleTitle = getPageTitle().split(":", 2)[1];
-		List<String> categoryLinks = I5Writer.dbManager
+		List<String> categoryLinks = WikiI5Processor.dbManager
 				.retrieveCategoryLinks(articleTitle);
 		for (String c : categoryLinks) {
 			String[] cats = c.split("title=", 2);
@@ -407,7 +407,7 @@ public class IdsTextBuffer extends SAXBuffer {
 
 				if (!langCode.equals("en")){
 					String categoryTitle = c.substring(category.length());
-					String englishCategory = I5Writer.dbManager
+					String englishCategory = WikiI5Processor.dbManager
 							.retrieveEnglishCategory(categoryTitle);
 					if (englishCategory!=null){
 						addEnglishCategory(englishCategory);

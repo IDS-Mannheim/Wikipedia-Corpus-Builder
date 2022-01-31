@@ -3,6 +3,8 @@ package de.mannheim.ids.transform;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.cocoon.xml.sax.SAXBuffer;
+
 import de.mannheim.ids.wiki.I5Exception;
 
 /**
@@ -25,6 +27,7 @@ public class WikiI5Part {
 	private String pageId;
 	private int docId;
 
+	private SAXBuffer idsTextBuffer;
 	/**
 	 * Constructs a WikiI5Part containing idsText.
 	 * 
@@ -43,6 +46,14 @@ public class WikiI5Part {
 		setIDSText(true);
 		setPageId(pageId);
 	}
+	
+	   public WikiI5Part (String wikiXMLPath, String pageId,
+               SAXBuffer extendedIdsTextBuffer) {
+        setWikiPath(wikiXMLPath);
+        setIDSText(true);
+        setPageId(pageId);
+        setIdsTextBuffer(extendedIdsTextBuffer);
+    }
 
 	/**
 	 * Constructs a WikiI5Part as a startDoc.
@@ -70,7 +81,7 @@ public class WikiI5Part {
 		setStartDoc(false);
 	}
 
-	public InputStream getInputStream() {
+    public InputStream getInputStream() {
 		return inputStream;
 	}
 
@@ -214,5 +225,13 @@ public class WikiI5Part {
 			throw new I5Exception("Failed closing outputstream.", e);
 		}
 	}
+
+    public SAXBuffer getIdsTextBuffer () {
+        return idsTextBuffer;
+    }
+
+    public void setIdsTextBuffer (SAXBuffer idsTextBuffer) {
+        this.idsTextBuffer = idsTextBuffer;
+    }
 
 }

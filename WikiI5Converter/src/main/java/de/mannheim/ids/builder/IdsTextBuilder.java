@@ -22,7 +22,7 @@ import org.xml.sax.helpers.AttributesImpl;
 import de.mannheim.ids.db.LanguageLinks;
 import de.mannheim.ids.wiki.Configuration;
 import de.mannheim.ids.wiki.I5Exception;
-import de.mannheim.ids.wiki.I5Writer;
+import de.mannheim.ids.wiki.WikiI5Processor;
 
 /** IdsTextBuilder is a SAX content handler that writes events 
  * from {@link IdsTextBuffer} to an {@link OutputStream}. This 
@@ -57,6 +57,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			String pageId, IdsTextBuffer idsTextBuffer)
 			throws I5Exception {
 		createWriter(config, outputStream);
+		this.includeLanguageLinks = config.isIncludeLangLinks();
 		this.pageId = pageId;
 		this.pageTitle = idsTextBuffer.getPageTitle();
 		this.categoryEvents = idsTextBuffer.getCategoryEvents();
@@ -215,11 +216,11 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				try {
 					if (isDiscussion) {
 						String articleTitle = pageTitle.split(":", 2)[1];
-						createLangLinks(I5Writer.dbManager
+						createLangLinks(WikiI5Processor.dbManager
 								.retrieveArticleLinks(articleTitle));
 					}
 					else if (includeLanguageLinks){
-						createLangLinks(I5Writer.dbManager
+						createLangLinks(WikiI5Processor.dbManager
 								.retrieveLanguageLinks(pageId));
 					}
 				}

@@ -251,8 +251,12 @@ public class TaskManager extends Thread {
 			String xmlPath = idx + "/" + pageId + ".xml";
 //			System.out.println(xmlPath);
 
-			Transformer t = new Transformer(config, statistics, errorHandler,
-					xmlPath, idx,	pageId);
+//			Transformer t = new Transformer(config, statistics, errorHandler,
+//					xmlPath, idx,	pageId);
+			
+			TaskRunner t = new TaskRunner(config, errorHandler, statistics, 
+			        xmlPath, idx, pageId);
+			
 			try {
 				WikiI5Processor.taskQueue.put(pool.submit(t));
 			}

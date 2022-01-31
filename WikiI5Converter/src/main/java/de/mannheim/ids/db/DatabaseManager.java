@@ -31,7 +31,6 @@ public class DatabaseManager {
 	public String[] langCodes = new String[]{"de", "fr", "en"};
 
 	public DataSource poolingDataSource;
-	public Connection conn;
 	private String langCode;
 
 	public static String langlink;

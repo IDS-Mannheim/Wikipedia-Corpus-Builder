@@ -1,5 +1,6 @@
 package de.mannheim.ids.wiki;
 
+import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -12,10 +13,11 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import de.mannheim.ids.transform.WikiI5Part;
+import de.mannheim.ids.db.DatabaseManager;
 import de.mannheim.ids.transform.TaskManager;
 
 /**
- * Manages the overall WikiXML to I5 conversion process.
+ * Manages the whole WikiXML to I5 conversion process.
  * 
  * @author margaretha
  *
@@ -26,6 +28,8 @@ public class WikiI5Processor {
 
 	private Statistics statistics;
 	private I5ErrorHandler errorHandler;
+	
+	public static DatabaseManager dbManager;
 
 	public static BlockingQueue<Future<WikiI5Part>> taskQueue;
 
@@ -48,6 +52,8 @@ public class WikiI5Processor {
 				config.getMaxThreads());
 		errorHandler = new I5ErrorHandler(config);
 		statistics = new Statistics();
+		
+		configureDataManager(config);
 	}
 
 	/**
@@ -79,7 +85,8 @@ public class WikiI5Processor {
 					.equals(endTask); future = taskQueue.take()) {
 				try {
 					WikiI5Part w = future.get();
-					i5Writer.write(w);
+//					i5Writer.write(w);
+					i5Writer.writeToFile(w);
 				}
 				catch (ExecutionException e) {
                     System.err.println("Future execution throws an exception: "
@@ -160,4 +167,25 @@ public class WikiI5Processor {
 		};
 	}
 
+	private void configureDataManager (Configuration config)
+            throws I5Exception {
+        try {
+            dbManager = new DatabaseManager(config.getDatabaseUrl(),
+                    config.getDatabaseUsername(), config.getDatabasePassword(),
+                    config.getLanguageCode());
+        }
+        catch (SQLException e) {
+            throw new I5Exception("Failed configuring the database manager.",
+                    e);
+        }
+
+        if (config.getPageType().equals("article")) {
+            try {
+                dbManager.createCategoryTable();
+            }
+            catch (SQLException e) {
+                throw new I5Exception("Failed creating category table", e);
+            }
+        }
+    }
 }

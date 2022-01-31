@@ -172,7 +172,7 @@ public class Transformer implements Callable<WikiI5Part> {
 	 * @return the transformation result in an OutputStream
 	 * @throws I5Exception
 	 */
-	private void doTransformation(OutputStream os)
+	public void doTransformation(OutputStream os)
 			throws I5Exception {
 		InputStream is = null;
 		String filepath = config.getWikiXMLFolder() + "/" + wikiXMLPath;
