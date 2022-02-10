@@ -40,6 +40,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	
 	private XMLStreamWriter writer;
 	private String pageId;
+	private String wikiXMLPath;
 	private String categorySchema;
 
 	private SAXBuffer categoryEvents;
@@ -54,7 +55,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 	private String pageTitle;
 
 	public IdsTextBuilder(Configuration config, OutputStream outputStream,
-			String pageId, IdsTextBuffer idsTextBuffer)
+			String pageId, String wikiXMLPath, IdsTextBuffer idsTextBuffer)
 			throws I5Exception {
 		createWriter(config, outputStream);
 		this.includeLanguageLinks = config.isIncludeLangLinks();
@@ -125,7 +126,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				writer.writeStartElement("textClass");
 				writer.writeStartElement("classCode");
 				writer.writeAttribute("scheme", categorySchema);
-				categoryEvents.toSAX(new IdsEventHandler(writer, pageId));
+				categoryEvents.toSAX(new IdsEventHandler(writer, wikiXMLPath));
 				writer.writeEndElement();
 
 				extendedIdsText.startElement("", "textClass", "textClass",
@@ -139,7 +140,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 				if (!englishCategoryEvents.isEmpty()) {
 					writer.writeStartElement("classCode");
 					writer.writeAttribute("scheme",enScheme);
-					englishCategoryEvents.toSAX(new IdsEventHandler(writer, pageId));
+					englishCategoryEvents.toSAX(new IdsEventHandler(writer, wikiXMLPath));
 					writer.writeEndElement();
 					
 					attr = new AttributesImpl();
@@ -175,7 +176,7 @@ public class IdsTextBuilder extends DefaultHandler2 {
 			extendedIdsText.startElement("", "div", "div", attr);
 
 			ContentHandler footnoteBuilder = new IdsEventHandler(writer,
-					pageId);
+			        wikiXMLPath);
 			SAXBuffer event;
 			for (String key : noteEvents.keySet()) {
 				event = noteEvents.get(key);

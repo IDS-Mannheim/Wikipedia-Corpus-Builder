@@ -29,6 +29,7 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 import de.mannheim.ids.builder.IdsCorpusBuilder;
+import de.mannheim.ids.builder.IdsDocBuffer;
 import de.mannheim.ids.builder.IdsDocBuilder;
 import de.mannheim.ids.builder.IdsTextBuffer;
 import de.mannheim.ids.builder.IdsTextBuilder;
@@ -66,9 +67,12 @@ public class I5Writer {
     private Statistics stats;
 
     private IdsTextBuffer idsTextBuffer;
-    private IdsTextHandler idsTextHandler;
 
     private IdsDocBuilder idsDocBuilder;
+    private IdsDocBuffer idsDocBuffer;
+
+    private boolean hasIdsDoc = false;
+    private int endDocCounter = 0;
 
     /**
      * Constructs an I5Writer from the given variables.
@@ -93,7 +97,6 @@ public class I5Writer {
 
         idsDocBuilder = new IdsDocBuilder(writer);
         idsTextBuffer = new IdsTextBuffer(config);
-        idsTextHandler = new IdsTextHandler(writer);
         stats = statistics;
 
     }
@@ -238,27 +241,56 @@ public class I5Writer {
             throw new IllegalArgumentException("WikiI5Part cannot be null.");
         }
 
+        if (w.isStartDoc()) {
+            try {
+                idsDocBuffer = new IdsDocBuffer(config, w);
+                hasIdsDoc = true;
+            }
+            catch (SAXException e) {
+                throw new I5Exception("Failed creating idsDocBuffer.", e);
+            }
+            return;
+        }
+
         synchronized (writer) {
             if (w.isIDSText()) {
+                if (hasIdsDoc) {
+                    System.out.println(w.getWikiPath());
+                    try {
+                        idsDocBuffer.writeStartDoc(writer, w.getWikiPath());
+                    }
+                    catch (SAXException e) {
+                        throw new I5Exception(
+                                "Failed writing idsDoc start element.", e);
+                    }
+                    hasIdsDoc = false;
+                    endDocCounter++;
+                }
                 writeIdsText(w.getIdsTextBuffer(), w.getWikiPath());
                 w.close();
             }
-            else if (w.isStartDoc()) {
-                writeStartIdsDoc(w);
+            else if (w.isEndDoc()) {
+                if (endDocCounter>0) {
+                    writeEndElement("idsDoc");
+                    endDocCounter--;
+                }
             }
             else {
-                try {
-                    writer.writeEndElement();
-                    writer.flush();
-                }
-                catch (XMLStreamException e) {
-                    throw new I5Exception(
-                            "Failed writing idsDoc or idsCorpus end element.",
-                            e);
-                } // idsCorpus
+                writeEndElement("idsCorpus");
             }
         }
 
+    }
+    
+
+    private void writeEndElement (String element) throws I5Exception {
+        try {
+            writer.writeEndElement();
+            writer.flush();
+        }
+        catch (XMLStreamException e) {
+            throw new I5Exception("Failed writing end element:" + element, e);
+        }
     }
 
 
@@ -325,8 +357,8 @@ public class I5Writer {
     private void storeCategories (String xmlPath) throws I5Exception {
         for (String c : idsTextBuffer.getCategories()) {
             try {
-                WikiI5Processor.dbManager.storeCategory(idsTextBuffer.getPageId(),
-                        c);
+                WikiI5Processor.dbManager
+                        .storeCategory(idsTextBuffer.getPageId(), c);
             }
             catch (SQLException e) {
                 errorHandler.write(xmlPath, "Failed storing category", e);
@@ -375,6 +407,7 @@ public class I5Writer {
      * @throws I5Exception
      *             an I5Exception
      */
+    @Deprecated
     private void writeStartIdsDoc (WikiI5Part w) throws I5Exception {
         String docTitle = idsDocBuilder.createIdsDocTitle(config.getPageType(),
                 w.getIndex(), w.getDocNr());
@@ -465,7 +498,8 @@ public class I5Writer {
                 1024 * 4);
 
         IdsTextBuilder idsTextBuilder = new IdsTextBuilder(config,
-                idsTextOutputStream, w.getPageId(), idsTextBuffer);
+                idsTextOutputStream, w.getPageId(),
+                w.getWikiPath(), idsTextBuffer);
 
         try {
             idsTextBuffer.toSAX(idsTextBuilder);
@@ -545,7 +579,7 @@ public class I5Writer {
             throws I5Exception {
 
         try {
-            saxBuffer.toSAX(idsTextHandler);
+            saxBuffer.toSAX(new IdsTextHandler(writer,wikiXMLPath));
         }
         catch (SAXException e) {
             stats.addSaxParserError();

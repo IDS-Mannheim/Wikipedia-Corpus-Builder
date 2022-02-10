@@ -241,7 +241,7 @@ public class TaskRunner implements Callable<WikiI5Part> {
             throws I5Exception {
 
         IdsTextBuilder idsTextBuilder = new IdsTextBuilder(config,
-                idsTextOutputStream, pageId, idsTextBuffer);
+                idsTextOutputStream, pageId,wikiXMLPath, idsTextBuffer);
 
         try {
             idsTextBuffer.toSAX(idsTextBuilder);

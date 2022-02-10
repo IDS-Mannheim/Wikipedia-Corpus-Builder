@@ -1,18 +1,25 @@
 package de.mannheim.ids.wiki;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.ParseException;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.mannheim.ids.transform.TaskRunner;
@@ -84,7 +91,7 @@ public class EnglishWikiTest {
 
 
     @Test
-    public void testArticle () throws I5Exception, IOException, SAXException,
+    public void testArticleWithEmptyDoc () throws I5Exception, IOException, SAXException,
             ParserConfigurationException, ParseException, InterruptedException,
             SQLException {
 
@@ -100,6 +107,20 @@ public class EnglishWikiTest {
         processor.run();
 
         String outputFile = config.getOutputFile();
-        WikiI5ConverterTest.testI5File(outputFile);
+        File f = new File(outputFile);
+        assertNotNull(f);
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = dbFactory.newDocumentBuilder();
+        Document doc = builder.parse(f);
+        NodeList list = doc.getElementsByTagName("text");
+        assertTrue(list.getLength() > 0);
+
+        String textContent = list.item(0).getTextContent();
+        assertTrue(textContent != null);
+        assertTrue(!textContent.isEmpty());
+        
+        NodeList docs = doc.getElementsByTagName("idsDoc");
+        assertEquals(3,docs.getLength());
     }
 }

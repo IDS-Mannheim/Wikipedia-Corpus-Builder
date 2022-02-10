@@ -20,8 +20,9 @@ public class WikiI5Part {
 	private InputStream inputStream;
 	private String wikiPath;
 
-	private boolean idsText;
-	private boolean startDoc;
+	private boolean idsText = false;
+	private boolean startDoc = false;
+	private boolean endDoc = false;
 
 	private String index;
 	private String pageId;
@@ -69,16 +70,15 @@ public class WikiI5Part {
 		setIndex(index);
 		setDocNr(docNr);
 		setStartDoc(isStartDoc);
-		setIDSText(false);
 	}
 
 	/**
 	 * Constructs a WikiI5Part as an endDoc.
+	 * @param isEndDoc 
 	 * 
 	 */
-	public WikiI5Part() {
-		setIDSText(false);
-		setStartDoc(false);
+	public WikiI5Part(boolean isEndDoc) {
+	    setEndDoc(true);
 	}
 
     public InputStream getInputStream() {
@@ -232,6 +232,14 @@ public class WikiI5Part {
 
     public void setIdsTextBuffer (SAXBuffer idsTextBuffer) {
         this.idsTextBuffer = idsTextBuffer;
+    }
+
+    public boolean isEndDoc () {
+        return endDoc;
+    }
+
+    public void setEndDoc (boolean endDoc) {
+        this.endDoc = endDoc;
     }
 
 }

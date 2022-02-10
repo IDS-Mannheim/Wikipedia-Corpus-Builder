@@ -8,6 +8,7 @@ import javax.xml.stream.XMLStreamWriter;
  * @author margaretha
  *
  */
+@Deprecated
 public class IdsDocBuilder extends BaseBuilder {
 
 	public IdsDocBuilder(XMLStreamWriter writer) {

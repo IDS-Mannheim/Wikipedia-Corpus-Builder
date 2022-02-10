@@ -177,7 +177,7 @@ public class TaskManager extends Thread {
 
 			addFutureDocPart(new WikiI5Part(idx, docNr, true), "startDoc");
 			addFutureTasks(pagegroup, idx);
-			addFutureDocPart(new WikiI5Part(), "endDoc");
+			addFutureDocPart(new WikiI5Part(true), "endDoc");
 		}
 
 	}
