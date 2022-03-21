@@ -32,7 +32,7 @@ The order of generating the I5 corpora is very important because category links 
 
 Besides, English category links should be included in the article and talk corpora of Wikipedias other languages than English. Thus, _the English Wikipedia article corpus has to be generated first of all, before generating other corpora_.  
 
-The category links must to be stored in the database **once**. To store them, WikiI5Converter must be run with **-storeCategories** option.
+The category links must to be stored for each **article corpus** in the database **once**. To store them, WikiI5Converter must be run with **-storeCategories** option.
 
 ```java -Xmx4g -cp "code/WikiI5Converter-1.0.5.jar:lib/*:." de.mannheim.ids.wiki.WikiI5Converter -prop properties/i5-enwiki-article.properties -storeCategories > logs/wikiI5-enwiki-20190801-article.log 2>&1```
 
@@ -395,6 +395,8 @@ Wikipedia articles often contain category links at the end of their pages. In I5
         &lt;/profileDesc&gt;
     &lt;/idsHeader&gt;
 &lt;/idsText&gt;
+
+Unlike articles, the talk pages do not contain category links. To enrich I5 talk corpora, the category links of the articles associated to the talk pages are thus included within ```<idsHeader>``` similar to the article corpora.
 
 </pre>
 
